@@ -229,14 +229,14 @@
       const painted = fx && VN.PAINT_PRESETS && VN.PAINT_PRESETS[fx.preset];
       const drift = h('div.title-drift');
       if (this.story.titleBackground) drift.append(eng.stage.makeBg(this.story.titleBackground));
-      if (painted && VN.noiseTile) drift.append(h('div.title-grain', { style: { backgroundImage: `url(${VN.noiseTile()})` } }));
       const bg = h('div.title-bg', drift);
       // Light and leaves sit in front of the shading, on their own parallax layer.
       const fxLayer = h('div.title-fxlayer');
+      const coverUrl = this.story.titleBackground ? VN.assets.lookup('bg', this.story.titleBackground) : null;
+      if (VN.setAmbient) VN.setAmbient(coverUrl || null);
       if (fx && painted) {
-        const url = VN.assets.lookup('bg', this.story.titleBackground);
-        // the canopy cut-out is added to the picture layer once it is laid out
-        requestAnimationFrame(() => new VN.PaintFx(fxLayer, { ...fx, image: url, swayHost: drift }, this.settings));
+        // light, shade and the swaying canopy live in the picture layer; leaves in front
+        requestAnimationFrame(() => new VN.PaintFx(fxLayer, { ...fx, image: coverUrl, imageHost: drift }, this.settings));
       } else if (fx && VN.TitleFx) new VN.TitleFx(fxLayer, fx, this.settings);
       // The title logo: glowing brush lettering, or carved letters (see brushlogo.js / titlelogo.js).
       const logoOpts = { animate: !this.settings.reduceMotion };

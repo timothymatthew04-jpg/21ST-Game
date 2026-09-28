@@ -7,7 +7,9 @@ Regenerate this list after editing the story with `node tools/check-script.js --
 
 ## Backgrounds: `assets/bg/<name>.png`
 
-1280×720 or 1920×1080 (16:9). `.jpg` and `.webp` work too.
+1280×720 or 1920×1080 (16:9). `.jpg` and `.webp` work too. The game widens to fit the window (up to
+21:9), which crops a little off the top and bottom of a 16:9 picture on very wide screens, so keep
+important details away from those edges.
 
 | File | Where it's used |
 | --- | --- |
@@ -28,11 +30,11 @@ Regenerate this list after editing the story with `node tools/check-script.js --
 | `helene_sickroom` | Chapter 15 |
 | `cemetery` | Ending: Hélène's grave |
 
-The title screen uses `title_cover` (already added: the ginkgo courtyard painting). The file we
-have is only 736×411, so it was enlarged to 2560×1430 with Lanczos resampling and sharpened; it looks
-good up to about 1080p but soft on 1440p and 4K screens. A larger original (3840×2160 is ideal) can
-simply replace `assets/bg/title_cover.webp`. The leaves, light, wind and logo are drawn by the game at
-the screen's full resolution, so they stay sharp at any size.
+The title screen uses `title_cover` (already added: the ginkgo courtyard painting, 2000×1117 at its
+original resolution with a gentle contrast curve for deeper shadows). It is sharp at 1080p; on 1440p
+and 4K screens it is enlarged a little. A larger original (3840×2160 is ideal) can simply replace
+`assets/bg/title_cover.webp`. The leaves, light, wind and logo are drawn by the game at the screen's
+full resolution, so they stay sharp at any size.
 
 Backgrounds and CGs are drawn pixel-crisp to match the cover. If they turn out to be painted or
 high-resolution instead, change `artstyle` at the top of the script (see docs/SCRIPTING.md).
@@ -66,11 +68,12 @@ Small transparent PNGs (about 110 px wide) for Hervé's Journal: `helene`, `woma
 
 ## Music: `assets/music/<name>.mp3`
 
-Loops automatically. `.ogg` and `.m4a` work too.
+Loops automatically: the end of each pass crossfades into the next, so there is no gap even when a
+track ends in silence. `.ogg` and `.m4a` work too.
 
 | File | Mood / where |
 | --- | --- |
-| `title` | Title screen |
+| `title` | Title screen (added). Plays on the menu only and stops when a game starts |
 | `town_theme` | The town, the mill, Balbadiou |
 | `helene_theme` | Scenes with Hélène |
 | `journey` | The long journeys |

@@ -1,21 +1,23 @@
 /*
  * paintfx.js — brings a painted (non-pixel) title picture to life:
  *
- *   - ginkgo leaves tumbling in 3D, with depth of field (near leaves blurred)
+ *   - ginkgo leaves tumbling in 3D, the nearer ones casting soft shadows
  *   - gusts of wind every few seconds: leaves tear off the canopy, streaks of
  *     air rush past, the tree sways harder and the light flickers
- *   - sun-dapples shimmering on the ground and walls, glints on the leaves,
- *     soft light rays and drifting pollen
+ *   - sun-dapples and moving leaf shade on the ground and walls, glints on the
+ *     leaves, soft light rays and drifting pollen
+ *   - nothing ever pops in or out: every leaf, speck and streak fades
  *
  * Everything is drawn at the screen's real resolution (up to 4K), so the
  * effects stay sharp however large the window is. Where the light falls is
  * read from the picture itself (bright spots get dapples, bright leaves get
  * glints), so it works with any painting.
  *
- * Story script:  titlefx ginkgo sun=0.3,-0.15 sway=0.3,0.22,0.34,0.3 pivot=0.36,0.7
+ * Story script:  titlefx ginkgo sun=0.3,-0.25 sway=0.28,0.22,0.34,0.3 pivot=0.4,0.85
  *   sun    where the light comes from (fractions of the screen; may be off-screen)
- *   sway   ellipse of canopy that moves in the wind: centre x,y and radius x,y
- *   pivot  the point the canopy sways around (the base of the trunk)
+ *   sway   ellipse of canopy that moves in the wind, as fractions of the picture:
+ *          centre x,y and radius x,y
+ *   pivot  the point the canopy sways around (the base of the trunk), also of the picture
  */
 (function () {
   'use strict';
@@ -125,20 +127,24 @@
 
   class PaintFx {
     /**
-     * @param host  element to fill (the title's effects layer)
-     * @param options  { preset, sun:[x,y], image: url of the picture, sway: [elements] }
+     * @param host     the foreground effects layer (leaves, pollen, streaks, glints)
+     * @param options  { preset, sun:[x,y], sway:[cx,cy,rx,ry], pivot:[x,y], image: url,
+     *                   imageHost: the element the picture is drawn in (light, shade and
+     *                   the swaying canopy are drawn there, locked to the painting) }
      */
     constructor(host, options, settings) {
       this.opts = options;
       this.preset = PRESETS[options.preset] || PRESETS.ginkgo;
       this.reduced = !!(settings && settings.reduceMotion) ||
         (globalThis.matchMedia && globalThis.matchMedia('(prefers-reduced-motion: reduce)').matches);
+      this.host = host;
+      this.imageHost = options.imageHost || host;
       this.light = VN.h('canvas.title-fx.fx-light', { 'aria-hidden': 'true' });
       this.canvas = VN.h('canvas.title-fx.fx-leaves', { 'aria-hidden': 'true' });
-      host.append(this.light, this.canvas);
+      this.imageHost.append(this.light);
+      host.append(this.canvas);
       this.lx = this.light.getContext('2d');
       this.cx = this.canvas.getContext('2d');
-      this.host = host;
       this.W = 1328;
       this.H = 768;
       this.t = 0;
@@ -146,30 +152,35 @@
       this.gust = 0;
       this.nextGust = rnd(2.5, 4);
       this.gustT = -1;
+      this.img = null;
+      this.cover = { s: 1, ox: 0, oy: 0 };
+      this.sway = null;
 
       const [lr, lg, lb] = this.preset.light;
       this.sprites = {
-        // front and (darker) back of each leaf colour, sharp / soft / blurred
+        // front and (darker) back of each leaf colour: sharp, and very slightly soft for the nearest
         leaves: this.preset.leaves.map((c) => ({
-          front: [0, 2.5, 5].map((b) => leafSprite(c, b)),
-          back: [0, 2.5, 5].map((b) => leafSprite(darker(c, 0.2), b)),
+          front: [0, 1].map((b) => leafSprite(c, b)),
+          back: [0, 1].map((b) => leafSprite(darker(c, 0.2), b)),
         })),
+        shadow: leafSprite('#2a1405', 3),
         mote: glowSprite(lr, lg, lb, 32, 0.95),
         dapple: glowSprite(255, 240, 200, 128, 0.55),
+        shade: glowSprite(52, 26, 6, 128, 0.6),
         star: starSprite(),
       };
-      const sun = options.sun || [0.3, -0.15];
-      this.sun = { x: sun[0] * this.W, y: sun[1] * this.H };
       this.rays = Array.from({ length: 8 }, (_, i) => ({ a: 0.55 + i * 0.13 + rnd(-0.03, 0.03), w: rnd(0.025, 0.06), ph: rnd(0, TAU), sp: rnd(0.15, 0.4), k: rnd(0.5, 1) }));
+      this.lightPts = [];
+      this.shadePts = [];
+      this.glintPts = [];
       this.dapples = [];
+      this.shades = [];
       this.glints = [];
       this.motes = Array.from({ length: this.reduced ? 15 : 55 }, () => this.newMote(true));
       this.leaves = Array.from({ length: this.reduced ? 12 : this.preset.count }, () => this.newLeaf(true)).sort((a, b) => a.z - b.z);
       this.streaks = [];
-      this.swayEls = [];
-      if (options.image && options.sway && options.swayHost && !this.reduced) this.makeSway(options.swayHost, options.image, options.sway, options.pivot);
 
-      if (options.image) this.readLight(options.image);
+      if (options.image) this.loadImage(options.image);
       this.resize();
       this.ro = globalThis.ResizeObserver ? new ResizeObserver(() => this.resize()) : null;
       if (this.ro) this.ro.observe(this.canvas);
@@ -177,95 +188,119 @@
       this.raf = requestAnimationFrame(this.frame);
     }
 
-    /**
-     * Cut the canopy out of the painting once (soft edges baked in) so it can
-     * sway with a cheap transform instead of a live CSS mask.
-     */
-    makeSway(host, url, sway, pivot) {
-      const img = new Image();
-      img.onload = () => {
-        const W = host.offsetWidth, H = host.offsetHeight;
-        if (!W) return;
-        const [cx, cy, rx, ry] = sway;
-        const [px, py] = pivot || [cx, cy + ry * 2];
-        const s = Math.max(W / img.width, H / img.height); // same framing as background-size: cover
-        const ox = (W - img.width * s) / 2, oy = (H - img.height * s) / 2;
-        const bx = Math.max(0, (cx - rx) * W), by = Math.max(0, (cy - ry) * H);
-        const bw = Math.min(W, (cx + rx) * W) - bx, bh = Math.min(H, (cy + ry) * H) - by;
-        const dpr = 2;
-        const c = document.createElement('canvas');
-        c.width = Math.round(bw * dpr); c.height = Math.round(bh * dpr);
-        const x = c.getContext('2d');
-        x.scale(dpr, dpr);
-        x.drawImage(img, ox - bx, oy - by, img.width * s, img.height * s);
-        // feather the edges into an ellipse
-        x.globalCompositeOperation = 'destination-in';
-        x.setTransform(dpr * rx * W, 0, 0, dpr * ry * H, dpr * (cx * W - bx), dpr * (cy * H - by));
-        const g = x.createRadialGradient(0, 0, 0, 0, 0, 1);
-        g.addColorStop(0, '#000'); g.addColorStop(0.55, '#000'); g.addColorStop(1, 'rgba(0,0,0,0)');
-        x.fillStyle = g;
-        x.fillRect(-1, -1, 2, 2);
-        c.className = 'title-sway';
-        Object.assign(c.style, { left: `${bx}px`, top: `${by}px`, width: `${bw}px`, height: `${bh}px`, transformOrigin: `${px * W - bx}px ${py * H - by}px` });
-        host.append(c);
-        this.swayEls.push(c);
-      };
-      img.src = url;
+    /** Picture coordinates (0..1) → layer coordinates, using the same framing as background-size: cover. */
+    map(u, v) {
+      const { s, ox, oy } = this.cover;
+      return { x: ox + u * this.img.width * s, y: oy + v * this.img.height * s };
     }
 
-    /** Find where light already falls in the painting, to place dapples and glints. */
-    readLight(url) {
+    loadImage(url) {
       const img = new Image();
       img.onload = () => {
-        const w = 160, h = 90;
+        this.img = img;
+        // Read where light already falls in the painting: bright spots get sun-dapples,
+        // mid-tones get moving leaf shade, bright leaves get glints.
+        const w = 160, h = Math.round((160 * img.height) / img.width);
         const c = document.createElement('canvas');
         c.width = w; c.height = h;
         const x = c.getContext('2d');
         x.drawImage(img, 0, 0, w, h);
         const d = x.getImageData(0, 0, w, h).data;
-        const ground = [], canopy = [];
+        const light = [], shade = [], canopy = [];
         for (let y = 2; y < h - 2; y++) for (let X = 2; X < w - 2; X++) {
           const i = (y * w + X) * 4;
           const lum = d[i] * 0.3 + d[i + 1] * 0.59 + d[i + 2] * 0.11;
-          const pt = { x: (X / w) * this.W, y: (y / h) * this.H, lum };
-          // dapples go where sunlight already falls and the screen isn't shaded for the menu
-          if (y > h * 0.45 && y < h * 0.86 && X > w * 0.45 && lum > 200) ground.push(pt);
+          const pt = { u: X / w, v: y / h };
+          if (y > h * 0.45 && y < h * 0.88 && X > w * 0.45 && lum > 195) light.push(pt);
+          if (y > h * 0.4 && y < h * 0.95 && lum > 90 && lum < 175) shade.push(pt);
           if (y < h * 0.55 && lum > 215) canopy.push(pt);
         }
         const pick = (arr, n) => Array.from({ length: Math.min(n, arr.length) }, () => arr[Math.floor(Math.random() * arr.length)]);
-        this.dapples = pick(ground, 22).map((p) => ({ ...p, r: rnd(12, 30), ph: rnd(0, TAU), sp: rnd(0.6, 1.6), k: rnd(0.2, 0.42), sx: rnd(1.3, 2.2) }));
-        this.glints = pick(canopy, 26).map((p) => ({ ...p, next: rnd(0, 6), life: 0 }));
+        this.lightPts = pick(light, 22).map((p) => ({ ...p, r: rnd(12, 30), ph: rnd(0, TAU), sp: rnd(0.6, 1.6), k: rnd(0.2, 0.42), sx: rnd(1.3, 2.2) }));
+        this.shadePts = pick(shade, 20).map((p) => ({ ...p, r: rnd(26, 60), ph: rnd(0, TAU), sp: rnd(0.3, 0.8), k: rnd(0.14, 0.3), sx: rnd(1.4, 2.4), rot: rnd(-0.6, 0.6) }));
+        this.glintPts = pick(canopy, 26).map((p) => ({ ...p, next: rnd(0, 6), life: 0 }));
+        this.layout(true);
       };
       img.src = url;
+    }
+
+    /** Recompute everything that depends on the layer size (called on resize). */
+    layout(rebuildSway) {
+      const [sx, sy] = this.opts.sun || [0.3, -0.15];
+      this.sun = { x: sx * this.W, y: sy * this.H };
+      if (!this.img) return;
+      const s = Math.max(this.W / this.img.width, this.H / this.img.height);
+      this.cover = { s, ox: (this.W - this.img.width * s) / 2, oy: (this.H - this.img.height * s) / 2 };
+      this.dapples = this.lightPts.map((p) => Object.assign(p, this.map(p.u, p.v)));
+      this.shades = this.shadePts.map((p) => Object.assign(p, this.map(p.u, p.v)));
+      this.glints = this.glintPts.map((p) => Object.assign(p, this.map(p.u, p.v)));
+      if (rebuildSway && this.opts.sway && !this.reduced) this.makeSway();
+    }
+
+    /**
+     * Cut the canopy out of the painting (soft edges baked in) so it can sway with
+     * a cheap transform. The ellipse and pivot are fractions of the picture.
+     */
+    makeSway() {
+      if (this.sway) this.sway.remove();
+      const img = this.img;
+      const W = this.W, H = this.H;
+      const [cu, cv, ru, rv] = this.opts.sway;
+      const [pu, pv] = this.opts.pivot || [cu, cv + rv * 2];
+      const { s, ox, oy } = this.cover;
+      const iw = img.width * s, ih = img.height * s;
+      const cx = ox + cu * iw, cy = oy + cv * ih, rx = ru * iw, ry = rv * ih;
+      const bx = Math.max(0, cx - rx), by = Math.max(0, cy - ry);
+      const bw = Math.min(W, cx + rx) - bx, bh = Math.min(H, cy + ry) - by;
+      if (bw <= 0 || bh <= 0) return;
+      const dpr = Math.min(2, Math.max(1, globalThis.devicePixelRatio || 1)) * 1.5;
+      const c = document.createElement('canvas');
+      c.width = Math.round(bw * dpr); c.height = Math.round(bh * dpr);
+      const x = c.getContext('2d');
+      x.imageSmoothingQuality = 'high';
+      x.scale(dpr, dpr);
+      x.drawImage(img, ox - bx, oy - by, iw, ih);
+      x.globalCompositeOperation = 'destination-in';
+      x.setTransform(dpr * rx, 0, 0, dpr * ry, dpr * (cx - bx), dpr * (cy - by));
+      const g = x.createRadialGradient(0, 0, 0, 0, 0, 1);
+      g.addColorStop(0, '#000'); g.addColorStop(0.55, '#000'); g.addColorStop(1, 'rgba(0,0,0,0)');
+      x.fillStyle = g;
+      x.fillRect(-1, -1, 2, 2);
+      c.className = 'title-sway';
+      Object.assign(c.style, { left: `${bx}px`, top: `${by}px`, width: `${bw}px`, height: `${bh}px`, transformOrigin: `${ox + pu * iw - bx}px ${oy + pv * ih - by}px` });
+      // below the light layer, above the picture
+      this.imageHost.insertBefore(c, this.light);
+      this.sway = c;
     }
 
     resize() {
       const rect = this.canvas.getBoundingClientRect();
       if (!rect.width) return;
-      this.W = this.host.offsetWidth || 1328;
-      this.H = this.host.offsetHeight || 768;
+      const W = this.host.offsetWidth || 1328, H = this.host.offsetHeight || 768;
+      const changed = W !== this.W || H !== this.H;
+      this.W = W; this.H = H;
       const dpr = Math.min(2, globalThis.devicePixelRatio || 1);
       const w = Math.min(3840, Math.round(rect.width * dpr));
       const h = Math.round((w * this.H) / this.W);
-      if (this.canvas.width !== w) { this.canvas.width = w; this.canvas.height = h; }
+      if (this.canvas.width !== w || this.canvas.height !== h) { this.canvas.width = w; this.canvas.height = h; }
       const lw = Math.round(w / 2), lh = Math.round(h / 2);
-      if (this.light.width !== lw) { this.light.width = lw; this.light.height = lh; }
+      if (this.light.width !== lw || this.light.height !== lh) { this.light.width = lw; this.light.height = lh; }
+      if (changed || !this.sun) this.layout(changed);
     }
 
     newMote(anywhere) {
       return {
         x: rnd(0, this.W), y: anywhere ? rnd(0, this.H) : this.H + 10,
-        vx: rnd(-6, 6), vy: rnd(-14, -4), ph: rnd(0, TAU), s: rnd(3, 9), tw: rnd(1, 3),
+        vx: rnd(-6, 6), vy: rnd(-14, -4), ph: rnd(0, TAU), s: rnd(3, 9), tw: rnd(1, 3), a: anywhere ? 1 : 0,
       };
     }
 
-    newLeaf(anywhere, fromTree) {
-      const z = Math.random() ** 1.3;
+    newLeaf(anywhere, fromTree, z = Math.random() ** 1.3) {
       return {
         z,
         sprite: Math.floor(Math.random() * this.preset.leaves.length),
         x: fromTree ? rnd(0.02, 0.62) * this.W : anywhere ? rnd(-60, this.W) : rnd(-120, this.W * 0.8),
-        y: fromTree ? rnd(0.02, 0.42) * this.H : anywhere ? rnd(-40, this.H) : rnd(-80, -30),
+        y: fromTree ? rnd(0.02, 0.4) * this.H : anywhere ? rnd(-40, this.H) : rnd(-80, -30),
         size: 14 + z ** 1.5 * 56,
         vy: rnd(28, 48) * (0.55 + z * 0.7),
         drift: rnd(8, 22),
@@ -274,6 +309,7 @@
         flipF: rnd(1.5, 4.5),
         ph: rnd(0, TAU),
         sway: rnd(14, 34),
+        a: anywhere ? 1 : 0, // fades in, so nothing ever pops into view
       };
     }
 
@@ -295,13 +331,15 @@
       if (this.nextGust <= 0 && this.gustT < 0) {
         this.gustT = 0;
         this.nextGust = rnd(7, 12);
-        // a gust tears a handful of leaves from the canopy
-        for (let i = 0; i < 10; i++) {
-          const k = Math.floor(Math.random() * this.leaves.length);
-          const z = this.leaves[k].z;
-          this.leaves[k] = Object.assign(this.newLeaf(false, true), { z, size: 14 + z ** 1.5 * 56 });
+        // A gust shakes a handful of extra leaves loose from the canopy. They fade in
+        // as they detach and are dropped once they have blown off screen.
+        for (let i = 0; i < 12; i++) {
+          const leaf = Object.assign(this.newLeaf(false, true), { extra: true, delay: rnd(0, 1.2) });
+          let k = this.leaves.findIndex((f) => f.z > leaf.z);
+          if (k < 0) k = this.leaves.length;
+          this.leaves.splice(k, 0, leaf);
         }
-        for (let i = 0; i < 16; i++) this.streaks.push({ x: rnd(-300, this.W * 0.6), y: rnd(0.05, 0.95) * this.H, len: rnd(160, 420), sp: rnd(700, 1200), a: rnd(0.25, 0.6), bend: rnd(-30, 30), w: rnd(0.8, 2.2) });
+        for (let i = 0; i < 16; i++) this.streaks.push({ x: rnd(-300, this.W * 0.6), y: rnd(0.05, 0.95) * this.H, len: rnd(160, 420), sp: rnd(700, 1200), a: rnd(0.25, 0.6), bend: rnd(-30, 30), w: rnd(0.8, 2.2), age: 0 });
       }
       if (this.gustT >= 0) {
         this.gustT += dt;
@@ -320,9 +358,23 @@
       x.setTransform(s, 0, 0, s, 0, 0);
       const t = this.t, g = this.gust;
       const [lr, lg, lb] = this.preset.light;
-      x.globalCompositeOperation = 'lighter';
+
+      // moving leaf shade on the walls and ground, for depth
+      x.globalCompositeOperation = 'source-over';
+      for (const d of this.shades) {
+        const drift = Math.sin(t * d.sp + d.ph);
+        x.globalAlpha = d.k * (0.7 + 0.3 * Math.sin(t * d.sp * 0.6 + d.ph * 2)) * (1 + g * 0.3);
+        const w = d.r * d.sx, h = d.r;
+        x.save();
+        x.translate(d.x + drift * (6 + g * 16), d.y + Math.cos(t * d.sp * 0.8 + d.ph) * (3 + g * 6));
+        x.rotate(d.rot + drift * 0.08);
+        x.drawImage(this.sprites.shade, -w, -h, w * 2, h * 2);
+        x.restore();
+      }
 
       // soft sun rays through the leaves
+      x.globalAlpha = 1;
+      x.globalCompositeOperation = 'lighter';
       const L = this.W * 1.3;
       for (const r of this.rays) {
         const a = r.a + Math.sin(t * 0.05 + r.ph) * 0.03;
@@ -343,10 +395,9 @@
       x.globalCompositeOperation = 'screen';
       for (const d of this.dapples) {
         const flick = 0.5 + 0.5 * Math.sin(t * d.sp * (1 + g * 3) + d.ph) * Math.sin(t * d.sp * 0.37 + d.ph * 2);
-        const a = d.k * (0.25 + 0.75 * flick) * (0.8 + g * 0.5);
+        x.globalAlpha = Math.min(1, d.k * (0.25 + 0.75 * flick) * (0.8 + g * 0.5));
         const jx = Math.sin(t * 1.3 + d.ph) * (3 + g * 10);
         const jy = Math.cos(t * 1.1 + d.ph) * (2 + g * 5);
-        x.globalAlpha = Math.min(1, a);
         const w = d.r * d.sx, h = d.r;
         x.drawImage(this.sprites.dapple, d.x - w + jx, d.y - h + jy, w * 2, h * 2);
       }
@@ -383,23 +434,26 @@
       // pollen and dust floating in the light
       for (let i = 0; i < this.motes.length; i++) {
         const m = this.motes[i];
+        m.a = Math.min(1, m.a + dt / 0.8);
         m.x += (m.vx + Math.sin(t * 0.7 + m.ph) * 8 + g * 160) * dt;
         m.y += (m.vy + Math.cos(t * 0.5 + m.ph) * 4) * dt;
         if (m.y < -20 || m.x > this.W + 20 || m.x < -20) { this.motes[i] = this.newMote(false); if (m.x > this.W) this.motes[i].x = rnd(-20, this.W * 0.3); continue; }
-        x.globalAlpha = 0.35 + 0.65 * (0.5 + 0.5 * Math.sin(t * m.tw + m.ph));
+        x.globalAlpha = m.a * (0.35 + 0.65 * (0.5 + 0.5 * Math.sin(t * m.tw + m.ph)));
         x.drawImage(this.sprites.mote, m.x - m.s, m.y - m.s, m.s * 2, m.s * 2);
       }
 
-      // streaks of wind during a gust
+      // streaks of wind during a gust (each fades in and out)
       if (this.streaks.length) {
         x.lineCap = 'round';
         for (let i = this.streaks.length - 1; i >= 0; i--) {
           const st = this.streaks[i];
+          st.age += dt;
           st.x += st.sp * dt;
           if (st.x - st.len > this.W) { this.streaks.splice(i, 1); continue; }
+          const fade = Math.min(1, st.age / 0.35) * Math.min(1, Math.max(0, (this.W + st.len - st.x) / 300));
           const gr = x.createLinearGradient(st.x - st.len, 0, st.x, 0);
           gr.addColorStop(0, 'rgba(255,248,225,0)');
-          gr.addColorStop(0.7, `rgba(255,248,225,${st.a * Math.max(0.2, g)})`);
+          gr.addColorStop(0.7, `rgba(255,248,225,${st.a * Math.max(0.2, g) * fade})`);
           gr.addColorStop(1, 'rgba(255,248,225,0)');
           x.strokeStyle = gr;
           x.lineWidth = st.w;
@@ -412,27 +466,38 @@
       x.globalAlpha = 1;
       x.globalCompositeOperation = 'source-over';
 
-      // leaves tumbling (far ones first)
+      // leaves tumbling (far ones first); nearer leaves cast a soft shadow
       const wind = 18 + Math.sin(t * 0.3) * 8 + g * 260;
       for (let i = 0; i < this.leaves.length; i++) {
         const f = this.leaves[i];
+        if (f.delay > 0) { f.delay -= dt; continue; }
+        f.a = Math.min(1, f.a + dt / 0.6);
         f.y += f.vy * (1 - g * 0.25) * dt;
         f.x += (f.drift + wind * (0.4 + f.z) + Math.sin(t * 1.2 + f.ph) * f.sway) * dt;
         f.rot += f.spin * (1 + g * 2.5) * dt;
-        if (f.y > this.H + 60 || f.x > this.W + 80) {
-          const z = f.z;
-          this.leaves[i] = Object.assign(this.newLeaf(false, Math.random() < 0.35), { z, size: 14 + z ** 1.5 * 56 });
+        if (f.y > this.H + 80 || f.x > this.W + 100) {
+          if (f.extra) { this.leaves.splice(i, 1); i--; continue; }
+          this.leaves[i] = this.newLeaf(false, Math.random() < 0.35, f.z);
           continue;
         }
         const flip = Math.cos(t * f.flipF + f.ph);
-        const blur = f.z > 0.82 ? 2 : f.z < 0.18 ? 1 : 0;
-        const img = this.sprites.leaves[f.sprite][flip < 0 ? 'back' : 'front'][blur];
+        const fx = Math.max(0.12, Math.abs(flip)) * (flip < 0 ? -1 : 1);
         const sz = f.size;
-        x.globalAlpha = 0.55 + f.z * 0.45;
+        if (f.z > 0.45) {
+          x.globalAlpha = 0.2 * f.z * f.a;
+          x.save();
+          x.translate(f.x + 8 + f.z * 12, f.y + 12 + f.z * 18);
+          x.rotate(f.rot);
+          x.scale(fx, 1);
+          x.drawImage(this.sprites.shadow, -sz / 2, -sz / 2, sz, sz);
+          x.restore();
+        }
+        const img = this.sprites.leaves[f.sprite][flip < 0 ? 'back' : 'front'][f.z > 0.92 ? 1 : 0];
+        x.globalAlpha = (0.6 + f.z * 0.4) * f.a;
         x.save();
         x.translate(f.x, f.y);
         x.rotate(f.rot);
-        x.scale(Math.max(0.12, Math.abs(flip)) * (flip < 0 ? -1 : 1), 1);
+        x.scale(fx, 1);
         x.drawImage(img, -sz / 2, -sz / 2, sz, sz);
         x.restore();
       }
@@ -440,13 +505,11 @@
     }
 
     swayCanopy() {
-      if (!this.swayEls.length || this.reduced) return;
+      if (!this.sway || this.reduced) return;
       const t = this.t, g = this.gust;
-      this.swayEls.forEach((el, i) => {
-        const a = Math.sin(t * (0.8 + i * 0.23) + i) * (0.22 + g * 0.55) + Math.sin(t * 2.7 + i * 2) * g * 0.25;
-        const sk = Math.sin(t * (0.6 + i * 0.3) + 1 + i) * (0.25 + g * 0.6);
-        el.style.transform = `rotate(${a.toFixed(3)}deg) skewX(${sk.toFixed(3)}deg)`;
-      });
+      const a = Math.sin(t * 0.8) * (0.22 + g * 0.55) + Math.sin(t * 2.7) * g * 0.25;
+      const sk = Math.sin(t * 0.6 + 1) * (0.25 + g * 0.6);
+      this.sway.style.transform = `rotate(${a.toFixed(3)}deg) skewX(${sk.toFixed(3)}deg)`;
     }
 
     stop() {

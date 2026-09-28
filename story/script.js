@@ -25,7 +25,7 @@ window.STORY_SCRIPT = String.raw`
 title "SILK" "A Choice Simulation"
 emblem "絹"
 titlebackground title_cover
-titlefx ginkgo sun=0.3,-0.2 sway=0.27,0.2,0.3,0.28 pivot=0.37,0.8
+titlefx ginkgo sun=0.3,-0.25 sway=0.28,0.22,0.34,0.3 pivot=0.4,0.85
 titlelogo brush
 # Backgrounds are pixel art; switch to "artstyle pixel" if the sprites are pixel art too,
 # or "artstyle smooth" if everything is painted / high-resolution.

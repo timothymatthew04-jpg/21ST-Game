@@ -321,6 +321,8 @@
     }
 
     setBg(name, d) {
+      // the soft backdrop shown around the stage on unusually shaped windows
+      if (VN.setAmbient) VN.setAmbient(name === 'black' || name === 'white' ? null : VN.assets.lookup('bg', name) || null);
       const el = this.makeBg(name);
       const old = [...this.bgStack.children];
       this.bgStack.append(el);

@@ -211,9 +211,16 @@
       <feFlood flood-color="#ffc05a"/><feComposite in2="b" operator="in" result="g"/>
       <feMerge><feMergeNode in="g"/><feMergeNode in="SourceGraphic"/></feMerge>
     </filter>
+    <filter id="${uid}-shadow" x="-20%" y="-25%" width="150%" height="170%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="9"/>
+      <feOffset dx="7" dy="12" result="off"/>
+      <feFlood flood-color="#2a1204" flood-opacity="0.6"/>
+      <feComposite in2="off" operator="in"/>
+    </filter>
     <mask id="${uid}-m2" maskUnits="userSpaceOnUse" x="-400" y="-400" width="${width + 800}" height="1400"><g fill="none" stroke="#fff" stroke-linecap="round">${reveal}</g><rect class="bl-reveal-sub" x="-400" y="400" width="${width + 800}" height="200" fill="#fff"/></mask>
   </defs>
   <g class="bl-masked" mask="url(#${uid}-m2)">
+    <g filter="url(#${uid}-shadow)" fill="#000">${shapes}${fallback.join('')}${subtitleSvg}</g>
     <g filter="url(#${uid}-paint)" fill="url(#${uid}-core)">${shapes}${fallback.join('')}
       <g fill="none" stroke="#f6c46e" stroke-opacity="0.24" stroke-width="1.4" stroke-linecap="round">${streaks}</g>
     </g>
@@ -241,7 +248,9 @@
     return wrap;
   }
 
-  // ---- smoke behind, sparkles and embers in front ------------------------------------
+  // ---- warm haze behind, sparkles and embers in front --------------------------------
+  // Both canvases extend half the logo's size beyond it on every side (see CSS), so
+  // embers and haze fade out on their own instead of being cut off at an edge.
   function startParticles(wrap, strokes, vb, animate) {
     const smoke = wrap.querySelector('.bl-smoke');
     const sparks = wrap.querySelector('.bl-sparks');
@@ -256,9 +265,10 @@
     }));
     const spot = () => spots[Math.floor(Math.random() * spots.length)];
 
-    const puffs = Array.from({ length: 16 }, () => ({
-      x: rnd(vb.x + 260, vb.x + vb.w - 260), y: rnd(vb.y + 250, vb.y + vb.h - 250), r: rnd(110, 200),
-      vx: rnd(4, 14), vy: rnd(-6, 2), ph: rnd(0, 6.28), dark: Math.random() < 0.72,
+    const ext = { x: vb.x - vb.w / 2, y: vb.y - vb.h / 2, w: vb.w * 2, h: vb.h * 2 };
+    const puffs = Array.from({ length: 9 }, () => ({
+      x: rnd(vb.x + 120, vb.x + vb.w - 120), y: rnd(vb.y + 140, vb.y + vb.h - 160), r: rnd(120, 210),
+      vx: rnd(4, 12), vy: rnd(-6, 2), ph: rnd(0, 6.28),
     }));
     const embers = [];
     const stars = [];
@@ -269,9 +279,9 @@
       if (!r.width) return false;
       const dpr = Math.min(2, globalThis.devicePixelRatio || 1);
       W = Math.min(3200, Math.round(r.width * dpr));
-      H = Math.round((W * vb.h) / vb.w);
+      H = Math.round((W * ext.h) / ext.w);
       if (sparks.width !== W) { sparks.width = smoke.width = W; sparks.height = smoke.height = H; }
-      scale = W / vb.w;
+      scale = W / ext.w;
       return true;
     };
 
@@ -303,22 +313,23 @@
       if (Math.random() < 0.02) size();
       const intro = Math.min(1, t / 2.6);
 
-      // smoke: dark haze for contrast, with a warm smouldering edge
+      // warm, glowing haze drifting around the letters (light, never dark)
       sx.setTransform(1, 0, 0, 1, 0, 0);
       sx.clearRect(0, 0, W, H);
-      sx.setTransform(scale, 0, 0, scale, -vb.x * scale, -vb.y * scale);
+      sx.setTransform(scale, 0, 0, scale, -ext.x * scale, -ext.y * scale);
+      sx.globalCompositeOperation = 'lighter';
       for (const p of puffs) {
         p.x += (p.vx + Math.sin(t * 0.2 + p.ph) * 6) * dt;
         p.y += (p.vy + Math.cos(t * 0.17 + p.ph) * 4) * dt;
         // keep each puff fully inside the canvas: drift back when it nears an edge
-        const minX = vb.x + p.r + 4, maxX = vb.x + vb.w - p.r - 4, minY = vb.y + p.r + 4, maxY = vb.y + vb.h - p.r - 4;
+        const minX = vb.x + 60, maxX = vb.x + vb.w - 60, minY = vb.y + 80, maxY = vb.y + vb.h - 120;
         if (p.x > maxX || p.x < minX) p.vx = -p.vx;
         if (p.y > maxY || p.y < minY) p.vy = -p.vy;
         p.x = Math.min(maxX, Math.max(minX, p.x));
         p.y = Math.min(maxY, Math.max(minY, p.y));
         const g = sx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.r);
-        if (p.dark) { g.addColorStop(0, `rgba(18,8,3,${0.5 * intro})`); g.addColorStop(1, 'rgba(18,8,3,0)'); }
-        else { g.addColorStop(0, `rgba(255,140,50,${0.13 * intro})`); g.addColorStop(1, 'rgba(255,120,30,0)'); }
+        const a = (0.05 + 0.03 * Math.sin(t * 0.4 + p.ph)) * intro;
+        g.addColorStop(0, `rgba(255,170,80,${a})`); g.addColorStop(1, 'rgba(255,140,50,0)');
         sx.fillStyle = g;
         sx.fillRect(p.x - p.r, p.y - p.r, p.r * 2, p.r * 2);
       }
@@ -326,8 +337,10 @@
       // embers drifting up and away from the strokes
       kx.setTransform(1, 0, 0, 1, 0, 0);
       kx.clearRect(0, 0, W, H);
-      kx.setTransform(scale, 0, 0, scale, -vb.x * scale, -vb.y * scale);
+      kx.setTransform(scale, 0, 0, scale, -ext.x * scale, -ext.y * scale);
       kx.globalCompositeOperation = 'lighter';
+      // fade anything that wanders close to the canvas edge
+      const edge = (px, py) => Math.max(0, Math.min(1, (px - ext.x) / 160, (ext.x + ext.w - px) / 160, (py - ext.y) / 160, (ext.y + ext.h - py) / 160));
       if (animate && embers.length < 70 && Math.random() < 0.55 * intro) {
         const s = spot();
         const side = Math.random() < 0.5 ? -1 : 1;
@@ -341,7 +354,7 @@
         e.x += (e.vx + Math.sin(t * 2 + e.ph) * 14) * dt;
         e.y += e.vy * dt;
         const k = e.age / e.life;
-        kx.globalAlpha = (k < 0.15 ? k / 0.15 : 1 - (k - 0.15) / 0.85) * (0.6 + 0.4 * Math.sin(t * 9 + e.ph));
+        kx.globalAlpha = (k < 0.15 ? k / 0.15 : 1 - (k - 0.15) / 0.85) * (0.6 + 0.4 * Math.sin(t * 9 + e.ph)) * edge(e.x, e.y);
         const z = e.sz * (1 - k * 0.5);
         kx.drawImage(emberSprite, e.x - z, e.y - z, z * 2, z * 2);
       }

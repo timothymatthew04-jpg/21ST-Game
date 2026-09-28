@@ -1,23 +1,38 @@
 /*
  * main.js — boots the game: compiles the story, builds the systems, wires up
- * keyboard / mouse / touch input and keeps the 16:9 stage fitted to the window.
+ * keyboard / mouse / touch input and keeps the stage fitted to the window.
+ *
+ * The stage is always 720 units tall; its width follows the window's shape
+ * (from 16:10 up to 21:9), so it fills the screen with no bars. Only unusual
+ * shapes (a phone held upright, say) leave a margin, and that margin shows a
+ * soft, blurred copy of the picture instead of flat bars.
  */
 (function () {
   'use strict';
   const VN = globalThis.VN;
-  const W = 1280, H = 720;
+  const H = 720;
+  const MIN_W = 1152; // 16:10
+  const MAX_W = 1720; // 21:9 (2560×1080 and 3440×1440 monitors)
 
   function slug(s) {
     return (s || 'game').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'game';
   }
 
   function fitStage(stageEl) {
+    const viewport = stageEl.parentElement;
+    const ambient = VN.h('div.ambient', { 'aria-hidden': 'true' });
+    viewport.prepend(ambient);
+    VN.setAmbient = (url) => { ambient.style.backgroundImage = url ? `url("${url}")` : 'none'; };
     const fit = () => {
       const vv = window.visualViewport;
       const vw = vv ? vv.width : window.innerWidth;
       const vh = vv ? vv.height : window.innerHeight;
-      const k = Math.min(vw / W, vh / H);
+      // fractional widths are fine, and keep the stage edges exactly on the window edges
+      const w = Math.min(MAX_W, Math.max(MIN_W, (H * vw) / vh));
+      const k = Math.min(vw / w, vh / H);
+      stageEl.style.setProperty('--w', `${w}px`);
       stageEl.style.setProperty('--k', String(k));
+      viewport.classList.toggle('letterboxed', Math.abs(vw - w * k) > 1.5 || Math.abs(vh - H * k) > 1.5);
     };
     window.addEventListener('resize', fit);
     if (window.visualViewport) window.visualViewport.addEventListener('resize', fit);

@@ -6,11 +6,18 @@
   'use strict';
   const VN = (globalThis.VN = globalThis.VN || {});
 
+  // Seconds of overlap between the end of a looping track and its next pass.
+  // Tracks usually end in a decaying tail and some silence, and restarting an
+  // <audio loop> leaves an audible gap; overlapping the passes keeps it seamless.
+  const XFADE = 5;
+
   class Channel {
     constructor(audio, kind) {
       this.audio = audio;
       this.kind = kind;
-      this.el = null;
+      this.el = null; // the pass currently playing (or fading in)
+      this.els = new Set(); // every element still sounding, including ones fading out
+      this.url = null;
       this.name = null;
       this.volume = 1;
       this.token = 0;
@@ -23,7 +30,7 @@
     async play(name, fadein = 0, volume = 1) {
       if (this.name === name) {
         this.volume = volume;
-        if (this.el) fade(this.el, this.target(), 0.4);
+        if (this.el) ramp(this.el, this.target(), 0.4);
         return;
       }
       this.stop(Math.max(fadein, 0.4));
@@ -32,45 +39,79 @@
       this.volume = volume;
       const url = await VN.assets.resolve(this.kind, name);
       if (!url || token !== this.token) return;
-      const el = new Audio(url);
-      el.loop = true;
+      this.url = url;
+      this.pass(fadein || 0.25);
+    }
+
+    /** Start one pass through the track; near its end the next pass fades in over it. */
+    pass(fadein) {
+      const el = new Audio(this.url);
+      el.preload = 'auto';
+      // Some browsers (iOS) ignore the volume property; there, fall back to a plain loop.
+      el.volume = 0.5;
+      const crossfade = Math.abs(el.volume - 0.5) < 0.01;
       el.volume = 0;
+      el.loop = !crossfade;
       this.el = el;
-      const start = () => el.play().then(() => fade(el, this.target(), fadein || 0.25)).catch(() => {});
+      this.els.add(el);
+      if (crossfade) {
+        let handedOver = false;
+        const next = () => {
+          if (handedOver || this.el !== el) return;
+          handedOver = true;
+          this.pass(XFADE / 2);
+          ramp(el, 0, XFADE, () => this.release(el));
+        };
+        el.addEventListener('loadedmetadata', () => { if (el.duration < XFADE * 3) el.loop = true; });
+        el.addEventListener('timeupdate', () => {
+          if (!el.loop && Number.isFinite(el.duration) && el.duration - el.currentTime <= XFADE) next();
+        });
+        el.addEventListener('ended', () => { next(); this.release(el); });
+      }
+      const start = () => el.play().then(() => ramp(el, this.target(), fadein)).catch(() => {});
       start();
       this.audio.onUnlock(() => { if (this.el === el && el.paused) start(); });
     }
 
+    release(el) {
+      clearInterval(el._ramp);
+      el.pause();
+      el.removeAttribute('src');
+      el.load();
+      this.els.delete(el);
+    }
+
     stop(fadeout = 0) {
       this.token++;
-      const el = this.el;
       this.el = null;
       this.name = null;
-      if (el) fade(el, 0, fadeout, () => { el.pause(); el.src = ''; });
+      for (const el of this.els) ramp(el, 0, fadeout, () => this.release(el));
     }
 
     refreshVolume() {
-      if (this.el) fade(this.el, this.target(), 0.15);
+      if (this.el) ramp(this.el, this.target(), 0.15);
     }
   }
 
-  function fade(el, to, seconds, done) {
-    cancelAnimationFrame(el._fadeRaf);
+  // Timer-driven (not requestAnimationFrame) so fades still finish in a background tab.
+  function ramp(el, to, seconds, done) {
+    clearInterval(el._ramp);
     const from = el.volume;
+    to = VN.clamp(to, 0, 1);
     const ms = Math.max(0, seconds * 1000);
     if (ms === 0) {
-      el.volume = VN.clamp(to, 0, 1);
+      el.volume = to;
       if (done) done();
       return;
     }
     const t0 = performance.now();
-    const step = (now) => {
-      const k = Math.min(1, (now - t0) / ms);
+    el._ramp = setInterval(() => {
+      const k = Math.min(1, (performance.now() - t0) / ms);
       el.volume = VN.clamp(from + (to - from) * k, 0, 1);
-      if (k < 1) el._fadeRaf = requestAnimationFrame(step);
-      else if (done) done();
-    };
-    el._fadeRaf = requestAnimationFrame(step);
+      if (k < 1) return;
+      clearInterval(el._ramp);
+      if (done) done();
+    }, 30);
   }
 
   class AudioSystem {

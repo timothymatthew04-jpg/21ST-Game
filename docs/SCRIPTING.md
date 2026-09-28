@@ -202,7 +202,9 @@ stop music fadeout 2
 titlemusic title                  # at the top of the script
 ```
 
-Files are found by name, see the asset folders below. Anything missing is silent.
+Files are found by name, see the asset folders below. Anything missing is silent. Music and ambience
+loop seamlessly: the last few seconds of each pass crossfade into the next. `titlemusic` plays only
+on the title screen; starting or loading a game fades it out.
 
 ## Game-wide settings (top of the script)
 
@@ -212,7 +214,7 @@ emblem "絹"
 credits "Adapted from Silk by Alessandro Baricco"
 titlemusic title
 titlebackground title_cover       # picture behind the title screen (assets/bg/title_cover.webp)
-titlefx ginkgo sun=0.3,-0.2 sway=0.27,0.2,0.3,0.28 pivot=0.37,0.8   # animate the title screen (see below)
+titlefx ginkgo sun=0.3,-0.25 sway=0.28,0.22,0.34,0.3 pivot=0.4,0.85   # animate the title screen (see below)
 titlelogo brush                   # glowing brush lettering (or: carved)
 artstyle mixed                    # pixel | smooth | mixed (see below)
 warning "Text shown once, the first time the game is opened."
@@ -224,13 +226,16 @@ leaves tumbling in 3D with depth of field, gusts of wind every few seconds (leav
 streaks of air rush past, the canopy sways harder), sun-dapples shimmering where light already falls
 in the painting, glints on the leaves, light rays and drifting pollen. `sun` is where the light comes
 from; `sway` is the ellipse of canopy that moves (centre x,y and radius x,y) and `pivot` is the point
-it sways around (the base of the trunk). For **pixel** art use `autumn`, `spring` or `summer` (pixel
-leaves, light shafts, mist); there `rays` sets where the shafts come from. All positions are
-fractions of the screen (0,0 is the top-left corner; values outside 0–1 are off-screen).
+it sways around (the base of the trunk); both are fractions of the picture, so they stay on the tree
+at any screen shape. Moving leaf shadows fall on the walls and ground, and the nearest leaves cast
+soft shadows of their own. For **pixel** art use `autumn`, `spring` or `summer` (pixel leaves, light
+shafts, mist); there `rays` sets where the shafts come from. `sun` and `rays` are fractions of the
+screen (0,0 is the top-left corner; values outside 0–1 are off-screen).
 
 `titlelogo brush` draws the title as glowing hand-painted brush strokes with a breathing halo, a gleam
-running across the letters, sparkles, embers and smoke (the letters s, i, l and k are hand-drawn in
-js/brushlogo.js; other letters fall back to a brush font). `titlelogo carved` draws carved stone
+running across the letters, sparkles, embers and a warm haze, and a soft shadow under the letters
+keeps them readable on bright art (the letters s, i, l and k are hand-drawn in js/brushlogo.js; other
+letters fall back to a brush font). `titlelogo carved` draws carved stone
 lettering instead. The title itself is drawn
 as a carved logo: the first letter oversized, spanning the name and the subtitle, with a sweeping
 gleam, glints and a silk ribbon (js/titlelogo.js).

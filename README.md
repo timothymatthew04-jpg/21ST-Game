@@ -65,7 +65,12 @@ On a phone, tap to advance and use the buttons under the text box.
   leaves tumbling with depth of field, gusts of wind that tear leaves from the swaying tree, shimmering
   sun-dapples, glints, light rays and pollen, a slow camera drift and mouse parallax. The logo is
   glowing hand-painted brush lettering in the spirit of *Ori and the Blind Forest*: it paints itself
-  in stroke by stroke, then breathes, gleams, sparkles and sheds embers.
+  in stroke by stroke, then breathes, gleams, sparkles and sheds embers. Moving leaf shadows and
+  soft cast shadows give the scene depth, and the menu has its own music (`assets/music/title.mp3`),
+  which loops with a crossfade so there is never a gap.
+* **Fills any screen.** The game widens to the window's shape (from 16:10 up to 21:9), so there are
+  no black bars on laptops, desktops or ultrawide monitors. Unusual shapes, such as a phone held
+  upright, get a soft blurred copy of the picture around the game instead of bars.
 * **Placeholder art.** Every background, character and event picture has a styled stand-in until
   the real art is added.
 
