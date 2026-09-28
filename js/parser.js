@@ -60,7 +60,7 @@
   function parse(source) {
     const story = {
       title: 'Untitled', subtitle: '', emblem: '', artStyle: 'mixed', titleFx: null, titleLogo: 'carved', titleMusic: null, titleBackground: null, warning: null, credits: null,
-      characters: {}, backgrounds: {}, poemWords: [], karma: [], bgFx: {}, places: {},
+      characters: {}, backgrounds: {}, poemWords: [], karma: [], bgFx: {}, places: {}, bgSound: {},
       program: [], labels: {}, endings: [], errors: [], warnings: [],
       hash: hashString(source),
     };
@@ -372,6 +372,10 @@
           }
           return;
         }
+        case 'bgsound':
+          need(3, 'bgsound background ambience [volume]');
+          story.bgSound[tk[1].v] = { name: tk[2].v, volume: tk[3] ? parseFloat(tk[3].v) || 1 : 1 };
+          return;
         case 'place':
           need(3, 'place background "Name of the place" ["Region"]');
           story.places[tk[1].v] = { name: str(tk[2], 'place background "Name of the place" ["Region"]'), region: tk[3] ? tk[3].v : '' };
@@ -438,7 +442,12 @@
 
         // ---- text ----
         case 'centered': emit(L, { op: 'say', who: null, centered: true, text: str(tk[1], 'centered "text"'), key: `${currentLabel}:${sayCount++}` }); return;
-        case 'chapter': emit(L, { op: 'chapter', title: str(tk[1], 'chapter "Chapter 1" ["Subtitle"]'), subtitle: tk[2] ? tk[2].v : '' }); return;
+        case 'chapter': {
+          // chapter "Chapter 3" "The Cup" seal 杯 — the seal is a kanji or two stamped on the card
+          const { pos, kw } = kwargs(tk, 2, ['seal', 'kanji'], L);
+          emit(L, { op: 'chapter', title: str(tk[1], 'chapter "Chapter 1" ["Subtitle"] [seal 字]'), subtitle: pos[0] ? pos[0].v : '', seal: kw.seal || '', kanji: kw.kanji || '' });
+          return;
+        }
         case 'notify': emit(L, { op: 'notify', text: str(tk[1], 'notify "text"') }); return;
         case 'pause': emit(L, { op: 'pause', seconds: tk[1] ? parseFloat(tk[1].v) : null }); return;
 

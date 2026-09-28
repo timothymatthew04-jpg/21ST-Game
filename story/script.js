@@ -106,6 +106,37 @@ bgfx aviary flutter=0.365,0.25,0.33,0.38,18 leaves=0.8 rays=0.19,0.15,0.8,0.8,#f
 bgfx burned_village smoke=0.167,0.65,1.3,#2e2020 smoke=0.7,0.64,1,#2e2020 smoke=0.906,0.67,1.2,#2e2020 smoke=0.41,0.62,0.7,#3a2a28 embers=0.167,0.7,1 embers=0.906,0.726,1 embers=0.406,0.63,0.6 ash=1 flame=0.167,0.71,0.08,#ff7a30 flame=0.7,0.69,0.07,#ff7a30 flame=0.906,0.75,0.08,#ff7a30
 bgfx forest_camp_night flame=0.429,0.82,0.12,#ff9a40 embers=0.429,0.8,1 smoke=0.429,0.78,0.8,#6a7288 fireflies=0,0.55,1,0.3,14 mist=0.7,0.2,0.3,#b8c8ff rays=0.6,0,0.9,0.45,#b8d0ff flame=0.219,0.79,0.05,#ffb860 glow=0.625,0.096,0.03,#cfe0ff
 
+# Each place has its own sound, which starts when the story arrives there and fades
+# when it leaves: "bgsound background ambience [volume]". A recording in
+# assets/music/<ambience>.mp3 is used if there is one; otherwise it is synthesized.
+bgsound lavilledieu       stream
+bgsound silk_mill         mill
+bgsound silk_mill_empty   rain 0.6
+bgsound balbadiou_office  clock
+bgsound joncour_home      fire 0.8
+bgsound helene_garden     birds
+bgsound garden_winter     wind 0.7
+bgsound helene_sickroom   room
+bgsound cemetery          birds 0.8
+bgsound cemetery_grey     rain
+bgsound cemetery_night    crickets
+bgsound road_east         wind 0.6
+bgsound road_winter       wind
+bgsound road_rain         storm
+bgsound smuggler_boat     boat
+bgsound china_dock        harbour
+bgsound japan_coast       waves
+bgsound japan_path        forest 0.8
+bgsound hara_kei_estate   temple
+bgsound estate_day        birds 0.8
+bgsound estate_unrest     unrest
+bgsound estate_tearoom    temple 0.7
+bgsound estate_room       night 0.7
+bgsound aviary            aviary
+bgsound burned_village    ruins
+bgsound forest_camp_night camp
+bgsound blanche_salon     city 0.8
+
 # ---------------------------------------------------------------- karma
 # Choices are felt, never shown as numbers. When a choice (or a "set" line) moves one
 # of these, a short line appears in its colour, the scene glows or darkens and the
@@ -173,7 +204,7 @@ label start
 #  INTRO — THE SILK DISEASE
 # ============================================================================
 label intro
-  chapter "Prologue" "The Silk Disease"
+  chapter "Prologue" "The Silk Disease" seal 絹
   scene lavilledieu with fade
   play music town_theme fadein 3
   "That year, the silkworms began to die."
@@ -196,7 +227,7 @@ label intro
 #  CHAPTER 1 — THE JOURNEY
 # ============================================================================
 label chapter1
-  chapter "Chapter 1" "The Journey"
+  chapter "Chapter 1" "The Journey" seal 旅
   scene joncour_home with fade
   play music helene_theme fadein 2
   "Hélène was reading by the window when I came home. She put the book face-down on her lap. She always knew before I said anything."
@@ -246,10 +277,8 @@ label chapter1
   "I crossed France by train, then the Alps. Austria. Hungary. Then Russia, where the roads stopped being roads."
   "Weeks of steppe. Lake Baikal, which the people there call the sea. Rivers I crossed on rafts, and villages that had never seen a Frenchman and saw no reason to start."
   scene smuggler_boat with dissolve
-  play ambience waves fadein 2
   "At the edge of the continent, a man who asked no questions and wanted a great deal of money put me on a smuggler's boat."
   "It sailed at night, with no lights, toward a country that did not want me."
-  stop ambience fadeout 2
   jump chapter2
 
 
@@ -257,13 +286,14 @@ label chapter1
 #  CHAPTER 2 — JAPAN
 # ============================================================================
 label chapter2
-  chapter "Chapter 2" "Japan"
+  chapter "Chapter 2" "Japan" seal 日本
   scene japan_coast with fade
   play music japan fadein 3
   "I came ashore on the west coast, the unofficial way, where foreigners were not supposed to come ashore at all."
   scene japan_path with dissolve
   "Men I never saw clearly led me inland for days, blindfolded for part of the way. Nobody explained anything. I learned very quickly not to ask."
   scene hara_kei_estate with fade
+  play sound temple_bell volume 0.6
   "At last I was brought to a village in the hills, and to the house of the man who controlled everything there: Hara Kei."
   show harakei neutral at center
   "He sat perfectly still. He was younger than I had imagined, and he looked at me as if I were a piece of weather he was waiting to pass."
@@ -299,12 +329,14 @@ label chapter2
 #  CHAPTER 3 — THE CUP
 # ============================================================================
 label chapter3
-  chapter "Chapter 3" "The Cup"
+  chapter "Chapter 3" "The Cup" seal 杯
   scene estate_tearoom with dissolve
+  play music her_theme fadein 4
   show harakei neutral at left
   show woman neutral at right
   "Later, tea was served. Hara Kei was talking, and for a moment no one was looking at anyone."
   "The young woman lifted a small teacup and drank from it."
+  play sound cup
   "Then she set it down in front of me."
   show woman gaze at right
   "She looked at me. Then at the cup. Then at me again."
@@ -340,7 +372,7 @@ label chapter3
 #  CHAPTER 4 — THE FIRST RETURN
 # ============================================================================
 label chapter4
-  chapter "Chapter 4" "The First Return"
+  chapter "Chapter 4" "The First Return" seal 帰
   scene road_east with fade
   play music journey fadein 2
   "Hara Kei sold me the eggs: thousands of them, pressed onto sheets of paper and packed in wooden boxes lined with mulberry leaves."
@@ -393,7 +425,7 @@ label chapter4
 #  CHAPTER 5 — THE SECOND JOURNEY
 # ============================================================================
 label chapter5
-  chapter "Chapter 5" "The Second Journey"
+  chapter "Chapter 5" "The Second Journey" seal 再
   scene balbadiou_office with fade
   play music town_theme fadein 2
   show balbadiou neutral
@@ -433,9 +465,8 @@ label chapter5
 #  CHAPTER 6 — THE GLOVE
 # ============================================================================
 label chapter6
-  chapter "Chapter 6" "The Glove"
+  chapter "Chapter 6" "The Glove" seal 手袋
   scene aviary with fade
-  play ambience birds fadein 2
   "Behind Hara Kei's house there was an aviary: a great cage of wood and paper, taller than a house, full of birds from every corner of Asia."
   "Hundreds of wings, all moving, going nowhere."
   "I stood there longer than I should have. I thought about her. About how you can keep something beautiful by never letting it leave."
@@ -465,7 +496,6 @@ label chapter6
         "Something that had touched my hands every day for years."
         "I only thought, much later, about whose needle had made those letters."
         set glove = "handkerchief"
-  stop ambience fadeout 2
   jump chapter7
 
 
@@ -473,7 +503,7 @@ label chapter6
 #  CHAPTER 7 — THE NOTE
 # ============================================================================
 label chapter7
-  chapter "Chapter 7" "The Note"
+  chapter "Chapter 7" "The Note" seal 文
   scene estate_day with fade
   play music her_theme fadein 3
   if glove == "left"
@@ -483,6 +513,7 @@ label chapter7
   else
     "On the last morning, as I packed, a tiny piece of paper fell out from between the pages of my notebook. I had not put it there."
   endif
+  play sound paper
   "A few lines of Japanese, in black ink. I couldn't read a single character."
   set mystery += 1
   "I carried it back across the world, next to the eggs. I did not show it to anyone."
@@ -494,6 +525,7 @@ label chapter7
   herve "That's all?"
   blanche soft "That's enough."
   set obsession += 5
+  play sound heartbeat
   effect pulse 1.4
   inner "Come back, or I will die. That's what I heard, although she hadn't said it."
   jump chapter8
@@ -503,7 +535,7 @@ label chapter7
 #  CHAPTER 8 — HÉLÈNE
 # ============================================================================
 label chapter8
-  chapter "Chapter 8" "Hélène"
+  chapter "Chapter 8" "Hélène" seal 庭
   scene helene_garden with fade
   play music helene_theme fadein 2
   "The eggs hatched again. The town celebrated again. I walked in the garden with Hélène in the evenings, and the trees were a little taller every time."
@@ -547,7 +579,7 @@ label chapter8
 #  CHAPTER 9 — THE THIRD JOURNEY
 # ============================================================================
 label chapter9
-  chapter "Chapter 9" "The Third Journey"
+  chapter "Chapter 9" "The Third Journey" seal 雨
   scene road_rain with fade
   play music journey fadein 2
   "I went back to Japan a third time."
@@ -558,6 +590,7 @@ label chapter9
   endif
   scene estate_unrest with fade
   play music japan fadein 2
+  play sound cannon volume 0.5
   "The country had changed. Foreign ships had come into the ports with their guns, and the old order was cracking. There were soldiers on the roads. People looked at me differently now — a white face had become a political problem."
   show harakei stern
   harakei stern "It is not a good time to be a foreigner here."
@@ -586,7 +619,7 @@ label chapter9
 #  CHAPTER 10 — WAR
 # ============================================================================
 label chapter10
-  chapter "Chapter 10" "War"
+  chapter "Chapter 10" "War" seal 戦
   scene balbadiou_office with fade
   play music war fadein 2
   show balbadiou worried
@@ -599,11 +632,13 @@ label chapter10
         set went_china = true
         balbadiou happy "Thank God."
         scene china_dock with fade
+        play music journey fadein 3
         "I went to China. I bought eggs from traders who laughed at my French and cheated me politely."
         "The eggs were sickly. Half the boxes were dead before I reached the coast."
         "I stood on a dock looking at the sea, with a ticket home in my pocket."
         inner "Japan was only a few days away. A few days."
         effect pulse 1.2
+        play sound paper
         "I tore up the ticket."
         "Being sensible had brought me halfway round the world. The rest of the way, I went by myself."
     - "Go to Japan anyway." [obsession += 3, danger += 3]
@@ -621,24 +656,24 @@ label chapter10
 #  CHAPTER 11 — THE ABANDONED VILLAGE
 # ============================================================================
 label chapter11
-  chapter "Chapter 11" "The Abandoned Village"
+  chapter "Chapter 11" "The Abandoned Village" seal 灰
   scene burned_village with fade
-  play ambience wind fadein 3
   stop music fadeout 3
   "I reached the hills after weeks of hiding, bribing, waiting."
   "The village was gone."
+  play sound wind_gust
   effect shake 0.6
   "Burned houses. Black beams against the sky. No birds. The great aviary was empty, its door hanging open."
   if danger >= 4
     "Twice I had to lie flat in a ditch while soldiers passed on the road. Once they came so close I could hear them breathing."
     "I kept thinking: if I die here, nobody at home will ever know where."
   endif
+  play music sorrow fadein 8
   "I searched for days. For Hara Kei. For her. For anyone."
   if went_china
     inner "In China I had been sensible. Here, in the ashes, sensible was a word from another language."
   endif
   "Then, on the fourth day, a boy found me and led me into the forest, without a word."
-  stop ambience fadeout 2
   jump chapter12
 
 
@@ -646,7 +681,7 @@ label chapter11
 #  CHAPTER 12 — HARA KEI'S WARNING
 # ============================================================================
 label chapter12
-  chapter "Chapter 12" "Hara Kei's Warning"
+  chapter "Chapter 12" "Hara Kei's Warning" seal 森
   scene forest_camp_night with fade
   play music japan fadein 3
   show harakei cold
@@ -683,13 +718,13 @@ label chapter12
 #  CHAPTER 13 — THE LAST EGGS
 # ============================================================================
 label chapter13
-  chapter "Chapter 13" "The Last Eggs"
+  chapter "Chapter 13" "The Last Eggs" seal 卵
   scene road_winter with fade
   play music journey fadein 2
   "I came home with eggs — bought at a terrible price from whoever would sell them in the chaos."
   "They had travelled too far, too slowly, through too much."
   scene silk_mill_empty with fade
-  play music town_theme fadein 2
+  play music sorrow fadein 3
   "In spring, they didn't hatch."
   "Almost none of them. A handful of worms, sickly and slow, that died on the leaves within a week."
   show balbadiou worried
@@ -712,9 +747,10 @@ label chapter13
 #  CHAPTER 14 — THE FINAL LETTER
 # ============================================================================
 label chapter14
-  chapter "Chapter 14" "The Final Letter"
+  chapter "Chapter 14" "The Final Letter" seal 手紙
   scene joncour_home with fade
   play music her_theme fadein 3
+  play sound paper
   "It came in the autumn, months after I had stopped hoping for anything: a thick envelope, with Japanese stamps, seven sheets covered in black ink."
   "I didn't open it at home. I took it to Madame Blanche."
   scene blanche_salon with fade
@@ -723,6 +759,7 @@ label chapter14
   blanche serious "It's long. And it's not the kind of letter one reads quickly."
   "She read it aloud, in French, slowly, without looking up."
   hide blanche
+  play sound page
   cg the_letter with dissolve
   window show
   if persistent.knows_truth
@@ -750,13 +787,14 @@ label chapter14
 #  CHAPTER 15 — HÉLÈNE'S DEATH
 # ============================================================================
 label chapter15
-  chapter "Chapter 15" "Hélène's Death"
+  chapter "Chapter 15" "Hélène's Death" seal 別
   scene garden_winter with fade
   play music helene_theme fadein 3
   "I gave up the silk trade. There was almost nothing left of it to give up."
   "We lived quietly. The trees in the garden grew tall. I learned the names of the birds that came to the pond."
   "Then, one winter, Hélène fell ill."
   scene helene_sickroom with fade
+  play music sorrow fadein 4
   filter faded
   show helene tired
   "She was ill for a long time, and then, very quickly, she was not going to get better."
@@ -773,6 +811,7 @@ label chapter15
     helene tired "You were always somewhere else, Hervé. I got used to talking to you there."
     "I wanted to tell her I was here. I had waited too long to say it, and now it wasn't true enough to say."
   endif
+  play sound bell volume 0.7
   "Hélène died at the beginning of September, on a morning with a clear sky."
   filter none
   hide helene with slow
@@ -786,19 +825,21 @@ label chapter15
 #  FINAL CHAPTER — THE TRUTH
 # ============================================================================
 label final
-  chapter "Final Chapter" "The Truth"
+  chapter "Final Chapter" "The Truth" seal 真
   scene blanche_salon with fade
   play music letter fadein 4
   "A few weeks after the funeral, Madame Blanche sent for me."
   show blanche serious
   blanche serious "I made a promise, Monsieur Joncour. To keep a secret while she was alive. She is not alive anymore."
   herve "Who?"
+  play sound heartbeat
   blanche soft "Your wife."
   "She told me everything. Hélène had come to her, years ago. With a letter she had written herself, in French. She had asked Madame Blanche to copy it into Japanese — and to read it back to me when I came."
   if told_helene
     inner "Who translated it for you? — she had asked me, in the garden. And I had told her."
   endif
   hide blanche
+  play sound page
   cg the_letter with dissolve
   effect glitch 0.9
   filter sepia
@@ -847,6 +888,7 @@ label ending
   elif helene_trust >= 3
     "I told her about my day. About the birds at the pond. About the letter, which I had finally read the right way."
     helene soft "{i}Look at whoever is beside you.{/i}"
+    play sound wind_gust volume 0.6
     "The wind moved through the trees she had watched me plant. For the first time in many years, I was exactly where I was."
     ending home_beside "Home — Beside Me All Along" true
   else

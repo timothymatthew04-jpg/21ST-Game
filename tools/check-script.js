@@ -14,7 +14,7 @@ const root = path.join(__dirname, '..');
 const ctx = { console, window: {} };
 ctx.globalThis = ctx;
 vm.createContext(ctx);
-for (const f of ['js/expr.js', 'js/parser.js', 'story/script.js']) {
+for (const f of ['js/expr.js', 'js/parser.js', 'js/synth.js', 'story/script.js']) {
   vm.runInContext(fs.readFileSync(path.join(root, f), 'utf8'), ctx, { filename: f });
 }
 const source = ctx.window.STORY_SCRIPT;
@@ -32,6 +32,19 @@ for (const i of lines) {
   if (i.target != null) targets.add(i.target);
   if (i.op === 'menu') i.options.forEach((o) => targets.add(o.target));
 }
+// Every music, ambience and sound needs a recording in assets/ or a synthesized version.
+const hasFile = (dir, name) => ['mp3', 'ogg', 'm4a', 'wav'].some((e) => fs.existsSync(path.join(root, 'assets', dir, `${name}.${e}`)));
+const soundChecks = [];
+for (const i of lines) {
+  if (i.op !== 'play') continue;
+  if (i.channel === 'sound') soundChecks.push([i.name, 'sfx', ctx.VN.SYNTH_SOUNDS, i.line]);
+  else soundChecks.push([i.name, 'music', i.channel === 'music' ? ctx.VN.SYNTH_TRACKS : ctx.VN.SYNTH_AMBIENCES, i.line]);
+}
+for (const [bg, a] of Object.entries(story.bgSound || {})) soundChecks.push([a.name, 'music', ctx.VN.SYNTH_AMBIENCES, `bgsound ${bg}`]);
+for (const [name, dir, synth, where] of soundChecks) {
+  if (!hasFile(dir, name) && !(synth && synth[name])) story.warnings.push({ line: where, msg: `no assets/${dir}/${name}.mp3 and no synthesized "${name}"` });
+}
+
 const unreachable = Object.entries(story.labels).filter(([name, idx]) => {
   if (name === 'start' || targets.has(idx)) return false;
   // falls through from the previous instruction?

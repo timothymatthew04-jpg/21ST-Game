@@ -31,12 +31,14 @@
     duck(level, seconds) {
       this.duckLevel = level;
       if (this.el) ramp(this.el, this.target(), seconds);
+      if (this.syn) this.syn.gain(this.target(), seconds);
     }
 
     async play(name, fadein = 0, volume = 1) {
       if (this.name === name) {
         this.volume = volume;
         if (this.el) ramp(this.el, this.target(), 0.4);
+        if (this.syn) this.syn.gain(this.target(), 0.4);
         return;
       }
       this.stop(Math.max(fadein, 0.4));
@@ -44,9 +46,24 @@
       this.name = name;
       this.volume = volume;
       const url = await VN.assets.resolve(this.kind, name);
-      if (!url || token !== this.token) return;
-      this.url = url;
-      this.pass(fadein || 0.25);
+      if (token !== this.token) return;
+      if (url) {
+        this.url = url;
+        this.pass(fadein || 0.25);
+      } else this.startSynth(name, fadein || 1);
+    }
+
+    /** No recording of this track: let the synthesizer (js/synth.js) play it instead. */
+    startSynth(name, fadein) {
+      const go = () => {
+        if (this.name !== name || this.syn) return;
+        const S = this.audio.getSynth();
+        if (!S) return;
+        this.syn = this.kind === 'ambience' ? S.ambience(name, 0) : S.track(name, 0);
+        if (this.syn) this.syn.gain(this.target(), fadein);
+      };
+      if (this.audio.ctx && this.audio.ctx.state === 'running') go();
+      else this.audio.onUnlock(go);
     }
 
     /** Start one pass through the track; near its end the next pass fades in over it. */
@@ -91,11 +108,13 @@
       this.token++;
       this.el = null;
       this.name = null;
+      if (this.syn) { this.syn.stop(fadeout); this.syn = null; }
       for (const el of this.els) ramp(el, 0, fadeout, () => this.release(el));
     }
 
     refreshVolume() {
       if (this.el) ramp(this.el, this.target(), 0.15);
+      if (this.syn) this.syn.gain(this.target(), 0.15);
     }
   }
 
@@ -160,9 +179,26 @@
       return name === 'ambience' ? this.ambience : this.music;
     }
 
+    /** The synthesizer for music, ambience and sounds that have no audio file. */
+    getSynth() {
+      if (!this.ctx || !VN.Synth) return null;
+      if (!this.synth) this.synth = new VN.Synth(this.ctx);
+      return this.synth;
+    }
+
+    /** A synthesized effect for the interface (chapter cards, cutscenes), optionally a moment from now. */
+    fx(name, { volume = 1, delay = 0 } = {}) {
+      const S = this.ctx && this.ctx.state === 'running' ? this.getSynth() : null;
+      if (S && this.sfxVolume > 0) S.sfx(name, volume * this.sfxVolume, delay);
+    }
+
     async playSound(name, volume = 1) {
       const url = await VN.assets.resolve('sound', name);
-      if (!url) return;
+      if (!url) {
+        const S = this.ctx && this.ctx.state === 'running' ? this.getSynth() : null;
+        if (S) S.sfx(name, volume * this.sfxVolume);
+        return;
+      }
       const el = new Audio(url);
       el.volume = VN.clamp(volume * this.sfxVolume, 0, 1);
       el.play().catch(() => {});

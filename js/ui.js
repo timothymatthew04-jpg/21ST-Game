@@ -27,6 +27,143 @@
     return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
   }
 
+  // ---- chapter card pieces ---------------------------------------------------------------------
+  const KANJI_DIGITS = ['', '一', '二', '三', '四', '五', '六', '七', '八', '九'];
+  const WORDS = ['Zero', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine', 'Ten', 'Eleven', 'Twelve',
+    'Thirteen', 'Fourteen', 'Fifteen', 'Sixteen', 'Seventeen', 'Eighteen', 'Nineteen', 'Twenty'];
+
+  /** "Chapter 12" → 第十二章, "Prologue" → 序章, "Final Chapter" → 終章. */
+  function chapterKanji(title) {
+    if (/prologue/i.test(title)) return '序章';
+    if (/final|epilogue|last/i.test(title)) return '終章';
+    const m = title.match(/\d+/);
+    if (!m) return '章';
+    const n = parseInt(m[0], 10);
+    if (n >= 100) return `第${m[0]}章`;
+    const tens = Math.floor(n / 10), ones = n % 10;
+    return `第${tens ? `${tens > 1 ? KANJI_DIGITS[tens] : ''}十` : ''}${KANJI_DIGITS[ones]}章`;
+  }
+
+  /** "Chapter 3" → "Chapter Three". */
+  function spellChapter(title) {
+    return title.replace(/\d+/, (d) => WORDS[parseInt(d, 10)] || d);
+  }
+
+  let svgId = 0;
+  function svgEl(markup, cls) {
+    const wrap = h(cls);
+    wrap.innerHTML = markup;
+    return wrap;
+  }
+
+  /** A vermilion stroke of a wide brush: a wet body and dry bristles, drawn left to right. */
+  function brushStroke() {
+    const id = `jc${++svgId}`;
+    const bristles = [];
+    for (let k = -4; k <= 4; k++) {
+      const y = 80 + k * 9;
+      const end = 760 + ((k * 37) % 90 + 90) % 90 + (Math.abs(k) > 2 ? -60 : 40);
+      bristles.push(`<path class="jc-bristle" pathLength="1" style="animation-delay:${520 + Math.abs(k) * 25}ms" d="M${48 + Math.abs(k) * 6} ${y + 6} C 240 ${y - 16}, 520 ${y - 18}, ${end} ${y - 8}" stroke-width="${Math.abs(k) > 2 ? 5 : 9}" opacity="${Math.abs(k) > 3 ? 0.55 : 0.85}"/>`);
+    }
+    return svgEl(`<svg viewBox="0 0 900 160" preserveAspectRatio="none" aria-hidden="true">
+      <defs>
+        <filter id="${id}r" x="-4%" y="-40%" width="108%" height="180%" color-interpolation-filters="sRGB">
+          <feTurbulence type="fractalNoise" baseFrequency="0.012 0.16" numOctaves="3" seed="${svgId * 7}" result="n"/>
+          <feDisplacementMap in="SourceGraphic" in2="n" scale="16" xChannelSelector="R" yChannelSelector="G"/>
+        </filter>
+        <linearGradient id="${id}g" x1="0" x2="1" y1="0" y2="0">
+          <stop offset="0" stop-color="#7d1810"/><stop offset="0.2" stop-color="#c12e1c"/>
+          <stop offset="0.75" stop-color="#d8432a"/><stop offset="1" stop-color="#a3261a"/>
+        </linearGradient>
+      </defs>
+      <g filter="url(#${id}r)" stroke="url(#${id}g)" fill="none" stroke-linecap="round">
+        <path class="jc-body" pathLength="1" d="M52 88 C 240 66, 520 62, 820 72" stroke-width="58"/>
+        ${bristles.join('')}
+      </g>
+    </svg>`, 'div.jc-brush');
+  }
+
+  /** A blot of ink spreading through wet paper behind everything. */
+  function inkBlot() {
+    const id = `jc${++svgId}`;
+    return svgEl(`<svg viewBox="0 0 400 400" aria-hidden="true">
+      <defs>
+        <filter id="${id}b" x="-20%" y="-20%" width="140%" height="140%" color-interpolation-filters="sRGB">
+          <feTurbulence type="fractalNoise" baseFrequency="0.03" numOctaves="4" seed="${svgId * 3}" result="n"/>
+          <feDisplacementMap in="SourceGraphic" in2="n" scale="60" xChannelSelector="R" yChannelSelector="G"/>
+        </filter>
+        <radialGradient id="${id}f">
+          <stop offset="0" stop-color="#000" stop-opacity="0.9"/>
+          <stop offset="0.55" stop-color="#140d0a" stop-opacity="0.75"/>
+          <stop offset="0.85" stop-color="#2a1a14" stop-opacity="0.35"/>
+          <stop offset="1" stop-color="#2a1a14" stop-opacity="0"/>
+        </radialGradient>
+      </defs>
+      <circle cx="200" cy="200" r="170" fill="url(#${id}f)" filter="url(#${id}b)"/>
+    </svg>`, 'div.jc-blot');
+  }
+
+  /** Gold sparks: a few always drifting up, and a burst on demand. */
+  function sparkField(cv) {
+    const dpr = Math.min(1.5, window.devicePixelRatio || 1);
+    const rect = cv.getBoundingClientRect();
+    const W = (cv.width = Math.max(1, Math.round(rect.width * dpr)));
+    const H = (cv.height = Math.max(1, Math.round(rect.height * dpr)));
+    const c = cv.getContext('2d');
+    const unit = H / 720; // one stage pixel
+    const dot = document.createElement('canvas');
+    dot.width = dot.height = 32;
+    const d = dot.getContext('2d');
+    const g = d.createRadialGradient(16, 16, 0, 16, 16, 16);
+    g.addColorStop(0, 'rgba(255,250,225,1)');
+    g.addColorStop(0.25, 'rgba(255,214,130,0.9)');
+    g.addColorStop(0.6, 'rgba(255,140,40,0.25)');
+    g.addColorStop(1, 'rgba(255,120,30,0)');
+    d.fillStyle = g;
+    d.fillRect(0, 0, 32, 32);
+    const parts = [];
+    let last = 0;
+    let acc = 0;
+    const add = (x, y, vx, vy, life, size, burst = false) => parts.push({ x, y, vx, vy, life, age: 0, size, burst, tw: Math.random() * 6 });
+    return {
+      burst(fx, fy) {
+        for (let i = 0; i < 90; i++) {
+          const a = Math.random() * Math.PI * 2, s = (160 + Math.random() * 620) * unit;
+          add(fx * W, fy * H, Math.cos(a) * s, Math.sin(a) * s * 0.7 - 40 * unit, 0.9 + Math.random() * 1.4, (5 + Math.random() * 9) * unit, true);
+        }
+      },
+      step(t) {
+        const dt = last ? Math.min(0.05, (t - last) / 1000) : 0.016;
+        last = t;
+        acc += dt * 26;
+        while (acc > 1) {
+          acc--;
+          add(Math.random() * W, H * (0.55 + Math.random() * 0.5), (Math.random() - 0.5) * 20 * unit, -(30 + Math.random() * 60) * unit, 2.5 + Math.random() * 2.5, (3 + Math.random() * 6) * unit);
+        }
+        c.clearRect(0, 0, W, H);
+        c.globalCompositeOperation = 'lighter';
+        for (let i = parts.length - 1; i >= 0; i--) {
+          const p = parts[i];
+          p.age += dt;
+          if (p.age >= p.life) { parts.splice(i, 1); continue; }
+          // burst sparks slow down quickly; then, like the drifting ones, they float upward
+          const drag = p.burst ? Math.pow(0.08, dt) : 1;
+          p.vx *= drag;
+          p.vy = p.vy * drag - (p.burst ? 40 : 6) * unit * dt;
+          p.x += p.vx * dt + Math.sin(t / 700 + p.tw) * 10 * unit * dt;
+          p.y += p.vy * dt;
+          const k = p.age / p.life;
+          const a = Math.min(1, p.age * 4) * (1 - k) * (0.6 + 0.4 * Math.sin(t / 90 + p.tw));
+          if (a <= 0.01) continue;
+          c.globalAlpha = a;
+          const s = p.size * (1 - k * 0.5) * 2;
+          c.drawImage(dot, p.x - s / 2, p.y - s / 2, s, s);
+        }
+        c.globalAlpha = 1;
+      },
+    };
+  }
+
   class UI {
     constructor(stageEl, story, settings, audio) {
       this.story = story;
@@ -192,7 +329,7 @@
       this.overlays.splice(i, 1);
       entry.el.classList.remove('shown');
       entry.el.classList.add('closing');
-      setTimeout(() => entry.el.remove(), 220);
+      setTimeout(() => entry.el.remove(), entry.removeAfter || 220);
       const top = this.overlays[this.overlays.length - 1];
       if (top) setTimeout(() => { if (!top.el.contains(document.activeElement)) this.focusFirst(top.el); }, 30);
       else if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
@@ -449,12 +586,37 @@
     }
 
     // ---- chapter card & ending -----------------------------------------------------------------
-    chapterCard(title, subtitle, { fast } = {}) {
+    /**
+     * The chapter card, in the style of the title menu: an ink wash, the chapter number
+     * as big brushed kanji, the name glowing over a vermilion brush stroke, and a red
+     * seal stamped at the end in a burst of gold sparks.
+     */
+    chapterCard(title, subtitle, { fast, seal, kanji } = {}) {
       return new Promise((resolve) => {
-        const letters = h('div.card-title');
-        [...title].forEach((c, i) => letters.append(h('span', { style: { animationDelay: `${i * 45}ms` } }, c === ' ' ? ' ' : c)));
-        const el = h('div.overlay.card', letters, h('div.card-rule'), subtitle && h('div.card-sub', subtitle));
+        const reduce = this.settings.reduceMotion;
+        const eyebrow = spellChapter(title);
+        const sub = subtitle || '';
+        const subSize = Math.round(Math.min(64, 820 / (Math.max(sub.length, 6) * 0.86)));
+        const letters = (text, cls, step, from) => h(cls, [...text].map((c, i) => h('span', { style: { animationDelay: `${from + i * step}ms` } }, c === ' ' ? ' ' : c)));
+        const kanjiCol = h('div.jc-kanji', [...(kanji || chapterKanji(title))].map((c, i) => h('span', { style: { animationDelay: `${250 + i * 170}ms` } }, c)));
+        const sealChars = [...(seal || '絹')].slice(0, 2);
+        const sealEl = h(`div.jc-seal${sealChars.length > 1 ? '.two' : ''}`, h('div.jc-seal-face', sealChars.map((c) => h('span', c))));
+        const main = h('div.jc-main',
+          letters(eyebrow.toUpperCase(), 'div.jc-eyebrow', 32, 650),
+          h('div.jc-line',
+            brushStroke(),
+            h('div.jc-sub', { style: { fontSize: `${subSize}px` } },
+              letters(sub.toUpperCase(), 'span.jc-sub-text', 45, 950),
+              h('span.jc-shine', { 'aria-hidden': 'true' }, sub.toUpperCase())),
+            sealEl));
+        const sparks = h('canvas.jc-sparks');
+        const el = h(`div.overlay.card.jcard${fast ? '.fast' : ''}${reduce ? '.still' : ''}`,
+          h('div.jc-wash'), inkBlot(), h('div.jc-rays'), h('div.jc-grain'), sparks,
+          h('div.jc-group', main, kanjiCol),
+          h('div.jc-flash'));
         let entry;
+        let raf = 0;
+        let stampTimer = 0;
         const finish = () => {
           if (!entry) return;
           const e = entry;
@@ -462,14 +624,32 @@
           this.cardEntry = null;
           this.cardFinish = null;
           clearTimeout(timer);
+          clearTimeout(stampTimer);
+          e.removeAfter = fast ? 250 : 800;
           this.close(e);
+          setTimeout(() => cancelAnimationFrame(raf), e.removeAfter);
           resolve();
         };
         el.addEventListener('click', finish);
         entry = this.open(el, { onKey: (e) => { if ([' ', 'Enter', 'Escape'].includes(e.key)) finish(); return true; }, onBack: finish, focus: false });
         this.cardEntry = entry;
         this.cardFinish = finish;
-        const timer = setTimeout(finish, fast ? 700 : 3200);
+        const timer = setTimeout(finish, fast ? 700 : 4400);
+        if (fast) return;
+        this.audio.fx('whoosh', { volume: 0.8 });
+        this.audio.fx('ink', { volume: 0.9, delay: 0.3 });
+        this.audio.fx('ink', { volume: 0.7, delay: 0.6 });
+        this.audio.fx('stamp', { delay: 1.95 });
+        this.audio.fx('sparkle', { volume: 0.9, delay: 2.0 });
+        if (reduce) return;
+        // gold sparks drifting up, and a burst when the seal lands
+        const field = sparkField(sparks);
+        const loop = (t) => { field.step(t); raf = requestAnimationFrame(loop); };
+        raf = requestAnimationFrame(loop);
+        stampTimer = setTimeout(() => {
+          const r = sealEl.getBoundingClientRect(), c = sparks.getBoundingClientRect();
+          if (c.width) field.burst((r.left + r.width / 2 - c.left) / c.width, (r.top + r.height / 2 - c.top) / c.height);
+        }, 1980);
       });
     }
 

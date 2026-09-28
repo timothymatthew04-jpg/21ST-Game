@@ -552,6 +552,17 @@
       } else {
         await this.sleep(this.stage.sync(sc, { instant: kind === 'none', duration: ms }));
       }
+      // Every place has its own sound (wind, the sea, the mill...), unless the script says otherwise.
+      const amb = this.story.bgSound[ins.bg];
+      if (amb) {
+        if (!this.state.ambience || this.state.ambience.name !== amb.name) {
+          this.state.ambience = { name: amb.name, volume: amb.volume };
+          this.audio.channel('ambience').play(amb.name, 2.5, amb.volume);
+        }
+      } else if (this.state.ambience && this.story.bgSound && Object.keys(this.story.bgSound).length) {
+        this.state.ambience = null;
+        this.audio.channel('ambience').stop(2);
+      }
       // Arriving somewhere new: say where we are.
       const place = this.story.places[ins.bg];
       const key = place ? `${place.name}|${place.region}` : null;
@@ -633,7 +644,7 @@
       this.ui.textbox.hideBox();
       this.ui.textbox.hideCentered();
       this.autosavePending = true;
-      await this.guard(this.ui.chapterCard(this.interp(ins.title), this.interp(ins.subtitle), { fast: this.isSkipping() }));
+      await this.guard(this.ui.chapterCard(this.interp(ins.title), this.interp(ins.subtitle), { fast: this.isSkipping(), seal: ins.seal, kanji: ins.kanji }));
       this.state.pc++;
     }
 
