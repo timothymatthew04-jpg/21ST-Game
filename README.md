@@ -65,8 +65,15 @@ On a phone, tap to advance and use the buttons under the text box.
   chapter), each with a picture of the scene.
 * **Rollback**, **skip read text**, **auto-advance**, **history log** and **hide text box**, as in
   Ren'Py games.
-* **Chapter title cards**, scene transitions (dissolve, fade, flash), tints, filters and screen
-  effects.
+* **Japanese chapter cards** in the title menu's style: an ink wash, the chapter number brushed in
+  vertical kanji (序章, 第一章 … 終章), the chapter's name glowing over a vermilion brush stroke, and a
+  red seal with the chapter's own character (旅, 杯, 手袋 …) stamped in with a burst of gold sparks.
+* **Cutscenes** for every chapter and ending: short cinematic moments with letterbox bars, slow
+  camera moves, captions and sound. Hervé's route drawn across an old map of Eurasia, the cup and
+  the glove in close-up, the note and the letter written out in calligraphy, the black ships, the
+  burned village, the candle going out at dawn, and the truth in Hélène's own handwriting. Click to
+  move on, Esc to skip.
+* Scene transitions (dissolve, fade, flash), tints, filters and screen effects.
 * **Settings** for text speed, auto speed, music and sound volume, text beeps, speaker highlight
   and reduced motion.
 * **Animated title screen** on the ginkgo courtyard painting (`assets/bg/title_cover.webp`): golden
@@ -79,16 +86,20 @@ On a phone, tap to advance and use the buttons under the text box.
 * **Fills any screen.** The game widens to the window's shape (from 16:10 up to 21:9), so there are
   no black bars on laptops, desktops or ultrawide monitors. Unusual shapes, such as a phone held
   upright, get a soft blurred copy of the picture around the game instead of bars.
-* **Living backgrounds** for every place in the story, from the silk mill in Lavilledieu across
-  the steppe and the night sea to Hara Kei's moonlit village: sakura petals and autumn leaves fall,
-  lanterns and fires flicker, water glints, fireflies wander, smoke and steam rise, birds cross the
-  sky and flutter in the aviary, and the smuggler's boat rocks. The name of each new place fades in
-  at the top of the screen when the story arrives there.
-* **Characters**: Hélène, Balbadiou, Hara Kei, the woman and Madame Blanche on stage, and Hervé's
-  face in the text box. Until a character has a picture for an expression, the pose reacts to the
-  mood instead.
-* **Placeholder art.** The three event pictures (CGs) have a styled stand-in until the real art is
-  added.
+* **Living backgrounds** for every place in the story, all painted in one pixel-art style, from the
+  silk mill in Lavilledieu across the steppe and the night sea to Hara Kei's moonlit village. Each
+  is built from layers that move: clouds drift, trees and curtains sway, boats bob, the mill wheel
+  turns, and the view shifts a little with the mouse. On top, sakura petals and autumn leaves fall,
+  lanterns and fires flicker, water glints, fireflies wander, smoke and steam rise and birds cross
+  the sky. The name of each new place fades in at the top of the screen when the story arrives.
+* **Music and sound composed in code**: nine pieces (a waltz for the town, Hélène's piano, koto and
+  bamboo flute for Japan, drums for the war…), a sound for every place (the sea, the mill, a
+  ticking clock, crickets, a fire, the harbour, rain and thunder) and effects at the key moments.
+  A recording with the same name in `assets/` always takes over.
+* **Characters who feel alive**: Hélène, Balbadiou, Hara Kei, the woman and Madame Blanche breathe,
+  sway a little, blink now and then, nod while they talk, react to their mood, and take on the light
+  of the place they stand in (firelight, dusk, moonlight, grey rain). Hervé's face is in the text box.
+* **Painted close-ups** of the cup, the glove and the letter.
 
 ## Project layout
 
@@ -108,14 +119,22 @@ js/                   the engine
   paintfx.js          the animated painted title (leaves, wind, light)
   brushlogo.js        the glowing brush-lettered title logo
   scenefx.js          living backgrounds (petals, lanterns, water, smoke, birds...)
+  scenery.js          the painted backgrounds' moving layers
+  cutscene.js         cutscenes: camera moves, captions, the journey map, letters
   audio.js            music, sounds, menu beeps
+  synth.js            the music, ambience and sound effects, composed in code
   main.js             start-up, keyboard/mouse input, screen scaling
 story/script.js       THE STORY: edit this to change the game
+story/cutscenes.js    the cutscenes (shots, camera moves, captions)
+story/scenery.js      how each painted background's layers move (generated)
+story/blinks.js       where each character's eyes are, for blinking (generated)
 docs/SCRIPTING.md     how to write the story script
 docs/ASSETS.md        every background, sprite, CG and track the story uses
 assets/               drop art and audio here (see docs/ASSETS.md)
 tools/check-script.js checks the story for mistakes:  node tools/check-script.js
-tools/paint-backgrounds.js  paints the pixel-art backgrounds in tools/paint/ into assets/bg/
+tools/paint-backgrounds.js  paints the pixel-art scenes in tools/paint/ into assets/scenes/
+tools/paint-blinks.js       paints the characters' blinking eyelids
+tools/extract-map.js        extracts the journey map's coastlines from Natural Earth data
 ```
 
 ## Adding art and music

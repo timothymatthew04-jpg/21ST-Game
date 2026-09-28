@@ -5,39 +5,44 @@ silence), so art can be added one piece at a time in any order.
 
 Regenerate this list after editing the story with `node tools/check-script.js --assets`.
 
-## Backgrounds: `assets/bg/<name>.png`
+## Backgrounds: painted in code, `assets/scenes/<name>/`
 
-All of them are in. Four are the illustrations you provided (`hara_kei_estate`, `estate_tearoom`,
-`estate_room` and `japan_path`); the other fourteen were painted in code in the same pixel-art
-style by `tools/paint-backgrounds.js` (the scenes are in `tools/paint/`), and can be regenerated or
-replaced at any time. Each one is animated by the `bgfx` lines at the top of the story script.
+Every background is pixel art painted by `tools/paint-backgrounds.js` from the scenes in
+`tools/paint/`, all in one style. Each is saved as layers (`assets/scenes/<name>/<layer>.png`, plus
+`flat.png` for thumbnails), and `story/scenery.js` says how each layer moves. Hara Kei's village,
+the tea room, the tatami room and the torii path were repainted from your four reference
+illustrations (kept in `docs/reference-art/`), keeping their layout.
 
-To replace one, save a new picture under the same name: 1920×1080 or larger (16:9). `.jpg` and
-`.webp` work too. The game looks for `.png` first, then `.jpg`, then `.webp`, so a new `.png` or
-`.jpg` takes over from the painted `.webp` without deleting anything. The game widens to fit the window (up to
-21:9), which crops a little off the top and bottom of a 16:9 picture on very wide screens, so keep
-important details away from those edges.
+To change one, edit its scene in `tools/paint/` and run `node tools/paint-backgrounds.js <name>`. A
+picture saved as `assets/bg/<name>.png` (or `.jpg`, `.webp`) is used only for backgrounds that have
+no painted version.
 
-| File | Where it's used |
+| Scene | Where it's used |
 | --- | --- |
-| `silk_mill` | Prologue, Chapters 4 and 13: the town's silk mill |
+| `lavilledieu` | Prologue: the town, the river and the mill wheel |
+| `silk_mill`, `silk_mill_empty` | Prologue, Chapter 4; Chapter 13 after the eggs fail |
 | `balbadiou_office` | Prologue, Chapters 5 and 10 |
 | `joncour_home` | Chapters 1 and 14: Hervé and Hélène's house |
-| `road_east` | The long journeys across Europe and Russia |
-| `smuggler_boat` | The night crossing to Japan, and the dock in China |
+| `road_east`, `road_winter`, `road_rain` | The journeys across Europe and Russia |
+| `smuggler_boat` | The night crossing to Japan |
+| `china_dock` | Chapter 10: the harbour in China |
 | `japan_coast` | Chapter 2: arriving in Japan |
 | `japan_path` | Chapter 2: led inland through the forest, past a torii |
-| `hara_kei_estate` | Chapters 2, 5, 7 and 9: Hara Kei's village in the hills |
-| `estate_tearoom` | Chapter 3: the moonlit room where tea is served and the cup is set down |
-| `estate_room` | Chapter 6: the empty room with her belongings, where Hervé leaves his glove |
-| `helene_garden` | Chapters 4, 8 and 15: the garden Hervé makes for Hélène |
+| `hara_kei_estate`, `estate_day`, `estate_unrest` | Hara Kei's village: at night, by day, in troubled times |
+| `estate_tearoom` | Chapter 3: the moonlit room where tea is served |
+| `estate_room` | Chapter 6: the room with her belongings |
 | `aviary` | Chapter 6: Hara Kei's great bird cage |
+| `helene_garden`, `garden_winter` | Chapters 4, 8 and 15: the garden Hervé makes for Hélène |
 | `blanche_salon` | Chapters 7 and 14, Final Chapter: Madame Blanche's house |
 | `burned_village` | Chapter 11: the abandoned village |
 | `forest_camp_night` | Chapter 12: Hara Kei's camp in the forest |
-| `silk_mill_empty` | Chapter 13: the mill after the eggs fail |
 | `helene_sickroom` | Chapter 15 |
-| `cemetery` | Ending: Hélène's grave |
+| `cemetery`, `cemetery_grey`, `cemetery_night` | The three endings |
+
+The cutscenes use a few more paintings: `journey_map` (Europe to Japan, drawn from Natural Earth
+coastlines), `cs_worms` (the dying silkworms), `cs_warships` (the black ships), `cs_candle` and
+`cs_candle_dawn`, and the close-ups `the_cup`, `the_glove` and `the_letter`, which are also the
+event pictures (CGs).
 
 The title screen uses `title_cover` (already added: the ginkgo courtyard painting, 2000×1117 at its
 original resolution with a gentle contrast curve for deeper shadows). It is sharp at 1080p; on 1440p
@@ -55,6 +60,10 @@ Transparent PNG, about 720–1000 px tall, feet touching the bottom edge. All si
 picture for an expression, their neutral one is used and the pose reacts instead: it lifts for
 happy moods and sinks for sad ones. Expression pictures can be added one at a time.
 
+Each character also has `blink.png`: their eyes half closed and closed, painted from their own
+skin and lash colours by `tools/paint-blinks.js`, which lays them over the eyes every few seconds.
+If a new `neutral.png` moves the face, update the eye positions in that tool and run it again.
+
 Hervé is the player, so he never stands in a scene, like the protagonist in DDLC. His picture is
 used for his face in the text box.
 
@@ -70,9 +79,10 @@ sprites. A hand-drawn portrait can simply replace any of them.
 | The woman | `woman/` | `neutral`, `gaze`, `smile`, `soft` |
 | Madame Blanche | `blanche/` | `neutral`, `serious`, `soft` |
 
-## Event pictures (CGs): `assets/cg/<name>.png`
+## Event pictures (CGs)
 
-Full-screen 16:9 illustrations for the key moments.
+The three key moments are painted close-ups (see above). A picture saved as `assets/cg/<name>.png`
+is used only for a CG that has no painted version.
 
 | File | Moment |
 | --- | --- |
@@ -84,23 +94,24 @@ Full-screen 16:9 illustrations for the key moments.
 
 Small transparent PNGs (about 110 px wide) for Hervé's Journal: `helene`, `woman`, `balbadiou`.
 
-## Music: `assets/music/<name>.mp3`
+## Music, ambience and sounds
 
-Loops automatically: the end of each pass crossfades into the next, so there is no gap even when a
-track ends in silence. `.ogg` and `.m4a` work too.
+All of them are composed in code (js/synth.js) except the title music, `assets/music/title.mp3`.
+To use a recording instead, save it under the same name and it takes over: music and ambience in
+`assets/music/<name>.mp3`, sounds in `assets/sfx/<name>.mp3` (`.ogg` and `.m4a` work too).
 
-| File | Mood / where |
+| Music | Mood / where |
 | --- | --- |
-| `title` | Title screen (added). Plays on the menu only and stops when a game starts |
-| `town_theme` | The town, the mill, Balbadiou |
-| `helene_theme` | Scenes with Hélène |
-| `journey` | The long journeys |
-| `japan` | Hara Kei's estate |
-| `her_theme` | The woman, the note, the letter |
-| `war` | Chapter 10 |
-| `letter` | Final Chapter: the truth |
-| `home` | Ending |
+| `title` | Title screen (a recording). Plays on the menu only and stops when a game starts |
+| `town_theme` | The town, the mill, Balbadiou: a waltz for guitar and music box |
+| `helene_theme` | Scenes with Hélène: piano over strings |
+| `journey` | The long journeys: a steady pulse, a flute looking ahead |
+| `japan` | Japan: koto and bamboo flute over a drone, a far temple bell |
+| `her_theme` | The woman, the cup, the note, the letter: high and weightless |
+| `war` | Chapter 10: drums and a crying flute |
+| `sorrow` | The empty mill, the sickroom |
+| `letter` | Final Chapter: the truth, from minor into major |
+| `home` | The endings: music box and piano |
 
-## Ambience: `assets/music/<name>.mp3`
-
-Quiet background loops layered under the music: `waves`, `birds`, `wind`.
+Each place's ambience is set by the `bgsound` lines at the top of the story script; the full list
+of ambiences and sounds is in docs/SCRIPTING.md.

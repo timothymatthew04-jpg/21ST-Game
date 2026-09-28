@@ -146,7 +146,8 @@ endif
 | `scene name [with transition]` | `scene japan_coast with fade`. It clears the characters. `black` and `white` are built in. |
 | `show id [expression] [at position] [with transition]` | `show helene soft at left` |
 | `hide id` / `hide all` | `hide woman with slow` |
-| `cg name` / `cg hide` | a full-screen event picture |
+| `cg name` / `cg hide` | a full-screen event picture (the painted close-ups `the_cup`, `the_glove`, `the_letter` move like backgrounds) |
+| `cutscene name` | play a cutscene from story/cutscenes.js (see below) |
 | `tint night` / `tint #ff8800 0.3` / `tint none` | colour over the scene: `night dusk sunset dawn memory red cold` |
 | `filter sepia` / `filter none` | `sepia grayscale faded dream dark` |
 | `vignette on` / `vignette off` | darken the edges |
@@ -183,7 +184,7 @@ Inside any line:
 ## Structure
 
 ```text
-chapter "Chapter 3" "The Cup"   # title card; also names the save file
+chapter "Chapter 3" "The Cup" seal 杯   # title card; also names the save file
 pause 1.5                       # wait (a click skips it); "pause" alone waits for a click
 notify "Hélène will remember that."    # a line at the top of the screen, like a karma line
 call some_label / return        # run a shared scene and come back
@@ -193,6 +194,35 @@ rollback off / rollback on      # stop players from going back (e.g. after a big
 ```
 
 Every `ending` in the script is listed on the Endings screen automatically, locked until found.
+
+The chapter card turns the title into a kanji chapter number by itself ("Prologue" → 序章,
+"Chapter 12" → 第十二章, "Final Chapter" → 終章). `seal` is the character (or two) stamped on the
+card; `kanji 第三章` overrides the number.
+
+## Cutscenes
+
+`cutscene name` plays one of the cutscenes defined in `story/cutscenes.js`. A cutscene is a list of
+shots; each shows a painted scene through a slowly moving camera, with letterbox bars and a caption:
+
+```js
+the_cup: {
+  shots: [
+    { bg: 'estate_tearoom', dur: 3.5, cam: [[1.0, 0.5, 0.5], [1.28, 0.5, 0.78]] },
+    { bg: 'the_cup', dur: 6.5, cam: [[1.7, 0.43, 0.55], [1.2, 0.5, 0.58]], sound: [['cup', 0.5, 1]] },
+  ],
+},
+```
+
+`cam` is `[zoom, x, y]`: the point to look at, as fractions of the picture, and how close; two of
+them make a move. A shot can also have `text` (a caption), `title` (big words across the middle),
+`kanji` (large brushed characters), `fx` (extra effects written like a `bgfx` line), `sound`,
+`flash`, `shake`, `tint`, `sprites` (characters standing in the shot), `trans` (`fade`, `cut`,
+`white`, `black`), a `map` (Hervé's route drawn across the journey map, the camera following it) or
+a `letter` (a sheet of paper whose words are written out, in Japanese columns or French
+handwriting). Every option is described at the top of `story/cutscenes.js`.
+
+Players click to move to the next shot and press Esc (or Skip) to end the cutscene; skip mode passes
+cutscenes by.
 
 ## The word game (DDLC's poem game)
 
@@ -219,14 +249,27 @@ Afterwards the game sets `poem_<id>` (points per character), `poem_winner` and `
 ```text
 play music japan fadein 3
 play ambience waves fadein 2      # a second looping layer (rain, sea, birds)
-play sound door
+play sound cup volume 0.8
 stop music fadeout 2
 titlemusic title                  # at the top of the script
+bgsound japan_coast waves         # at the top: the sound of a place, started whenever the story arrives there
 ```
 
-Files are found by name, see the asset folders below. Anything missing is silent. Music and ambience
-loop seamlessly: the last few seconds of each pass crossfade into the next. `titlemusic` plays only
-on the title screen; starting or loading a game fades it out.
+Files are found by name, see the asset folders below. When there is no file, the game plays its own
+music and sounds, composed in code (js/synth.js):
+
+* **Music**: `town_theme`, `helene_theme`, `journey`, `japan`, `her_theme`, `war`, `letter`, `home`,
+  `sorrow`.
+* **Ambience**: `waves`, `wind`, `birds`, `rain`, `storm`, `fire`, `crickets`, `night`, `temple`,
+  `forest`, `camp`, `mill`, `clock`, `room`, `city`, `harbour`, `boat`, `stream`, `ruins`, `unrest`,
+  `aviary`.
+* **Sounds**: `bell`, `temple_bell`, `chime`, `heartbeat`, `thunder`, `cannon`, `page`, `paper`,
+  `knock`, `cup`, `gong`, `wind_gust`, `breath`, `ink`, `whoosh`, `stamp`, `sparkle`, `candle_out`.
+
+Music and ambience loop seamlessly: recordings crossfade the last few seconds of each pass into the
+next, and the composed pieces never repeat exactly. `titlemusic` plays only on the title screen;
+starting or loading a game fades it out. `node tools/check-script.js` warns about any name that has
+neither a file nor a composed version.
 
 ## Game-wide settings (top of the script)
 
@@ -268,6 +311,15 @@ gleam, glints and a silk ribbon (js/titlelogo.js).
 place hara_kei_estate "Hara Kei's Village" "The hills of Japan"
 bgfx hara_kei_estate glow=0.435,0.16,0.09,#cfe0ff flame=0.287,0.665,0.03 leaves glints=0.24,0.8,0.54,0.19
 ```
+
+```text
+bgsound hara_kei_estate temple            # the place's own sound (and an optional volume)
+bglight hara_kei_estate night             # how its light falls on the characters
+```
+
+`bgsound` starts the place's sound whenever the story arrives there and fades it when it leaves, so
+scripts don't need `play ambience` lines. `bglight` tints the characters standing in a place:
+`day`, `warm`, `fire`, `dusk`, `night`, `moon`, `grey`, `dim` or `ash` (or any CSS filter).
 
 `place` names where a background is. The first time the story arrives there, the name fades in at
 the top of the screen (with the region above it), so the player always knows where Hervé has gone.
