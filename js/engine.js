@@ -298,7 +298,8 @@
       const line = { typer, seen, started: performance.now(), autoTimer: 0, skipTimer: 0, resolve: null };
       const done = new Promise((r) => { line.resolve = r; });
       this.line = line;
-      typer.done.then(() => this.onTyped(line));
+      if (!opts.centered && !instant && !this.isSkipping()) this.stage.setTalking(true);
+      typer.done.then(() => { if (this.line === line || !this.line) this.stage.setTalking(false); this.onTyped(line); });
       this.updateSkip();
       await this.guard(done);
       this.persistent.seen[ins.key] = 1;
@@ -326,6 +327,7 @@
       clearTimeout(line.skipTimer);
       this.line = null;
       this.ui.textbox.hideNext();
+      this.stage.setTalking(false);
       line.resolve();
     }
 

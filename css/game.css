@@ -325,10 +325,36 @@ html, body {
   transition-timing-function: cubic-bezier(0.3, 0.7, 0.2, 1);
 }
 .sprite.entering, .sprite.leaving { opacity: 0; }
+.sprite.entering { transform: translateX(-50%) translateY(18px); }
+.sprite.entering, .sprite.leaving { transition-property: left, opacity, transform; }
 .sprite-inner {
+  position: relative;
   transform-origin: 50% 100%;
   transition: transform 0.22s ease, filter 0.22s ease;
 }
+/* the light of the place falls on everyone standing in it */
+.sprite-layer { transition: filter 1.2s ease; }
+/* alive: breathing and a slight sway, each at their own pace; a nod while talking; blinking */
+.sprite-life { transform-origin: 50% 100%; animation: sprite-breathe var(--bt, 4.8s) ease-in-out var(--bd, 0s) infinite; }
+@keyframes sprite-breathe {
+  0%, 100% { transform: none; }
+  50% { transform: scale(1.003, 1.008) rotate(var(--sw, 0.2deg)); }
+}
+.sprite-talk { position: relative; transform-origin: 50% 100%; }
+.sprite.talking .sprite-talk { animation: sprite-talk 1.25s ease-in-out infinite; }
+@keyframes sprite-talk {
+  0%, 100% { transform: none; }
+  14% { transform: translateY(-3px) rotate(-0.25deg); }
+  28% { transform: translateY(0); }
+  46% { transform: translateY(-2px) rotate(0.2deg); }
+  58% { transform: translateY(0); }
+  76% { transform: translateY(-3.5px); }
+  88% { transform: translateY(-0.5px); }
+}
+.sprite-blink { position: absolute; background-size: 100% 200%; background-repeat: no-repeat; opacity: 0; pointer-events: none; }
+.sprite-blink[data-f='h'] { opacity: 1; background-position: 0 0; }
+.sprite-blink[data-f='c'] { opacity: 1; background-position: 0 100%; }
+.reduce-motion .sprite-life, .reduce-motion .sprite.talking .sprite-talk { animation: none; }
 .sprite.speaking .sprite-inner { transform: scale(1.035); }
 .sprite.dim .sprite-inner { filter: brightness(0.7) saturate(0.85); }
 .sprite-img { display: block; height: 660px; width: auto; transition: transform 0.5s ease, filter 0.5s ease; }
@@ -337,6 +363,9 @@ html, body {
 .sprite-img[data-mood='cold'] { filter: saturate(0.82) brightness(0.97); }
 .sprite-img[data-mood='soft'] { filter: brightness(1.04) saturate(1.05); }
 .sprite-img[data-mood='up'] { animation: mood-hop 0.55s ease; }
+.sprite-img[data-mood='hurt'] { animation: mood-flinch 0.5s ease; transform: translateY(8px); filter: brightness(0.92) saturate(0.85); }
+.sprite-img[data-mood='tired'] { transform: translateY(14px) rotate(-0.6deg); transform-origin: 50% 100%; filter: brightness(0.9) saturate(0.75); }
+@keyframes mood-flinch { 0% { transform: none; } 20% { transform: translate(6px, 4px) rotate(0.6deg); } 45% { transform: translate(-4px, 7px); } 70% { transform: translate(2px, 8px); } 100% { transform: translateY(8px); } }
 @keyframes mood-hop { 30% { transform: translateY(-16px); } 60% { transform: translateY(0); } 80% { transform: translateY(-5px); } }
 /* artstyle pixel / smooth (set in the story script) */
 .art-pixel .sprite-img, .art-pixel .chibi-img { image-rendering: pixelated; }

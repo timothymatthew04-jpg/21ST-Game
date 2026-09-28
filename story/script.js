@@ -137,6 +137,29 @@ bgsound burned_village    ruins
 bgsound forest_camp_night camp
 bgsound blanche_salon     city 0.8
 
+# How the light of each place falls on the characters: "bglight background look",
+# where look is day, warm, fire, dusk, night, moon, grey, dim or ash.
+bglight balbadiou_office  warm
+bglight joncour_home      fire
+bglight helene_sickroom   dim
+bglight blanche_salon     warm
+bglight road_east         dusk
+bglight road_rain         grey
+bglight smuggler_boat     moon
+bglight china_dock        dusk
+bglight japan_coast       dusk
+bglight hara_kei_estate   night
+bglight estate_unrest     fire
+bglight estate_tearoom    warm
+bglight estate_room       moon
+bglight burned_village    ash
+bglight forest_camp_night fire
+bglight silk_mill_empty   grey
+bglight cemetery          dusk
+bglight cemetery_grey     grey
+bglight cemetery_night    moon
+bglight garden_winter     grey
+
 # ---------------------------------------------------------------- karma
 # Choices are felt, never shown as numbers. When a choice (or a "set" line) moves one
 # of these, a short line appears in its colour, the scene glows or darkens and the

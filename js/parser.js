@@ -60,7 +60,7 @@
   function parse(source) {
     const story = {
       title: 'Untitled', subtitle: '', emblem: '', artStyle: 'mixed', titleFx: null, titleLogo: 'carved', titleMusic: null, titleBackground: null, warning: null, credits: null,
-      characters: {}, backgrounds: {}, poemWords: [], karma: [], bgFx: {}, places: {}, bgSound: {},
+      characters: {}, backgrounds: {}, poemWords: [], karma: [], bgFx: {}, places: {}, bgSound: {}, bgLight: {},
       program: [], labels: {}, endings: [], errors: [], warnings: [],
       hash: hashString(source),
     };
@@ -375,6 +375,11 @@
         case 'bgsound':
           need(3, 'bgsound background ambience [volume]');
           story.bgSound[tk[1].v] = { name: tk[2].v, volume: tk[3] ? parseFloat(tk[3].v) || 1 : 1 };
+          return;
+        case 'bglight':
+          // bglight background day|warm|fire|dusk|night|moon|grey|dim|ash (or any CSS filter)
+          need(3, 'bglight background day|warm|fire|dusk|night|moon|grey|dim|ash');
+          story.bgLight[tk[1].v] = tk.slice(2).map((t) => t.v).join(' ');
           return;
         case 'place':
           need(3, 'place background "Name of the place" ["Region"]');

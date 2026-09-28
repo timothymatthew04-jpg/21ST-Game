@@ -15,7 +15,20 @@
 
   // When a character has no picture for an expression, their neutral picture is
   // used and the pose reacts instead: a small lift for happy moods, a sink for sad ones.
-  const MOODS = { smile: 'up', happy: 'up', soft: 'soft', sad: 'down', hurt: 'down', tired: 'down', worried: 'down', cold: 'cold', stern: 'cold', serious: 'cold', gaze: 'soft' };
+  const MOODS = { smile: 'up', happy: 'up', soft: 'soft', sad: 'down', hurt: 'hurt', tired: 'tired', worried: 'down', cold: 'cold', stern: 'cold', serious: 'cold', gaze: 'soft', surprised: 'up' };
+
+  // How the light of a place falls on the characters standing in it (see "bglight").
+  const LIGHTS = {
+    day: 'none',
+    warm: 'sepia(0.2) saturate(1.12) brightness(1.02)',
+    fire: 'sepia(0.3) saturate(1.2) brightness(0.96) contrast(1.04)',
+    dusk: 'sepia(0.22) saturate(1.18) brightness(0.92)',
+    night: 'brightness(0.74) saturate(0.68) contrast(1.06)',
+    moon: 'brightness(0.82) saturate(0.6) contrast(1.04)',
+    grey: 'saturate(0.62) brightness(0.9) contrast(0.96)',
+    dim: 'brightness(0.88) saturate(0.82) sepia(0.08)',
+    ash: 'saturate(0.5) sepia(0.25) brightness(0.84)',
+  };
 
   const aspects = new Map();
   /** A picture's width / height, so animation layers can line up with it. */
@@ -213,12 +226,17 @@
       el.dataset.key = key;
       const showImage = (url, fallback) => {
         if (el.dataset.key !== key) return;
-        let img = inner.firstChild;
-        if (!img || img.tagName !== 'IMG') {
+        let life = inner.firstChild;
+        let img = life && life.classList.contains('sprite-life') ? life.querySelector('.sprite-img') : null;
+        if (!img) {
           img = h('img.sprite-img', { alt: '', draggable: 'false' });
-          inner.replaceChildren(img);
+          // breathing, a little sway, and a nod while they talk: every character at their own pace
+          life = h('div.sprite-life', { style: { '--bt': `${(4.2 + Math.random() * 1.6).toFixed(2)}s`, '--bd': `${(-Math.random() * 5).toFixed(2)}s`, '--sw': `${(Math.random() < 0.5 ? -1 : 1) * (0.15 + Math.random() * 0.15)}deg` } },
+            h('div.sprite-talk', img));
+          inner.replaceChildren(life);
         }
         if (img.getAttribute('src') !== url) img.src = url;
+        this.setBlink(el, folder, fallback || (expr || 'neutral') === 'neutral');
         // One picture for every mood: let the pose itself react a little instead.
         const mood = fallback ? MOODS[expr] || '' : '';
         if (img.dataset.mood !== mood || mood === 'up') {
@@ -229,7 +247,7 @@
       const known = spriteLookup(folder, expr || 'neutral');
       if (known) return showImage(known.url, known.fallback);
       // Still looking the picture up: keep the current one rather than flashing a placeholder.
-      const hasArt = inner.firstChild && inner.firstChild.tagName === 'IMG';
+      const hasArt = !!(inner.firstChild && inner.firstChild.classList && inner.firstChild.classList.contains('sprite-life'));
       if (!(known === undefined && hasArt)) {
         inner.replaceChildren(
           h('div.ph-sprite',
@@ -240,6 +258,42 @@
         );
       }
       if (known === undefined) resolveSprite(folder, expr || 'neutral').then((r) => { if (r) showImage(r.url, r.fallback); });
+    }
+
+    /** Eyelids painted by tools/paint-blinks.js, laid over the eyes now and then. */
+    setBlink(el, folder, on) {
+      const talk = el.querySelector('.sprite-talk');
+      let lid = talk && talk.querySelector('.sprite-blink');
+      const spot = on && (globalThis.VN_BLINKS || {})[folder];
+      if (!spot) { if (lid) lid.remove(); return; }
+      if (!lid) {
+        lid = h('div.sprite-blink', {
+          style: { left: `${spot.x * 100}%`, top: `${spot.y * 100}%`, width: `${spot.w * 100}%`, height: `${spot.h * 100}%` },
+        });
+        talk.append(lid);
+        VN.assets.resolve('sprite', `${folder}/blink`).then((url) => { if (url) lid.style.backgroundImage = `url("${url}")`; else lid.remove(); });
+      }
+      if (!el._blink) this.scheduleBlink(el, 600 + Math.random() * 2500);
+    }
+
+    scheduleBlink(el, ms) {
+      el._blink = setTimeout(() => {
+        const lid = el.querySelector('.sprite-blink');
+        if (!el.isConnected || !lid) { el._blink = 0; return; }
+        const frames = Math.random() < 0.18 ? ['h', 'c', 'h', '', 'h', 'c', 'h', ''] : ['h', 'c', 'c', 'h', ''];
+        let i = 0;
+        const step = () => {
+          lid.dataset.f = frames[i++] || '';
+          if (i < frames.length) setTimeout(step, frames[i - 1] === '' ? 90 : 45);
+        };
+        step();
+        this.scheduleBlink(el, 2200 + Math.random() * 4200);
+      }, ms);
+    }
+
+    /** The speaker nods along while their words appear. */
+    setTalking(on) {
+      for (const [id, el] of Object.entries(this.spriteEls)) el.classList.toggle('talking', !!on && id === this.speaker);
     }
 
     makeCg(name) {
@@ -324,6 +378,9 @@
       let longest = 0;
 
       if (scene.bg !== this.rendered.bg) {
+        const light = (this.story.bgLight || {})[scene.bg] || 'day';
+        this.spriteLayer.style.transitionDuration = instant ? '0ms' : '';
+        this.spriteLayer.style.filter = LIGHTS[light] || light;
         this.setBg(scene.bg, instant || bgTransition === 'none' ? 0 : d);
         this.rendered.bg = scene.bg;
         if (!instant && bgTransition !== 'none') longest = Math.max(longest, d);
