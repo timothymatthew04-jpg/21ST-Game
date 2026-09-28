@@ -41,11 +41,20 @@ high-resolution instead, change `artstyle` at the top of the script (see docs/SC
 
 ## Character sprites: `assets/sprites/<character>/<expression>.png`
 
-Transparent PNG, about 720–1000 px tall, feet touching the bottom edge. The game scales them to the
-screen height. Hervé is the player, so he has no sprite, like the protagonist in DDLC.
+Transparent PNG, about 720–1000 px tall, feet touching the bottom edge. All six characters are in
+(`neutral.png` for each, cut to a common scale so their heights match). Until a character has a
+picture for an expression, their neutral one is used and the pose reacts instead: it lifts for
+happy moods and sinks for sad ones. Expression pictures can be added one at a time.
+
+Hervé is the player, so he never stands in a scene, like the protagonist in DDLC. His picture is
+used for his face in the text box.
+
+Text-box faces are in `assets/faces/<character>.png`: square head-and-shoulders crops of the
+sprites. A hand-drawn portrait can simply replace any of them.
 
 | Character | Folder | Expressions |
 | --- | --- | --- |
+| Hervé | `herve/` | `neutral` (used for his text-box face) |
 | Hélène | `helene/` | `neutral`, `soft`, `smile`, `sad`, `hurt`, `tired` |
 | Balbadiou | `balbadiou/` | `neutral`, `serious`, `happy`, `worried` |
 | Hara Kei | `harakei/` | `neutral`, `stern`, `cold` |

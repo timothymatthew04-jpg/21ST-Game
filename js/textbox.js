@@ -222,9 +222,13 @@
       this.settings = settings;
       this.audio = audio;
       this.name = h('div.namebox');
+      this.face = h('div.tb-face', { 'aria-hidden': 'true' });
       this.text = h('div.tb-text');
       this.next = h('div.tb-next', { 'aria-hidden': 'true' });
-      this.box = h('div.textbox.hidden', this.name, this.text, this.next);
+      // The panel is drawn separately so the portrait and name plate can overhang its frame.
+      const panel = h('div.tb-panel', ...['tl', 'tr', 'bl', 'br'].map((c) => h(`i.tb-corner.${c}`)));
+      this.box = h('div.textbox.hidden', panel, this.face, this.name, this.text, this.next);
+      this.faceUrl = null;
       this.centeredText = h('div.centered-text');
       this.centered = h('div.centered.hidden', this.centeredText);
       root.append(this.centered, this.box);
@@ -243,11 +247,12 @@
       return !this.box.classList.contains('hidden');
     }
 
-    say({ name, color, text, italic, instant, blip }) {
+    say({ name, color, text, italic, instant, blip, face }) {
       this.stop();
       this.hideCentered();
       this.showBox();
       this.hideNext();
+      this.setFace(face);
       if (name) {
         this.name.textContent = name;
         this.name.style.setProperty('--name-color', color || '#fff');
@@ -262,6 +267,19 @@
         onPause: () => { this.showNext(); if (this.onPause) this.onPause(); },
       });
       return this.typer;
+    }
+
+    setFace(url) {
+      url = url || null;
+      this.box.classList.toggle('has-face', !!url);
+      if (url === this.faceUrl) return;
+      this.faceUrl = url;
+      if (!url) return;
+      this.face.style.backgroundImage = `url("${url}")`;
+      // a new speaker's portrait slides in; the same speaker stays put
+      this.face.classList.remove('enter');
+      void this.face.offsetWidth;
+      this.face.classList.add('enter');
     }
 
     sayCentered({ text, instant }) {
@@ -299,6 +317,7 @@
       this.stop();
       this.text.replaceChildren();
       this.name.classList.remove('on');
+      this.setFace(null);
       this.hideNext();
       this.hideBox();
       this.hideCentered();

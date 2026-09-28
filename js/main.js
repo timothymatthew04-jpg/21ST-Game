@@ -32,6 +32,8 @@
       const k = Math.min(vw / w, vh / H);
       stageEl.style.setProperty('--w', `${w}px`);
       stageEl.style.setProperty('--k', String(k));
+      // on small screens the stage is scaled down a lot: enlarge the small buttons so they stay tappable
+      stageEl.classList.toggle('compact', k < 0.7);
       viewport.classList.toggle('letterboxed', Math.abs(vw - w * k) > 1.5 || Math.abs(vh - H * k) > 1.5);
     };
     window.addEventListener('resize', fit);
@@ -74,6 +76,8 @@
     for (const [name, path] of Object.entries(story.backgrounds)) VN.assets.override('bg', name, path);
     // Start loading the cover art now so it's ready when the title screen appears.
     if (story.titleBackground) VN.assets.resolve('bg', story.titleBackground);
+    // Text-box portraits are small; fetch them all up front so they never pop in late.
+    for (const ch of Object.values(story.characters)) if (ch.face) VN.assets.resolve('face', ch.face);
 
     const settings = Object.assign({}, VN.DEFAULT_SETTINGS, VN.store.get('settings', {}));
     const audio = new VN.AudioSystem(settings);

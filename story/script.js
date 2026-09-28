@@ -32,17 +32,34 @@ titlelogo brush
 artstyle mixed
 credits "Adapted from Silk by Alessandro Baricco"
 titlemusic title
-warning "SILK is a branching story adapted from Alessandro Baricco's novel.\n\nYour choices shape Hervé's relationships, his obsession and his memories — the great events of his life stay the same.\n\nThis is an early build: characters and backgrounds are placeholders until the art arrives."
+warning "SILK is a branching story adapted from Alessandro Baricco's novel.\n\nYour choices shape Hervé's relationships, his obsession and his memories — the great events of his life stay the same.\n\nThis is an early build: the backgrounds are placeholders until the art arrives."
 
 # ---------------------------------------------------------------- characters
 # Hervé is the player. His spoken lines use "herve"; his inner thoughts use "inner".
 character herve     "Hervé"          color=#e9c46a blip=440
-character inner     ""               color=#cbbef0 italic
+character inner     ""               color=#cbbef0 italic face=none
 character helene    "Hélène"         color=#f4a7b9 blip=620
 character balbadiou "Balbadiou"      color=#9ccf9f blip=380
 character harakei   "Hara Kei"       color=#e0503c blip=300
 character woman     "???"            color=#f6ecdb blip=700
 character blanche   "Madame Blanche" color=#b7c4ff blip=520
+
+# Each character's picture is assets/sprites/<id>/neutral.png, and their face in the
+# text box is assets/faces/<id>.png. The face appears when they speak without standing
+# in the scene: always for Hervé, who is the player.
+
+# ---------------------------------------------------------------- karma
+# Choices are felt, never shown as numbers. When a choice (or a "set" line) moves one
+# of these, a short line appears in its colour, the scene glows or darkens and the
+# music dips. "heavy" is the direction that costs Hervé something. Threads listed
+# first speak first (at most two per choice). The ending reveals every choice.
+karma helene_trust color=#f4a7b9 heavy=down up="Hélène will remember that." down="Something in Hélène goes quiet."
+karma obsession    color=#e2553f heavy=up   up="Japan pulls at you a little harder." down="The pull of Japan loosens, for now."
+karma danger       color=#b02a2a heavy=up   up="Somewhere, Hara Kei takes note." down="You step back from the edge."
+karma intimacy     color=#c9a0ff up="Something unspoken passed between you."
+karma fascination  color=#f2d492 up="She will stay in your thoughts."
+karma business     color=#9ccf9f up="Balbadiou would be pleased."
+karma mystery      color=#9fb4ff up="The mystery deepens." down="A little of the mystery fades."
 
 # ---------------------------------------------------------------- journal words
 # The DDLC-style word game in Chapter 4. Each word pulls Hervé's heart toward
@@ -652,10 +669,10 @@ label chapter14
   cg the_letter with dissolve
   window show
   if persistent.knows_truth
-    woman "You crossed the whole world to look at me. I know what that journey costs. I have {color=#f4a7b9}waited at a window{/color} for every mile of it."
-    woman "I will not ask you to come back. I ask you instead to stay where you are, in your house, in your {color=#f4a7b9}garden that will grow long after both of us{/color}."
+    woman "You crossed the whole world to look at me. I know what that journey costs. I have {color=#c2476a}waited at a window{/color} for every mile of it."
+    woman "I will not ask you to come back. I ask you instead to stay where you are, in your house, in your {color=#c2476a}garden that will grow long after both of us{/color}."
     woman "Let me be a story someone told you once. Beautiful, and finished."
-    woman "And if some evening you feel {color=#f4a7b9}a hand on your arm on the garden path{/color}, don't look for me in it. Look at whoever is beside you."
+    woman "And if some evening you feel {color=#c2476a}a hand on your arm on the garden path{/color}, don't look for me in it. Look at whoever is beside you."
     woman "Goodbye, my love. We will not see each other again."
   else
     woman "You crossed the whole world to look at me. I know what that journey costs. I have waited at a window for every mile of it."
@@ -728,7 +745,7 @@ label final
   cg the_letter with dissolve
   effect glitch 0.9
   filter sepia
-  helene "You crossed the whole world to look at me. I know what that journey costs. I have {color=#f4a7b9}waited at a window{/color} for every mile of it."
+  helene "You crossed the whole world to look at me. I know what that journey costs. I have {color=#c2476a}waited at a window{/color} for every mile of it."
   helene "Let me be a story someone told you once. Beautiful, and finished."
   helene soft "Look at whoever is beside you."
   filter none

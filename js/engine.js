@@ -95,6 +95,7 @@
         ambience: null,
         chapter: '',
         noRollback: false,
+        choices: [], // what the player chose and how it was felt, for the ending recap
       };
     }
 
@@ -128,6 +129,41 @@
         case '-=': this.setVar(name, cur - v); break;
         case '*=': this.setVar(name, cur * v); break;
         case '/=': this.setVar(name, cur / v); break;
+      }
+    }
+
+    // ---- karma: choices are felt, never shown as numbers ------------------------------------
+    karmaSnapshot() {
+      const snap = {};
+      for (const k of this.story.karma) snap[k.name] = Number(this.getVar(k.name)) || 0;
+      return snap;
+    }
+
+    /** Compare with a snapshot and let the player feel the (at most two) biggest threads that moved. */
+    karmaFelt(before) {
+      const felt = [];
+      for (const k of this.story.karma) {
+        const d = (Number(this.getVar(k.name)) || 0) - before[k.name];
+        if (!d) continue;
+        const dir = d > 0 ? 'up' : 'down';
+        if (!k[dir]) continue;
+        felt.push({ text: this.interp(k[dir]), color: k.color, weight: k.heavy === dir ? 'heavy' : k.heavy ? 'light' : 'soft' });
+        if (felt.length === 2) break;
+      }
+      if (felt.length) this.ui.feelKarma(felt, { quiet: this.isSkipping() });
+      return felt;
+    }
+
+    /** Several "set" lines in a row are felt together, once. */
+    queueKarma(before) {
+      if (!this.karmaBefore) {
+        this.karmaBefore = before;
+        const gen = this.gen;
+        setTimeout(() => {
+          const snap = this.karmaBefore;
+          this.karmaBefore = null;
+          if (gen === this.gen && this.inGame) this.karmaFelt(snap);
+        }, 0);
       }
     }
 
@@ -415,7 +451,10 @@
     async op_end() { await this.endGame(); }
 
     op_set(ins) {
+      const felt = ins.assign !== '=' && this.story.karma.some((k) => k.name === ins.name);
+      const before = felt ? this.karmaSnapshot() : null;
       this.assign(ins);
+      if (felt) this.queueKarma(before);
       this.state.pc++;
     }
 
@@ -430,8 +469,10 @@
       this.stage.setSpeaker(ins.centered ? null : ins.who);
       const name = ch ? VN.plainName(this.interp(ch.name)) : '';
       const text = this.interp(ins.text);
+      // Speakers who aren't standing in the scene (Hervé, voices over a CG) get their face in the text box.
+      const face = ch && ch.face && !ins.centered && !st.scene.sprites[ins.who] ? VN.assets.lookup('face', ch.face) || null : null;
       this.history.push({ who: name, color: ch && ch.color, italic: !!(ch && ch.italic), text: VN.stripTags(text) });
-      await this.showLine(ins, { name, color: ch && ch.color, italic: ch && ch.italic, blip: ch && ch.blip, text, centered: ins.centered });
+      await this.showLine(ins, { name, color: ch && ch.color, italic: ch && ch.italic, blip: ch && ch.blip, text, centered: ins.centered, face });
       this.state.pc++;
     }
 
@@ -452,8 +493,13 @@
       this.instantNext = false;
       const idx = await this.guard(this.ui.showChoices(options.map((o) => this.interp(o.text))));
       const opt = options[idx];
-      this.history.push({ choice: true, text: VN.stripTags(this.interp(opt.text)) });
+      const picked = VN.stripTags(this.interp(opt.text));
+      this.history.push({ choice: true, text: picked });
+      const before = this.karmaSnapshot();
       for (const a of opt.effects) this.assign(a);
+      const felt = this.karmaFelt(before);
+      if (!felt.length) this.ui.settleChoice();
+      this.state.choices = [...(this.state.choices || []), { chapter: this.state.chapter, text: picked, felt }];
       this.persistent.seen[ins.key] = 1;
       this.state.pc = opt.target;
       if (this.onStep) this.onStep();
@@ -586,7 +632,7 @@
     }
 
     op_notify(ins) {
-      if (!this.isSkipping()) this.ui.toast(this.interp(ins.text), 'note');
+      this.ui.whisper(this.interp(ins.text), '#e9c46a', { quiet: this.isSkipping() });
       this.state.pc++;
     }
 
@@ -633,7 +679,7 @@
       this.audio.stopAll(2.5);
       await this.sleep(this.stage.fadeTo(1, 1400));
       const found = this.story.endings.filter((e) => this.persistent.endings[e.id]).length;
-      await this.guard(this.ui.endingScreen(ins, found, this.story.endings.length));
+      await this.guard(this.ui.endingScreen(ins, found, this.story.endings.length, this.state.choices || []));
       this.returnToTitle();
     }
 

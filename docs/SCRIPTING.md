@@ -44,6 +44,9 @@ character inner  ""       color=#cbbef0 italic
 * `italic` renders the lines in italics (used for inner thoughts).
 * An empty name (`""`) hides the name tag.
 * `sprite=folder` uses a different sprite folder than the character's id.
+* `face=id` picks the portrait shown in the text box (`assets/faces/<id>.png`, the character's id by
+  default); `face=none` turns it off. The portrait appears when the character speaks without
+  standing in the scene: always for Hervé, who is the player, and for voices heard over a CG.
 
 ## Choices
 
@@ -68,6 +71,25 @@ menu
 * `menu "Prompt text"` shows a line of narration together with the choices.
 
 Choices trigger an autosave, so players can always go back to them.
+
+## Karma: making choices felt
+
+The variables a choice changes are never shown as numbers. Instead, declare which ones matter at
+the top of the script, and the game makes the player *feel* them:
+
+```text
+karma helene_trust color=#f4a7b9 heavy=down up="Hélène will remember that." down="Something in Hélène goes quiet."
+karma obsession    color=#e2553f heavy=up   up="Japan pulls at you a little harder."
+```
+
+* When a choice (or a `set x += …` line) moves one of these, its line fades in at the top of the
+  screen along a thread of its `color`. At most two show per choice; threads declared first speak first.
+* `heavy` is the direction that costs something. A heavy moment darkens the scene with a heartbeat
+  and a low tone; the opposite direction glows warmly with a soft chord. The music dips either way.
+* While the player is deciding, the scene dims and the music quietens; the chosen line lingers a
+  moment before the story moves on.
+* At the ending, **See your choices** lists every choice the player made, chapter by chapter, with
+  the lines each one caused.
 
 ## Variables and conditions
 
@@ -163,7 +185,7 @@ Inside any line:
 ```text
 chapter "Chapter 3" "The Cup"   # title card; also names the save file
 pause 1.5                       # wait (a click skips it); "pause" alone waits for a click
-notify "Hélène will remember that."    # small pop-up in the corner
+notify "Hélène will remember that."    # a line at the top of the screen, like a karma line
 call some_label / return        # run a shared scene and come back
 ending home_beside "Home — Beside Me All Along" true    # true | good | bad | neutral
 end                             # back to the title without an ending screen
@@ -252,7 +274,8 @@ Until then, the game draws placeholders.
 | What | Where | Notes |
 | --- | --- | --- |
 | Backgrounds | `assets/bg/<name>.png` (or `.jpg`, `.webp`) | 1280×720 or 1920×1080 |
-| Character sprites | `assets/sprites/<character>/<expression>.png` | transparent PNG, about 720–1000 px tall, feet at the bottom edge; `neutral.png` is the default |
+| Character sprites | `assets/sprites/<character>/<expression>.png` | transparent PNG, about 720–1000 px tall, feet at the bottom edge; `neutral.png` is the default and stands in for any expression without its own picture |
+| Text-box portraits | `assets/faces/<character>.png` | square transparent PNG of the head and shoulders |
 | Event pictures (CGs) | `assets/cg/<name>.png` | 1280×720 or larger, 16:9 |
 | Word-game chibis | `assets/chibi/<character>.png` | small transparent PNG |
 | Music | `assets/music/<name>.mp3` (or `.ogg`, `.m4a`) | loops automatically |

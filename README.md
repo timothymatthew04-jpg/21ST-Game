@@ -1,8 +1,8 @@
 # SILK
 
 A branching visual novel adapted from Alessandro Baricco's *Silk*, built on a small web engine with
-*Doki Doki Literature Club*-style mechanics and an indie pixel-art look: a Cinzel title logo,
-wooden sign plates, and Kavoon / Pixelify Sans type.
+*Doki Doki Literature Club*-style mechanics: an animated ginkgo title screen with a glowing brush
+logo, and Japanese visual-novel dialogue on washi paper with lacquer and gold.
 
 You play Hervé Joncour. Your choices shape his marriage to Hélène, his commitment to the silk trade,
 and his obsession with a woman in Japan. The great events of the novel stay the same; what changes
@@ -42,8 +42,16 @@ On a phone, tap to advance and use the buttons under the text box.
 
 ## Mechanics
 
-* **Typewriter dialogue** with a speaker name tag, natural pauses at punctuation, text effects
-  (shake, wave, glitch, colour, pauses), and a speed setting.
+* **Japanese-style text box**: a translucent washi panel with a vermilion and gold frame and
+  seigaiha waves, a black-lacquer name plate, the speaker's face at its corner (for Hervé and for
+  voices heard off-scene), and save / load tabs at its side. Clean Zen Maru Gothic text, with
+  Hervé's thoughts in a plum serif.
+* **Typewriter dialogue** with natural pauses at punctuation, text effects (shake, wave, glitch,
+  colour, pauses), and a speed setting.
+* **Karma you feel, not see.** No meters or numbers: when a choice matters, a line like "Hélène will
+  remember that." drifts in along a coloured thread, the scene glows warmly or darkens with a
+  heartbeat, and the music dips. While you decide, the scene dims and the music quietens. At the
+  ending, **See your choices** reveals every choice you made and what each one set in motion.
 * **Choices** that change hidden variables: Hélène Trust, Business, Obsession, Fascination,
   Intimacy, Danger and Mystery.
 * **Scenes only some players see.** Many choices open a short scene of their own, and later
@@ -71,8 +79,11 @@ On a phone, tap to advance and use the buttons under the text box.
 * **Fills any screen.** The game widens to the window's shape (from 16:10 up to 21:9), so there are
   no black bars on laptops, desktops or ultrawide monitors. Unusual shapes, such as a phone held
   upright, get a soft blurred copy of the picture around the game instead of bars.
-* **Placeholder art.** Every background, character and event picture has a styled stand-in until
-  the real art is added.
+* **Characters**: Hélène, Balbadiou, Hara Kei, the woman and Madame Blanche on stage, and Hervé's
+  face in the text box. Until a character has a picture for an expression, the pose reacts to the
+  mood instead.
+* **Placeholder art.** Every background and event picture has a styled stand-in until the real
+  art is added.
 
 ## Project layout
 

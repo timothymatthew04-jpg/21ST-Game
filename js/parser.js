@@ -59,7 +59,7 @@
   function parse(source) {
     const story = {
       title: 'Untitled', subtitle: '', emblem: '', artStyle: 'mixed', titleFx: null, titleLogo: 'carved', titleMusic: null, titleBackground: null, warning: null, credits: null,
-      characters: {}, backgrounds: {}, poemWords: [],
+      characters: {}, backgrounds: {}, poemWords: [], karma: [],
       program: [], labels: {}, endings: [], errors: [], warnings: [],
       hash: hashString(source),
     };
@@ -96,7 +96,7 @@
         const tk = tokenizeLine(L.text);
         const id = tk[1] && tk[1].t === 'word' ? tk[1].v : null;
         if (!id || !IDENT_RE.test(id)) { err(L, 'character needs an id, e.g. character helene "Hélène" color=#f4a7b9'); continue; }
-        const ch = { id, name: tk[2] && tk[2].t === 'str' ? tk[2].v : id, color: '#ffffff', blip: 520, italic: false, sprite: null };
+        const ch = { id, name: tk[2] && tk[2].t === 'str' ? tk[2].v : id, color: '#ffffff', blip: 520, italic: false, sprite: null, face: id };
         for (const t of tk.slice(3)) {
           const [k, v] = t.v.split('=');
           if (k === 'color') ch.color = v;
@@ -104,6 +104,7 @@
           else if (k === 'italic' || k === 'thought') ch.italic = true;
           else if (k === 'sprite') ch.sprite = v;
           else if (k === 'chibi') ch.chibi = v;
+          else if (k === 'face') ch.face = v === 'none' ? null : v;
           else err(L, `Unknown character option "${t.v}"`);
         }
         story.characters[id] = ch;
@@ -310,6 +311,24 @@
         case 'warning': story.warning = str(tk[1], 'warning "Text shown once before the title screen"'); return;
         case 'credits': story.credits = str(tk[1], 'credits "Made by ..."'); return;
         case 'emblem': story.emblem = str(tk[1], 'emblem "絹"'); return;
+        case 'karma': {
+          const usage = 'karma variable color=#f4a7b9 [heavy=up|down] up="Line when it rises." [down="Line when it falls."]';
+          if (!tk[1] || tk[1].t !== 'word' || !IDENT_RE.test(tk[1].v)) throw new Error(`Usage: ${usage}`);
+          const k = { name: tk[1].v, color: '#f4c542', heavy: null, up: '', down: '' };
+          for (let i = 2; i < tk.length; i++) {
+            const t = tk[i];
+            let key, val;
+            if (t.t === 'word' && t.v.endsWith('=') && tk[i + 1] && tk[i + 1].t === 'str') { key = t.v.slice(0, -1); val = tk[++i].v; }
+            else if (t.t === 'word' && t.v.includes('=')) [key, val] = t.v.split('=');
+            else throw new Error(`Usage: ${usage}`);
+            if (key === 'color') k.color = val;
+            else if (key === 'heavy' && (val === 'up' || val === 'down')) k.heavy = val;
+            else if (key === 'up' || key === 'down') k[key] = val;
+            else throw new Error(`Unknown karma option "${key}". ${usage}`);
+          }
+          if (!story.karma.find((x) => x.name === k.name)) story.karma.push(k);
+          return;
+        }
         case 'titlefx': {
           const fx = { preset: tk[1] ? tk[1].v : 'autumn' };
           for (const t of tk.slice(2)) {

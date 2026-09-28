@@ -108,6 +108,7 @@
   //   assets/sprites/<character>/<expression>.png|webp
   //   assets/cg/<name>.png|jpg|webp
   //   assets/chibi/<character>.png|webp
+  //   assets/faces/<character>.png|webp   (portrait in the text box)
   //   assets/music/<name>.mp3|ogg|m4a|wav
   //   assets/sfx/<name>.mp3|ogg|wav
   // ---------------------------------------------------------------------------
@@ -145,6 +146,7 @@
       case 'sprite': return `assets/sprites/${name}`; // name = "char/expression"
       case 'cg': return `assets/cg/${name}`;
       case 'chibi': return `assets/chibi/${name}`;
+      case 'face': return `assets/faces/${name}`;
       case 'ui': return `assets/ui/${name}`;
       case 'music': return `assets/music/${name}`;
       case 'sound': return `assets/sfx/${name}`;

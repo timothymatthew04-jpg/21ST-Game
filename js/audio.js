@@ -20,11 +20,17 @@
       this.url = null;
       this.name = null;
       this.volume = 1;
+      this.duckLevel = 1; // briefly lowered while a choice weighs on the player
       this.token = 0;
     }
 
     target() {
-      return this.volume * this.audio.musicVolume;
+      return this.volume * this.audio.musicVolume * this.duckLevel;
+    }
+
+    duck(level, seconds) {
+      this.duckLevel = level;
+      if (this.el) ramp(this.el, this.target(), seconds);
     }
 
     async play(name, fadein = 0, volume = 1) {
@@ -171,6 +177,7 @@
     }
 
     stopAll(fadeout = 0.8) {
+      this.music.duckLevel = 1;
       this.music.stop(fadeout);
       this.ambience.stop(fadeout);
     }
@@ -229,6 +236,20 @@
         case 'page': this.tone(1320, 0.03, { vol: 0.02, type: 'triangle' }); break;
         case 'chime': [523, 659, 784, 1047].forEach((f, i) => this.tone(f, 0.35, { vol: 0.03, type: 'triangle', delay: i * 0.09 })); break;
         case 'pick': this.tone(1046, 0.05, { vol: 0.035, type: 'triangle' }); this.tone(1568, 0.09, { vol: 0.03, type: 'triangle', delay: 0.04 }); break;
+      }
+    }
+
+    /** The sound of a choice landing: warm for a kind choice, a low heartbeat for a heavy one. */
+    karma(weight) {
+      if (weight === 'heavy') {
+        this.tone(98, 0.5, { type: 'sine', vol: 0.12, slide: -30 });
+        this.tone(92, 0.45, { type: 'sine', vol: 0.09, slide: -26, delay: 0.26 });
+        this.tone(233, 1.2, { type: 'triangle', vol: 0.02, delay: 0.05 });
+      } else if (weight === 'light') {
+        [523, 659, 784].forEach((f, i) => this.tone(f, 1.1, { type: 'sine', vol: 0.028, delay: i * 0.07 }));
+      } else {
+        this.tone(659, 0.9, { type: 'sine', vol: 0.025 });
+        this.tone(988, 0.7, { type: 'sine', vol: 0.014, delay: 0.08 });
       }
     }
 

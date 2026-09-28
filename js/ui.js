@@ -48,7 +48,13 @@
       stageEl.append(this.gameLayer, this.overlayRoot, this.toastEl);
 
       this.textbox = new VN.Textbox(this.uiLayer, settings, audio);
-      this.uiLayer.append(this.choicesEl, this.quickmenu, this.indicators);
+      // Karma is felt, not shown: the scene dims while a choice is weighed, and glows
+      // (or darkens) in the colour of whatever the choice touched.
+      this.veil = h('div.choice-veil');
+      this.pulseEl = h('div.karma-pulse');
+      this.whisperEl = h('div.whispers', { 'aria-live': 'polite' });
+      this.uiLayer.prepend(this.veil, this.pulseEl);
+      this.uiLayer.append(this.choicesEl, this.quickmenu, this.indicators, this.whisperEl);
       this.choice = null;
       this.applySettings();
     }
@@ -78,17 +84,24 @@
       };
       this.qmSkip = btn('Skip', 'Skip read text (Tab, or hold Ctrl)', () => this.engine.toggleSkip(), 'skip');
       this.qmAuto = btn('Auto', 'Auto-advance (A)', () => this.engine.setAuto(!this.engine.auto), 'auto');
+      const tab = (label, title, fn) => {
+        const b = btn(label, title, fn);
+        b.classList.add('qm-tab');
+        return b;
+      };
       return h('div.quickmenu', { onclick: (e) => e.stopPropagation() },
-        btn('Back', 'Go back one line (mouse wheel up)', () => this.engine.rollback()),
-        btn('History', 'Dialogue history (L)', () => this.openMenu('history')),
-        this.qmSkip,
-        this.qmAuto,
-        btn('Save', 'Save (S)', () => this.openMenu('save')),
-        btn('Load', 'Load', () => this.openMenu('load')),
-        btn('Q.Save', 'Quick save (Q)', () => this.engine.quickSave()),
-        btn('Q.Load', 'Quick load', () => this.engine.quickLoad()),
-        btn('Settings', 'Settings', () => this.openMenu('settings')),
-        btn('Hide', 'Hide the text box (H)', () => this.setHidden(true)));
+        h('div.qm-row',
+          btn('Back', 'Go back one line (mouse wheel up)', () => this.engine.rollback()),
+          btn('History', 'Dialogue history (L)', () => this.openMenu('history')),
+          this.qmSkip,
+          this.qmAuto,
+          btn('Config', 'Settings', () => this.openMenu('settings')),
+          btn('Hide', 'Hide the text box (H)', () => this.setHidden(true))),
+        h('div.qm-tabs',
+          tab('Q.Save', 'Quick save (Q)', () => this.engine.quickSave()),
+          tab('Q.Load', 'Quick load', () => this.engine.quickLoad()),
+          tab('Save', 'Save (S)', () => this.openMenu('save')),
+          tab('Load', 'Load', () => this.openMenu('load'))));
     }
 
     setModes({ skip, auto }) {
@@ -97,6 +110,46 @@
       this.indicators.replaceChildren(
         ...(skip ? [h('span.ind.ind-skip', 'SKIP ▸▸')] : []),
         ...(auto ? [h('span.ind.ind-auto', 'AUTO ▸')] : []));
+    }
+
+    // ---- karma ------------------------------------------------------------------
+    /** A short line that says a choice mattered, drawn in along a thread of its colour. */
+    whisper(text, color, { quiet = false, delay = 0 } = {}) {
+      const w = h('div.whisper', { style: { '--c': color, animationDelay: `${delay}ms` } },
+        h('span.whisper-thread'), h('span.whisper-text', text));
+      this.whisperEl.append(w);
+      const stay = (quiet ? 1400 : 3800) + delay;
+      setTimeout(() => w.classList.add('out'), stay);
+      setTimeout(() => w.remove(), stay + 700);
+    }
+
+    /** After a choice lands: whispers, a glow or darkening in the thread's colour, a sound, the music dips. */
+    feelKarma(felt, { quiet = false } = {}) {
+      this.settleChoice(quiet ? 0.4 : 2.6);
+      felt.forEach((f, i) => this.whisper(f.text, f.color, { quiet, delay: i * 450 }));
+      if (quiet) return;
+      const weight = felt.some((f) => f.weight === 'heavy') ? 'heavy' : felt[0].weight;
+      const lead = felt.find((f) => f.weight === weight) || felt[0];
+      const p = this.pulseEl;
+      p.style.setProperty('--c', lead.color);
+      p.className = `karma-pulse ${weight}`;
+      void p.offsetWidth;
+      p.classList.add('on');
+      this.audio.karma(weight);
+      this.audio.music.duck(weight === 'heavy' ? 0.25 : 0.45, 0.25);
+      clearTimeout(this.unduckTimer);
+      this.unduckTimer = setTimeout(() => this.audio.music.duck(1, 2.6), weight === 'heavy' ? 1400 : 900);
+      if (weight === 'heavy' && !this.settings.reduceMotion) {
+        this.sceneRoot.animate(
+          [{ transform: 'scale(1)' }, { transform: 'scale(1.018)', offset: 0.14 }, { transform: 'scale(1)', offset: 0.32 }, { transform: 'scale(1.012)', offset: 0.46 }, { transform: 'scale(1)' }],
+          { duration: 1300, easing: 'ease-out' });
+      }
+    }
+
+    /** The moment of choosing is over: lift the veil and bring the music back. */
+    settleChoice(seconds = 1.2) {
+      this.veil.classList.remove('on');
+      if (this.audio.music.duckLevel !== 1 && !this.pulseEl.classList.contains('on')) this.audio.music.duck(1, seconds);
     }
 
     toast(text, kind) {
@@ -287,13 +340,19 @@
           done = true;
           this.audio.ui('select');
           buttons.forEach((b, j) => b.classList.add(j === i ? 'picked' : 'dropped'));
+          // the chosen line lingers a moment, so the choice is felt before the story moves on
+          const hold = this.engine && this.engine.isSkipping() ? 200 : 620;
           setTimeout(() => {
             this.choicesEl.replaceChildren();
             this.choicesEl.classList.remove('on');
             this.choice = null;
             resolve(i);
-          }, 380);
+          }, hold);
         };
+        this.pulseEl.classList.remove('on');
+        this.veil.classList.add('on');
+        clearTimeout(this.unduckTimer);
+        this.audio.music.duck(0.6, 0.8);
         this.choicesEl.replaceChildren(...buttons);
         this.choicesEl.classList.add('on');
         this.choice = {
@@ -323,6 +382,7 @@
     cancelChoices() {
       if (!this.choice) return;
       this.choice = null;
+      this.settleChoice(0.4);
       this.choicesEl.replaceChildren();
       this.choicesEl.classList.remove('on');
     }
@@ -400,17 +460,38 @@
       });
     }
 
-    endingScreen(ending, found, total) {
+    endingScreen(ending, found, total, choices = []) {
       return new Promise((resolve) => {
         let entry;
-        const btn = this.button('Return to title', () => { this.close(entry); resolve(); }, '.primary');
-        btn.setAttribute('autofocus', '');
+        const finish = () => { this.close(entry); resolve(); };
+        const back = this.button('Return to title', finish, choices.length ? '' : '.primary');
+        const buttons = [back];
+        // The ending reveals what the story never showed as numbers: each choice, and how it was felt.
+        const recap = h('div.recap',
+          h('div.recap-eyebrow', 'THE THREADS YOU WOVE'),
+          h('ol.recap-list', { style: { '--rows': String(Math.ceil(choices.length / 2)) } }, choices.map((c, i) => {
+            const felt = c.felt || [];
+            return h('li.recap-item', { style: { '--c': felt[0] ? felt[0].color : '#b9ab93', animationDelay: `${200 + i * 110}ms` } },
+              h('span.recap-knot'),
+              h('div.recap-body',
+                h('div.recap-chapter', (c.chapter || '').replace(' · ', ' — ')),
+                h('div.recap-choice', `“${c.text.replace(/^[“"]|[”"]$/g, '')}”`),
+                felt.length ? h('div.recap-felt', felt.map((f) => h('span', { style: { color: f.color } }, f.text))) : null));
+          })),
+          h('div.row', this.button('Return to title', finish, '.primary')));
+        if (choices.length) {
+          const show = this.button('See your choices', () => { el.classList.add('show-recap'); this.audio.ui('page'); setTimeout(() => this.focusFirst(recap), 60); }, '.primary');
+          buttons.unshift(show);
+          show.setAttribute('autofocus', '');
+        } else back.setAttribute('autofocus', '');
         const el = h(`div.overlay.ending.kind-${ending.kind || 'neutral'}`,
-          h('div.ending-eyebrow', 'ENDING'),
-          h('div.ending-title', ending.title),
-          h('div.ending-rule'),
-          h('div.ending-count', `${found} of ${total} endings found`),
-          h('div.row', btn));
+          h('div.ending-main',
+            h('div.ending-eyebrow', 'ENDING'),
+            h('div.ending-title', ending.title),
+            h('div.ending-rule'),
+            h('div.ending-count', `${found} of ${total} endings found`),
+            h('div.row', buttons)),
+          choices.length ? recap : null);
         entry = this.open(el, { onBack: () => {} });
       });
     }

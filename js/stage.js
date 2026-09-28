@@ -13,6 +13,27 @@
 
   const AUTO_SLOTS = { 1: [50], 2: [32, 68], 3: [20, 50, 80], 4: [14, 38, 62, 86] };
 
+  // When a character has no picture for an expression, their neutral picture is
+  // used and the pose reacts instead: a small lift for happy moods, a sink for sad ones.
+  const MOODS = { smile: 'up', happy: 'up', soft: 'soft', sad: 'down', hurt: 'down', tired: 'down', worried: 'down', cold: 'cold', stern: 'cold', serious: 'cold', gaze: 'soft' };
+
+  /** Synchronous: {url, fallback}, null (no art at all) or undefined (not checked yet). */
+  function spriteLookup(folder, expr) {
+    const exact = VN.assets.lookup('sprite', `${folder}/${expr}`);
+    if (exact) return { url: exact, fallback: false };
+    if (expr === 'neutral' || exact === undefined) return exact;
+    const base = VN.assets.lookup('sprite', `${folder}/neutral`);
+    return base ? { url: base, fallback: true } : base;
+  }
+
+  async function resolveSprite(folder, expr) {
+    const exact = await VN.assets.resolve('sprite', `${folder}/${expr}`);
+    if (exact) return { url: exact, fallback: false };
+    if (expr === 'neutral') return null;
+    const base = await VN.assets.resolve('sprite', `${folder}/neutral`);
+    return base ? { url: base, fallback: true } : null;
+  }
+
   // Placeholder palettes chosen by keywords in the background's name.
   const BG_THEMES = [
     [/night|dark|midnight/, ['#0b0d26', '#27204a', '#5a4b8a']],
@@ -153,23 +174,39 @@
     setSpriteExpr(el, id, expr) {
       const ch = this.story.characters[id] || { name: id, sprite: null };
       const inner = el.firstChild;
-      const key = `${ch.sprite || id}/${expr || 'neutral'}`;
+      const folder = ch.sprite || id;
+      const key = `${folder}/${expr || 'neutral'}`;
       if (el.dataset.key === key) return;
       el.dataset.key = key;
-      const showImage = (url) => {
+      const showImage = (url, fallback) => {
         if (el.dataset.key !== key) return;
-        inner.replaceChildren(h('img.sprite-img', { src: url, alt: '', draggable: 'false' }));
+        let img = inner.firstChild;
+        if (!img || img.tagName !== 'IMG') {
+          img = h('img.sprite-img', { alt: '', draggable: 'false' });
+          inner.replaceChildren(img);
+        }
+        if (img.getAttribute('src') !== url) img.src = url;
+        // One picture for every mood: let the pose itself react a little instead.
+        const mood = fallback ? MOODS[expr] || '' : '';
+        if (img.dataset.mood !== mood || mood === 'up') {
+          img.dataset.mood = '';
+          if (mood) { void img.offsetWidth; img.dataset.mood = mood; }
+        }
       };
-      const known = VN.assets.lookup('sprite', key);
-      if (known) return showImage(known);
-      inner.replaceChildren(
-        h('div.ph-sprite',
-          h('div.ph-hair'),
-          h('div.ph-head', h('span.ph-face', kaomoji(expr))),
-          h('div.ph-body'),
-          h('div.ph-tag', h('b', VN.plainName ? VN.plainName(ch.name) : ch.name), h('span', expr || 'neutral')))
-      );
-      if (known === undefined) VN.assets.resolve('sprite', key).then((url) => { if (url) showImage(url); });
+      const known = spriteLookup(folder, expr || 'neutral');
+      if (known) return showImage(known.url, known.fallback);
+      // Still looking the picture up: keep the current one rather than flashing a placeholder.
+      const hasArt = inner.firstChild && inner.firstChild.tagName === 'IMG';
+      if (!(known === undefined && hasArt)) {
+        inner.replaceChildren(
+          h('div.ph-sprite',
+            h('div.ph-hair'),
+            h('div.ph-head', h('span.ph-face', kaomoji(expr))),
+            h('div.ph-body'),
+            h('div.ph-tag', h('b', VN.plainName ? VN.plainName(ch.name) : ch.name), h('span', expr || 'neutral')))
+        );
+      }
+      if (known === undefined) resolveSprite(folder, expr || 'neutral').then((r) => { if (r) showImage(r.url, r.fallback); });
     }
 
     makeCg(name) {
@@ -203,11 +240,11 @@
       if (ins.op === 'scene' && ins.bg !== 'black' && ins.bg !== 'white') VN.assets.resolve('bg', ins.bg);
       if (ins.op === 'show') {
         const ch = this.story.characters[ins.id];
-        VN.assets.resolve('sprite', `${(ch && ch.sprite) || ins.id}/${ins.expr || 'neutral'}`);
+        resolveSprite((ch && ch.sprite) || ins.id, ins.expr || 'neutral');
       }
       if (ins.op === 'say' && ins.expr && ins.who) {
         const ch = this.story.characters[ins.who];
-        VN.assets.resolve('sprite', `${(ch && ch.sprite) || ins.who}/${ins.expr}`);
+        resolveSprite((ch && ch.sprite) || ins.who, ins.expr);
       }
       if (ins.op === 'cg' && ins.name) VN.assets.resolve('cg', ins.name);
     }
@@ -218,7 +255,7 @@
       if (scene.bg && scene.bg !== 'black' && scene.bg !== 'white') jobs.push(VN.assets.resolveWithin('bg', scene.bg, 600));
       for (const [id, s] of Object.entries(scene.sprites)) {
         const ch = this.story.characters[id];
-        jobs.push(VN.assets.resolveWithin('sprite', `${(ch && ch.sprite) || id}/${s.expr || 'neutral'}`, 600));
+        jobs.push(Promise.race([resolveSprite((ch && ch.sprite) || id, s.expr || 'neutral'), new Promise((r) => setTimeout(r, 600))]));
       }
       if (scene.cg) jobs.push(VN.assets.resolveWithin('cg', scene.cg, 600));
       await Promise.all(jobs);
