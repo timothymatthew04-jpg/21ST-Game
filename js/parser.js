@@ -58,7 +58,7 @@
 
   function parse(source) {
     const story = {
-      title: 'Untitled', subtitle: '', emblem: '', artStyle: 'mixed', titleFx: null, titleMusic: null, titleBackground: null, warning: null, credits: null,
+      title: 'Untitled', subtitle: '', emblem: '', artStyle: 'mixed', titleFx: null, titleLogo: 'carved', titleMusic: null, titleBackground: null, warning: null, credits: null,
       characters: {}, backgrounds: {}, poemWords: [],
       program: [], labels: {}, endings: [], errors: [], warnings: [],
       hash: hashString(source),
@@ -311,15 +311,22 @@
         case 'credits': story.credits = str(tk[1], 'credits "Made by ..."'); return;
         case 'emblem': story.emblem = str(tk[1], 'emblem "絹"'); return;
         case 'titlefx': {
-          const fx = { preset: tk[1] ? tk[1].v : 'autumn', sun: null };
+          const fx = { preset: tk[1] ? tk[1].v : 'autumn' };
           for (const t of tk.slice(2)) {
             const [k, v] = t.v.split('=');
-            if ((k === 'sun' || k === 'rays') && v) fx[k] = v.split(',').map(Number);
-            else throw new Error('Usage: titlefx autumn|spring|summer|none [sun=0.3,0.4] [rays=-0.1,-0.3]');
+            const nums = v ? v.split(',').map(Number) : [];
+            if (!['sun', 'rays', 'sway', 'pivot'].includes(k) || !nums.length || nums.some(isNaN)) {
+              throw new Error('Usage: titlefx autumn|spring|summer|ginkgo|sakura|maple|none [sun=x,y] [rays=x,y] [sway=cx,cy,rx,ry] [pivot=x,y]');
+            }
+            fx[k] = nums;
           }
           story.titleFx = fx.preset === 'none' ? null : fx;
           return;
         }
+        case 'titlelogo':
+          if (!tk[1] || !['brush', 'carved'].includes(tk[1].v)) throw new Error('Usage: titlelogo brush|carved');
+          story.titleLogo = tk[1].v;
+          return;
         case 'artstyle':
           if (!tk[1] || !['pixel', 'smooth', 'mixed'].includes(tk[1].v)) throw new Error('Usage: artstyle pixel|smooth|mixed');
           story.artStyle = tk[1].v;

@@ -778,6 +778,104 @@ html, body {
   text-shadow: 0 2px 6px rgba(0, 0, 0, 0.8);
 }
 
+/* ---------------------------------------------------------------- painted title (titlefx ginkgo/sakura/maple) */
+#stage .painted .title-drift .bg { image-rendering: auto; }
+.title-sway { position: absolute; will-change: transform; pointer-events: none; }
+.title-grain {
+  position: absolute;
+  inset: 0;
+  opacity: 0.09;
+  mix-blend-mode: overlay;
+  pointer-events: none;
+}
+.painted .title-shade {
+  background:
+    radial-gradient(ellipse 60% 70% at 24% 30%, rgba(26, 12, 3, 0.42), transparent 70%),
+    linear-gradient(90deg, rgba(28, 12, 3, 0.62) 0%, rgba(28, 12, 3, 0.3) 30%, transparent 55%),
+    linear-gradient(0deg, rgba(24, 10, 2, 0.78) 0%, rgba(24, 10, 2, 0.25) 26%, transparent 45%),
+    radial-gradient(ellipse at 60% 45%, transparent 55%, rgba(20, 8, 2, 0.45) 100%);
+}
+
+/* ---------------------------------------------------------------- glowing brush logo (titlelogo brush) */
+.brush-logo { position: relative; width: 640px; animation: none; }
+.brush-logo svg { display: block; width: 100%; height: auto; overflow: visible; }
+.brush-logo .bl-main { position: relative; z-index: 2; }
+.brush-logo .bl-layer, .brush-logo canvas { position: absolute; left: 0; top: 0; width: 100%; height: 100%; pointer-events: none; }
+.brush-logo .bl-smoke { z-index: 0; }
+.brush-logo .bl-outer { z-index: 1; will-change: opacity; opacity: 0; animation: bl-glow-in 1.4s 1.6s ease forwards, bl-breathe 4.5s ease-in-out 3s infinite; }
+@keyframes bl-glow-in { to { opacity: 1; } }
+.brush-logo .bl-front { z-index: 3; will-change: transform; }
+.brush-logo .bl-sparks { z-index: 4; }
+.bl-reveal { stroke-dasharray: 1; stroke-dashoffset: 1; animation: bl-paint 0.85s cubic-bezier(0.55, 0, 0.35, 1) forwards; }
+.bl-reveal-sub { opacity: 0; animation: bl-fade 1.2s 1.7s ease forwards; }
+@keyframes bl-paint { to { stroke-dashoffset: 0; } }
+@keyframes bl-fade { to { opacity: 1; } }
+@keyframes bl-breathe { 0%, 100% { opacity: 0.8; } 50% { opacity: 1; } }
+.bl-gleam { transform: skewX(-20deg); animation: bl-gleam 6.5s cubic-bezier(0.45, 0, 0.3, 1) 3s infinite; }
+@keyframes bl-gleam {
+  0% { transform: translateX(0) skewX(-20deg); }
+  40%, 100% { transform: translateX(1100px) skewX(-20deg); }
+}
+.brush-logo.still .bl-reveal { animation: none; stroke-dashoffset: 0; }
+.brush-logo.still .bl-reveal-sub { animation: none; opacity: 1; }
+.brush-logo.still .bl-outer, .brush-logo.still .bl-gleam { animation: none; opacity: 1; }
+/* a dark, smoky backdrop so the glowing letters stand out on bright art */
+.glow-ui .title-block::after {
+  content: '';
+  position: absolute;
+  left: 30px;
+  top: 40px;
+  width: 640px;
+  height: 460px;
+  z-index: -1;
+  background: radial-gradient(closest-side, rgba(20, 8, 2, 0.6), rgba(20, 8, 2, 0.32) 55%, transparent 100%);
+  pointer-events: none;
+}
+.splash .brush-logo { width: 560px; margin: -40px 0 -60px; }
+.splash-seal + .splash-title { margin-top: 0; }
+
+/* glowing menu to match */
+.glow-ui .title-block { left: 18px; top: -34px; }
+/* the logo is decoration: never let its glow area block clicks on the menu */
+.title-block, .title-block * { pointer-events: none; }
+.glow-ui .title-block::before { display: none; }
+.glow-ui .title-menu { left: 104px; top: 432px; gap: 6px; }
+.glow-ui .title-item {
+  font-family: 'Julius Sans One', 'Josefin Sans', sans-serif;
+  font-weight: 400;
+  font-size: 24px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #fffaf0 !important;
+  text-shadow: 0 0 6px rgba(255, 214, 140, 0.95), 0 0 18px rgba(255, 150, 50, 0.6), 0 2px 4px rgba(20, 8, 0, 0.8);
+  padding-left: 34px;
+}
+.glow-ui .title-item::before {
+  width: 10px;
+  height: 10px;
+  margin-top: -5px;
+  border-radius: 50%;
+  background: #fff6dc;
+  box-shadow: 0 0 8px 3px rgba(255, 200, 110, 0.95), 0 0 22px 6px rgba(255, 140, 40, 0.6);
+  transform: scale(0);
+}
+.glow-ui .title-item:hover, .glow-ui .title-item:focus-visible {
+  color: #ffffff !important;
+  text-shadow: 0 0 8px #fff3c8, 0 0 20px rgba(255, 190, 90, 1), 0 0 44px rgba(255, 130, 30, 0.8), 0 2px 4px rgba(20, 8, 0, 0.8);
+  transform: translateX(8px);
+}
+.glow-ui .title-item:hover::before, .glow-ui .title-item:focus-visible::before { transform: scale(1); animation: orb 1.6s ease-in-out infinite; }
+@keyframes orb { 50% { box-shadow: 0 0 12px 5px rgba(255, 210, 120, 1), 0 0 30px 10px rgba(255, 150, 50, 0.7); } }
+.glow-ui .title-foot {
+  font-family: 'Julius Sans One', 'Josefin Sans', sans-serif;
+  font-weight: 400;
+  font-size: 13px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  text-shadow: 0 0 6px rgba(255, 180, 80, 0.7), 0 1px 3px rgba(0, 0, 0, 0.9);
+}
+.reduce-motion .title-sway { transform: none !important; }
+
 /* ---------------------------------------------------------------- chapter card */
 .card {
   background: radial-gradient(ellipse at 50% 50%, #1f2a1c 0%, #0c0e0a 75%);

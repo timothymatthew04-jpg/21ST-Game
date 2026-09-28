@@ -174,8 +174,10 @@
     splash() {
       return new Promise((resolve) => {
         const el = h('div.overlay.splash',
-          this.story.emblem && h('div.splash-seal', { 'aria-hidden': 'true' }, this.story.emblem),
-          h('div.splash-title', { 'data-text': this.story.title }, this.story.title),
+          this.story.titleLogo === 'brush' && VN.buildBrushLogo
+            ? VN.buildBrushLogo(this.story.title, '', { animate: !this.settings.reduceMotion })
+            : [this.story.emblem && h('div.splash-seal', { 'aria-hidden': 'true' }, this.story.emblem),
+              h('div.splash-title', { 'data-text': this.story.title }, this.story.title)],
           h('div.splash-press', 'Click to begin'),
           h('div.splash-hint', 'or press any key'));
         let entry;
@@ -223,22 +225,31 @@
       ].filter(Boolean);
 
       // Cover art, slowly drifting, with the animated light / leaves layer on top.
+      const fx = this.story.titleFx;
+      const painted = fx && VN.PAINT_PRESETS && VN.PAINT_PRESETS[fx.preset];
       const drift = h('div.title-drift');
       if (this.story.titleBackground) drift.append(eng.stage.makeBg(this.story.titleBackground));
+      if (painted && VN.noiseTile) drift.append(h('div.title-grain', { style: { backgroundImage: `url(${VN.noiseTile()})` } }));
       const bg = h('div.title-bg', drift);
       // Light and leaves sit in front of the shading, on their own parallax layer.
       const fxLayer = h('div.title-fxlayer');
-      if (this.story.titleFx && VN.TitleFx) new VN.TitleFx(fxLayer, this.story.titleFx, this.settings);
-      // Big adventure-game logo: carved letters, a sweeping gleam, glints and
-      // a silk ribbon rippling behind the name (see titlelogo.js).
-      const logo = VN.buildTitleLogo(this.story.title, this.story.subtitle, { animate: !this.settings.reduceMotion });
-      const el = h('div.overlay.title-screen',
+      if (fx && painted) {
+        const url = VN.assets.lookup('bg', this.story.titleBackground);
+        // the canopy cut-out is added to the picture layer once it is laid out
+        requestAnimationFrame(() => new VN.PaintFx(fxLayer, { ...fx, image: url, swayHost: drift }, this.settings));
+      } else if (fx && VN.TitleFx) new VN.TitleFx(fxLayer, fx, this.settings);
+      // The title logo: glowing brush lettering, or carved letters (see brushlogo.js / titlelogo.js).
+      const logoOpts = { animate: !this.settings.reduceMotion };
+      const logo = this.story.titleLogo === 'brush' && VN.buildBrushLogo
+        ? VN.buildBrushLogo(this.story.title, this.story.subtitle, logoOpts)
+        : VN.buildTitleLogo(this.story.title, this.story.subtitle, logoOpts);
+      const el = h(`div.overlay.title-screen${painted ? '.painted' : ''}${this.story.titleLogo === 'brush' ? '.glow-ui' : ''}`,
         bg, h('div.title-shade'), fxLayer,
         h('div.title-block', logo),
         h('nav.title-menu', items),
         h('div.title-foot',
           h('span', this.story.credits || ''),
-          h('span', endingsFound ? `${endingsFound} of ${this.story.endings.length} endings found` : '↑ ↓ to choose · Enter to confirm')));
+          h('span', endingsFound ? `${endingsFound} of ${this.story.endings.length} endings found` : '')));
       if (eng.persistent.vars && eng.persistent.vars.title_variant) el.classList.add(`variant-${eng.persistent.vars.title_variant}`);
       // Gentle parallax: the picture leans away from the pointer.
       if (!this.settings.reduceMotion) {

@@ -212,17 +212,26 @@ emblem "絹"
 credits "Adapted from Silk by Alessandro Baricco"
 titlemusic title
 titlebackground title_cover       # picture behind the title screen (assets/bg/title_cover.webp)
-titlefx autumn sun=0.28,0.45 rays=0.02,-0.35   # animate the title screen (see below)
+titlefx ginkgo sun=0.3,-0.2 sway=0.27,0.2,0.3,0.28 pivot=0.37,0.8   # animate the title screen (see below)
+titlelogo brush                   # glowing brush lettering (or: carved)
 artstyle mixed                    # pixel | smooth | mixed (see below)
 warning "Text shown once, the first time the game is opened."
 background hara_kei_estate "assets/bg/some-other-name.jpg"   # only if a file doesn't follow the naming rule
 ```
 
-`titlefx` brings the title picture to life: falling leaves, light shafts, glowing specks of light
-and drifting mist, plus a slow camera drift and a little parallax when the mouse moves. Presets are
-`autumn` (maple leaves), `spring` (cherry petals), `summer` (green leaves) and `none`. `sun` is where
-the sun glows in the picture and `rays` is where the light shafts come from, both as fractions of the
-screen (0,0 is the top-left corner; values outside 0–1 are off-screen). The title itself is drawn
+`titlefx` brings the title picture to life. For **painted** art use `ginkgo`, `sakura` or `maple`:
+leaves tumbling in 3D with depth of field, gusts of wind every few seconds (leaves tear off the tree,
+streaks of air rush past, the canopy sways harder), sun-dapples shimmering where light already falls
+in the painting, glints on the leaves, light rays and drifting pollen. `sun` is where the light comes
+from; `sway` is the ellipse of canopy that moves (centre x,y and radius x,y) and `pivot` is the point
+it sways around (the base of the trunk). For **pixel** art use `autumn`, `spring` or `summer` (pixel
+leaves, light shafts, mist); there `rays` sets where the shafts come from. All positions are
+fractions of the screen (0,0 is the top-left corner; values outside 0–1 are off-screen).
+
+`titlelogo brush` draws the title as glowing hand-painted brush strokes with a breathing halo, a gleam
+running across the letters, sparkles, embers and smoke (the letters s, i, l and k are hand-drawn in
+js/brushlogo.js; other letters fall back to a brush font). `titlelogo carved` draws carved stone
+lettering instead. The title itself is drawn
 as a carved logo: the first letter oversized, spanning the name and the subtitle, with a sweeping
 gleam, glints and a silk ribbon (js/titlelogo.js).
 
