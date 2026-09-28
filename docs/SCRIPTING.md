@@ -211,11 +211,19 @@ title "SILK" "A choice simulation"
 emblem "絹"
 credits "Adapted from Silk by Alessandro Baricco"
 titlemusic title
-titlebackground title_cover       # picture behind the title screen (assets/bg/title_cover.webp)
+titlebackground title_cover       # picture behind the title screen (assets/bg/title_cover.png)
+titlefx autumn sun=0.28,0.45 rays=0.02,-0.35   # animate the title screen (see below)
 artstyle mixed                    # pixel | smooth | mixed (see below)
 warning "Text shown once, the first time the game is opened."
 background hara_kei_estate "assets/bg/some-other-name.jpg"   # only if a file doesn't follow the naming rule
 ```
+
+`titlefx` brings the title picture to life: falling leaves, light shafts, glowing specks of light
+and drifting mist, plus a slow camera drift and a little parallax when the mouse moves. Presets are
+`autumn` (maple leaves), `spring` (cherry petals), `summer` (green leaves) and `none`. `sun` is where
+the sun glows in the picture and `rays` is where the light shafts come from, both as fractions of the
+screen (0,0 is the top-left corner; values outside 0–1 are off-screen). The title's first letter is
+drawn oversized, spanning the name and the subtitle.
 
 `artstyle` decides how pictures are scaled. `pixel` keeps every pixel crisp (for pixel art),
 `smooth` scales everything softly (for painted or high-resolution art), and `mixed` (the default)

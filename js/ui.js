@@ -222,28 +222,40 @@
         this.button('Help', () => this.openMenu('help', { fromTitle: true }), '.title-item'),
       ].filter(Boolean);
 
-      const bg = h('div.title-bg');
-      if (this.story.titleBackground) bg.append(eng.stage.makeBg(this.story.titleBackground));
-      // Drifting leaves and specks of light over the cover art.
-      const rnd = (a, b) => a + Math.random() * (b - a);
-      const leaves = h('div.title-leaves', { 'aria-hidden': 'true' });
-      for (let i = 0; i < 14; i++) {
-        leaves.append(h('i', { style: { left: `${rnd(-5, 100)}%`, animationDuration: `${rnd(11, 20).toFixed(1)}s`, animationDelay: `${rnd(-20, 0).toFixed(1)}s`, '--drift': `${rnd(-160, 160).toFixed(0)}px`, '--spin': `${rnd(180, 720).toFixed(0)}deg`, '--size': `${Math.round(rnd(2, 4)) * 3}px` } }));
-      }
-      const motes = h('div.title-motes', { 'aria-hidden': 'true' });
-      for (let i = 0; i < 18; i++) {
-        motes.append(h('i', { style: { left: `${rnd(35, 98)}%`, top: `${rnd(4, 70)}%`, animationDelay: `${rnd(-6, 0).toFixed(1)}s`, animationDuration: `${rnd(3, 6).toFixed(1)}s` } }));
-      }
+      // Cover art, slowly drifting, with the animated light / leaves layer on top.
+      const drift = h('div.title-drift');
+      if (this.story.titleBackground) drift.append(eng.stage.makeBg(this.story.titleBackground));
+      const bg = h('div.title-bg', drift);
+      // Light and leaves sit in front of the shading, on their own parallax layer.
+      const fxLayer = h('div.title-fxlayer');
+      if (this.story.titleFx && VN.TitleFx) new VN.TitleFx(fxLayer, this.story.titleFx, this.settings);
+      // Title in the style of a big adventure-game logo: an oversized first
+      // letter that spans the name and the subtitle.
+      const name = this.story.title;
+      const logo = h('h1.title-logo', { 'aria-label': [name, this.story.subtitle].filter(Boolean).join(': ') },
+        h('span.logo-cap', { 'aria-hidden': 'true' }, name.charAt(0)),
+        h('span.logo-rest', { 'aria-hidden': 'true' }, name.slice(1)),
+        this.story.subtitle && h('span.logo-sub', { 'aria-hidden': 'true' }, this.story.subtitle));
       const el = h('div.overlay.title-screen',
-        bg, h('div.title-shade'), motes, leaves,
-        h('div.title-block',
-          h('h1.title-logo', { 'data-text': this.story.title }, this.story.title),
-          this.story.subtitle && h('div.title-plank', h('span', { 'data-text': this.story.subtitle }, this.story.subtitle))),
+        bg, h('div.title-shade'), fxLayer,
+        h('div.title-block', logo),
         h('nav.title-menu', items),
         h('div.title-foot',
           h('span', this.story.credits || ''),
           h('span', endingsFound ? `${endingsFound} of ${this.story.endings.length} endings found` : '↑ ↓ to choose · Enter to confirm')));
       if (eng.persistent.vars && eng.persistent.vars.title_variant) el.classList.add(`variant-${eng.persistent.vars.title_variant}`);
+      // Gentle parallax: the picture leans away from the pointer.
+      if (!this.settings.reduceMotion) {
+        el.addEventListener('pointermove', (e) => {
+          const r = el.getBoundingClientRect();
+          const dx = ((e.clientX - r.left) / r.width) - 0.5;
+          const dy = ((e.clientY - r.top) / r.height) - 0.5;
+          bg.style.setProperty('--px', `${dx * -18}px`);
+          bg.style.setProperty('--py', `${dy * -12}px`);
+          fxLayer.style.setProperty('--px', `${dx * -34}px`);
+          fxLayer.style.setProperty('--py', `${dy * -22}px`);
+        });
+      }
       this.titleEntry = this.open(el, { onBack: () => {} });
     }
 

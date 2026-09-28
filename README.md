@@ -1,8 +1,8 @@
 # SILK
 
 A branching visual novel adapted from Alessandro Baricco's *Silk*, built on a small web engine with
-*Doki Doki Literature Club*-style mechanics and an indie pixel-art look: carved-stone lettering,
-wooden sign plates and Kavoon / Pixelify Sans type.
+*Doki Doki Literature Club*-style mechanics and an indie pixel-art look: a Cinzel title logo,
+wooden sign plates, and Kavoon / Pixelify Sans type.
 
 You play Hervé Joncour. Your choices shape his marriage to Hélène, his commitment to the silk trade,
 and his obsession with a woman in Japan. The great events of the novel stay the same; what changes
@@ -61,7 +61,9 @@ On a phone, tap to advance and use the buttons under the text box.
   effects.
 * **Settings** for text speed, auto speed, music and sound volume, text beeps, speaker highlight
   and reduced motion.
-* **Title screen** on the pixel-art cover (`assets/bg/title_cover.webp`) with drifting leaves.
+* **Animated title screen** on the autumn temple cover (`assets/bg/title_cover.png`): maple leaves
+  tumbling on the wind, shifting light shafts, glowing specks of light, drifting mist, a slow camera
+  drift and mouse parallax, under a large Zelda-style Cinzel logo.
 * **Placeholder art.** Every background, character and event picture has a styled stand-in until
   the real art is added.
 
@@ -78,6 +80,7 @@ js/                   the engine
   textbox.js          dialogue box and typewriter
   ui.js               title screen, menus, choices, save/load, settings
   poem.js             the word minigame
+  titlefx.js          the animated title screen (leaves, light, mist)
   audio.js            music, sounds, menu beeps
   main.js             start-up, keyboard/mouse input, screen scaling
 story/script.js       THE STORY: edit this to change the game

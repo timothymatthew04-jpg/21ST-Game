@@ -58,7 +58,7 @@
 
   function parse(source) {
     const story = {
-      title: 'Untitled', subtitle: '', emblem: '', artStyle: 'mixed', titleMusic: null, titleBackground: null, warning: null, credits: null,
+      title: 'Untitled', subtitle: '', emblem: '', artStyle: 'mixed', titleFx: null, titleMusic: null, titleBackground: null, warning: null, credits: null,
       characters: {}, backgrounds: {}, poemWords: [],
       program: [], labels: {}, endings: [], errors: [], warnings: [],
       hash: hashString(source),
@@ -310,6 +310,16 @@
         case 'warning': story.warning = str(tk[1], 'warning "Text shown once before the title screen"'); return;
         case 'credits': story.credits = str(tk[1], 'credits "Made by ..."'); return;
         case 'emblem': story.emblem = str(tk[1], 'emblem "絹"'); return;
+        case 'titlefx': {
+          const fx = { preset: tk[1] ? tk[1].v : 'autumn', sun: null };
+          for (const t of tk.slice(2)) {
+            const [k, v] = t.v.split('=');
+            if ((k === 'sun' || k === 'rays') && v) fx[k] = v.split(',').map(Number);
+            else throw new Error('Usage: titlefx autumn|spring|summer|none [sun=0.3,0.4] [rays=-0.1,-0.3]');
+          }
+          story.titleFx = fx.preset === 'none' ? null : fx;
+          return;
+        }
         case 'artstyle':
           if (!tk[1] || !['pixel', 'smooth', 'mixed'].includes(tk[1].v)) throw new Error('Usage: artstyle pixel|smooth|mixed');
           story.artStyle = tk[1].v;
