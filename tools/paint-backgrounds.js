@@ -82,6 +82,11 @@ function readManifest() {
   const page = await browser.newPage();
   page.on('pageerror', (e) => console.error('page error:', e.message));
   await page.setContent('<!doctype html><html><body></body></html>');
+  // data some scenes paint from (the journey map's coastlines), as globalThis.PAINT_DATA
+  const data = {};
+  const dataDir = path.join(KIT, 'data');
+  if (fs.existsSync(dataDir)) for (const f of fs.readdirSync(dataDir).filter((n) => n.endsWith('.json'))) data[f.replace('.json', '')] = JSON.parse(fs.readFileSync(path.join(dataDir, f), 'utf8'));
+  await page.addScriptTag({ content: `globalThis.PAINT_DATA = ${JSON.stringify(data)};` });
   for (const f of files) await page.addScriptTag({ content: fs.readFileSync(path.join(KIT, f), 'utf8') });
   const all = await page.evaluate(() => Object.keys(globalThis.SCENES));
   const wanted = process.argv.slice(2).length ? process.argv.slice(2) : all;

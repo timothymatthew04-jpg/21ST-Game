@@ -582,7 +582,11 @@
     cancelTransient() {
       this.cancelChoices();
       if (this.pendingAsk) { this.pendingAsk.cancel(); this.pendingAsk = null; }
-      if (this.cardEntry) { this.close(this.cardEntry); this.cardEntry = null; }
+      if (this.cardEntry) {
+        if (this.cardEntry.cleanup) this.cardEntry.cleanup();
+        this.close(this.cardEntry);
+        this.cardEntry = null;
+      }
     }
 
     // ---- chapter card & ending -----------------------------------------------------------------

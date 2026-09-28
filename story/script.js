@@ -104,6 +104,10 @@ bgfx estate_tearoom petals=1.2 glow=0.6875,0.163,0.07,#cfe0ff steam=0.4917,0.785
 bgfx estate_room glow=0.2167,0.244,0.035,#cfe0ff glints=0.17,0.56,0.12,0.13,10 fireflies=0.27,0.15,0.15,0.5,8 fireflies=0.696,0.16,0.2,0.5,10 motes=0.25,0.74,0.46,0.13,20
 bgfx aviary flutter=0.365,0.25,0.33,0.38,18 leaves=0.8 rays=0.19,0.15,0.8,0.8,#fff2c4 motes=0.3,0.3,0.4,0.5,25,#fff0c8
 bgfx burned_village smoke=0.167,0.65,1.3,#2e2020 smoke=0.7,0.64,1,#2e2020 smoke=0.906,0.67,1.2,#2e2020 smoke=0.41,0.62,0.7,#3a2a28 embers=0.167,0.7,1 embers=0.906,0.726,1 embers=0.406,0.63,0.6 ash=1 flame=0.167,0.71,0.08,#ff7a30 flame=0.7,0.69,0.07,#ff7a30 flame=0.906,0.75,0.08,#ff7a30
+# the painted close-ups shown with "cg"
+bgfx the_cup steam=0.52,0.54,0.9 glow=0.19,0.385,0.06,#ffc070 petals=0.3,0.62,0.07,0.25,0.25
+bgfx the_glove motes=0.1,0,0.7,0.8,22,#fff0c8 rays=0.3,0,1.2,0.5,#fff0c0
+bgfx the_letter flame=0.896,0.29,0.03,#ffc070 motes=0.6,0.1,0.3,0.5,14,#ffe0a0
 bgfx forest_camp_night flame=0.429,0.82,0.12,#ff9a40 embers=0.429,0.8,1 smoke=0.429,0.78,0.8,#6a7288 fireflies=0,0.55,1,0.3,14 mist=0.7,0.2,0.3,#b8c8ff rays=0.6,0,0.9,0.45,#b8d0ff flame=0.219,0.79,0.05,#ffb860 glow=0.625,0.096,0.03,#cfe0ff
 
 # Each place has its own sound, which starts when the story arrives there and fades
@@ -230,6 +234,7 @@ label intro
   chapter "Prologue" "The Silk Disease" seal 絹
   scene lavilledieu with fade
   play music town_theme fadein 3
+  cutscene prologue
   "That year, the silkworms began to die."
   "First in one village, then in the next. The eggs turned grey before they could hatch, and the worms that did hatch stopped eating and lay still on the mulberry leaves."
   "It spread across Europe. Then, they said, it reached Africa."
@@ -295,8 +300,9 @@ label chapter1
     hide helene
   endif
   tint none
-  scene road_east with slow
   play music journey fadein 3
+  cutscene journey_one
+  scene road_east with slow
   "I crossed France by train, then the Alps. Austria. Hungary. Then Russia, where the roads stopped being roads."
   "Weeks of steppe. Lake Baikal, which the people there call the sea. Rivers I crossed on rafts, and villages that had never seen a Frenchman and saw no reason to start."
   scene smuggler_boat with dissolve
@@ -312,6 +318,7 @@ label chapter2
   chapter "Chapter 2" "Japan" seal 日本
   scene japan_coast with fade
   play music japan fadein 3
+  cutscene arrival
   "I came ashore on the west coast, the unofficial way, where foreigners were not supposed to come ashore at all."
   scene japan_path with dissolve
   "Men I never saw clearly led me inland for days, blindfolded for part of the way. Nobody explained anything. I learned very quickly not to ask."
@@ -359,7 +366,7 @@ label chapter3
   show woman neutral at right
   "Later, tea was served. Hara Kei was talking, and for a moment no one was looking at anyone."
   "The young woman lifted a small teacup and drank from it."
-  play sound cup
+  cutscene the_cup
   "Then she set it down in front of me."
   show woman gaze at right
   "She looked at me. Then at the cup. Then at me again."
@@ -396,8 +403,9 @@ label chapter3
 # ============================================================================
 label chapter4
   chapter "Chapter 4" "The First Return" seal 帰
-  scene road_east with fade
   play music journey fadein 2
+  cutscene return_home
+  scene road_east with fade
   "Hara Kei sold me the eggs: thousands of them, pressed onto sheets of paper and packed in wooden boxes lined with mulberry leaves."
   "I carried them back across the whole world, watching the weather, keeping them cool, counting the days."
   scene silk_mill with fade
@@ -455,8 +463,9 @@ label chapter5
   balbadiou "The whole valley wants to buy eggs from us now. Everyone who lost their worms, everyone who heard what we did."
   balbadiou serious "One journey was a miracle. We need a second one."
   "He didn't ask if I wanted to go. He didn't need to."
-  scene road_winter with fade
   play music journey fadein 2
+  cutscene journey_two
+  scene road_winter with fade
   "The same trains. The same steppe. The same boat without lights."
   "It was easier the second time. That frightened me a little. It meant I was getting used to it."
   scene estate_day with fade
@@ -496,6 +505,7 @@ label chapter6
   scene estate_room with dissolve
   "On the way back, I passed the room where she had been sitting that first day. Her things were there — a shawl, a small lacquered box, nobody watching."
   "Before I knew I had decided anything, I had taken off one of my gloves and laid it among her belongings."
+  cutscene the_glove
   cg the_glove with dissolve
   "A glove. A stupid, ordinary thing. A message with no words in it."
   menu
@@ -544,6 +554,7 @@ label chapter7
   "In France there was only one person I knew who could read Japanese: Madame Blanche, who kept a fine house in the city and asked very few questions."
   show blanche neutral
   "She unfolded the paper. She read it once. Then she looked at me for a long time before she spoke."
+  cutscene the_note
   blanche serious "Come back."
   herve "That's all?"
   blanche soft "That's enough."
@@ -561,6 +572,7 @@ label chapter8
   chapter "Chapter 8" "Hélène" seal 庭
   scene helene_garden with fade
   play music helene_theme fadein 2
+  cutscene garden
   "The eggs hatched again. The town celebrated again. I walked in the garden with Hélène in the evenings, and the trees were a little taller every time."
   show helene soft
   helene soft "You're quiet since you came back."
@@ -603,8 +615,9 @@ label chapter8
 # ============================================================================
 label chapter9
   chapter "Chapter 9" "The Third Journey" seal 雨
-  scene road_rain with fade
   play music journey fadein 2
+  cutscene journey_three
+  scene road_rain with fade
   "I went back to Japan a third time."
   if obsession >= 8
     "I told Balbadiou it was for the eggs. I told Hélène it was for the eggs. I stopped believing it somewhere in Russia."
@@ -613,7 +626,7 @@ label chapter9
   endif
   scene estate_unrest with fade
   play music japan fadein 2
-  play sound cannon volume 0.5
+  cutscene warships
   "The country had changed. Foreign ships had come into the ports with their guns, and the old order was cracking. There were soldiers on the roads. People looked at me differently now — a white face had become a political problem."
   show harakei stern
   harakei stern "It is not a good time to be a foreigner here."
@@ -643,8 +656,9 @@ label chapter9
 # ============================================================================
 label chapter10
   chapter "Chapter 10" "War" seal 戦
-  scene balbadiou_office with fade
   play music war fadein 2
+  cutscene war
+  scene balbadiou_office with fade
   show balbadiou worried
   "The next year, the news from Japan was all bad. Civil war. Foreigners attacked. Ports closed. Nobody knew who was in charge."
   balbadiou worried "You can't go this time. Nobody can."
@@ -682,6 +696,7 @@ label chapter11
   chapter "Chapter 11" "The Abandoned Village" seal 灰
   scene burned_village with fade
   stop music fadeout 3
+  cutscene ashes
   "I reached the hills after weeks of hiding, bribing, waiting."
   "The village was gone."
   play sound wind_gust
@@ -707,6 +722,7 @@ label chapter12
   chapter "Chapter 12" "Hara Kei's Warning" seal 森
   scene forest_camp_night with fade
   play music japan fadein 3
+  cutscene forest
   show harakei cold
   "Hara Kei was camped in the forest with what was left of his people. He did not seem surprised to see me."
   harakei cold "You should not have come."
@@ -742,12 +758,14 @@ label chapter12
 # ============================================================================
 label chapter13
   chapter "Chapter 13" "The Last Eggs" seal 卵
-  scene road_winter with fade
   play music journey fadein 2
+  cutscene last_eggs
+  scene road_winter with fade
   "I came home with eggs — bought at a terrible price from whoever would sell them in the chaos."
   "They had travelled too far, too slowly, through too much."
   scene silk_mill_empty with fade
   play music sorrow fadein 3
+  cutscene no_hatch
   "In spring, they didn't hatch."
   "Almost none of them. A handful of worms, sickly and slow, that died on the leaves within a week."
   show balbadiou worried
@@ -782,7 +800,7 @@ label chapter14
   blanche serious "It's long. And it's not the kind of letter one reads quickly."
   "She read it aloud, in French, slowly, without looking up."
   hide blanche
-  play sound page
+  cutscene final_letter
   cg the_letter with dissolve
   window show
   if persistent.knows_truth
@@ -834,7 +852,7 @@ label chapter15
     helene tired "You were always somewhere else, Hervé. I got used to talking to you there."
     "I wanted to tell her I was here. I had waited too long to say it, and now it wasn't true enough to say."
   endif
-  play sound bell volume 0.7
+  cutscene candle
   "Hélène died at the beginning of September, on a morning with a clear sky."
   filter none
   hide helene with slow
@@ -862,7 +880,7 @@ label final
     inner "Who translated it for you? — she had asked me, in the garden. And I had told her."
   endif
   hide blanche
-  play sound page
+  cutscene truth
   cg the_letter with dissolve
   effect glitch 0.9
   filter sepia
@@ -907,17 +925,20 @@ label ending
     scene cemetery_grey with slow
     "I stood there a long time and said nothing, the way she had said nothing, for years, for my sake."
     "Some things are told best in silence. She taught me that. I learned it too late, and I learned it completely."
+    cutscene end_silence
     ending home_silence "Home — Unsaid" neutral
   elif helene_trust >= 3
     "I told her about my day. About the birds at the pond. About the letter, which I had finally read the right way."
     helene soft "{i}Look at whoever is beside you.{/i}"
     play sound wind_gust volume 0.6
     "The wind moved through the trees she had watched me plant. For the first time in many years, I was exactly where I was."
+    cutscene end_beside
     ending home_beside "Home — Beside Me All Along" true
   else
     scene cemetery_night with slow
     "I tried to speak to her, and found I had forgotten how. I had spent too many years talking to someone who wasn't there."
     "Some evenings I still look east. Now I know what I am looking for is behind me."
+    cutscene end_distance
     ending home_distance "Home — The Far Shore" bad
   endif
 `;

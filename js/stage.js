@@ -298,6 +298,14 @@
 
     makeCg(name) {
       const el = h('div.cg');
+      // a painted close-up, built from moving layers like the backgrounds
+      if (VN.Scenery && VN.Scenery.has(name)) {
+        el.classList.add('bg-layered');
+        const frame = VN.Scenery.build(el, name, { reduce: !!this.settings.reduceMotion });
+        const specs = this.story.bgFx && this.story.bgFx[name];
+        if (specs && specs.length && VN.SceneFx) new VN.SceneFx(el, specs, this.settings, frame);
+        return el;
+      }
       const known = VN.assets.lookup('cg', name);
       const apply = (url) => {
         el.classList.remove('cg-ph');

@@ -726,6 +726,150 @@ window.VN_SCENERY = {
    }
   ]
  },
+ "cs_candle": {
+  "flat": "assets/scenes/cs_candle/flat.png",
+  "vignette": [
+   0.6,
+   "0,0,10"
+  ],
+  "layers": [
+   {
+    "id": "sky",
+    "x": 0,
+    "y": 0,
+    "w": 480,
+    "h": 270,
+    "depth": 0,
+    "anim": null,
+    "src": "assets/scenes/cs_candle/sky.png"
+   },
+   {
+    "id": "stand",
+    "x": 10,
+    "y": 87,
+    "w": 460,
+    "h": 183,
+    "depth": 0.5,
+    "anim": null,
+    "src": "assets/scenes/cs_candle/stand.png"
+   }
+  ]
+ },
+ "cs_candle_dawn": {
+  "flat": "assets/scenes/cs_candle_dawn/flat.png",
+  "vignette": [
+   0.35,
+   "30,20,20"
+  ],
+  "layers": [
+   {
+    "id": "sky",
+    "x": 0,
+    "y": 0,
+    "w": 480,
+    "h": 270,
+    "depth": 0,
+    "anim": null,
+    "src": "assets/scenes/cs_candle_dawn/sky.png"
+   },
+   {
+    "id": "stand",
+    "x": 10,
+    "y": 143,
+    "w": 460,
+    "h": 127,
+    "depth": 0.5,
+    "anim": null,
+    "src": "assets/scenes/cs_candle_dawn/stand.png"
+   }
+  ]
+ },
+ "cs_warships": {
+  "flat": "assets/scenes/cs_warships/flat.png",
+  "vignette": [
+   0.5,
+   "20,0,10"
+  ],
+  "layers": [
+   {
+    "id": "sky",
+    "x": 0,
+    "y": 0,
+    "w": 480,
+    "h": 270,
+    "depth": 0,
+    "anim": null,
+    "src": "assets/scenes/cs_warships/sky.png"
+   },
+   {
+    "id": "ship_far",
+    "x": 286,
+    "y": 137,
+    "w": 115,
+    "h": 69,
+    "depth": 0.35,
+    "anim": {
+     "type": "bob",
+     "a": 0.7,
+     "t": 5.55
+    },
+    "src": "assets/scenes/cs_warships/ship_far.png"
+   },
+   {
+    "id": "ship_near",
+    "x": 78,
+    "y": 123,
+    "w": 189,
+    "h": 113,
+    "depth": 0.6,
+    "anim": {
+     "type": "bob",
+     "a": 0.7,
+     "t": 5.9
+    },
+    "src": "assets/scenes/cs_warships/ship_near.png"
+   }
+  ]
+ },
+ "cs_worms": {
+  "flat": "assets/scenes/cs_worms/flat.png",
+  "vignette": [
+   0.6,
+   "0,0,0"
+  ],
+  "layers": [
+   {
+    "id": "sky",
+    "x": 0,
+    "y": 0,
+    "w": 480,
+    "h": 270,
+    "depth": 0,
+    "anim": null,
+    "src": "assets/scenes/cs_worms/sky.png"
+   },
+   {
+    "id": "tray",
+    "x": 10,
+    "y": 74,
+    "w": 460,
+    "h": 192,
+    "depth": 0.45,
+    "anim": null,
+    "src": "assets/scenes/cs_worms/tray.png"
+   },
+   {
+    "id": "worms",
+    "x": 52,
+    "y": 124,
+    "w": 220,
+    "h": 121,
+    "depth": 0.5,
+    "anim": null,
+    "src": "assets/scenes/cs_worms/worms.png"
+   }
+  ]
+ },
  "estate_day": {
   "flat": "assets/scenes/estate_day/flat.png",
   "vignette": [
@@ -1843,6 +1987,25 @@ window.VN_SCENERY = {
    }
   ]
  },
+ "journey_map": {
+  "flat": "assets/scenes/journey_map/flat.png",
+  "vignette": [
+   0.25,
+   "30,14,0"
+  ],
+  "layers": [
+   {
+    "id": "sky",
+    "x": 0,
+    "y": 0,
+    "w": 480,
+    "h": 270,
+    "depth": 0,
+    "anim": null,
+    "src": "assets/scenes/journey_map/sky.png"
+   }
+  ]
+ },
  "lavilledieu": {
   "flat": "assets/scenes/lavilledieu/flat.png",
   "vignette": [
@@ -2652,6 +2815,139 @@ window.VN_SCENERY = {
      "oy": 1
     },
     "src": "assets/scenes/smuggler_boat/deck.png"
+   }
+  ]
+ },
+ "the_cup": {
+  "flat": "assets/scenes/the_cup/flat.png",
+  "vignette": [
+   0.55,
+   "6,4,20"
+  ],
+  "layers": [
+   {
+    "id": "sky",
+    "x": 0,
+    "y": 0,
+    "w": 480,
+    "h": 270,
+    "depth": 0,
+    "anim": null,
+    "src": "assets/scenes/the_cup/sky.png"
+   },
+   {
+    "id": "table",
+    "x": 0,
+    "y": 132,
+    "w": 480,
+    "h": 138,
+    "depth": 0.35,
+    "anim": null,
+    "src": "assets/scenes/the_cup/table.png"
+   },
+   {
+    "id": "sleeve",
+    "x": 401,
+    "y": 0,
+    "w": 79,
+    "h": 267,
+    "depth": 0.6,
+    "anim": {
+     "type": "sway",
+     "a": 0.5,
+     "t": 7,
+     "ox": 1,
+     "oy": 0
+    },
+    "src": "assets/scenes/the_cup/sleeve.png"
+   },
+   {
+    "id": "cup",
+    "x": 179,
+    "y": 138,
+    "w": 142,
+    "h": 106,
+    "depth": 0.55,
+    "anim": null,
+    "src": "assets/scenes/the_cup/cup.png"
+   }
+  ]
+ },
+ "the_glove": {
+  "flat": "assets/scenes/the_glove/flat.png",
+  "vignette": [
+   0.45,
+   "30,14,0"
+  ],
+  "layers": [
+   {
+    "id": "sky",
+    "x": 0,
+    "y": 0,
+    "w": 480,
+    "h": 270,
+    "depth": 0,
+    "anim": null,
+    "src": "assets/scenes/the_glove/sky.png"
+   },
+   {
+    "id": "things",
+    "x": 70,
+    "y": 50,
+    "w": 392,
+    "h": 200,
+    "depth": 0.45,
+    "anim": null,
+    "src": "assets/scenes/the_glove/things.png"
+   },
+   {
+    "id": "glove",
+    "x": 150,
+    "y": 118,
+    "w": 128,
+    "h": 127,
+    "depth": 0.6,
+    "anim": null,
+    "src": "assets/scenes/the_glove/glove.png"
+   }
+  ]
+ },
+ "the_letter": {
+  "flat": "assets/scenes/the_letter/flat.png",
+  "vignette": [
+   0.5,
+   "20,8,0"
+  ],
+  "layers": [
+   {
+    "id": "sky",
+    "x": 0,
+    "y": 0,
+    "w": 480,
+    "h": 270,
+    "depth": 0,
+    "anim": null,
+    "src": "assets/scenes/the_letter/sky.png"
+   },
+   {
+    "id": "sheets",
+    "x": 31,
+    "y": 35,
+    "w": 415,
+    "h": 235,
+    "depth": 0.45,
+    "anim": null,
+    "src": "assets/scenes/the_letter/sheets.png"
+   },
+   {
+    "id": "lamp",
+    "x": 404,
+    "y": 40,
+    "w": 52,
+    "h": 116,
+    "depth": 0.6,
+    "anim": null,
+    "src": "assets/scenes/the_letter/lamp.png"
    }
   ]
  }

@@ -650,6 +650,17 @@
       this.state.pc++;
     }
 
+    async op_cutscene(ins) {
+      this.ui.textbox.hideBox();
+      this.ui.textbox.hideCentered();
+      this.stage.setSpeaker(null);
+      if (!this.isSkipping() && (globalThis.VN_CUTSCENES || {})[ins.name]) {
+        const ctx = { ui: this.ui, stage: this.stage, audio: this.audio, settings: this.settings, story: this.story };
+        await this.guard(VN.playCutscene(ctx, ins.name));
+      }
+      this.state.pc++;
+    }
+
     op_notify(ins) {
       this.ui.whisper(this.interp(ins.text), '#e9c46a', { quiet: this.isSkipping() });
       this.state.pc++;

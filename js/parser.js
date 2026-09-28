@@ -447,6 +447,11 @@
 
         // ---- text ----
         case 'centered': emit(L, { op: 'say', who: null, centered: true, text: str(tk[1], 'centered "text"'), key: `${currentLabel}:${sayCount++}` }); return;
+        case 'cutscene':
+          // cutscene name — plays a cinematic sequence from story/cutscenes.js
+          need(2, 'cutscene name');
+          emit(L, { op: 'cutscene', name: tk[1].v });
+          return;
         case 'chapter': {
           // chapter "Chapter 3" "The Cup" seal 杯 — the seal is a kanji or two stamped on the card
           const { pos, kw } = kwargs(tk, 2, ['seal', 'kanji'], L);

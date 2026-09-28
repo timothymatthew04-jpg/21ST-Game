@@ -1932,3 +1932,143 @@ input[type='range']::-moz-range-thumb { width: 18px; height: 24px; background: v
     pointer-events: none;
   }
 }
+
+/* ---------------------------------------------------------------- cutscenes */
+.cutscene { background: #000; overflow: hidden; cursor: pointer; transition: opacity 0.8s ease; z-index: 3; }
+.cs-view, .cs-shot, .cs-cam { position: absolute; inset: 0; }
+.cs-shot { overflow: hidden; }
+.cs-cam { transform-origin: 50% 50%; will-change: transform; }
+.cs-cam > .bg { position: absolute; inset: 0; }
+.cs-tint { position: absolute; inset: 0; pointer-events: none; }
+.cs-flash { position: absolute; inset: 0; opacity: 0; pointer-events: none; }
+/* letterbox bars slide in, the caption lives in the lower one */
+.cs-bar { position: absolute; left: 0; right: 0; height: 12%; background: #000; z-index: 2; transition: transform 0.9s cubic-bezier(0.3, 0.8, 0.3, 1); }
+.cs-bar.top { top: 0; transform: translateY(-100%); }
+.cs-bar.bottom { bottom: 0; transform: translateY(100%); display: flex; align-items: center; justify-content: center; }
+.cutscene.shown .cs-bar { transform: none; }
+.cutscene.closing .cs-bar.top { transform: translateY(-100%); }
+.cutscene.closing .cs-bar.bottom { transform: translateY(100%); }
+.cs-caption {
+  font-family: 'Zen Old Mincho', 'Noto Serif JP', serif;
+  font-weight: 600;
+  font-size: 25px;
+  letter-spacing: 0.04em;
+  color: #fff6e2;
+  text-shadow: 0 0 10px rgba(255, 200, 120, 0.55), 0 2px 3px rgba(0, 0, 0, 0.9);
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity 0.7s ease, transform 0.7s ease;
+  padding: 0 60px;
+  text-align: center;
+}
+.cs-caption.on { opacity: 1; transform: none; }
+.cs-title {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 44%;
+  text-align: center;
+  font-family: 'Julius Sans One', 'Josefin Sans', sans-serif;
+  font-size: 40px;
+  letter-spacing: 0.4em;
+  text-indent: 0.4em;
+  color: #fffaf0;
+  text-shadow: 0 0 8px rgba(255, 226, 170, 0.95), 0 0 26px rgba(255, 160, 60, 0.7), 0 3px 4px rgba(20, 6, 0, 0.9);
+  animation: cs-title 1.4s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  pointer-events: none;
+}
+@keyframes cs-title { from { opacity: 0; letter-spacing: 0.7em; filter: blur(8px); } }
+.cs-kanji {
+  position: absolute;
+  right: 9%;
+  top: 18%;
+  writing-mode: vertical-rl;
+  font-family: 'Yuji Syuku', 'Zen Old Mincho', serif;
+  font-size: 96px;
+  line-height: 1;
+  color: #fff6e2;
+  text-shadow: 0 0 12px rgba(255, 214, 140, 0.8), 0 0 36px rgba(255, 150, 50, 0.45), 0 4px 6px rgba(20, 8, 0, 0.9);
+  pointer-events: none;
+}
+.cs-kanji span { display: inline-block; animation: jc-brush-in 0.8s cubic-bezier(0.3, 0.7, 0.2, 1) both; }
+.cs-sprite { position: absolute; transform: translateX(-50%); pointer-events: none; }
+.cs-skip {
+  position: absolute;
+  right: 22px;
+  bottom: 3%;
+  z-index: 3;
+  background: none;
+  border: 0;
+  font-family: 'Julius Sans One', 'Josefin Sans', sans-serif;
+  font-size: 15px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: rgba(255, 246, 226, 0.55);
+  cursor: pointer;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  transition: color 0.2s ease;
+}
+.cs-skip:hover, .cs-skip:focus-visible { color: #ffd98a; outline: none; }
+
+/* the journey map: the route canvas and the names of places */
+.cs-route { position: absolute; inset: 0; width: 100%; height: 100%; image-rendering: pixelated; }
+.cs-place { position: absolute; width: 0; height: 0; }
+.cs-place i { position: absolute; left: -2px; top: -2px; width: 4px; height: 4px; background: #5a2a14; box-shadow: 0 0 0 1px #f4e6c4; opacity: 0; transition: opacity 0.4s ease; }
+.cs-place span {
+  position: absolute;
+  left: 7px;
+  top: -9px;
+  white-space: nowrap;
+  font-family: 'Zen Old Mincho', serif;
+  font-weight: 700;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  color: #3a1c0c;
+  text-shadow: 0 0 2px #f6ecd0, 0 0 3px #f6ecd0, 0 0 5px #f6ecd0;
+  opacity: 0;
+  transform: translateY(3px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+.cs-place.big span { font-size: 14px; color: #8a1e10; }
+.cs-place.on i, .cs-place.on span { opacity: 1; transform: none; }
+.cs-place.quiet i { display: none; }
+
+/* a letter: paper on a dark desk, the writing appearing stroke by stroke */
+.cs-desk { position: absolute; inset: 0; display: grid; place-items: center; background: radial-gradient(ellipse at 60% 30%, #3a2416 0%, #140a06 75%); }
+.cs-paper {
+  position: relative;
+  padding: 44px 50px;
+  background: radial-gradient(ellipse at 40% 30%, #f8f0dc, #e6d6b0 80%);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6), inset 0 0 40px rgba(140, 100, 50, 0.25);
+  color: #1a120c;
+  animation: cs-paper 1.2s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+@keyframes cs-paper { from { opacity: 0; transform: translateY(30px) rotate(-2deg) scale(0.96); } }
+.cs-paper.ja { writing-mode: vertical-rl; height: 460px; display: flex; gap: 22px; font-family: 'Yuji Syuku', 'Zen Old Mincho', serif; font-size: 40px; line-height: 1.12; }
+.cs-paper.fr { width: 640px; font-family: 'Pinyon Script', 'Zen Old Mincho', cursive; font-size: 36px; line-height: 1.45; color: #20160e; }
+.cs-writing { animation: cs-write-ja 1.2s linear both; }
+.cs-paper.fr .cs-writing { animation-name: cs-write-fr; }
+@keyframes cs-write-ja { from { clip-path: inset(0 0 100% 0); opacity: 0.3; } 10% { opacity: 1; } to { clip-path: inset(0 0 -10% 0); } }
+@keyframes cs-write-fr { from { clip-path: inset(0 100% 0 0); opacity: 0.3; } 10% { opacity: 1; } to { clip-path: inset(0 -10% 0 0); } }
+.cs-paper-seal {
+  position: absolute;
+  left: 18px;
+  bottom: 18px;
+  width: 46px;
+  height: 46px;
+  display: grid;
+  place-items: center;
+  background: #b42a1c;
+  color: #fbe9dc;
+  border-radius: 5px;
+  font-family: 'Zen Old Mincho', serif;
+  font-weight: 700;
+  font-size: 28px;
+  writing-mode: horizontal-tb;
+  transform: rotate(-6deg);
+  box-shadow: inset 0 0 0 3px #b42a1c, inset 0 0 0 4px #f6d9c8;
+  animation: jc-stamp 0.34s 2.2s cubic-bezier(0.6, 0, 0.9, 0.5) both;
+}
+.reduce-motion .cs-cam { will-change: auto; }
