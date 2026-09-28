@@ -651,10 +651,11 @@ html, body {
   animation: title-drift 38s ease-in-out infinite alternate;
 }
 @keyframes title-drift {
-  from { transform: scale(1.01) translate(0, 0); }
-  to { transform: scale(1.07) translate(-16px, -8px); }
+  from { transform: scale(1) translate(0, 0); }
+  to { transform: scale(1.045) translate(-14px, -6px); }
 }
-#stage .title-drift .bg { image-rendering: pixelated; }
+/* the cover is pre-enlarged at 2x with hard pixel edges, so let the browser scale it down smoothly */
+#stage .title-drift .bg { image-rendering: auto; }
 .title-fxlayer {
   position: absolute;
   inset: -24px;
@@ -685,43 +686,42 @@ html, body {
   left: 82px;
   top: 64px;
 }
-/* Adventure-game logo: an oversized first letter spanning the name and subtitle. */
+/* Animated logo (built in titlelogo.js) */
+.title-block::before {
+  /* warm light breathing behind the name */
+  content: '';
+  position: absolute;
+  left: -60px;
+  top: -40px;
+  width: 820px;
+  height: 380px;
+  background: radial-gradient(ellipse at 45% 50%, rgba(255, 200, 120, 0.28), rgba(255, 170, 90, 0.08) 45%, transparent 70%);
+  animation: logo-breathe 5s ease-in-out infinite;
+  pointer-events: none;
+}
+@keyframes logo-breathe { 50% { opacity: 0.55; transform: scale(1.04); } }
 .title-logo {
-  margin: 0;
-  display: grid;
-  grid-template-columns: auto auto;
-  grid-template-rows: auto auto;
-  column-gap: 4px;
-  font-family: var(--display);
-  font-weight: 900;
-  color: #fffaf0;
-  text-shadow: 0 5px 0 rgba(38, 14, 5, 0.55), 0 0 28px rgba(0, 0, 0, 0.55), 0 0 70px rgba(255, 186, 110, 0.22);
-  animation: logo-in 1.4s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  position: relative;
+  width: 700px;
+  animation: logo-in 1.6s cubic-bezier(0.2, 0.8, 0.2, 1) both;
 }
-.logo-cap {
-  grid-row: 1 / span 2;
-  align-self: start;
-  font-size: 272px;
-  line-height: 0.76;
+.title-logo svg { display: block; width: 100%; height: auto; overflow: visible; }
+.title-logo .lg-main { position: relative; z-index: 1; }
+.title-logo .lg-layer { position: absolute; left: 0; top: 0; will-change: transform; }
+.title-logo .lg-back { z-index: 0; }
+.title-logo .lg-front { z-index: 2; }
+.lg-gleam { animation: lg-gleam 7s cubic-bezier(0.45, 0, 0.3, 1) 1.2s infinite; transform: skewX(-18deg); }
+@keyframes lg-gleam {
+  0% { transform: translateX(0) skewX(-18deg); }
+  42%, 100% { transform: translateX(1300px) skewX(-18deg); }
 }
-.logo-rest {
-  align-self: end;
-  font-size: 168px;
-  line-height: 0.74;
-  letter-spacing: 0.02em;
+.lg-glint { opacity: 0; transform-box: fill-box; transform-origin: center; animation: lg-glint 7s ease-in-out infinite; }
+@keyframes lg-glint {
+  0%, 60%, 100% { opacity: 0; transform: scale(0.2) rotate(0deg); }
+  66% { opacity: 1; transform: scale(1) rotate(45deg); }
+  74% { opacity: 0; transform: scale(0.3) rotate(90deg); }
 }
-.logo-sub {
-  align-self: start;
-  justify-self: end;
-  margin-top: 14px;
-  padding-right: 6px;
-  font-size: 38px;
-  font-weight: 700;
-  line-height: 1;
-  letter-spacing: 0.05em;
-  animation: fade-up 1.2s 0.7s ease both;
-}
-@keyframes logo-in { from { opacity: 0; transform: translateY(-14px); letter-spacing: 0.1em; filter: blur(4px); } }
+@keyframes logo-in { from { opacity: 0; transform: translateY(-16px) scale(0.97); } }
 
 .title-menu {
   position: absolute;
@@ -1180,6 +1180,7 @@ input[type='range']::-moz-range-thumb { width: 18px; height: 24px; background: v
 /* ---------------------------------------------------------------- motion preferences */
 .reduce-motion .fx-shake.on, .reduce-motion .fx-wave.on { animation: none; }
 .reduce-motion .title-drift, .reduce-motion .title-bg { animation: none; transition: none; }
+.reduce-motion .lg-gleam, .reduce-motion .lg-glint, .reduce-motion .title-block::before { animation: none; }
 @media (prefers-reduced-motion: reduce) {
   .fx-shake.on, .fx-wave.on { animation: none; }
   .title-drift { animation: none; }

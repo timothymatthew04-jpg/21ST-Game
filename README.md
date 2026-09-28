@@ -61,9 +61,10 @@ On a phone, tap to advance and use the buttons under the text box.
   effects.
 * **Settings** for text speed, auto speed, music and sound volume, text beeps, speaker highlight
   and reduced motion.
-* **Animated title screen** on the autumn temple cover (`assets/bg/title_cover.png`): maple leaves
+* **Animated title screen** on the autumn temple cover (`assets/bg/title_cover.webp`): maple leaves
   tumbling on the wind, shifting light shafts, glowing specks of light, drifting mist, a slow camera
-  drift and mouse parallax, under a large Zelda-style Cinzel logo.
+  drift and mouse parallax. The logo is carved ivory-and-gold lettering with a gleam of light that
+  sweeps across it, twinkling glints and a silk ribbon rippling behind the name.
 * **Placeholder art.** Every background, character and event picture has a styled stand-in until
   the real art is added.
 
@@ -81,6 +82,7 @@ js/                   the engine
   ui.js               title screen, menus, choices, save/load, settings
   poem.js             the word minigame
   titlefx.js          the animated title screen (leaves, light, mist)
+  titlelogo.js        the carved, animated title logo
   audio.js            music, sounds, menu beeps
   main.js             start-up, keyboard/mouse input, screen scaling
 story/script.js       THE STORY: edit this to change the game

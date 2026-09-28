@@ -229,13 +229,9 @@
       // Light and leaves sit in front of the shading, on their own parallax layer.
       const fxLayer = h('div.title-fxlayer');
       if (this.story.titleFx && VN.TitleFx) new VN.TitleFx(fxLayer, this.story.titleFx, this.settings);
-      // Title in the style of a big adventure-game logo: an oversized first
-      // letter that spans the name and the subtitle.
-      const name = this.story.title;
-      const logo = h('h1.title-logo', { 'aria-label': [name, this.story.subtitle].filter(Boolean).join(': ') },
-        h('span.logo-cap', { 'aria-hidden': 'true' }, name.charAt(0)),
-        h('span.logo-rest', { 'aria-hidden': 'true' }, name.slice(1)),
-        this.story.subtitle && h('span.logo-sub', { 'aria-hidden': 'true' }, this.story.subtitle));
+      // Big adventure-game logo: carved letters, a sweeping gleam, glints and
+      // a silk ribbon rippling behind the name (see titlelogo.js).
+      const logo = VN.buildTitleLogo(this.story.title, this.story.subtitle, { animate: !this.settings.reduceMotion });
       const el = h('div.overlay.title-screen',
         bg, h('div.title-shade'), fxLayer,
         h('div.title-block', logo),

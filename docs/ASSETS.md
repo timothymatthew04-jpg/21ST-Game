@@ -28,8 +28,11 @@ Regenerate this list after editing the story with `node tools/check-script.js --
 | `helene_sickroom` | Chapter 15 |
 | `cemetery` | Ending: Hélène's grave |
 
-The title screen uses `title_cover` (already added: the temple in autumn). The falling leaves,
-light and mist on top of it are drawn by the game, so the picture itself can stay a still image.
+The title screen uses `title_cover` (already added: the temple in autumn). It was cropped out of its
+black frame and enlarged to 2560×1440 with hard pixel edges, so it stays sharp even fullscreen. The
+falling leaves, light and mist on top of it are drawn by the game, so the picture itself can stay a
+still image. For best results, give any new cover at least 2560×1440, or pixel art enlarged by a whole
+number (2×, 3×, 4×) with "nearest neighbour" scaling.
 
 Backgrounds and CGs are drawn pixel-crisp to match the cover. If they turn out to be painted or
 high-resolution instead, change `artstyle` at the top of the script (see docs/SCRIPTING.md).

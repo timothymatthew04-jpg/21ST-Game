@@ -25,7 +25,7 @@ window.STORY_SCRIPT = String.raw`
 title "SILK" "A Choice Simulation"
 emblem "絹"
 titlebackground title_cover
-titlefx autumn sun=0.28,0.45 rays=0.02,-0.35
+titlefx autumn sun=0.28,0.42 rays=0.02,-0.35
 # Backgrounds are pixel art; switch to "artstyle pixel" if the sprites are pixel art too,
 # or "artstyle smooth" if everything is painted / high-resolution.
 artstyle mixed
