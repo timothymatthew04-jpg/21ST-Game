@@ -27,9 +27,8 @@ emblem "絹"
 titlebackground title_cover
 titlefx ginkgo sun=0.3,-0.25 sway=0.28,0.22,0.34,0.3 pivot=0.4,0.85
 titlelogo brush
-# Backgrounds are pixel art; switch to "artstyle pixel" if the sprites are pixel art too,
-# or "artstyle smooth" if everything is painted / high-resolution.
-artstyle mixed
+# The backgrounds are detailed pixel art at high resolution, so everything is scaled smoothly.
+artstyle smooth
 credits "Adapted from Silk by Alessandro Baricco"
 titlemusic title
 warning "SILK is a branching story adapted from Alessandro Baricco's novel.\n\nYour choices shape Hervé's relationships, his obsession and his memories — the great events of his life stay the same.\n\nThis is an early build: the backgrounds are placeholders until the art arrives."
@@ -47,6 +46,49 @@ character blanche   "Madame Blanche" color=#b7c4ff blip=520
 # Each character's picture is assets/sprites/<id>/neutral.png, and their face in the
 # text box is assets/faces/<id>.png. The face appears when they speak without standing
 # in the scene: always for Hervé, who is the player.
+
+# ---------------------------------------------------------------- places and living backgrounds
+# "place" names where a background is; the name appears at the top of the screen the
+# first time the story arrives there. "bgfx" brings a background to life; positions are
+# fractions of the picture (see docs/SCRIPTING.md for every effect).
+place silk_mill         "The Silk Mill"          "Lavilledieu · France"
+place silk_mill_empty   "The Silk Mill"          "Lavilledieu · France"
+place balbadiou_office  "Balbadiou's Office"     "Lavilledieu · France"
+place joncour_home      "The Joncour House"      "Lavilledieu · France"
+place helene_garden     "Hélène's Garden"        "Lavilledieu · France"
+place helene_sickroom   "Hélène's Room"          "Lavilledieu · France"
+place cemetery          "The Cemetery"           "Lavilledieu · France"
+place road_east         "The Road East"          "Across Europe and Russia"
+place smuggler_boat     "A Smuggler's Boat"      "The eastern sea, at night"
+place japan_coast       "The West Coast"         "Japan"
+place japan_path        "The Road into the Hills" "Japan"
+place hara_kei_estate   "Hara Kei's Village"     "The hills of Japan"
+place estate_tearoom    "Hara Kei's House"       "The hills of Japan"
+place estate_room       "Hara Kei's House"       "The hills of Japan"
+place aviary            "The Aviary"             "Behind Hara Kei's house"
+place burned_village    "The Burned Village"     "The hills of Japan"
+place forest_camp_night "Hara Kei's Camp"        "The forest, at night"
+place blanche_salon     "Madame Blanche's House" "In the city"
+
+bgfx silk_mill glow=0.36,0.38,0.08,#fff4d0 glow=0.498,0.38,0.08,#fff4d0 glow=0.635,0.38,0.08,#fff4d0 motes=0.15,0.25,0.55,0.7,45
+bgfx silk_mill_empty motes=0.15,0.25,0.55,0.7,20,#c8d4e6 rain=0.5,0.308,0.215,0.105,0.34 rain=0.5,0.446,0.215,0.105,0.34 rain=0.5,0.583,0.215,0.105,0.34
+bgfx balbadiou_office flame=0.6375,0.648,0.05,#ffc070 glow=0.87,0.35,0.1,#fff0d0 motes=0.5,0.3,0.45,0.6,30
+bgfx joncour_home flame=0.856,0.642,0.07,#ff9a40 embers=0.856,0.63,0.4 flame=0.825,0.393,0.014 flame=0.887,0.393,0.014 stars=0.37,0.21,0.26,0.14,10 fireflies=0.37,0.47,0.26,0.1,5
+bgfx helene_sickroom snow=1,0.3125,0.207,0.1875,0.37 flame=0.45,0.622,0.03,#ffc070 motes=0.3,0.25,0.4,0.7,18,#dde6ff
+bgfx blanche_salon flame=0.231,0.415,0.07,#ffb070 flame=0.094,0.414,0.013 flame=0.115,0.41,0.013 flame=0.133,0.406,0.013 steam=0.796,0.83,0.8 steam=0.6875,0.84,0.6 glow=0.9125,0.148,0.03 stars=0.8,0.04,0.12,0.4,8
+bgfx helene_garden glow=0.817,0.415,0.09,#ffd08a glow=0.065,0.485,0.03,#ffc070 glow=0.131,0.485,0.03,#ffc070 glow=0.181,0.574,0.03,#ffc070 glints=0.49,0.67,0.33,0.12 fireflies=0.05,0.45,0.9,0.4,14 petals=0.35 birds=3,0.05,0.25
+bgfx cemetery glow=0.275,0.607,0.09,#ffc07a flame=0.817,0.422,0.02 flame=0.5375,0.863,0.025 birds=3,0.08,0.3 motes=0.1,0.5,0.8,0.4,30,#ffe0a0 fireflies=0.05,0.62,0.9,0.3,10 foliage=0.4
+bgfx road_east glow=0.6625,0.544,0.07,#ffd08a rays=0.6625,0.54,0.8,#ffd49a birds=5,0.08,0.4 motes=0.4,0.45,0.5,0.3,30,#ffe0a0 mist=0.06,0.22,0.2,#ffc9a0
+bgfx smuggler_boat glow=0.625,0.207,0.05,#cfe0ff glints=0.5,0.53,0.25,0.25,30 stars=0,0,1,0.45,30 mist=0.48,0.12,0.25 rock
+bgfx japan_coast glow=0.133,0.141,0.03,#cfe0ff glow=0.85,0.55,0.25,#ffb080 glints=0.3,0.56,0.7,0.2,26 flame=0.373,0.633,0.02 birds=4,0.1,0.35 mist=0.42,0.12,0.3,#ffd0d0 stars=0,0,1,0.25,14
+bgfx japan_path rays=0.51,0.28,1.2,0.6,#fff0b0 motes=0.3,0.2,0.4,0.6,40,#fff0c0 fireflies=0,0.65,0.35,0.3,8 fireflies=0.65,0.65,0.35,0.3,8 foliage=0.6 glow=0.513,0.14,0.07,#e8f0ff flame=0.25,0.59,0.025,#ffd28a flame=0.763,0.59,0.025,#ffd28a
+bgfx hara_kei_estate glow=0.435,0.16,0.09,#cfe0ff flame=0.287,0.665,0.03 flame=0.43,0.63,0.025 flame=0.588,0.665,0.03 flame=0.765,0.665,0.03 flame=0.937,0.76,0.045
+bgfx hara_kei_estate flame=0.285,0.865,0.025,#ffc870 flame=0.43,0.78,0.02,#ffc870 flame=0.588,0.835,0.025,#ffc870 flame=0.765,0.9,0.025,#ffc870 glints=0.24,0.8,0.54,0.19,22 leaves=0.9 petals=0.25 stars=0.05,0.02,0.9,0.3,14
+bgfx estate_tearoom petals=1.2 glow=0.665,0.135,0.07,#cfe0ff steam=0.535,0.77,0.9 steam=0.67,0.6,0.8 glints=0.4,0.66,0.16,0.06,10 flame=0.724,0.5,0.02,#ffd28a stars=0.15,0,0.42,0.25,10
+bgfx estate_room glow=0.213,0.28,0.04,#cfe0ff glints=0.17,0.57,0.1,0.09,10 fireflies=0.28,0.2,0.14,0.45,8 fireflies=0.69,0.2,0.21,0.45,10 motes=0.25,0.62,0.37,0.2,20
+bgfx aviary flutter=0.365,0.25,0.33,0.38,18 leaves=0.8 rays=0.19,0.15,0.8,#fff2c4 motes=0.3,0.3,0.4,0.5,25,#fff0c8
+bgfx burned_village smoke=0.167,0.65,1.3,#2e2020 smoke=0.7,0.64,1,#2e2020 smoke=0.906,0.67,1.2,#2e2020 smoke=0.41,0.62,0.7,#3a2a28 embers=0.167,0.7,1 embers=0.906,0.726,1 embers=0.406,0.63,0.6 ash=1 flame=0.167,0.71,0.08,#ff7a30 flame=0.7,0.69,0.07,#ff7a30 flame=0.906,0.75,0.08,#ff7a30
+bgfx forest_camp_night flame=0.429,0.82,0.12,#ff9a40 embers=0.429,0.8,1 smoke=0.429,0.78,0.8,#6a7288 fireflies=0,0.55,1,0.3,14 mist=0.7,0.2,0.3,#b8c8ff rays=0.6,0,0.9,0.45,#b8d0ff flame=0.219,0.79,0.05,#ffb860 glow=0.625,0.096,0.03,#cfe0ff
 
 # ---------------------------------------------------------------- karma
 # Choices are felt, never shown as numbers. When a choice (or a "set" line) moves one
@@ -203,6 +245,7 @@ label chapter2
   scene japan_coast with fade
   play music japan fadein 3
   "I came ashore on the west coast, the unofficial way, where foreigners were not supposed to come ashore at all."
+  scene japan_path with dissolve
   "Men I never saw clearly led me inland for days, blindfolded for part of the way. Nobody explained anything. I learned very quickly not to ask."
   scene hara_kei_estate with fade
   "At last I was brought to a village in the hills, and to the house of the man who controlled everything there: Hara Kei."
@@ -380,7 +423,7 @@ label chapter6
   "Behind Hara Kei's house there was an aviary: a great cage of wood and paper, taller than a house, full of birds from every corner of Asia."
   "Hundreds of wings, all moving, going nowhere."
   "I stood there longer than I should have. I thought about her. About how you can keep something beautiful by never letting it leave."
-  scene estate_tearoom with dissolve
+  scene estate_room with dissolve
   "On the way back, I passed the room where she had been sitting that first day. Her things were there — a shawl, a small lacquered box, nobody watching."
   "Before I knew I had decided anything, I had taken off one of my gloves and laid it among her belongings."
   cg the_glove with dissolve
@@ -564,7 +607,6 @@ label chapter10
 label chapter11
   chapter "Chapter 11" "The Abandoned Village"
   scene burned_village with fade
-  tint red
   play ambience wind fadein 3
   stop music fadeout 3
   "I reached the hills after weeks of hiding, bribing, waiting."
@@ -580,7 +622,6 @@ label chapter11
     inner "In China I had been sensible. Here, in the ashes, sensible was a word from another language."
   endif
   "Then, on the fourth day, a boy found me and led me into the forest, without a word."
-  tint none
   stop ambience fadeout 2
   jump chapter12
 

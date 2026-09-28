@@ -17,6 +17,20 @@
   // used and the pose reacts instead: a small lift for happy moods, a sink for sad ones.
   const MOODS = { smile: 'up', happy: 'up', soft: 'soft', sad: 'down', hurt: 'down', tired: 'down', worried: 'down', cold: 'cold', stern: 'cold', serious: 'cold', gaze: 'soft' };
 
+  const aspects = new Map();
+  /** A picture's width / height, so animation layers can line up with it. */
+  function pictureAspect(url) {
+    if (!aspects.has(url)) {
+      aspects.set(url, new Promise((resolve) => {
+        const img = new Image();
+        img.onload = () => resolve(img.naturalWidth / img.naturalHeight || 16 / 9);
+        img.onerror = () => resolve(16 / 9);
+        img.src = url;
+      }));
+    }
+    return aspects.get(url);
+  }
+
   /** Synchronous: {url, fallback}, null (no art at all) or undefined (not checked yet). */
   function spriteLookup(folder, expr) {
     const exact = VN.assets.lookup('sprite', `${folder}/${expr}`);
@@ -133,7 +147,7 @@
     }
 
     // ---- element builders (also used for save thumbnails) -------------------
-    makeBg(name) {
+    makeBg(name, live = true) {
       const el = h('div.bg');
       if (name === 'black' || name === 'white') {
         el.style.background = name === 'black' ? '#000' : '#fff';
@@ -143,6 +157,12 @@
         el.classList.remove('bg-ph');
         el.replaceChildren();
         el.style.backgroundImage = `url("${url}")`;
+        // the picture's own animation: petals, lanterns, water... (not in save thumbnails)
+        const specs = live && this.story.bgFx && this.story.bgFx[name];
+        if (specs && specs.length && VN.SceneFx) {
+          const fx = new VN.SceneFx(el, specs, this.settings);
+          pictureAspect(url).then((ar) => fx.setAspect(ar));
+        }
       };
       const known = VN.assets.lookup('bg', name);
       if (known) {
@@ -509,7 +529,7 @@
       const box = h('div.thumb-scene');
       const content = h('div.scene-content');
       content.style.filter = (scene.filter && FILTERS[scene.filter]) || 'none';
-      if (scene.bg) content.append(this.makeBg(scene.bg));
+      if (scene.bg) content.append(this.makeBg(scene.bg, false));
       const { order, pos } = Stage.layout(scene.sprites || {});
       order.forEach((id, z) => {
         const el = this.makeSprite(id, scene.sprites[id].expr);

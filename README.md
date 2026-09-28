@@ -79,11 +79,16 @@ On a phone, tap to advance and use the buttons under the text box.
 * **Fills any screen.** The game widens to the window's shape (from 16:10 up to 21:9), so there are
   no black bars on laptops, desktops or ultrawide monitors. Unusual shapes, such as a phone held
   upright, get a soft blurred copy of the picture around the game instead of bars.
+* **Living backgrounds** for every place in the story, from the silk mill in Lavilledieu across
+  the steppe and the night sea to Hara Kei's moonlit village: sakura petals and autumn leaves fall,
+  lanterns and fires flicker, water glints, fireflies wander, smoke and steam rise, birds cross the
+  sky and flutter in the aviary, and the smuggler's boat rocks. The name of each new place fades in
+  at the top of the screen when the story arrives there.
 * **Characters**: Hélène, Balbadiou, Hara Kei, the woman and Madame Blanche on stage, and Hervé's
   face in the text box. Until a character has a picture for an expression, the pose reacts to the
   mood instead.
-* **Placeholder art.** Every background and event picture has a styled stand-in until the real
-  art is added.
+* **Placeholder art.** The three event pictures (CGs) have a styled stand-in until the real art is
+  added.
 
 ## Project layout
 
@@ -102,6 +107,7 @@ js/                   the engine
   titlelogo.js        the carved title logo (alternative style)
   paintfx.js          the animated painted title (leaves, wind, light)
   brushlogo.js        the glowing brush-lettered title logo
+  scenefx.js          living backgrounds (petals, lanterns, water, smoke, birds...)
   audio.js            music, sounds, menu beeps
   main.js             start-up, keyboard/mouse input, screen scaling
 story/script.js       THE STORY: edit this to change the game
@@ -109,6 +115,7 @@ docs/SCRIPTING.md     how to write the story script
 docs/ASSETS.md        every background, sprite, CG and track the story uses
 assets/               drop art and audio here (see docs/ASSETS.md)
 tools/check-script.js checks the story for mistakes:  node tools/check-script.js
+tools/paint-backgrounds.js  paints the pixel-art backgrounds in tools/paint/ into assets/bg/
 ```
 
 ## Adding art and music

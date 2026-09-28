@@ -171,6 +171,91 @@ html, body {
   image-rendering: pixelated;
 }
 
+/* living backgrounds (js/scenefx.js): a frame that covers the stage exactly as the picture does */
+.bg { overflow: hidden; }
+.bg-frame {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: max(100%, calc(720px * var(--ar, 1.7778)));
+  aspect-ratio: var(--ar, 1.7778);
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+.bg-particles { position: absolute; inset: 0; width: 100%; height: 100%; image-rendering: pixelated; }
+.bg-light {
+  position: absolute;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: radial-gradient(circle closest-side,
+    color-mix(in srgb, var(--c) 75%, transparent) 0%,
+    color-mix(in srgb, var(--c) 30%, transparent) 38%,
+    color-mix(in srgb, var(--c) 8%, transparent) 70%,
+    transparent 100%);
+  mix-blend-mode: screen;
+  transform: translate(-50%, -50%);
+}
+.bg-light.glow { animation: bg-glow 6s ease-in-out infinite; }
+.bg-light.flame { animation: bg-flame 1.7s linear infinite; }
+@keyframes bg-glow {
+  0%, 100% { opacity: 0.7; transform: translate(-50%, -50%) scale(1); }
+  50% { opacity: 1; transform: translate(-50%, -50%) scale(1.08); }
+}
+@keyframes bg-flame {
+  0% { opacity: 0.85; transform: translate(-50%, -50%) scale(1); }
+  11% { opacity: 1; transform: translate(-50%, -50%) scale(1.07); }
+  19% { opacity: 0.78; transform: translate(-50%, -50%) scale(0.98); }
+  31% { opacity: 0.95; transform: translate(-50%, -50%) scale(1.03); }
+  44% { opacity: 0.74; transform: translate(-50%, -50%) scale(0.96); }
+  58% { opacity: 1; transform: translate(-50%, -50%) scale(1.05); }
+  70% { opacity: 0.84; transform: translate(-50%, -50%) scale(1); }
+  83% { opacity: 0.97; transform: translate(-50%, -50%) scale(1.04); }
+  100% { opacity: 0.85; transform: translate(-50%, -50%) scale(1); }
+}
+.bg-rays {
+  /* shafts of light fanning down from a point, swaying slowly */
+  position: absolute;
+  width: calc(var(--s, 1) * 150%);
+  aspect-ratio: 1;
+  --r: color-mix(in srgb, var(--c) 34%, transparent);
+  background: conic-gradient(from 0deg,
+    transparent 0deg 116deg, var(--r) 119deg, transparent 123deg 129deg, var(--r) 133deg, transparent 138deg 146deg,
+    var(--r) 148deg, transparent 151deg 156deg, var(--r) 161deg, transparent 166deg 171deg, var(--r) 174deg, transparent 177deg 182deg,
+    var(--r) 187deg, transparent 192deg 197deg, var(--r) 200deg, transparent 203deg 209deg, var(--r) 214deg, transparent 219deg 225deg,
+    var(--r) 228deg, transparent 232deg 237deg, var(--r) 241deg, transparent 245deg 360deg);
+  -webkit-mask-image: radial-gradient(circle closest-side, #000 0%, rgba(0, 0, 0, 0.55) 35%, transparent 80%);
+  mask-image: radial-gradient(circle closest-side, #000 0%, rgba(0, 0, 0, 0.55) 35%, transparent 80%);
+  mix-blend-mode: screen;
+  animation: bg-rays 16s ease-in-out infinite alternate;
+}
+@keyframes bg-rays {
+  from { transform: translate(-50%, -50%) rotate(-5deg); opacity: calc(0.45 * var(--o, 1)); }
+  to { transform: translate(-50%, -50%) rotate(5deg); opacity: calc(0.8 * var(--o, 1)); }
+}
+.bg-mist {
+  /* a band of fog drifting sideways, seamlessly */
+  position: absolute;
+  left: 0;
+  width: 200%;
+  --m: color-mix(in srgb, var(--c) 55%, transparent);
+  background:
+    radial-gradient(ellipse 13% 42% at 12% 50%, var(--m), transparent 70%),
+    radial-gradient(ellipse 18% 34% at 36% 62%, var(--m), transparent 70%),
+    radial-gradient(ellipse 11% 46% at 61% 44%, var(--m), transparent 70%),
+    radial-gradient(ellipse 16% 38% at 86% 56%, var(--m), transparent 70%);
+  background-size: 50% 100%;
+  background-repeat: repeat-x;
+  mix-blend-mode: screen;
+  animation: bg-mist 80s linear infinite;
+}
+@keyframes bg-mist { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+.bg.bg-rock { animation: bg-rock 9s ease-in-out infinite; transform-origin: 50% 75%; }
+@keyframes bg-rock {
+  0%, 100% { transform: scale(1.06) rotate(-0.7deg) translateY(-4px); }
+  50% { transform: scale(1.06) rotate(0.7deg) translateY(5px); }
+}
+.reduce-motion .bg-rays, .reduce-motion .bg-mist, .reduce-motion .bg-light { animation: none; }
+
 .bg-ph {
   background:
     radial-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1.2px) 0 0 / 6px 6px,
@@ -759,6 +844,44 @@ html, body {
   text-shadow: 0 1px 3px rgba(0, 0, 0, 0.85), 0 0 16px color-mix(in srgb, var(--c) 55%, transparent);
 }
 @keyframes whisper-in { from { opacity: 0; transform: translateX(-10px); } }
+
+/* where the story has arrived */
+.place {
+  position: absolute;
+  top: 30px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 70px 12px;
+  background: radial-gradient(ellipse closest-side, rgba(10, 5, 3, 0.5), transparent);
+  pointer-events: none;
+  animation: fade-up 0.9s ease both;
+  transition: opacity 0.9s ease;
+}
+.place.out { opacity: 0; }
+.place-region {
+  font-family: var(--text-font);
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: 0.32em;
+  padding-left: 0.32em;
+  text-transform: uppercase;
+  color: var(--kin-light);
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.9);
+}
+.place-rule { width: 0; height: 1.5px; background: linear-gradient(90deg, transparent, var(--kin), transparent); animation: place-rule 1.2s 0.2s ease forwards; }
+@keyframes place-rule { to { width: 280px; } }
+.place-name {
+  font-family: var(--name-font);
+  font-weight: 700;
+  font-size: 28px;
+  letter-spacing: 0.06em;
+  color: #fff7ec;
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.85), 0 0 2px rgba(0, 0, 0, 0.9);
+}
 @keyframes thread-draw { from { transform: scaleX(0); } }
 
 /* ---------------------------------------------------------------- overlays & panels */

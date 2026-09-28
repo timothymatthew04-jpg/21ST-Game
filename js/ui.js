@@ -113,6 +113,19 @@
     }
 
     // ---- karma ------------------------------------------------------------------
+    /** Where the story has arrived: a small caption at the top of the screen. */
+    placeCaption({ name, region }) {
+      if (this.placeEl) this.placeEl.remove();
+      const el = h('div.place', { 'aria-live': 'polite' },
+        region ? h('div.place-region', region) : null,
+        h('div.place-rule'),
+        h('div.place-name', name));
+      this.placeEl = el;
+      this.uiLayer.append(el);
+      setTimeout(() => el.classList.add('out'), 3800);
+      setTimeout(() => { el.remove(); if (this.placeEl === el) this.placeEl = null; }, 4700);
+    }
+
     /** A short line that says a choice mattered, drawn in along a thread of its colour. */
     whisper(text, color, { quiet = false, delay = 0 } = {}) {
       const w = h('div.whisper', { style: { '--c': color, animationDelay: `${delay}ms` } },

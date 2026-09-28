@@ -10,6 +10,7 @@
   const POSITIONS = { farleft: 14, left: 28, center: 50, right: 72, farright: 86 };
   const ASSIGN_RE = /^([A-Za-z_]\w*(?:\.[A-Za-z_]\w*)?)\s*(\+=|-=|\*=|\/=|=)\s*(.+)$/;
   const IDENT_RE = /^[A-Za-z_]\w*$/;
+  const BG_FX = ['petals', 'leaves', 'foliage', 'snow', 'ash', 'rain', 'fireflies', 'motes', 'glints', 'stars', 'smoke', 'steam', 'embers', 'birds', 'flutter', 'glow', 'flame', 'rays', 'mist', 'rock'];
 
   /** Split a line into bare words and "quoted strings" (with \" and \n escapes). */
   function tokenizeLine(text) {
@@ -59,7 +60,7 @@
   function parse(source) {
     const story = {
       title: 'Untitled', subtitle: '', emblem: '', artStyle: 'mixed', titleFx: null, titleLogo: 'carved', titleMusic: null, titleBackground: null, warning: null, credits: null,
-      characters: {}, backgrounds: {}, poemWords: [], karma: [],
+      characters: {}, backgrounds: {}, poemWords: [], karma: [], bgFx: {}, places: {},
       program: [], labels: {}, endings: [], errors: [], warnings: [],
       hash: hashString(source),
     };
@@ -357,6 +358,24 @@
           story.backgrounds[tk[1].v] = str(tk[2], 'background name "path/to/image.png"');
           return;
         }
+        case 'bgfx': {
+          const usage = 'bgfx background effect[=numbers,#color] ... (see docs/SCRIPTING.md)';
+          need(3, usage);
+          const list = story.bgFx[tk[1].v] || (story.bgFx[tk[1].v] = []);
+          for (const t of tk.slice(2)) {
+            const [type, val] = t.v.split('=');
+            if (!BG_FX.includes(type)) throw new Error(`Unknown background effect "${type}" (use ${BG_FX.join(', ')})`);
+            const parts = val ? val.split(',') : [];
+            const nums = parts.filter((p) => !p.startsWith('#')).map(Number);
+            if (nums.some(isNaN)) throw new Error(`Usage: ${usage}`);
+            list.push({ type, nums, color: parts.find((p) => p.startsWith('#')) || null });
+          }
+          return;
+        }
+        case 'place':
+          need(3, 'place background "Name of the place" ["Region"]');
+          story.places[tk[1].v] = { name: str(tk[2], 'place background "Name of the place" ["Region"]'), region: tk[3] ? tk[3].v : '' };
+          return;
         case 'endpoemwords': throw new Error('"endpoemwords" without "poemwords"');
 
         // ---- flow ----

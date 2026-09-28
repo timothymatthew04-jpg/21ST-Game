@@ -271,6 +271,7 @@
     restore(state, { instant = true } = {}) {
       this.abort();
       this.state = state;
+      this.shownPlace = null;
       this.ui.cancelTransient();
       this.poem.cancel();
       this.ui.textbox.clear();
@@ -551,6 +552,11 @@
       } else {
         await this.sleep(this.stage.sync(sc, { instant: kind === 'none', duration: ms }));
       }
+      // Arriving somewhere new: say where we are.
+      const place = this.story.places[ins.bg];
+      const key = place ? `${place.name}|${place.region}` : null;
+      if (place && key !== this.shownPlace && !this.isSkipping()) this.ui.placeCaption(place);
+      if (place || ins.bg === 'black') this.shownPlace = key;
       this.state.pc++;
     }
 

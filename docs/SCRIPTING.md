@@ -238,7 +238,7 @@ titlemusic title
 titlebackground title_cover       # picture behind the title screen (assets/bg/title_cover.webp)
 titlefx ginkgo sun=0.3,-0.25 sway=0.28,0.22,0.34,0.3 pivot=0.4,0.85   # animate the title screen (see below)
 titlelogo brush                   # glowing brush lettering (or: carved)
-artstyle mixed                    # pixel | smooth | mixed (see below)
+artstyle smooth                   # pixel | smooth | mixed (see below)
 warning "Text shown once, the first time the game is opened."
 background hara_kei_estate "assets/bg/some-other-name.jpg"   # only if a file doesn't follow the naming rule
 ```
@@ -261,6 +261,34 @@ letters fall back to a brush font). `titlelogo carved` draws carved stone
 lettering instead. The title itself is drawn
 as a carved logo: the first letter oversized, spanning the name and the subtitle, with a sweeping
 gleam, glints and a silk ribbon (js/titlelogo.js).
+
+### Places and living backgrounds
+
+```text
+place hara_kei_estate "Hara Kei's Village" "The hills of Japan"
+bgfx hara_kei_estate glow=0.435,0.16,0.09,#cfe0ff flame=0.287,0.665,0.03 leaves glints=0.24,0.8,0.54,0.19
+```
+
+`place` names where a background is. The first time the story arrives there, the name fades in at
+the top of the screen (with the region above it), so the player always knows where Hervé has gone.
+
+`bgfx` brings a background to life. Several `bgfx` lines for the same background add up. All
+positions and sizes are fractions of the picture (0,0 is its top-left corner), so they stay on the
+lantern or the pond at any window shape; `#colour` is optional everywhere.
+
+| Effect | Numbers | What it does |
+| --- | --- | --- |
+| `petals`, `leaves`, `foliage`, `snow`, `ash` | density [, x,y,w,h] | falling sakura petals, autumn leaves, green-gold leaves, snow, ash; with a region (e.g. a window) they only fall there |
+| `rain` | density [, x,y,w,h] | slanting rain, optionally only inside a window |
+| `fireflies`, `motes`, `glints`, `stars` | x,y,w,h [, count] | fireflies wandering, dust drifting in light, sparkles on water, twinkling stars, inside a region |
+| `smoke`, `steam`, `embers` | x,y [, scale] | rising from a point: chimney or fire smoke, steam from tea, sparks |
+| `birds` | count [, top, bottom] | birds crossing the sky between two heights |
+| `flutter` | x,y,w,h [, count] | birds hopping and flying inside a cage |
+| `glow` | x,y,radius | a slow, breathing light: a moon, a window |
+| `flame` | x,y,radius | a flickering light: a lantern, a candle, a fire |
+| `rays` | x,y [, spread, strength] | shafts of light fanning down from a point, swaying |
+| `mist` | y,height [, opacity] | a band of fog drifting across |
+| `rock` | | the whole picture rocks gently, like a boat |
 
 `artstyle` decides how pictures are scaled. `pixel` keeps every pixel crisp (for pixel art),
 `smooth` scales everything softly (for painted or high-resolution art), and `mixed` (the default)

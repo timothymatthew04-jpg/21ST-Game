@@ -7,7 +7,14 @@ Regenerate this list after editing the story with `node tools/check-script.js --
 
 ## Backgrounds: `assets/bg/<name>.png`
 
-1280×720 or 1920×1080 (16:9). `.jpg` and `.webp` work too. The game widens to fit the window (up to
+All of them are in. Four are the illustrations you provided (`hara_kei_estate`, `estate_tearoom`,
+`estate_room` and `japan_path`); the other fourteen were painted in code in the same pixel-art
+style by `tools/paint-backgrounds.js` (the scenes are in `tools/paint/`), and can be regenerated or
+replaced at any time. Each one is animated by the `bgfx` lines at the top of the story script.
+
+To replace one, save a new picture under the same name: 1920×1080 or larger (16:9). `.jpg` and
+`.webp` work too. The game looks for `.png` first, then `.jpg`, then `.webp`, so a new `.png` or
+`.jpg` takes over from the painted `.webp` without deleting anything. The game widens to fit the window (up to
 21:9), which crops a little off the top and bottom of a 16:9 picture on very wide screens, so keep
 important details away from those edges.
 
@@ -19,8 +26,10 @@ important details away from those edges.
 | `road_east` | The long journeys across Europe and Russia |
 | `smuggler_boat` | The night crossing to Japan, and the dock in China |
 | `japan_coast` | Chapter 2: arriving in Japan |
+| `japan_path` | Chapter 2: led inland through the forest, past a torii |
 | `hara_kei_estate` | Chapters 2, 5, 7 and 9: Hara Kei's village in the hills |
-| `estate_tearoom` | Chapters 3 and 6: the room where the cup scene happens |
+| `estate_tearoom` | Chapter 3: the moonlit room where tea is served and the cup is set down |
+| `estate_room` | Chapter 6: the empty room with her belongings, where Hervé leaves his glove |
 | `helene_garden` | Chapters 4, 8 and 15: the garden Hervé makes for Hélène |
 | `aviary` | Chapter 6: Hara Kei's great bird cage |
 | `blanche_salon` | Chapters 7 and 14, Final Chapter: Madame Blanche's house |
@@ -36,8 +45,8 @@ and 4K screens it is enlarged a little. A larger original (3840×2160 is ideal) 
 `assets/bg/title_cover.webp`. The leaves, light, wind and logo are drawn by the game at the screen's
 full resolution, so they stay sharp at any size.
 
-Backgrounds and CGs are drawn pixel-crisp to match the cover. If they turn out to be painted or
-high-resolution instead, change `artstyle` at the top of the script (see docs/SCRIPTING.md).
+The story uses `artstyle smooth`: the backgrounds are pixel art drawn at high resolution, so they
+are scaled smoothly and stay sharp at any window size (see docs/SCRIPTING.md).
 
 ## Character sprites: `assets/sprites/<character>/<expression>.png`
 
