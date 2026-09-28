@@ -28,7 +28,10 @@ Regenerate this list after editing the story with `node tools/check-script.js --
 | `helene_sickroom` | Chapter 15 |
 | `cemetery` | Ending: Hélène's grave |
 
-Optional: `titlebackground <name>` in the script puts a picture behind the title screen.
+The title screen uses `title_cover` (already added: the ivy-covered house with the bell).
+
+Backgrounds and CGs are drawn pixel-crisp to match the cover. If they turn out to be painted or
+high-resolution instead, change `artstyle` at the top of the script (see docs/SCRIPTING.md).
 
 ## Character sprites: `assets/sprites/<character>/<expression>.png`
 

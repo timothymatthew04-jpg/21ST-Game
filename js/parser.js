@@ -58,7 +58,7 @@
 
   function parse(source) {
     const story = {
-      title: 'Untitled', subtitle: '', emblem: '', titleMusic: null, titleBackground: null, warning: null, credits: null,
+      title: 'Untitled', subtitle: '', emblem: '', artStyle: 'mixed', titleMusic: null, titleBackground: null, warning: null, credits: null,
       characters: {}, backgrounds: {}, poemWords: [],
       program: [], labels: {}, endings: [], errors: [], warnings: [],
       hash: hashString(source),
@@ -310,6 +310,10 @@
         case 'warning': story.warning = str(tk[1], 'warning "Text shown once before the title screen"'); return;
         case 'credits': story.credits = str(tk[1], 'credits "Made by ..."'); return;
         case 'emblem': story.emblem = str(tk[1], 'emblem "絹"'); return;
+        case 'artstyle':
+          if (!tk[1] || !['pixel', 'smooth', 'mixed'].includes(tk[1].v)) throw new Error('Usage: artstyle pixel|smooth|mixed');
+          story.artStyle = tk[1].v;
+          return;
         case 'titlemusic': need(2, 'titlemusic track_name'); story.titleMusic = tk[1].v; return;
         case 'titlebackground': need(2, 'titlebackground bg_name'); story.titleBackground = tk[1].v; return;
         case 'background': {

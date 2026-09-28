@@ -1,7 +1,8 @@
 # SILK
 
 A branching visual novel adapted from Alessandro Baricco's *Silk*, built on a small web engine with
-*Doki Doki Literature Club*-style mechanics and a retro anime look.
+*Doki Doki Literature Club*-style mechanics and an indie pixel-art look: carved-stone lettering,
+wooden sign plates and Kavoon / Pixelify Sans type.
 
 You play Hervé Joncour. Your choices shape his marriage to Hélène, his commitment to the silk trade,
 and his obsession with a woman in Japan. The great events of the novel stay the same; what changes
@@ -58,8 +59,9 @@ On a phone, tap to advance and use the buttons under the text box.
   Ren'Py games.
 * **Chapter title cards**, scene transitions (dissolve, fade, flash), tints, filters and screen
   effects.
-* **Settings** for text speed, auto speed, music and sound volume, text beeps, speaker highlight,
-  CRT scanlines and reduced motion.
+* **Settings** for text speed, auto speed, music and sound volume, text beeps, speaker highlight
+  and reduced motion.
+* **Title screen** on the pixel-art cover (`assets/bg/title_cover.webp`) with drifting leaves.
 * **Placeholder art.** Every background, character and event picture has a styled stand-in until
   the real art is added.
 
@@ -67,7 +69,7 @@ On a phone, tap to advance and use the buttons under the text box.
 
 ```text
 index.html            the page
-css/game.css          all styling (colours are variables at the top)
+css/game.css          all styling (colours and fonts are variables at the top)
 js/                   the engine
   parser.js           reads the story script
   expr.js             conditions like  helene_trust >= 3

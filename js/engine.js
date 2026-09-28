@@ -22,7 +22,6 @@
     textBlips: false,
     skipUnseen: false,
     skipAfterChoices: false,
-    crt: true,
     focus: true,
     reduceMotion: false,
   };

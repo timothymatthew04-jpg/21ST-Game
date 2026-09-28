@@ -140,7 +140,7 @@
     }
 
     // ---- synthesized sounds ------------------------------------------------
-    tone(freq, dur, { type = 'square', vol = 0.05, slide = 0, delay = 0 } = {}) {
+    tone(freq, dur, { type = 'triangle', vol = 0.05, slide = 0, delay = 0 } = {}) {
       const ctx = this.ctx;
       if (!ctx || ctx.state !== 'running') return;
       const v = vol * this.sfxVolume;
@@ -180,11 +180,11 @@
     ui(kind) {
       if (!this.settings.uiSounds) return;
       switch (kind) {
-        case 'hover': this.tone(880, 0.04, { vol: 0.02 }); break;
-        case 'select': this.tone(660, 0.06, { vol: 0.04 }); this.tone(990, 0.08, { vol: 0.04, delay: 0.05 }); break;
-        case 'back': this.tone(520, 0.07, { vol: 0.035, slide: -180 }); break;
-        case 'save': this.tone(784, 0.07, { vol: 0.04 }); this.tone(1175, 0.12, { vol: 0.04, delay: 0.07 }); break;
-        case 'error': this.tone(180, 0.15, { vol: 0.05, type: 'sawtooth' }); break;
+        case 'hover': this.tone(740, 0.05, { vol: 0.025, type: 'sine' }); break;
+        case 'select': this.tone(587, 0.09, { vol: 0.05 }); this.tone(880, 0.12, { vol: 0.04, delay: 0.06 }); break;
+        case 'back': this.tone(494, 0.1, { vol: 0.045, slide: -120 }); break;
+        case 'save': this.tone(659, 0.1, { vol: 0.05 }); this.tone(988, 0.16, { vol: 0.045, delay: 0.08 }); break;
+        case 'error': this.tone(196, 0.18, { vol: 0.06 }); break;
         case 'page': this.tone(1320, 0.03, { vol: 0.02, type: 'triangle' }); break;
         case 'chime': [523, 659, 784, 1047].forEach((f, i) => this.tone(f, 0.35, { vol: 0.03, type: 'triangle', delay: i * 0.09 })); break;
         case 'pick': this.tone(1046, 0.05, { vol: 0.035, type: 'triangle' }); this.tone(1568, 0.09, { vol: 0.03, type: 'triangle', delay: 0.04 }); break;
@@ -196,7 +196,7 @@
       const now = performance.now();
       if (now - this.lastBlip < 45) return;
       this.lastBlip = now;
-      this.tone(freq * (0.96 + Math.random() * 0.08), 0.035, { vol: 0.025, type: 'square' });
+      this.tone(freq * (0.96 + Math.random() * 0.08), 0.04, { vol: 0.03, type: 'triangle' });
     }
   }
 

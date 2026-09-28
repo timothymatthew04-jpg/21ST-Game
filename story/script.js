@@ -22,8 +22,12 @@
  */
 window.STORY_SCRIPT = String.raw`
 
-title "SILK" "A choice simulation"
+title "SILK" "A Choice Simulation"
 emblem "絹"
+titlebackground title_cover
+# Backgrounds are pixel art; switch to "artstyle pixel" if the sprites are pixel art too,
+# or "artstyle smooth" if everything is painted / high-resolution.
+artstyle mixed
 credits "Adapted from Silk by Alessandro Baricco"
 titlemusic title
 warning "SILK is a branching story adapted from Alessandro Baricco's novel.\n\nYour choices shape Hervé's relationships, his obsession and his memories — the great events of his life stay the same.\n\nThis is an early build: characters and backgrounds are placeholders until the art arrives."

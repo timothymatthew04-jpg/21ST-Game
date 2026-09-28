@@ -55,7 +55,10 @@
     VN.story = story;
     VN.store.setPrefix(`vn.${slug(story.title)}.`);
     document.title = story.title;
+    stageEl.classList.add(`art-${story.artStyle}`);
     for (const [name, path] of Object.entries(story.backgrounds)) VN.assets.override('bg', name, path);
+    // Start loading the cover art now so it's ready when the title screen appears.
+    if (story.titleBackground) VN.assets.resolve('bg', story.titleBackground);
 
     const settings = Object.assign({}, VN.DEFAULT_SETTINGS, VN.store.get('settings', {}));
     const audio = new VN.AudioSystem(settings);

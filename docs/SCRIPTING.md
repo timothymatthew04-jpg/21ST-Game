@@ -40,7 +40,7 @@ character inner  ""       color=#cbbef0 italic
 ```
 
 * `color` is the colour of the name tag.
-* `blip` is the pitch of the optional retro text beeps (Settings → Text blips).
+* `blip` is the pitch of the optional text beeps (Settings → Text blips).
 * `italic` renders the lines in italics (used for inner thoughts).
 * An empty name (`""`) hides the name tag.
 * `sprite=folder` uses a different sprite folder than the character's id.
@@ -211,10 +211,15 @@ title "SILK" "A choice simulation"
 emblem "絹"
 credits "Adapted from Silk by Alessandro Baricco"
 titlemusic title
-titlebackground title_bg
+titlebackground title_cover       # picture behind the title screen (assets/bg/title_cover.webp)
+artstyle mixed                    # pixel | smooth | mixed (see below)
 warning "Text shown once, the first time the game is opened."
 background hara_kei_estate "assets/bg/some-other-name.jpg"   # only if a file doesn't follow the naming rule
 ```
+
+`artstyle` decides how pictures are scaled. `pixel` keeps every pixel crisp (for pixel art),
+`smooth` scales everything softly (for painted or high-resolution art), and `mixed` (the default)
+keeps backgrounds and CGs crisp but draws character sprites smoothly.
 
 ## Where the art and sound go
 

@@ -27,7 +27,7 @@ const between = (a, b) => {
 const scripts = [...between('<!-- scripts:start -->', '<!-- scripts:end -->').matchAll(/src="([^"]+)"/g)].map((m) => m[1]);
 const body = between('<!-- stage:start -->', '<!-- stage:end -->').trim();
 const title = (index.match(/<title>([^<]*)<\/title>/) || [, 'Game'])[1];
-const fonts = (index.match(/<link rel="stylesheet" href="(https:\/\/fonts[^"]+)">/) || [])[1];
+const fonts = [...index.matchAll(/<link rel="stylesheet" href="(https:\/\/fonts[^"]+)">/g)].map((m) => m[1]);
 
 const MIME = {
   png: 'image/png', jpg: 'image/jpeg', jpeg: 'image/jpeg', webp: 'image/webp', gif: 'image/gif',
@@ -59,7 +59,7 @@ const head = [
   `<title>${title}</title>`,
   '<link rel="preconnect" href="https://fonts.googleapis.com">',
   '<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>',
-  fonts ? `<link rel="stylesheet" href="${fonts}">` : '',
+  ...fonts.map((href) => `<link rel="stylesheet" href="${href}">`),
   `<style>\n${read('css/game.css')}\n</style>`,
 ].filter(Boolean).join('\n');
 

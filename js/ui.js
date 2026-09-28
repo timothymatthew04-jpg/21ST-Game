@@ -45,8 +45,7 @@
       this.gameLayer.append(this.sceneRoot, this.uiLayer);
       this.overlayRoot = h('div.overlays');
       this.toastEl = h('div.toasts', { 'aria-live': 'polite' });
-      this.crt = h('div.crt');
-      stageEl.append(this.gameLayer, this.overlayRoot, this.toastEl, this.crt);
+      stageEl.append(this.gameLayer, this.overlayRoot, this.toastEl);
 
       this.textbox = new VN.Textbox(this.uiLayer, settings, audio);
       this.uiLayer.append(this.choicesEl, this.quickmenu, this.indicators);
@@ -57,7 +56,6 @@
     bind(engine) { this.engine = engine; }
 
     applySettings() {
-      this.crt.classList.toggle('on', !!this.settings.crt);
       this.stageEl.classList.toggle('reduce-motion', !!this.settings.reduceMotion);
     }
 
@@ -176,10 +174,10 @@
     splash() {
       return new Promise((resolve) => {
         const el = h('div.overlay.splash',
-          this.story.emblem && h('div.splash-kanji', { 'aria-hidden': 'true' }, this.story.emblem),
-          h('div.splash-title', this.story.title),
-          h('div.splash-press', 'PRESS START'),
-          h('div.splash-hint', 'click · tap · any key'));
+          this.story.emblem && h('div.splash-seal', { 'aria-hidden': 'true' }, this.story.emblem),
+          h('div.splash-title', { 'data-text': this.story.title }, this.story.title),
+          h('div.splash-press', 'Click to begin'),
+          h('div.splash-hint', 'or press any key'));
         let entry;
         const go = () => {
           if (!entry) return;
@@ -224,19 +222,23 @@
         this.button('Help', () => this.openMenu('help', { fromTitle: true }), '.title-item'),
       ].filter(Boolean);
 
-      const stars = h('div.title-stars', { 'aria-hidden': 'true' });
-      for (let i = 0; i < 48; i++) {
-        stars.append(h('i', { style: { left: `${Math.random() * 100}%`, top: `${Math.random() * 62}%`, animationDelay: `${(Math.random() * 4).toFixed(2)}s`, opacity: String(0.3 + Math.random() * 0.7) } }));
-      }
       const bg = h('div.title-bg');
       if (this.story.titleBackground) bg.append(eng.stage.makeBg(this.story.titleBackground));
-      const threads = h('div.title-threads', { 'aria-hidden': 'true' }, h('i'), h('i'), h('i'));
+      // Drifting leaves and specks of light over the cover art.
+      const rnd = (a, b) => a + Math.random() * (b - a);
+      const leaves = h('div.title-leaves', { 'aria-hidden': 'true' });
+      for (let i = 0; i < 14; i++) {
+        leaves.append(h('i', { style: { left: `${rnd(-5, 100)}%`, animationDuration: `${rnd(11, 20).toFixed(1)}s`, animationDelay: `${rnd(-20, 0).toFixed(1)}s`, '--drift': `${rnd(-160, 160).toFixed(0)}px`, '--spin': `${rnd(180, 720).toFixed(0)}deg`, '--size': `${Math.round(rnd(2, 4)) * 3}px` } }));
+      }
+      const motes = h('div.title-motes', { 'aria-hidden': 'true' });
+      for (let i = 0; i < 18; i++) {
+        motes.append(h('i', { style: { left: `${rnd(35, 98)}%`, top: `${rnd(4, 70)}%`, animationDelay: `${rnd(-6, 0).toFixed(1)}s`, animationDuration: `${rnd(3, 6).toFixed(1)}s` } }));
+      }
       const el = h('div.overlay.title-screen',
-        bg, stars, threads,
-        this.story.emblem && h('div.title-kanji', { 'aria-hidden': 'true' }, this.story.emblem),
+        bg, h('div.title-shade'), motes, leaves,
         h('div.title-block',
           h('h1.title-logo', { 'data-text': this.story.title }, this.story.title),
-          this.story.subtitle && h('div.title-sub', this.story.subtitle)),
+          this.story.subtitle && h('div.title-plank', h('span', { 'data-text': this.story.subtitle }, this.story.subtitle))),
         h('nav.title-menu', items),
         h('div.title-foot',
           h('span', this.story.credits || ''),
@@ -628,11 +630,10 @@
             slider('set-music', 'Music volume', 0, 1, 0.05, () => s.musicVolume, (v) => { s.musicVolume = v; this.audio.refreshVolumes(); }, (v) => `${Math.round(v * 100)}%`),
             slider('set-sfx', 'Sound volume', 0, 1, 0.05, () => s.sfxVolume, (v) => { s.sfxVolume = v; }, (v) => `${Math.round(v * 100)}%`),
             toggle('set-ui', 'Menu sounds', 'uiSounds'),
-            toggle('set-blips', 'Text blips', 'textBlips', 'Retro beeps while text types')),
+            toggle('set-blips', 'Text blips', 'textBlips', 'Soft ticks while text types')),
           h('section.set-group',
             h('h3', 'Display'),
             toggle('set-focus', 'Highlight the speaker', 'focus'),
-            toggle('set-crt', 'CRT scanlines', 'crt'),
             toggle('set-motion', 'Reduce motion & flashes', 'reduceMotion'),
             h('div.set-row', h('label', 'Screen'), fsBtn)),
           h('section.set-group',
