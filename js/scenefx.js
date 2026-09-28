@@ -400,10 +400,10 @@
 
   // ---------------------------------------------------------------- the per-background controller
   class SceneFx {
-    constructor(bgEl, specs, settings) {
+    constructor(bgEl, specs, settings, frame = null) {
       this.bg = bgEl;
       this.reduce = !!(settings && settings.reduceMotion);
-      this.frameEl = h('div.bg-frame');
+      this.frameEl = frame || h('div.bg-frame');
       this.systems = [];
       const lights = [];
       for (const s of specs) {
@@ -431,12 +431,12 @@
       if (this.systems.length) {
         this.canvas = h('canvas.bg-particles');
         this.ctx = this.canvas.getContext('2d');
-        this.frameEl.prepend(this.canvas);
+        if (frame) this.frameEl.append(this.canvas); else this.frameEl.prepend(this.canvas);
         this.ro = new ResizeObserver(() => this.size());
         this.ro.observe(this.frameEl);
         start(this);
       }
-      bgEl.append(this.frameEl);
+      if (!frame) bgEl.append(this.frameEl);
     }
 
     /** The picture's shape, so the frame covers the stage exactly as the picture does. */
@@ -459,7 +459,22 @@
 
     rays(s) {
       const [x = 0.5, y = 0, spread = 1, strength = 1] = s.nums || [];
-      return h('div.bg-rays', { style: { left: `${x * 100}%`, top: `${y * 100}%`, '--c': s.color || '#fff2c4', '--s': String(spread), '--o': String(strength) } });
+      // painted once onto a small canvas (cheaper than a masked gradient), then swayed
+      const cv = h('canvas.bg-rays', { style: { left: `${x * 100}%`, top: `${y * 100}%`, '--s': String(spread), '--o': String(strength) } });
+      cv.width = cv.height = 256;
+      const c = cv.getContext('2d');
+      const g = c.createRadialGradient(128, 128, 0, 128, 128, 128);
+      const col = s.color || '#fff2c4';
+      g.addColorStop(0, col);
+      g.addColorStop(0.35, `${col}88`);
+      g.addColorStop(0.8, `${col}00`);
+      c.fillStyle = g;
+      c.globalAlpha = 0.34;
+      for (const [deg, w] of [[119, 3], [133, 5], [148, 2.5], [161, 5], [174, 3], [187, 5], [200, 3], [214, 5], [228, 3.5], [241, 4]]) {
+        const a0 = ((deg - 90 - w / 2) * Math.PI) / 180, a1 = ((deg - 90 + w / 2) * Math.PI) / 180;
+        c.beginPath(); c.moveTo(128, 128); c.arc(128, 128, 128, a0, a1); c.closePath(); c.fill();
+      }
+      return cv;
     }
 
     mist(s) {

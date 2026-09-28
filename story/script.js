@@ -51,18 +51,25 @@ character blanche   "Madame Blanche" color=#b7c4ff blip=520
 # "place" names where a background is; the name appears at the top of the screen the
 # first time the story arrives there. "bgfx" brings a background to life; positions are
 # fractions of the picture (see docs/SCRIPTING.md for every effect).
+place lavilledieu       "Lavilledieu"            "The south of France · 1861"
 place silk_mill         "The Silk Mill"          "Lavilledieu · France"
 place silk_mill_empty   "The Silk Mill"          "Lavilledieu · France"
 place balbadiou_office  "Balbadiou's Office"     "Lavilledieu · France"
 place joncour_home      "The Joncour House"      "Lavilledieu · France"
 place helene_garden     "Hélène's Garden"        "Lavilledieu · France"
+place garden_winter     "Hélène's Garden"        "Lavilledieu · Winter"
 place helene_sickroom   "Hélène's Room"          "Lavilledieu · France"
 place cemetery          "The Cemetery"           "Lavilledieu · France"
 place road_east         "The Road East"          "Across Europe and Russia"
+place road_winter       "The Road East"          "The Russian winter"
+place road_rain         "The Road East"          "Across the steppe, in the rain"
 place smuggler_boat     "A Smuggler's Boat"      "The eastern sea, at night"
+place china_dock        "A Harbour in China"     "The far side of the world"
 place japan_coast       "The West Coast"         "Japan"
 place japan_path        "The Road into the Hills" "Japan"
 place hara_kei_estate   "Hara Kei's Village"     "The hills of Japan"
+place estate_day        "Hara Kei's Village"     "The hills of Japan"
+place estate_unrest     "Hara Kei's Village"     "Japan, in troubled times"
 place estate_tearoom    "Hara Kei's House"       "The hills of Japan"
 place estate_room       "Hara Kei's House"       "The hills of Japan"
 place aviary            "The Aviary"             "Behind Hara Kei's house"
@@ -70,6 +77,7 @@ place burned_village    "The Burned Village"     "The hills of Japan"
 place forest_camp_night "Hara Kei's Camp"        "The forest, at night"
 place blanche_salon     "Madame Blanche's House" "In the city"
 
+bgfx lavilledieu smoke=0.752,0.574,0.6 glints=0.52,0.56,0.19,0.44,16 birds=4,0.06,0.3 motes=0.1,0.4,0.8,0.4,20,#fff6d8
 bgfx silk_mill glow=0.36,0.38,0.08,#fff4d0 glow=0.498,0.38,0.08,#fff4d0 glow=0.635,0.38,0.08,#fff4d0 motes=0.15,0.25,0.55,0.7,45
 bgfx silk_mill_empty motes=0.15,0.25,0.55,0.7,20,#c8d4e6 rain=0.5,0.308,0.215,0.105,0.34 rain=0.5,0.446,0.215,0.105,0.34 rain=0.5,0.583,0.215,0.105,0.34
 bgfx balbadiou_office flame=0.6375,0.648,0.05,#ffc070 glow=0.87,0.35,0.1,#fff0d0 motes=0.5,0.3,0.45,0.6,30
@@ -77,16 +85,24 @@ bgfx joncour_home flame=0.856,0.642,0.07,#ff9a40 embers=0.856,0.63,0.4 flame=0.8
 bgfx helene_sickroom snow=1,0.3125,0.207,0.1875,0.37 flame=0.45,0.622,0.03,#ffc070 motes=0.3,0.25,0.4,0.7,18,#dde6ff
 bgfx blanche_salon flame=0.231,0.415,0.07,#ffb070 flame=0.094,0.414,0.013 flame=0.115,0.41,0.013 flame=0.133,0.406,0.013 steam=0.796,0.83,0.8 steam=0.6875,0.84,0.6 glow=0.9125,0.148,0.03 stars=0.8,0.04,0.12,0.4,8
 bgfx helene_garden glow=0.817,0.415,0.09,#ffd08a glow=0.065,0.485,0.03,#ffc070 glow=0.131,0.485,0.03,#ffc070 glow=0.181,0.574,0.03,#ffc070 glints=0.49,0.67,0.33,0.12 fireflies=0.05,0.45,0.9,0.4,14 petals=0.35 birds=3,0.05,0.25
+bgfx garden_winter snow=1.1 smoke=0.196,0.278,0.6,#d8dce8 glow=0.065,0.485,0.03,#ffc070 glow=0.131,0.485,0.03,#ffc070 glow=0.065,0.574,0.03,#ffc070 glow=0.181,0.574,0.03,#ffc070
 bgfx cemetery glow=0.275,0.607,0.09,#ffc07a flame=0.817,0.422,0.02 flame=0.5375,0.863,0.025 birds=3,0.08,0.3 motes=0.1,0.5,0.8,0.4,30,#ffe0a0 fireflies=0.05,0.62,0.9,0.3,10 foliage=0.4
-bgfx road_east glow=0.6625,0.544,0.07,#ffd08a rays=0.6625,0.54,0.8,#ffd49a birds=5,0.08,0.4 motes=0.4,0.45,0.5,0.3,30,#ffe0a0 mist=0.06,0.22,0.2,#ffc9a0
-bgfx smuggler_boat glow=0.625,0.207,0.05,#cfe0ff glints=0.5,0.53,0.25,0.25,30 stars=0,0,1,0.45,30 mist=0.48,0.12,0.25 rock
+bgfx cemetery_grey rain=0.8 mist=0.55,0.2,0.3,#c8ccd8
+bgfx cemetery_night glow=0.75,0.185,0.05,#cfe0ff flame=0.817,0.422,0.02 flame=0.5375,0.863,0.03 stars=0,0,1,0.45,24 fireflies=0.05,0.6,0.9,0.3,12 mist=0.6,0.15,0.2,#a8b8e8
+bgfx road_east glow=0.6625,0.544,0.07,#ffd08a rays=0.6625,0.54,0.8,0.8,#ffd49a birds=5,0.08,0.4 motes=0.4,0.45,0.5,0.3,30,#ffe0a0
+bgfx road_winter snow=1.2 glow=0.625,0.407,0.05,#fff6e8 mist=0.5,0.12,0.3,#ffffff
+bgfx road_rain rain=1.3 mist=0.52,0.14,0.3,#9aa4b8
+bgfx smuggler_boat glow=0.625,0.207,0.05,#cfe0ff glints=0.5,0.53,0.25,0.25,30 stars=0,0,1,0.45,30 mist=0.48,0.12,0.25
+bgfx china_dock glow=0.3125,0.526,0.09,#ffc080 flame=0.252,0.593,0.03,#ff7050 flame=0.877,0.593,0.03,#ff7050 glints=0,0.56,1,0.25,26 birds=3,0.08,0.3
 bgfx japan_coast glow=0.133,0.141,0.03,#cfe0ff glow=0.85,0.55,0.25,#ffb080 glints=0.3,0.56,0.7,0.2,26 flame=0.373,0.633,0.02 birds=4,0.1,0.35 mist=0.42,0.12,0.3,#ffd0d0 stars=0,0,1,0.25,14
-bgfx japan_path rays=0.51,0.28,1.2,0.6,#fff0b0 motes=0.3,0.2,0.4,0.6,40,#fff0c0 fireflies=0,0.65,0.35,0.3,8 fireflies=0.65,0.65,0.35,0.3,8 foliage=0.6 glow=0.513,0.14,0.07,#e8f0ff flame=0.25,0.59,0.025,#ffd28a flame=0.763,0.59,0.025,#ffd28a
-bgfx hara_kei_estate glow=0.435,0.16,0.09,#cfe0ff flame=0.287,0.665,0.03 flame=0.43,0.63,0.025 flame=0.588,0.665,0.03 flame=0.765,0.665,0.03 flame=0.937,0.76,0.045
-bgfx hara_kei_estate flame=0.285,0.865,0.025,#ffc870 flame=0.43,0.78,0.02,#ffc870 flame=0.588,0.835,0.025,#ffc870 flame=0.765,0.9,0.025,#ffc870 glints=0.24,0.8,0.54,0.19,22 leaves=0.9 petals=0.25 stars=0.05,0.02,0.9,0.3,14
-bgfx estate_tearoom petals=1.2 glow=0.665,0.135,0.07,#cfe0ff steam=0.535,0.77,0.9 steam=0.67,0.6,0.8 glints=0.4,0.66,0.16,0.06,10 flame=0.724,0.5,0.02,#ffd28a stars=0.15,0,0.42,0.25,10
-bgfx estate_room glow=0.213,0.28,0.04,#cfe0ff glints=0.17,0.57,0.1,0.09,10 fireflies=0.28,0.2,0.14,0.45,8 fireflies=0.69,0.2,0.21,0.45,10 motes=0.25,0.62,0.37,0.2,20
-bgfx aviary flutter=0.365,0.25,0.33,0.38,18 leaves=0.8 rays=0.19,0.15,0.8,#fff2c4 motes=0.3,0.3,0.4,0.5,25,#fff0c8
+bgfx japan_path rays=0.5,0.37,1.2,0.6,#fff0b0 motes=0.3,0.2,0.4,0.6,40,#fff0c0 fireflies=0,0.65,0.35,0.3,8 fireflies=0.65,0.65,0.35,0.3,8 foliage=0.6 glow=0.5125,0.14,0.07,#e8f0ff flame=0.25,0.687,0.02,#ffd28a flame=0.754,0.687,0.02,#ffd28a flame=0.329,0.678,0.012,#ffd28a
+bgfx hara_kei_estate glow=0.435,0.159,0.1,#cfe0ff flame=0.2875,0.696,0.03 flame=0.429,0.673,0.025 flame=0.5875,0.696,0.03 flame=0.767,0.696,0.03 flame=0.9375,0.781,0.045 glow=0.74,0.66,0.06,#ffcf7a
+bgfx hara_kei_estate glints=0.1,0.8,0.8,0.18,22 leaves=0.8 petals=0.25 stars=0.05,0.02,0.9,0.3,14 fireflies=0.05,0.6,0.9,0.2,8
+bgfx estate_day glints=0.1,0.8,0.8,0.18,22 leaves=1 petals=0.3 birds=3,0.05,0.3 motes=0.2,0.4,0.6,0.4,20,#fff6d8
+bgfx estate_unrest flame=0.2875,0.696,0.03 flame=0.429,0.673,0.025 flame=0.5875,0.696,0.03 flame=0.767,0.696,0.03 flame=0.9375,0.781,0.045 smoke=0.125,0.548,1.2,#2e2020 smoke=0.79,0.548,1.3,#2e2020 smoke=0.917,0.548,1,#2e2020 ash=0.6 leaves=0.6
+bgfx estate_tearoom petals=1.2 glow=0.6875,0.163,0.07,#cfe0ff steam=0.4917,0.785,0.9 steam=0.65,0.711,0.8 glints=0.31,0.66,0.38,0.05,10 flame=0.748,0.459,0.02,#ffd28a
+bgfx estate_room glow=0.2167,0.244,0.035,#cfe0ff glints=0.17,0.56,0.12,0.13,10 fireflies=0.27,0.15,0.15,0.5,8 fireflies=0.696,0.16,0.2,0.5,10 motes=0.25,0.74,0.46,0.13,20
+bgfx aviary flutter=0.365,0.25,0.33,0.38,18 leaves=0.8 rays=0.19,0.15,0.8,0.8,#fff2c4 motes=0.3,0.3,0.4,0.5,25,#fff0c8
 bgfx burned_village smoke=0.167,0.65,1.3,#2e2020 smoke=0.7,0.64,1,#2e2020 smoke=0.906,0.67,1.2,#2e2020 smoke=0.41,0.62,0.7,#3a2a28 embers=0.167,0.7,1 embers=0.906,0.726,1 embers=0.406,0.63,0.6 ash=1 flame=0.167,0.71,0.08,#ff7a30 flame=0.7,0.69,0.07,#ff7a30 flame=0.906,0.75,0.08,#ff7a30
 bgfx forest_camp_night flame=0.429,0.82,0.12,#ff9a40 embers=0.429,0.8,1 smoke=0.429,0.78,0.8,#6a7288 fireflies=0,0.55,1,0.3,14 mist=0.7,0.2,0.3,#b8c8ff rays=0.6,0,0.9,0.45,#b8d0ff flame=0.219,0.79,0.05,#ffb860 glow=0.625,0.096,0.03,#cfe0ff
 
@@ -158,7 +174,7 @@ label start
 # ============================================================================
 label intro
   chapter "Prologue" "The Silk Disease"
-  scene silk_mill with fade
+  scene lavilledieu with fade
   play music town_theme fadein 3
   "That year, the silkworms began to die."
   "First in one village, then in the next. The eggs turned grey before they could hatch, and the worms that did hatch stopped eating and lay still on the mulberry leaves."
@@ -384,11 +400,11 @@ label chapter5
   balbadiou "The whole valley wants to buy eggs from us now. Everyone who lost their worms, everyone who heard what we did."
   balbadiou serious "One journey was a miracle. We need a second one."
   "He didn't ask if I wanted to go. He didn't need to."
-  scene road_east with fade
+  scene road_winter with fade
   play music journey fadein 2
   "The same trains. The same steppe. The same boat without lights."
   "It was easier the second time. That frightened me a little. It meant I was getting used to it."
-  scene hara_kei_estate with fade
+  scene estate_day with fade
   play music japan fadein 2
   show harakei neutral
   harakei "You came back."
@@ -458,7 +474,7 @@ label chapter6
 # ============================================================================
 label chapter7
   chapter "Chapter 7" "The Note"
-  scene hara_kei_estate with fade
+  scene estate_day with fade
   play music her_theme fadein 3
   if glove == "left"
     "On the last morning, I found my glove on my travel chest. Neatly folded. Inside it, a tiny piece of paper."
@@ -532,7 +548,7 @@ label chapter8
 # ============================================================================
 label chapter9
   chapter "Chapter 9" "The Third Journey"
-  scene road_east with fade
+  scene road_rain with fade
   play music journey fadein 2
   "I went back to Japan a third time."
   if obsession >= 8
@@ -540,7 +556,7 @@ label chapter9
   else
     "It was for the eggs. I told myself that every morning, like a prayer."
   endif
-  scene hara_kei_estate with fade
+  scene estate_unrest with fade
   play music japan fadein 2
   "The country had changed. Foreign ships had come into the ports with their guns, and the old order was cracking. There were soldiers on the roads. People looked at me differently now — a white face had become a political problem."
   show harakei stern
@@ -582,7 +598,7 @@ label chapter10
     - "Go to China." [obsession -= 1]
         set went_china = true
         balbadiou happy "Thank God."
-        scene smuggler_boat with fade
+        scene china_dock with fade
         "I went to China. I bought eggs from traders who laughed at my French and cheated me politely."
         "The eggs were sickly. Half the boxes were dead before I reached the coast."
         "I stood on a dock looking at the sea, with a ticket home in my pocket."
@@ -668,7 +684,7 @@ label chapter12
 # ============================================================================
 label chapter13
   chapter "Chapter 13" "The Last Eggs"
-  scene road_east with fade
+  scene road_winter with fade
   play music journey fadein 2
   "I came home with eggs — bought at a terrible price from whoever would sell them in the chaos."
   "They had travelled too far, too slowly, through too much."
@@ -735,7 +751,7 @@ label chapter14
 # ============================================================================
 label chapter15
   chapter "Chapter 15" "Hélène's Death"
-  scene helene_garden with fade
+  scene garden_winter with fade
   play music helene_theme fadein 3
   "I gave up the silk trade. There was almost nothing left of it to give up."
   "We lived quietly. The trees in the garden grew tall. I learned the names of the birds that came to the pond."
@@ -824,6 +840,7 @@ label ending
   "I had spent years searching for an impossible love at the other end of the world."
   "The person who had loved me most had been beside me all along."
   if final_choice == "silent"
+    scene cemetery_grey with slow
     "I stood there a long time and said nothing, the way she had said nothing, for years, for my sake."
     "Some things are told best in silence. She taught me that. I learned it too late, and I learned it completely."
     ending home_silence "Home — Unsaid" neutral
@@ -833,6 +850,7 @@ label ending
     "The wind moved through the trees she had watched me plant. For the first time in many years, I was exactly where I was."
     ending home_beside "Home — Beside Me All Along" true
   else
+    scene cemetery_night with slow
     "I tried to speak to her, and found I had forgotten how. I had spent too many years talking to someone who wasn't there."
     "Some evenings I still look east. Now I know what I am looking for is behind me."
     ending home_distance "Home — The Far Shore" bad

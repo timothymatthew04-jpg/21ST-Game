@@ -97,7 +97,7 @@ function candle(c, x, y, lit = true) {
 }
 
 // ---------------------------------------------------------------- the silk mill (full of life, or empty)
-function millScene(c, empty) {
+function millScene(c, L, empty) {
   const r = rng(empty ? 52 : 51);
   const o = { bx0: 120, by0: 44, bx1: 360, by1: 176 };
   const warm = !empty;
@@ -160,17 +160,21 @@ function millScene(c, empty) {
   rack(1);
   // silk skeins hanging from a pole, glowing in the light
   line(c, 150, 40, 330, 40, warm ? '#3a281b' : '#24262c', 2);
+  const sk = L('skeins', { depth: 0.5, anim: sway(warm ? 2.2 : 3.5, warm ? 4.5 : 6, { oy: 0 }) });
   for (let x = 156; x < 330; x += 9) {
-    if (!warm && r() < 0.75) { if (r() < 0.4) line(c, x, 41, x + 1, 41 + r.r(4, 12), '#b9b4a8', 1); continue; }
-    ellipse(c, x, 50, 3, 9, warm ? '#f3dca2' : '#c9c2b0');
-    ellipse(c, x, 50, 1.5, 7, warm ? '#fff3cf' : '#ddd6c6');
-    px(c, x - 1, 44, warm ? '#c9a45a' : '#9a9486');
+    if (!warm && r() < 0.75) { if (r() < 0.4) line(sk, x, 41, x + 1, 41 + r.r(4, 12), '#b9b4a8', 1); continue; }
+    ellipse(sk, x, 50, 3, 9, warm ? '#f3dca2' : '#c9c2b0');
+    ellipse(sk, x, 50, 1.5, 7, warm ? '#fff3cf' : '#ddd6c6');
+    px(sk, x - 1, 44, warm ? '#c9a45a' : '#9a9486');
   }
   // a reeling wheel at the back
   const wx = 240, wy = 148;
-  c.strokeStyle = warm ? '#5b3f29' : '#40434b'; c.lineWidth = 2; c.beginPath(); c.arc(wx, wy, 14, 0, TAU); c.stroke();
-  for (let k = 0; k < 8; k++) line(c, wx, wy, wx + Math.cos(k * TAU / 8) * 14, wy + Math.sin(k * TAU / 8) * 14, warm ? '#6b4c34' : '#4b4e56', 1);
   rect(c, wx - 18, wy + 14, 36, 12, warm ? '#6b4c34' : '#45474f');
+  // (the wheel turns while the mill is alive)
+  const wl = warm ? L('wheel', { depth: 0.5, anim: { type: 'spin', t: 9, ox: 0.5, oy: 0.5 } }) : c;
+  wl.strokeStyle = warm ? '#5b3f29' : '#40434b'; wl.lineWidth = 2; wl.beginPath(); wl.arc(wx, wy, 14, 0, TAU); wl.stroke();
+  for (let k = 0; k < 8; k++) line(wl, wx, wy, wx + Math.cos(k * TAU / 8) * 14, wy + Math.sin(k * TAU / 8) * 14, warm ? '#6b4c34' : '#4b4e56', 1);
+  circle(wl, wx, wy, 2, warm ? '#3a281b' : '#34343a');
   if (warm) for (let k = 0; k < 6; k++) line(c, wx - 12 + k * 5, wy - 8, wx - 30 + k * 12, wy - 30, 'rgba(255,240,200,0.6)', 1);
   // baskets and a table in the foreground
   ellipse(c, 70, 250, 34, 10, warm ? '#8a6238' : '#5a5048');
@@ -180,14 +184,13 @@ function millScene(c, empty) {
   if (empty) { line(c, 390, 250, 440, 236, '#5a5048', 3); rect(c, 400, 250, 50, 4, '#4a4440'); }
   // cobwebs in the empty mill
   if (empty) for (const [x, y, s] of [[0, 0, 1], [W, 0, -1]]) for (let k = 0; k < 5; k++) line(c, x, y + k * 6, x + s * (30 - k * 5), y, 'rgba(210,215,225,0.35)', 1);
-  vignette(c, empty ? 0.55 : 0.35);
-  return { colors: 64 };
+  return { colors: 64, vignette: empty ? [0.55, '10,14,24'] : [0.35, '30,16,0'] };
 }
-SCENES.silk_mill = (c) => millScene(c, false);
-SCENES.silk_mill_empty = (c) => millScene(c, true);
+SCENES.silk_mill = (c, L) => millScene(c, L, false);
+SCENES.silk_mill_empty = (c, L) => millScene(c, L, true);
 
 // ---------------------------------------------------------------- Balbadiou's office
-SCENES.balbadiou_office = (c) => {
+SCENES.balbadiou_office = (c, L) => {
   const r = rng(61);
   const o = { bx0: 96, by0: 40, bx1: 384, by1: 180 };
   room(c, r, { ...o, ceiling: '#3a2a22', left: '#40523e', right: '#3a4b38', back: '#4a5e46', floor: '#5a3e2c', plankLine: '#442e20', seam: '#2e2018', skirting: '#3a281c' });
@@ -201,6 +204,11 @@ SCENES.balbadiou_office = (c) => {
   for (const [x, y, w, h] of [[160, 66, 22, 18], [178, 88, 14, 22], [196, 64, 30, 18], [214, 82, 18, 16], [228, 64, 34, 24], [236, 92, 18, 10], [262, 72, 6, 12]]) ellipse(c, x + w / 2, y + h / 2, w / 2, h / 2, '#b9a47a');
   c.strokeStyle = '#b3262c'; c.lineWidth = 1; c.setLineDash([2, 1]); c.beginPath(); c.moveTo(200, 74); c.quadraticCurveTo(232, 60, 264, 76); c.stroke(); c.setLineDash([]);
   circle(c, 200, 74, 1.5, '#b3262c'); circle(c, 264, 77, 1.5, '#b3262c');
+  // a tall wall clock, its pendulum swinging
+  rect(c, 302, 64, 22, 74, '#4a301e'); rect(c, 302, 64, 22, 2, '#8a5c3a'); circle(c, 313, 78, 8, '#e8dcc0'); circle(c, 313, 78, 7, '#f4ecd6');
+  line(c, 313, 78, 313, 73, '#2a1e18', 1); line(c, 313, 78, 317, 79, '#2a1e18', 1); rect(c, 306, 90, 14, 44, '#2a1a12');
+  const pd = L('pendulum', { depth: 0.5, anim: sway(9, 2, { oy: 0 }) });
+  line(pd, 313, 90, 313, 124, '#c9a45a', 1); circle(pd, 313, 126, 3.5, '#d8b05a'); circle(pd, 312, 125, 1.2, '#fff0b0');
   // the window on the right wall: roofs of the town in the afternoon
   const winPts = [wallPt(o, 1, 0.3, 0.14), wallPt(o, 1, 0.75, 0.14), wallPt(o, 1, 0.75, 0.62), wallPt(o, 1, 0.3, 0.62)];
   c.save(); c.beginPath(); c.moveTo(...winPts[0]); for (const p of winPts.slice(1)) c.lineTo(...p); c.closePath(); c.clip();
@@ -238,12 +246,11 @@ SCENES.balbadiou_office = (c) => {
   rect(c, 250, 180, 5, 6, '#1c1c24'); line(c, 253, 180, 262, 170, '#f0e6d0', 1);
   for (let k = 0; k < 3; k++) rect(c, 270 + k * 3, 176 - k * 4, 14, 4, r.pick(['#e8dcc0', '#dccfb0']));
   lamp(c, 306, 186, 1.2, true);
-  vignette(c, 0.45);
-  return { colors: 64 };
+  return { colors: 64, vignette: [0.45, '20,10,0'] };
 };
 
 // ---------------------------------------------------------------- the Joncour house: the sitting room at dusk
-SCENES.joncour_home = (c) => {
+SCENES.joncour_home = (c, L) => {
   const r = rng(71);
   const o = { bx0: 110, by0: 42, bx1: 370, by1: 182 };
   room(c, r, { ...o, ceiling: '#3a2c30', left: '#6e5a66', right: '#665260', back: '#7a6470', floor: '#5a3e30', plankLine: '#453024', seam: '#3a2a2e', skirting: '#4a3430' });
@@ -260,8 +267,9 @@ SCENES.joncour_home = (c) => {
   viewWindow(c, 176, 56, 128, 104, view, { frame: '#e6d6c2', sill: '#cdb9a0', bars: 3 });
   // curtains
   for (const [x, s] of [[166, 1], [314, -1]]) {
-    poly(c, [[x, 50], [x + s * 18, 50], [x + s * 14, 170], [x - s * 2, 176]], '#7a2e3e');
-    for (let k = 0; k < 4; k++) line(c, x + s * (3 + k * 4), 52, x + s * (2 + k * 3.5), 172, '#5e2232', 1);
+    const cu = L(`curtain${x}`, { depth: 0.5, anim: sway(1.1, r.r(5, 7), { oy: 0 }) });
+    poly(cu, [[x, 50], [x + s * 18, 50], [x + s * 14, 170], [x - s * 2, 176]], '#7a2e3e');
+    for (let k = 0; k < 4; k++) line(cu, x + s * (3 + k * 4), 52, x + s * (2 + k * 3.5), 172, '#5e2232', 1);
   }
   rect(c, 160, 48, 160, 3, '#c9a45a');
   // her reading chair by the window, turned toward the room, a book left open on the seat
@@ -310,12 +318,11 @@ SCENES.joncour_home = (c) => {
   ellipse(c, 282, 218, 4, 2, '#f0e8e0'); rect(c, 280, 214, 5, 4, '#f0e8e0'); ellipse(c, 296, 219, 5, 2, '#f0e8e0');
   shade(c, fc[0], 240, 150, 'rgba(255,150,70,0.18)');
   shaft(c, [[176, 160], [304, 160], [340, 260], [150, 260]], 'rgba(170,150,220,1)', 0.12);
-  vignette(c, 0.5);
-  return { colors: 64 };
+  return { colors: 64, vignette: [0.5, '20,8,10'] };
 };
 
 // ---------------------------------------------------------------- Hélène's room in winter
-SCENES.helene_sickroom = (c) => {
+SCENES.helene_sickroom = (c, L) => {
   const r = rng(81);
   const o = { bx0: 120, by0: 40, bx1: 360, by1: 176 };
   room(c, r, { ...o, ceiling: '#3e3e48', left: '#8a8a94', right: '#7e7e8a', back: '#9696a2', floor: '#5a4e4a', plankLine: '#463c3a', seam: '#55555f', skirting: '#6a6a74' });
@@ -334,7 +341,10 @@ SCENES.helene_sickroom = (c) => {
   };
   viewWindow(c, 150, 56, 90, 100, view, { frame: '#e8e6e2', sill: '#d0cdc8', bars: 3 });
   shaft(c, [[150, 70], [240, 70], [330, 262], [150, 262]], 'rgba(220,230,250,1)', 0.14);
-  poly(c, [[142, 52], [156, 52], [152, 164], [140, 168]], '#b8a8b4'); poly(c, [[248, 52], [234, 52], [238, 164], [250, 168]], '#b8a8b4');
+  const cl = L('curtainL', { depth: 0.5, anim: sway(1.4, 6, { oy: 0 }) });
+  poly(cl, [[142, 52], [156, 52], [152, 164], [140, 168]], '#b8a8b4'); line(cl, 147, 54, 146, 164, '#a090a0', 1);
+  const cr = L('curtainR', { depth: 0.5, anim: sway(1.2, 7, { oy: 0 }) });
+  poly(cr, [[248, 52], [234, 52], [238, 164], [250, 168]], '#b8a8b4'); line(cr, 243, 54, 244, 164, '#a090a0', 1);
   // the bed, white and heavy, with its dark wooden frame
   poly(c, [[250, 150], [370, 150], [420, 214], [270, 214]], '#f0eef0');
   poly(c, [[250, 150], [370, 150], [372, 156], [252, 156]], '#dcdae4');
@@ -354,12 +364,11 @@ SCENES.helene_sickroom = (c) => {
   rect(c, 150, 196, 34, 5, '#5a3c2c'); rect(c, 152, 201, 4, 30, '#4a3024'); rect(c, 178, 201, 4, 30, '#4a3024'); rect(c, 150, 160, 5, 40, '#4a3024');
   poly(c, [[150, 162], [168, 166], [170, 210], [154, 206]], '#8a7a9a');
   rect(c, 309, 72, 2, 16, '#3a2a24'); rect(c, 304, 77, 12, 2, '#3a2a24');
-  vignette(c, 0.5, '20,20,40');
-  return { colors: 60 };
+  return { colors: 60, vignette: [0.5, '20,20,40'] };
 };
 
 // ---------------------------------------------------------------- Madame Blanche's salon, lamplit, at night
-SCENES.blanche_salon = (c) => {
+SCENES.blanche_salon = (c, L) => {
   const r = rng(91);
   const o = { bx0: 100, by0: 38, bx1: 380, by1: 180 };
   room(c, r, { ...o, ceiling: '#2a1418', left: '#5a1c24', right: '#521a22', back: '#6a2028', floor: '#3a2420', plankLine: '#2a1814', seam: '#2a0e12', skirting: '#3a1a14' });
@@ -379,7 +388,8 @@ SCENES.blanche_salon = (c) => {
   }
   c.restore();
   c.strokeStyle = '#2a1410'; c.lineWidth = 3; c.beginPath(); c.moveTo(...win[0]); for (const p of win.slice(1)) c.lineTo(...p); c.closePath(); c.stroke();
-  poly(c, [win[0], [win[0][0] + 12, win[0][1] + 4], [win[3][0] + 14, win[3][1] + 10], win[3]], '#3a1a3a');
+  const dr = L('drape', { depth: 0.5, anim: sway(1, 7, { oy: 0 }) });
+  poly(dr, [win[0], [win[0][0] + 12, win[0][1] + 4], [win[3][0] + 14, win[3][1] + 10], win[3]], '#3a1a3a');
   // a folding screen with cranes on gold, Madame Blanche's own
   const sx = 128, sy = 70, pw = 26, ph = 104;
   for (let i = 0; i < 6; i++) {
@@ -412,9 +422,111 @@ SCENES.blanche_salon = (c) => {
   poly(c, [[90, 270], [150, 232], [340, 232], [420, 270]], '#4a1a24');
   poly(c, [[108, 266], [156, 236], [334, 236], [402, 266]], '#6a2a32');
   for (let i = 0; i < 60; i++) px(c, 130 + r() * 250, 240 + r() * 24, '#c9a45a');
+  const palm = L('palm', { depth: 0.55, anim: sway(2.5, 5) });
+  for (let k = 0; k < 9; k++) { const tx = 439 + r.r(-26, 26), ty = 230 - r.r(20, 44); branch(palm, 439, 230, tx, ty, 2, '#2e5a3a'); branch(palm, 439, 230, tx + 1, ty + 1, 1, '#4a8a5a'); }
   rect(c, 430, 230, 18, 22, '#6a3a2a');
-  for (let k = 0; k < 9; k++) branch(c, 439, 230, 439 + r.r(-26, 26), 230 - r.r(20, 44), 2, '#2e5a3a');
   shade(c, 111, 150, 170, 'rgba(255,150,80,0.16)');
-  vignette(c, 0.55);
-  return { colors: 64 };
+  return { colors: 64, vignette: [0.55, '20,4,6'] };
+};
+
+// ---------------------------------------------------------------- Hara Kei's house: the moonlit room where tea is served
+SCENES.estate_tearoom = (c, L) => {
+  const r = rng(161);
+  // the view: night garden, roofs and a pagoda, the moon
+  vgrad(c, 0, 0, W, 200, [[0, '#0a1a44'], [0.55, '#1e3a80'], [1, '#3a5aa0']]);
+  stars(c, r, 60, 0, 0, W, 90);
+  moon(c, 330, 44, 22, { seed: 5, lit: '#eef4ff', mare: '#b4c2e2' });
+  hill(c, r, 60, 440, 132, 26, '#2a4480');
+  for (const [x, yb, w, hh, rh] of [[96, 162, 70, 18, 16], [180, 150, 50, 14, 12], [300, 150, 60, 16, 14], [352, 164, 44, 14, 12]]) {
+    jpHouse(c, r, x, yb, w, hh, { roof: '#18264e', roofLight: '#5a78b8', plaster: '#3a5088', wood: '#101a38', roofH: rh, windows: [[w * 0.4, 4, 6, 6, x === 300]] });
+  }
+  rect(c, 236, 70, 8, 84, '#142042');
+  for (let k = 0; k < 5; k++) { const y = 76 + k * 16, w = 30 - k * 4; poly(c, [[240 - w / 2 - 4, y], [240 + w / 2 + 4, y], [240 + w / 2, y - 5], [240 - w / 2, y - 5]], '#101a3a'); line(c, 240 - w / 2 - 4, y, 240 + w / 2 + 4, y, '#4a64a8', 1); }
+  vgrad(c, 0, 160, W, 40, [[0, '#1a2a5a'], [1, '#101a3a']]);
+  for (let i = 0; i < 30; i++) crown(c, r, 80 + r() * 320, 170 + r() * 20, r.r(6, 12), r.r(4, 8), ['#0e1a3a', '#1a2e60', '#3a5a9a'], { x: 0.3, y: -1 }, 8);
+  c.fillStyle = '#6a8ad0'; c.beginPath(); c.moveTo(150, 190); c.bezierCurveTo(220, 180, 250, 186, 330, 178); c.lineTo(330, 182); c.bezierCurveTo(250, 190, 220, 186, 150, 194); c.fill();
+  for (let i = 0; i < 20; i++) px(c, 160 + r() * 170, 180 + r() * 10, '#e8f0ff');
+  rect(c, 356, 118, 6, 12, '#ffd88a'); rect(c, 355, 116, 8, 2, '#1a2440'); rect(c, 358, 130, 2, 20, '#1a2440'); glow(c, 359, 124, 14, 'rgba(255,200,120,0.6)');
+  // the cherry trees outside, swaying and dropping petals
+  const bl = L('blossoms', { depth: 0.3, anim: sway(1, 6, { ox: 0, oy: 0 }) });
+  branch(bl, -10, 30, 150, 60, 7, '#1a1426'); branch(bl, 60, 44, 200, 10, 4, '#1a1426'); branch(bl, 120, 55, 240, 90, 3, '#1a1426'); branch(bl, 30, 38, 90, 130, 3, '#1a1426');
+  const pink = ['#7a3a6a', '#c8709a', '#f0a8c8', '#ffe0ee'];
+  for (let i = 0; i < 70; i++) { const t = r(); crown(bl, r, -10 + t * 250 + r.r(-18, 18), 30 + t * 40 + r.r(-26, 22), r.r(6, 13), r.r(5, 9), pink, { x: 0.4, y: -0.8 }, 9); }
+  const bl2 = L('blossoms2', { depth: 0.3, anim: sway(1.6, 5) });
+  trunk(bl2, 390, 170, 70, 5, 3, '#1a1426');
+  for (let k = 0; k < 5; k++) branch(bl2, 390, 120, 390 + r.r(-30, 30), 90 + r.r(-20, 10), 2, '#1a1426');
+  for (let i = 0; i < 16; i++) crown(bl2, r, 390 + r.r(-30, 30), 96 + r.r(-22, 20), r.r(6, 11), r.r(5, 8), pink, { x: -0.4, y: -0.8 }, 8);
+  // the room around the window, dark wood and paper screens
+  const rm = L('room', { depth: 0.5 });
+  rect(rm, 0, 0, W, H, '#10182e');
+  for (let x = 6; x < 64; x += 16) { rect(rm, x, 0, 12, 200, '#1e2c50'); for (let y = 10; y < 200; y += 22) rect(rm, x, y, 12, 1, '#10182e'); }
+  for (let x = 408; x < W; x += 16) { rect(rm, x, 0, 12, 200, '#2a3c6a'); for (let y = 10; y < 200; y += 22) rect(rm, x, y, 12, 1, '#16223e'); }
+  rm.clearRect(72, 0, 200, 190);
+  rm.clearRect(292, 0, 108, 176);
+  rect(rm, 66, 0, 8, 196, '#0a0f20'); rect(rm, 270, 0, 22, 196, '#0a0f20'); rect(rm, 398, 0, 8, 196, '#0a0f20'); rect(rm, 272, 0, 2, 196, '#3a4a78');
+  rect(rm, 292, 174, 108, 10, '#0a0f20'); rect(rm, 66, 188, 340, 8, '#0a0f20'); rect(rm, 66, 188, 340, 1, '#4a5a90');
+  // the low table: tea, a teapot, an open book, fallen petals
+  vgrad(rm, 0, 196, W, 74, [[0, '#1e2a4a'], [1, '#0c1226']]);
+  for (let k = 0; k < 9; k++) line(rm, 0, 200 + k * k * 1.1, W, 202 + k * k * 1.2, '#16203a', 1);
+  shaft(rm, [[72, 190], [272, 190], [360, 270], [120, 270]], 'rgba(150,180,255,1)', 0.14);
+  ellipse(rm, 236, 244, 32, 8, '#3a4a78'); ellipse(rm, 236, 243, 28, 6.5, '#52649a');
+  rect(rm, 220, 216, 32, 26, '#46588c'); ellipse(rm, 236, 242, 16, 4, '#46588c'); ellipse(rm, 236, 216, 16, 4, '#6a80bc'); ellipse(rm, 236, 216, 13, 3, '#1c2644');
+  rect(rm, 220, 216, 4, 26, '#6a80bc'); line(rm, 252, 222, 258, 230, '#46588c', 2);
+  ellipse(rm, 312, 218, 26, 18, '#232a44'); ellipse(rm, 306, 212, 14, 10, '#34406a'); ellipse(rm, 312, 206, 18, 5, '#3a4670'); rect(rm, 306, 196, 12, 6, '#232a44'); circle(rm, 312, 195, 3, '#5a6aa0');
+  for (let k = 0; k < 70; k++) px(rm, 290 + r() * 44, 204 + r() * 28, r() < 0.5 ? '#46527e' : '#161c30');
+  rm.strokeStyle = '#8a9ad0'; rm.lineWidth = 1; rm.beginPath(); rm.arc(312, 218, 25, Math.PI * 1.05, Math.PI * 1.45); rm.stroke();
+  line(rm, 336, 214, 350, 204, '#1a2034', 3); rm.strokeStyle = '#1a2034'; rm.lineWidth = 2; rm.beginPath(); rm.arc(312, 192, 20, Math.PI * 1.1, Math.PI * 1.9); rm.stroke();
+  ellipse(rm, 312, 234, 30, 4, 'rgba(0,0,0,0.3)');
+  poly(rm, [[350, 262], [390, 236], [470, 238], [440, 266]], '#9aaad0'); poly(rm, [[390, 236], [410, 232], [474, 234], [470, 238]], '#c8d4ee');
+  line(rm, 392, 237, 440, 266, '#6a7aa8', 1);
+  for (let k = 0; k < 7; k++) { line(rm, 360 + k * 3, 258 - k * 3, 392 + k * 3, 240 - k * 3, '#5a6a98', 1); line(rm, 412 + k * 4, 242 + k * 1.5, 452 + k * 3, 242 + k * 3, '#5a6a98', 1); }
+  for (let i = 0; i < 14; i++) { const x = r() * W, y = 206 + r() * 60; ellipse(rm, x, y, 2.5, 1.5, r.pick(['#f4b0cc', '#e890b8'])); }
+  return { colors: 64, vignette: [0.5, '0,6,30'] };
+};
+
+// ---------------------------------------------------------------- Hara Kei's house: the empty tatami room, the lake and the bamboo
+SCENES.estate_room = (c, L) => {
+  const r = rng(171);
+  // the view through the open screens: a moonlit lake on the left, bamboo in the mist
+  vgrad(c, 0, 0, W, 200, [[0, '#0c1c48'], [1, '#2a4a8a']]);
+  stars(c, r, 30, 80, 20, 60, 60);
+  moon(c, 104, 66, 11, { seed: 3 });
+  hill(c, r, 70, 150, 150, 16, '#1a2c5a');
+  vgrad(c, 80, 150, 60, 36, [[0, '#2a4a8a'], [1, '#12234e']]);
+  for (let i = 0; i < 14; i++) rect(c, 96 + r.r(-6, 6), 152 + i * 2.2, r.r(3, 8), 1, '#dce8ff');
+  vgrad(c, 130, 0, 350, 200, [[0, '#9ab86a'], [0.6, '#c8d890'], [1, '#6a8a4a']]);
+  for (let i = 0; i < 40; i++) { const x = 130 + r() * 350; rect(c, x, 0, r.r(2, 4), 200, r.pick(['#b0c878', '#c8d890', '#a0b868'])); }
+  for (let i = 0; i < 30; i++) crown(c, r, 140 + r() * 330, 150 + r() * 40, r.r(10, 18), r.r(6, 10), ['#4a6a2e', '#6a8a3e', '#9ab85a'], { x: 0, y: -1 }, 10);
+  const bb = L('bamboo', { depth: 0.25, anim: sway(1.3, 5.5) });
+  for (let i = 0; i < 18; i++) {
+    const x = 132 + r() * 340, w = r.r(3, 5);
+    rect(bb, x, 0, w, 196, '#3e6a2a'); rect(bb, x + w - 1, 0, 1, 196, '#8ab050');
+    for (let y = r() * 30; y < 196; y += r.r(22, 30)) rect(bb, x - 1, y, w + 2, 1, '#2a4a1e');
+    for (let k = 0; k < 4; k++) { const y = r() * 150; line(bb, x, y, x + r.r(-16, 16), y + r.r(4, 10), '#4a7a2e', 1); }
+  }
+  // the room: warm paper screens, dark posts, a tatami floor catching the light
+  const rm = L('room', { depth: 0.5 });
+  rect(rm, 0, 0, W, H, '#8a5a34');
+  rect(rm, 0, 0, W, 30, '#5a3a22');
+  for (let x = 0; x < W; x += 30) { rect(rm, x, 0, 2, 30, '#3a2414'); }
+  rect(rm, 0, 30, W, 10, '#6a4428');
+  const shoji = (x0, x1, y0, y1) => {
+    vgrad(rm, x0, y0, x1 - x0, y1 - y0, [[0, '#f6d8a0'], [1, '#e8b870']]);
+    for (let x = x0; x <= x1; x += 13) rect(rm, x, y0, 2, y1 - y0, '#6a4428');
+    for (let y = y0; y <= y1; y += 18) rect(rm, x0, y, x1 - x0, 2, '#6a4428');
+    shade(rm, (x0 + x1) / 2, y1, (x1 - x0), 'rgba(80,40,10,0.25)');
+  };
+  shoji(0, 76, 44, 186); shoji(204, 264, 58, 176); shoji(276, 330, 58, 176); shoji(434, W, 44, 186);
+  rm.clearRect(80, 42, 124, 144);
+  rm.clearRect(334, 44, 96, 142);
+  for (const x of [76, 200, 266, 330, 430]) { rect(rm, x, 30, 6, 160, '#3a2414'); rect(rm, x, 30, 2, 160, '#a87a4a'); }
+  rect(rm, 80, 184, 124, 4, '#3a2414'); rect(rm, 334, 184, 96, 4, '#3a2414');
+  // tatami, in perspective, with a patch of light
+  poly(rm, [[0, 190], [W, 190], [W, H], [0, H]], '#b89a5a');
+  const fl = (x0, y0, x1, y1) => line(rm, x0, y0, x1, y1, '#6a4a28', 2);
+  fl(0, 214, W, 206); fl(0, 244, W, 236); fl(120, 190, 40, H); fl(270, 190, 290, H); fl(400, 190, 470, H); fl(200, 214, 180, 244);
+  texture(rm, r, 0, 190, W, 80, 0.05, 3);
+  poly(rm, [[120, 200], [300, 200], [340, 236], [140, 236]], 'rgba(255,230,160,0.45)');
+  vgrad(rm, 0, 186, W, 12, [[0, 'rgba(60,30,10,0.4)'], [1, 'rgba(60,30,10,0)']]);
+  return { colors: 64, vignette: [0.4, '30,14,0'] };
 };

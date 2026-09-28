@@ -130,9 +130,10 @@ function moon(c, x, y, rad, o = {}) {
   glow(c, x, y, rad * 2.2, o.halo2 || 'rgba(210,225,255,0.45)', 1);
   circle(c, x, y, rad, o.lit || '#eef2ff');
   const r = rng(o.seed || 7);
-  for (let i = 0; i < 7; i++) {
-    const a = r() * TAU, d = r() * rad * 0.7;
-    circle(c, x + Math.cos(a) * d, y + Math.sin(a) * d, rad * r.r(0.1, 0.24), o.mare || '#c7d2ef');
+  // soft grey seas, off-centre like the real moon's, never a face
+  for (let i = 0; i < 16; i++) {
+    const a = r.r(-0.4, 2.6), d = r.r(0.15, 0.7) * rad;
+    circle(c, x + Math.cos(a) * d * 0.9, y - Math.sin(a) * d * 0.6 - rad * 0.1, rad * r.r(0.08, 0.2), o.mare || '#b6c2de');
   }
   circle(c, x - rad * 0.25, y - rad * 0.25, rad * 0.35, 'rgba(255,255,255,0.35)');
 }
@@ -497,3 +498,115 @@ function rock(c, r, x, y, w, h, o = {}) {
   poly(c, [[x + w * 0.1, y + h * 0.35], [x + w * 0.4, y + h * 0.04], [x + w * 0.72, y + h * 0.14], [x + w * 0.6, y + h * 0.45], [x + w * 0.2, y + h * 0.55]], mid);
   poly(c, [[x + w * 0.2, y + h * 0.28], [x + w * 0.4, y + h * 0.08], [x + w * 0.6, y + h * 0.16], [x + w * 0.42, y + h * 0.26]], lit);
 }
+
+// ---------------------------------------------------------------- layered scenes
+/*
+ * A scene paints on several layers so parts of it can move: `c` is the first
+ * layer (usually the sky); `L(id, opts)` starts another one on top and returns
+ * its context. opts: { depth: 0..1 (parallax), anim: { type, ... } }.
+ * Every layer shares one palette; transparent pixels stay transparent.
+ */
+function applyPalette(canvas, pal, spread, opaque) {
+  const c = canvas.getContext('2d');
+  const img = c.getImageData(0, 0, canvas.width, canvas.height);
+  const d = img.data;
+  const cache = new Map();
+  for (let y = 0; y < canvas.height; y++) {
+    for (let x = 0; x < canvas.width; x++) {
+      const i = (y * canvas.width + x) * 4;
+      if (!opaque && d[i + 3] < 128) { d[i + 3] = 0; continue; }
+      const a = d[i + 3] / 255;
+      const off = (BAYER[y & 3][x & 3] / 16 - 0.47) * spread;
+      const R = Math.max(0, Math.min(255, d[i] / (opaque ? 1 : a) + off)), G = Math.max(0, Math.min(255, d[i + 1] / (opaque ? 1 : a) + off)), B = Math.max(0, Math.min(255, d[i + 2] / (opaque ? 1 : a) + off));
+      const key = ((R >> 2) << 12) | ((G >> 2) << 6) | (B >> 2);
+      let best = cache.get(key);
+      if (!best) {
+        let bd = 1e9;
+        for (const p of pal) {
+          const dr = R - p[0], dg = G - p[1], db = B - p[2];
+          const dd = dr * dr * 0.3 + dg * dg * 0.59 + db * db * 0.11;
+          if (dd < bd) { bd = dd; best = p; }
+        }
+        cache.set(key, best);
+      }
+      d[i] = best[0]; d[i + 1] = best[1]; d[i + 2] = best[2]; d[i + 3] = 255;
+    }
+  }
+  c.putImageData(img, 0, 0);
+}
+
+function bbox(canvas) {
+  const d = canvas.getContext('2d').getImageData(0, 0, canvas.width, canvas.height).data;
+  let x0 = canvas.width, y0 = canvas.height, x1 = -1, y1 = -1;
+  for (let y = 0; y < canvas.height; y++) for (let x = 0; x < canvas.width; x++) {
+    if (d[(y * canvas.width + x) * 4 + 3]) { if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y; }
+  }
+  return x1 < 0 ? null : { x: x0, y: y0, w: x1 - x0 + 1, h: y1 - y0 + 1 };
+}
+
+/** Raw RGBA pixels of part of a canvas, base64-encoded, for the PNG writer in Node. */
+function rawOf(canvas, box) {
+  const d = canvas.getContext('2d').getImageData(box.x, box.y, box.w, box.h).data;
+  let s = '';
+  for (let i = 0; i < d.length; i += 0x8000) s += String.fromCharCode.apply(null, d.subarray(i, i + 0x8000));
+  return { w: box.w, h: box.h, rgba: btoa(s) };
+}
+
+/** Paint everything a scene function draws into each layer's own canvas, then flatten and pixelate. */
+function paintScene(fn) {
+  const layers = [];
+  const first = newCanvas();
+  layers.push({ id: 'sky', cv: first, o: { depth: 0 } });
+  const L = (id, o = {}) => {
+    const cv = newCanvas();
+    layers.push({ id, cv, o });
+    return cv.getContext('2d');
+  };
+  const opts = fn(first.getContext('2d'), L) || {};
+  const flat = newCanvas();
+  const fc = flat.getContext('2d');
+  for (const l of layers) fc.drawImage(l.cv, 0, 0);
+  const pal = medianCut(fc.getImageData(0, 0, W, H).data, opts.colors || 60);
+  const spread = opts.spread == null ? 16 : opts.spread;
+  for (const [i, l] of layers.entries()) applyPalette(l.cv, pal, spread, i === 0);
+  fc.clearRect(0, 0, W, H);
+  for (const l of layers) fc.drawImage(l.cv, 0, 0);
+  const out = [];
+  for (const [i, l] of layers.entries()) {
+    let box = i === 0 ? { x: 0, y: 0, w: W, h: H } : bbox(l.cv);
+    if (!box) continue;
+    if (l.o.anim && l.o.anim.type === 'drift') box = { x: 0, y: box.y, w: W, h: box.h };
+    out.push({ id: l.id, ...box, depth: l.o.depth == null ? 0.5 : l.o.depth, anim: l.o.anim || null, png: rawOf(l.cv, box) });
+  }
+  return { flat: rawOf(flat, { x: 0, y: 0, w: W, h: H }), preview: enlarge(flat, 2).toDataURL('image/png'), layers: out, vignette: opts.vignette || [0.4, '0,0,0'] };
+}
+
+/** Draw something so it tiles across the left/right edge (for drifting clouds). */
+function wrapped(c, seed, fn) {
+  for (const dx of [-W, 0, W]) { c.save(); c.translate(dx, 0); fn(c, rng(seed)); c.restore(); }
+}
+
+// ---------------------------------------------------------------- shared scene pieces
+/** Layer options for something that sways (trees, grass, cloth): a = degrees, t = seconds. */
+function sway(a, t, o = {}) { return { type: 'sway', a, t, ...o }; }
+
+/** A bare tree: trunk and forking branches, with snow on them if asked. */
+function bareTree(c, r, x, yb, h, col, snow) {
+  trunk(c, x, yb, h * 0.5, h * 0.06, h * 0.035, col);
+  const limb = (x0, y0, ang, len, w, depth) => {
+    const x1 = x0 + Math.cos(ang) * len, y1 = y0 + Math.sin(ang) * len;
+    branch(c, x0, y0, x1, y1, Math.max(1, w), col);
+    if (snow && w > 1) line(c, x0, y0 - 1, x1, y1 - 1, snow, 1);
+    if (depth > 0) for (let k = 0; k < 2; k++) limb(x1, y1, ang + r.r(-0.6, 0.6), len * r.r(0.55, 0.75), w * 0.6, depth - 1);
+  };
+  for (let k = 0; k < 4; k++) limb(x, yb - h * (0.45 + k * 0.1), -Math.PI / 2 + r.r(-0.8, 0.8), h * 0.3, h * 0.025, 3);
+}
+
+function birch(c, r, x, yb, hh, leaves) {
+  const tw = Math.max(1, hh * 0.05);
+  rect(c, x, yb - hh * 0.8, tw, hh * 0.8, '#efe6d6');
+  if (tw > 2) rect(c, x + tw * 0.6, yb - hh * 0.8, tw * 0.4, hh * 0.8, '#c9a98f');
+  for (let k = 0; k < hh * 0.14; k++) rect(c, x, yb - r() * hh * 0.8, Math.max(1, tw * r.r(0.4, 1)), 1, '#3b3533');
+  if (leaves) crown(c, r, x + 2, yb - hh * 0.84, hh * 0.22, hh * 0.3, leaves, { x: 0.85, y: -0.25 }, 24);
+}
+

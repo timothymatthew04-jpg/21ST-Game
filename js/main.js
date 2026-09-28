@@ -111,6 +111,18 @@
     game.addEventListener('auxclick', (e) => {
       if (e.button === 1 && engine.inGame) { e.preventDefault(); ui.setHidden(!ui.uiHidden); }
     });
+    // The painted scenes follow the mouse a little, near layers more than far ones.
+    let parallax = 0;
+    game.addEventListener('pointermove', (e) => {
+      if (parallax || e.pointerType === 'touch') return;
+      parallax = requestAnimationFrame(() => {
+        parallax = 0;
+        const r = stageEl.getBoundingClientRect();
+        stageEl.style.setProperty('--mx', (((e.clientX - r.left) / r.width) * 2 - 1).toFixed(3));
+        stageEl.style.setProperty('--my', (((e.clientY - r.top) / r.height) * 2 - 1).toFixed(3));
+      });
+    });
+
     let lastWheel = 0;
     game.addEventListener('wheel', (e) => {
       e.preventDefault();

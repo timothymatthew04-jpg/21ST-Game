@@ -183,6 +183,37 @@ html, body {
   pointer-events: none;
 }
 .bg-particles { position: absolute; inset: 0; width: 100%; height: 100%; image-rendering: pixelated; }
+
+/* painted scenes built from moving layers (js/scenery.js) */
+.bg-layered { background: #000; }
+.bg-frame.bg-scenery { width: calc(max(100%, calc(720px * var(--ar))) * 1.04); }
+.bg-layer {
+  position: absolute;
+  translate: calc(var(--mx, 0) * var(--d, 0.5) * -14px) calc(var(--my, 0) * var(--d, 0.5) * -7px);
+  transition: translate 1.4s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+.bg-art { position: absolute; left: 0; top: 0; width: 100%; height: 100%; }
+.bg-vignette { position: absolute; inset: 0; pointer-events: none; }
+@keyframes bg-cam {
+  from { translate: calc(var(--d, 0.5) * -9px) calc(var(--d, 0.5) * -2px); }
+  to { translate: calc(var(--d, 0.5) * 9px) calc(var(--d, 0.5) * 2px); }
+}
+@keyframes art-sway {
+  0%, 100% { transform: skewX(calc(var(--a) * -1deg)); }
+  50% { transform: skewX(calc(var(--a) * 1deg)); }
+}
+@keyframes art-wave {
+  0%, 100% { transform: skewY(calc(var(--a) * -1deg)) scaleX(1); }
+  50% { transform: skewY(calc(var(--a) * 1deg)) scaleX(0.97); }
+}
+@keyframes art-drift { to { transform: translateX(-50%); } }
+@keyframes art-bob {
+  0%, 100% { transform: translateY(calc(var(--a) * -1px)) rotate(calc(var(--r) * -1deg)); }
+  50% { transform: translateY(calc(var(--a) * 1px)) rotate(calc(var(--r) * 1deg)); }
+}
+@keyframes art-pulse { 0%, 100% { opacity: var(--lo); } 50% { opacity: 1; } }
+@keyframes art-spin { to { transform: rotate(360deg); } }
+.reduce-motion .bg-layer { translate: none; transition: none; }
 .bg-light {
   position: absolute;
   aspect-ratio: 1;
@@ -192,7 +223,6 @@ html, body {
     color-mix(in srgb, var(--c) 30%, transparent) 38%,
     color-mix(in srgb, var(--c) 8%, transparent) 70%,
     transparent 100%);
-  mix-blend-mode: screen;
   transform: translate(-50%, -50%);
 }
 .bg-light.glow { animation: bg-glow 6s ease-in-out infinite; }
@@ -215,17 +245,8 @@ html, body {
 .bg-rays {
   /* shafts of light fanning down from a point, swaying slowly */
   position: absolute;
-  width: calc(var(--s, 1) * 150%);
+  width: calc(var(--s, 1) * 95%);
   aspect-ratio: 1;
-  --r: color-mix(in srgb, var(--c) 34%, transparent);
-  background: conic-gradient(from 0deg,
-    transparent 0deg 116deg, var(--r) 119deg, transparent 123deg 129deg, var(--r) 133deg, transparent 138deg 146deg,
-    var(--r) 148deg, transparent 151deg 156deg, var(--r) 161deg, transparent 166deg 171deg, var(--r) 174deg, transparent 177deg 182deg,
-    var(--r) 187deg, transparent 192deg 197deg, var(--r) 200deg, transparent 203deg 209deg, var(--r) 214deg, transparent 219deg 225deg,
-    var(--r) 228deg, transparent 232deg 237deg, var(--r) 241deg, transparent 245deg 360deg);
-  -webkit-mask-image: radial-gradient(circle closest-side, #000 0%, rgba(0, 0, 0, 0.55) 35%, transparent 80%);
-  mask-image: radial-gradient(circle closest-side, #000 0%, rgba(0, 0, 0, 0.55) 35%, transparent 80%);
-  mix-blend-mode: screen;
   animation: bg-rays 16s ease-in-out infinite alternate;
 }
 @keyframes bg-rays {
@@ -245,7 +266,6 @@ html, body {
     radial-gradient(ellipse 16% 38% at 86% 56%, var(--m), transparent 70%);
   background-size: 50% 100%;
   background-repeat: repeat-x;
-  mix-blend-mode: screen;
   animation: bg-mist 80s linear infinite;
 }
 @keyframes bg-mist { from { transform: translateX(0); } to { transform: translateX(-50%); } }

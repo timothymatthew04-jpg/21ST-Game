@@ -153,6 +153,19 @@
         el.style.background = name === 'black' ? '#000' : '#fff';
         return el;
       }
+      // painted scenes are built from moving layers (js/scenery.js)
+      if (VN.Scenery && VN.Scenery.has(name)) {
+        if (!live) {
+          el.style.backgroundImage = `url("${VN.Scenery.flatUrl(name)}")`;
+          el.style.imageRendering = 'auto';
+          return el;
+        }
+        el.classList.add('bg-layered');
+        const frame = VN.Scenery.build(el, name, { reduce: !!this.settings.reduceMotion });
+        const specs = this.story.bgFx && this.story.bgFx[name];
+        if (specs && specs.length && VN.SceneFx) new VN.SceneFx(el, specs, this.settings, frame);
+        return el;
+      }
       const apply = (url) => {
         el.classList.remove('bg-ph');
         el.replaceChildren();
@@ -257,7 +270,10 @@
 
     // ---- preloading ----------------------------------------------------------
     preload(ins) {
-      if (ins.op === 'scene' && ins.bg !== 'black' && ins.bg !== 'white') VN.assets.resolve('bg', ins.bg);
+      if (ins.op === 'scene' && ins.bg !== 'black' && ins.bg !== 'white') {
+        if (VN.Scenery && VN.Scenery.has(ins.bg)) VN.Scenery.load(ins.bg);
+        else VN.assets.resolve('bg', ins.bg);
+      }
       if (ins.op === 'show') {
         const ch = this.story.characters[ins.id];
         resolveSprite((ch && ch.sprite) || ins.id, ins.expr || 'neutral');
@@ -272,7 +288,10 @@
     /** Wait (briefly) for the images a scene needs, so transitions show real art. */
     async prepare(scene) {
       const jobs = [];
-      if (scene.bg && scene.bg !== 'black' && scene.bg !== 'white') jobs.push(VN.assets.resolveWithin('bg', scene.bg, 600));
+      if (scene.bg && scene.bg !== 'black' && scene.bg !== 'white') {
+        if (VN.Scenery && VN.Scenery.has(scene.bg)) jobs.push(Promise.race([VN.Scenery.load(scene.bg), new Promise((r) => setTimeout(r, 900))]));
+        else jobs.push(VN.assets.resolveWithin('bg', scene.bg, 600));
+      }
       for (const [id, s] of Object.entries(scene.sprites)) {
         const ch = this.story.characters[id];
         jobs.push(Promise.race([resolveSprite((ch && ch.sprite) || id, s.expr || 'neutral'), new Promise((r) => setTimeout(r, 600))]));
@@ -379,7 +398,10 @@
 
     setBg(name, d) {
       // the soft backdrop shown around the stage on unusually shaped windows
-      if (VN.setAmbient) VN.setAmbient(name === 'black' || name === 'white' ? null : VN.assets.lookup('bg', name) || null);
+      if (VN.setAmbient) {
+        const flat = VN.Scenery && VN.Scenery.has(name) ? VN.Scenery.flatUrl(name) : VN.assets.lookup('bg', name);
+        VN.setAmbient(name === 'black' || name === 'white' ? null : flat || null);
+      }
       const el = this.makeBg(name);
       const old = [...this.bgStack.children];
       this.bgStack.append(el);
