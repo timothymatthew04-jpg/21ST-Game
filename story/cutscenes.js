@@ -29,11 +29,11 @@
   // ---- Hervé's route, as the novel tells it: Metz, Vienna, Budapest, Kiev, the steppe,
   // the Urals, Siberia, Lake Baikal, the Amur, the port of Sabirk, then by sea to Japan.
   const P = {
-    lavilledieu: { lon: 4.45, lat: 44.58, label: 'Lavilledieu', big: true },
+    lavilledieu: { lon: 4.45, lat: 44.58, label: 'Lavilledieu', big: true, side: 'below' },
     metz: { lon: 6.18, lat: 49.12, label: 'Metz' },
     bavaria: { lon: 11.5, lat: 48.4 },
     vienna: { lon: 16.37, lat: 48.21, label: 'Vienna' },
-    budapest: { lon: 19.04, lat: 47.5, label: 'Budapest', side: 'left' },
+    budapest: { lon: 19.04, lat: 47.5, label: 'Budapest', side: 'below' },
     kiev: { lon: 30.52, lat: 50.45, label: 'Kiev' },
     steppe: { lon: 45, lat: 52.5, label: 'the steppe' },
     urals: { lon: 60.6, lat: 56.8, label: 'the Urals' },
@@ -43,10 +43,10 @@
     chita: { lon: 113.5, lat: 52 },
     amur: { lon: 127.5, lat: 50.3, label: 'the Amur' },
     khabarovsk: { lon: 135, lat: 48.5 },
-    sabirk: { lon: 140.2, lat: 49, label: 'Sabirk' },
+    sabirk: { lon: 140.2, lat: 49, label: 'Sabirk', side: 'above' },
     strait: { lon: 138.8, lat: 44, sea: true },
     teraya: { lon: 136.9, lat: 37.3, label: 'Cape Teraya', sea: true, side: 'left' },
-    shirakawa: { lon: 140.2, lat: 37.1, label: 'Shirakawa', big: true },
+    shirakawa: { lon: 140.2, lat: 37.1, label: 'Shirakawa', big: true, side: 'below' },
   };
   const OUT = ['lavilledieu', 'metz', 'bavaria', 'vienna', 'budapest', 'kiev', 'steppe', 'urals', 'omsk', 'siberia', 'baikal', 'chita', 'amur', 'khabarovsk', 'sabirk', 'strait', 'teraya', 'shirakawa'];
   const out = () => OUT.map((k) => ({ ...P[k] }));
@@ -70,7 +70,7 @@
     // ---------------------------------------------------------------- Chapter 1: the first journey
     journey_one: {
       shots: [
-        { bg: 'journey_map', dur: 17, map: { stops: out(), zoom: 2.2, travel: 15 }, text: 'To the end of the world, and a country that did not want him.', textAt: 1.5, sound: [['whoosh', 0.2, 0.5]] },
+        { bg: 'journey_map', dur: 17, map: { stops: out(), zoom: 1.9, travel: 15 }, text: 'To the end of the world, and a country that did not want him.', textAt: 1.5, sound: [['whoosh', 0.2, 0.5]] },
       ],
     },
 
@@ -122,7 +122,7 @@
     // ---------------------------------------------------------------- Chapter 8: the garden
     garden: {
       shots: [
-        { bg: 'helene_garden', dur: 6, cam: [[1.3, 0.5, 0.2], [1.06, 0.5, 0.55]], text: 'The trees were a little taller every time.', textAt: 1.2, sprites: [{ id: 'helene', x: 0.66, y: 0.04, h: 0.42, expr: 'soft' }] },
+        { bg: 'helene_garden', dur: 6, cam: [[1.3, 0.5, 0.2], [1.06, 0.5, 0.55]], text: 'The trees were a little taller every time.', textAt: 1.2, sprites: [{ id: 'helene', x: 0.87, y: 0.02, h: 0.46, expr: 'soft', filter: 'sepia(0.18) saturate(1.1) brightness(0.96)' }] },
       ],
     },
 
@@ -151,7 +151,7 @@
     ashes: {
       shots: [
         { bg: 'burned_village', dur: 6.5, cam: [[1.0, 0.5, 0.5], [1.32, 0.45, 0.45]], fx: 'ash=1.2', sound: [['wind_gust', 0.5, 0.7]], kanji: '灰' },
-        { bg: 'aviary', dur: 4.5, cam: [[1.25, 0.4, 0.5], [1.1, 0.5, 0.45]], tint: 'rgba(30,26,24,0.55)', fx: 'ash=0.8', text: 'No birds.', textAt: 1.2 },
+        { bg: 'aviary', dur: 4.5, cam: [[1.25, 0.4, 0.5], [1.1, 0.5, 0.45]], nofx: true, tint: 'rgba(30,26,24,0.55)', fx: 'ash=0.8', text: 'No birds.', textAt: 1.2 },
       ],
     },
 

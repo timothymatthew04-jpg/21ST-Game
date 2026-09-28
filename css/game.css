@@ -2032,6 +2032,11 @@ input[type='range']::-moz-range-thumb { width: 18px; height: 24px; background: v
   transition: opacity 0.6s ease, transform 0.6s ease;
 }
 .cs-place.big span { font-size: 14px; color: #8a1e10; }
+.cs-place.left span { left: auto; right: 7px; }
+.cs-place.below span { left: 0; top: 5px; transform: translateX(-50%); }
+.cs-place.below.on span { transform: translateX(-50%); }
+.cs-place.above span { left: 0; top: -22px; transform: translateX(-50%); }
+.cs-place.above.on span { transform: translateX(-50%); }
 .cs-place.on i, .cs-place.on span { opacity: 1; transform: none; }
 .cs-place.quiet i { display: none; }
 
@@ -2046,9 +2051,10 @@ input[type='range']::-moz-range-thumb { width: 18px; height: 24px; background: v
   animation: cs-paper 1.2s cubic-bezier(0.2, 0.7, 0.2, 1) both;
 }
 @keyframes cs-paper { from { opacity: 0; transform: translateY(30px) rotate(-2deg) scale(0.96); } }
-.cs-paper.ja { writing-mode: vertical-rl; height: 460px; display: flex; gap: 22px; font-family: 'Yuji Syuku', 'Zen Old Mincho', serif; font-size: 40px; line-height: 1.12; }
+.cs-paper.ja { writing-mode: vertical-rl; height: 380px; padding: 36px 44px; min-width: 170px; display: flex; flex-direction: column; align-items: flex-start; gap: 18px; font-family: 'Yuji Syuku', 'Zen Old Mincho', serif; font-size: 36px; line-height: 1.12; }
 .cs-paper.fr { width: 640px; font-family: 'Pinyon Script', 'Zen Old Mincho', cursive; font-size: 36px; line-height: 1.45; color: #20160e; }
-.cs-writing { animation: cs-write-ja 1.2s linear both; }
+.cs-writing { flex: none; white-space: nowrap; animation: cs-write-ja 1.2s linear both; }
+.cs-paper.fr .cs-writing { white-space: normal; }
 .cs-paper.fr .cs-writing { animation-name: cs-write-fr; }
 @keyframes cs-write-ja { from { clip-path: inset(0 0 100% 0); opacity: 0.3; } 10% { opacity: 1; } to { clip-path: inset(0 0 -10% 0); } }
 @keyframes cs-write-fr { from { clip-path: inset(0 100% 0 0); opacity: 0.3; } 10% { opacity: 1; } to { clip-path: inset(0 -10% 0 0); } }

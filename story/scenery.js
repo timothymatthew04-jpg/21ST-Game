@@ -2902,9 +2902,9 @@ window.VN_SCENERY = {
    },
    {
     "id": "glove",
-    "x": 150,
+    "x": 154,
     "y": 118,
-    "w": 128,
+    "w": 111,
     "h": 127,
     "depth": 0.6,
     "anim": null,

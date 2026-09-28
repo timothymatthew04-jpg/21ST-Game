@@ -204,7 +204,7 @@ SCENES.the_glove = (c, L) => {
   line(cl, 348, 62, 436, 53, '#8a7a6a', 1);
   // the glove: brown leather, fingers a little curled, laid across the silk
   const gl = L('glove', { depth: 0.6 });
-  ellipse(gl, 214, 190, 64, 30, '#8a70a0');
+  ellipse(gl, 212, 188, 50, 22, '#a890bc');
   gl.save();
   gl.translate(206, 176); gl.rotate(-0.55);
   gl.lineCap = 'round';

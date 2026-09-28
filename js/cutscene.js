@@ -120,7 +120,7 @@
       // the picture
       if (shot.letter) cam.append(this.letter(shot.letter, dur));
       else {
-        const bg = this.stage.makeBg(shot.bg || 'black');
+        const bg = this.stage.makeBg(shot.bg || 'black', true, { fx: shot.nofx !== true });
         cam.append(bg);
         const extra = parseFx(shot.fx);
         const frame = bg.querySelector('.bg-frame');
@@ -215,7 +215,7 @@
       frame.append(cv);
       const labels = stops.map((s) => {
         const [x, y] = mapXY(s.lon, s.lat);
-        const el = h(`div.cs-place${s.label ? '' : '.quiet'}${s.big ? '.big' : ''}`, { style: { left: `${(x / MAP.w) * 100}%`, top: `${(y / MAP.h) * 100}%` } }, h('i'), s.label ? h('span', { style: s.side === 'left' ? { right: '8px', left: 'auto' } : null }, s.label) : null);
+        const el = h(`div.cs-place${s.label ? '' : '.quiet'}${s.big ? '.big' : ''}${s.side ? `.${s.side}` : ''}`, { style: { left: `${(x / MAP.w) * 100}%`, top: `${(y / MAP.h) * 100}%` } }, h('i'), s.label ? h('span', s.label) : null);
         frame.append(el);
         return el;
       });
@@ -223,15 +223,23 @@
       const t0 = performance.now();
       const travel = (M.travel || dur - 1.6) * 1000;
       const delay = (M.delay || 0.6) * 1000;
-      // the camera follows the head of the route, smoothly
-      const view = cam.getBoundingClientRect();
-      const fr = frame.getBoundingClientRect();
-      const toView = (px, py) => [(fr.left - view.left + (px / MAP.w) * fr.width) / view.width, (fr.top - view.top + (py / MAP.h) * fr.height) / view.height];
-      let camPos = toView(path[0].x, path[0].y);
-      let camZ = M.startZoom || zoom * 0.8;
+      // the camera follows the head of the route, smoothly (measured once the shot is on screen)
+      let geo = null;
+      const measure = () => {
+        const keep = cam.style.transform;
+        cam.style.transform = 'none';
+        const view = cam.getBoundingClientRect(), fr = frame.getBoundingClientRect();
+        cam.style.transform = keep;
+        return view.width && fr.width ? { view, fr } : null;
+      };
+      const toView = (px, py) => [(geo.fr.left - geo.view.left + (px / MAP.w) * geo.fr.width) / geo.view.width, (geo.fr.top - geo.view.top + (py / MAP.h) * geo.fr.height) / geo.view.height];
+      let camPos = null;
+      let camZ = M.startZoom || zoom * 0.75;
       let lastStop = -1;
       const draw = (now) => {
-        if (this.done || !cv.isConnected) return;
+        if (this.done) return;
+        if (!cv.isConnected || !(geo || (geo = measure()))) { this.rafs.add(requestAnimationFrame(draw)); return; }
+        if (!camPos) camPos = toView(path[0].x, path[0].y);
         const k = Math.max(0, Math.min(1, (now - t0 - delay) / travel));
         const e = k < 0.5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2;
         const head = e * total;
@@ -269,11 +277,10 @@
         camPos = [camPos[0] + (vx - camPos[0]) * 0.06, camPos[1] + (vy - camPos[1]) * 0.06];
         const targetZ = k >= 1 && M.endZoom ? M.endZoom : zoom;
         camZ += (targetZ - camZ) * 0.03;
-        if (!this.reduce) cam.style.transform = camTransform([camZ, camPos[0], camPos[1]]);
+        cam.style.transform = this.reduce ? camTransform([1.25, 0.62, 0.5]) : camTransform([camZ, camPos[0], camPos[1]]);
         const id = requestAnimationFrame(draw);
         this.rafs.add(id);
       };
-      if (this.reduce) cam.style.transform = camTransform([1.2, 0.6, 0.5]);
       this.rafs.add(requestAnimationFrame(draw));
     }
 

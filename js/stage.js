@@ -160,7 +160,7 @@
     }
 
     // ---- element builders (also used for save thumbnails) -------------------
-    makeBg(name, live = true) {
+    makeBg(name, live = true, { fx = true } = {}) {
       const el = h('div.bg');
       if (name === 'black' || name === 'white') {
         el.style.background = name === 'black' ? '#000' : '#fff';
@@ -175,7 +175,7 @@
         }
         el.classList.add('bg-layered');
         const frame = VN.Scenery.build(el, name, { reduce: !!this.settings.reduceMotion });
-        const specs = this.story.bgFx && this.story.bgFx[name];
+        const specs = fx && this.story.bgFx && this.story.bgFx[name];
         if (specs && specs.length && VN.SceneFx) new VN.SceneFx(el, specs, this.settings, frame);
         return el;
       }
