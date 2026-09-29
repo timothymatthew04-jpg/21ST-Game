@@ -24,7 +24,14 @@
     skipAfterChoices: false,
     focus: true,
     reduceMotion: false,
+    choiceTimer: 2, // 0 off, 1 relaxed, 2 normal
   };
+
+  // How long a choice waits, by the "Choice timer" setting.
+  const TIMER_FACTOR = [0, 1.8, 1];
+
+  // A choice's emotional tone, guessed from what it does when the script doesn't say.
+  const TONE_OF = { helene_trust: ['tender', 'cold'], intimacy: ['tender', null], obsession: ['obsession', 'honest'], danger: ['danger', 'quiet'], business: ['duty', null], mystery: ['curious', 'honest'], fascination: ['curious', null] };
 
   const FUNCTIONS = {
     max: (e, a) => Math.max(...a),
@@ -38,6 +45,8 @@
     top: (e, a) => a.reduce((best, n) => ((e.getVar(n) || 0) > (e.getVar(best) || 0) ? n : best), a[0]),
     visited: (e, a) => (e.state.visited[a[0]] || 0),
     seen_ending: (e, a) => !!e.persistent.endings[a[0]],
+    /** has("watch") → whether Hervé carries that keepsake */
+    has: (e, a) => e.hasItem(a[0]),
     endings: (e) => Object.keys(e.persistent.endings).length,
   };
 
@@ -96,7 +105,63 @@
         chapter: '',
         noRollback: false,
         choices: [], // what the player chose and how it was felt, for the ending recap
+        items: [], // the keepsakes Hervé carries (money is the variable "francs")
       };
+    }
+
+    // ---- keepsakes and money --------------------------------------------------------
+    hasItem(id) { return (this.state.items || []).includes(id); }
+
+    itemInfo(id) { return (this.story.items && this.story.items[id]) || { id, name: id.replace(/_/g, ' '), desc: '' }; }
+
+    gainItem(id, { quiet = false } = {}) {
+      if (!this.state.items) this.state.items = [];
+      if (this.hasItem(id)) return;
+      this.state.items.push(id);
+      if (!quiet) this.ui.itemNotice(this.itemInfo(id), 'gain');
+    }
+
+    loseItem(id, { quiet = false } = {}) {
+      if (!this.hasItem(id)) return;
+      this.state.items = this.state.items.filter((i) => i !== id);
+      if (!quiet) this.ui.itemNotice(this.itemInfo(id), 'lose');
+    }
+
+    francs() { return Number(this.getVar('francs')) || 0; }
+
+    changeFrancs(delta, { quiet = false } = {}) {
+      const before = this.francs();
+      const after = Math.max(0, before + delta);
+      this.setVar('francs', after);
+      if (!quiet && after !== before) this.ui.itemNotice({ id: 'francs', name: `${Math.abs(after - before)} francs`, desc: '' }, after > before ? 'gain' : 'lose');
+    }
+
+    /** "francs:40" / "item:watch" → what it is and whether Hervé has it. */
+    parseCost(spec) {
+      if (!spec) return null;
+      const [kind, what] = spec.split(':');
+      if (kind === 'francs') { const n = parseInt(what, 10) || 0; return { kind, n, ok: this.francs() >= n, label: `${n} francs` }; }
+      return { kind: 'item', id: what, ok: this.hasItem(what), label: this.itemInfo(what).name, item: this.itemInfo(what) };
+    }
+
+    payCost(c) {
+      if (!c) return;
+      if (c.kind === 'francs') this.changeFrancs(-c.n); else this.loseItem(c.id);
+    }
+
+    guessTone(opt) {
+      let best = null, size = 0;
+      for (const a of opt.effects || []) {
+        const map = TONE_OF[a.name];
+        if (!map) continue;
+        let v = 0;
+        try { v = Number(this.evaluate(a.value)) || 0; } catch (e) { v = 0; }
+        if (a.assign === '-=') v = -v;
+        if (a.assign !== '+=' && a.assign !== '-=') continue;
+        const tone = v > 0 ? map[0] : map[1];
+        if (tone && Math.abs(v) > size) { size = Math.abs(v); best = tone; }
+      }
+      return best || 'neutral';
     }
 
     // ---- variables & expressions ---------------------------------------------------
@@ -494,15 +559,35 @@
       }
       this.ui.textbox.hideNext();
       this.instantNext = false;
-      const idx = await this.guard(this.ui.showChoices(options.map((o) => this.interp(o.text))));
-      const opt = options[idx];
-      const picked = VN.stripTags(this.interp(opt.text));
+      // what each option costs or needs, and how it feels
+      const shown = options.map((o) => {
+        const cost = this.parseCost(o.cost);
+        const needs = this.parseCost(o.needs);
+        const gain = o.gain ? this.parseCost(o.gain) : null;
+        return { text: this.interp(o.text), tone: o.tone || this.guessTone(o), cost, needs, gain, locked: !!((cost && !cost.ok) || (needs && !needs.ok)) };
+      });
+      // never leave the player without a way forward
+      if (shown.every((o) => o.locked)) shown[0].locked = false;
+      const base = ins.time != null ? ins.time : this.story.choiceTime != null ? this.story.choiceTime : 0;
+      const factor = TIMER_FACTOR[this.settings.choiceTimer == null ? 2 : this.settings.choiceTimer] || 0;
+      const time = this.isSkipping() ? 0 : base * factor;
+      const idx = await this.guard(this.ui.showChoices(shown, { time }));
+      // letting the time run out is a choice too
+      const hesitated = idx < 0;
+      const opt = hesitated ? ins.hesitate || options[0] : options[idx];
+      const picked = hesitated ? '(You hesitated, and said nothing.)' : VN.stripTags(this.interp(opt.text));
       this.history.push({ choice: true, text: picked });
       const before = this.karmaSnapshot();
+      if (!hesitated) {
+        const s = shown[idx];
+        if (s.cost && s.cost.ok) this.payCost(s.cost);
+        if (s.gain) { if (s.gain.kind === 'francs') this.changeFrancs(s.gain.n); else this.gainItem(s.gain.id); }
+      }
       for (const a of opt.effects) this.assign(a);
       const felt = this.karmaFelt(before);
       if (!felt.length) this.ui.settleChoice();
-      this.state.choices = [...(this.state.choices || []), { chapter: this.state.chapter, text: picked, felt }];
+      this.state.choices = [...(this.state.choices || []), { chapter: this.state.chapter, text: picked, felt, tone: hesitated ? 'quiet' : shown[idx].tone }];
+      this.state.lastTone = hesitated ? 'hesitate' : shown[idx].tone;
       this.persistent.seen[ins.key] = 1;
       this.state.pc = opt.target;
       if (this.onStep) this.onStep();
@@ -647,6 +732,16 @@
       this.ui.textbox.hideCentered();
       this.autosavePending = true;
       await this.guard(this.ui.chapterCard(this.interp(ins.title), this.interp(ins.subtitle), { fast: this.isSkipping(), seal: ins.seal, kanji: ins.kanji }));
+      this.state.pc++;
+    }
+
+    op_item(ins) {
+      if (ins.gain) this.gainItem(ins.id, { quiet: this.isSkipping() }); else this.loseItem(ins.id, { quiet: this.isSkipping() });
+      this.state.pc++;
+    }
+
+    op_francs(ins) {
+      this.changeFrancs(ins.delta, { quiet: this.isSkipping() });
       this.state.pc++;
     }
 

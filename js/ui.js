@@ -27,6 +27,39 @@
     return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
   }
 
+  // ---- choice tones -----------------------------------------------------------------------------
+  // Each tone has an emblem, a pace for its words and a way of moving (see css "choice tones").
+  const svg = (body) => `<svg viewBox="0 0 24 24" aria-hidden="true">${body}</svg>`;
+  const TONES = {
+    tender: { cps: 26, icon: svg('<g fill="currentColor">' + [0, 72, 144, 216, 288].map((a) => `<ellipse cx="12" cy="6.5" rx="3.2" ry="4.6" transform="rotate(${a} 12 12)"/>`).join('') + '</g><circle cx="12" cy="12" r="2" fill="#fff6c8"/>') },
+    warm: { cps: 38, icon: svg('<circle cx="12" cy="12" r="4.5" fill="currentColor"/>' + [0, 45, 90, 135, 180, 225, 270, 315].map((a) => `<rect x="11.2" y="1.5" width="1.6" height="4" rx="0.8" fill="currentColor" transform="rotate(${a} 12 12)"/>`).join('')) },
+    honest: { cps: 40, icon: svg('<path d="M12 2.5c3.6 5 6 8.3 6 11.3a6 6 0 0 1-12 0c0-3 2.4-6.3 6-11.3z" fill="currentColor"/><path d="M9.2 14.5a3 3 0 0 0 2.6 2.8" stroke="#fff" stroke-width="1.3" fill="none" stroke-linecap="round"/>') },
+    cold: { cps: 70, icon: svg('<g stroke="currentColor" stroke-width="1.6" stroke-linecap="round" fill="none">' + [0, 60, 120].map((a) => `<g transform="rotate(${a} 12 12)"><path d="M12 2v20"/><path d="M9.5 4.5 12 7l2.5-2.5M9.5 19.5 12 17l2.5 2.5"/></g>`).join('') + '</g>') },
+    duty: { cps: 55, icon: svg('<circle cx="12" cy="12" r="8.5" fill="currentColor"/><rect x="9.5" y="9.5" width="5" height="5" fill="#241407"/><circle cx="12" cy="12" r="6.6" fill="none" stroke="#241407" stroke-width="0.8" opacity="0.5"/>') },
+    obsession: { cps: 34, icon: svg('<path d="M12 20.5C6 16 3 12.5 3 9a4.5 4.5 0 0 1 9-1.2A4.5 4.5 0 0 1 21 9c0 3.5-3 7-9 11.5z" fill="currentColor"/><path d="M3 21c4-3 6-1 9-4s5-3 9-1" stroke="currentColor" stroke-width="1.2" fill="none"/>') },
+    danger: { cps: 60, icon: svg('<path d="M12 2c1 4 5 5.5 5 11a5 5 0 0 1-10 0c0-2.4 1.2-3.8 2.3-5 .2 1.7.9 2.6 1.8 3C11 8.5 11.2 5.5 12 2z" fill="currentColor"/>') },
+    curious: { cps: 36, icon: svg('<path d="M15.5 3.2A9 9 0 1 0 20.8 15 7 7 0 0 1 15.5 3.2z" fill="currentColor"/><circle cx="18" cy="5" r="1" fill="currentColor"/><circle cx="21" cy="9" r="0.7" fill="currentColor"/>') },
+    quiet: { cps: 18, icon: svg('<g fill="currentColor"><circle cx="6" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8" opacity="0.7"/><circle cx="18" cy="12" r="1.8" opacity="0.4"/></g>') },
+    neutral: { cps: 44, icon: svg('<path d="M12 3 21 12 12 21 3 12z" fill="currentColor"/>') },
+  };
+
+  /** The words of a choice arriving at the pace (and with the movement) of its tone. */
+  function revealWords(el, text, tone, reduce) {
+    const cps = (TONES[tone] || TONES.neutral).cps;
+    el.replaceChildren();
+    if (reduce) { el.textContent = text; return; }
+    [...text].forEach((ch, i) => {
+      el.append(h('span.cw', { style: { animationDelay: `${Math.round((i * 1000) / cps)}ms`, '--i': String(i % 7) } }, ch === ' ' ? ' ' : ch));
+    });
+  }
+
+  /** A keepsake's little picture (assets/items/<id>.png), or a knot of thread until there is one. */
+  function itemIcon(id) {
+    const el = h('i.item-icon', '✦');
+    VN.assets.resolve('ui', `items/${id}`).then((url) => { if (url) { el.textContent = ''; el.style.backgroundImage = `url("${url}")`; } });
+    return el;
+  }
+
   // ---- chapter card pieces ---------------------------------------------------------------------
   const KANJI_DIGITS = ['', '一', '二', '三', '四', '五', '六', '七', '八', '九'];
   const WORDS = ['Zero', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine', 'Ten', 'Eleven', 'Twelve',
@@ -190,8 +223,9 @@
       this.veil = h('div.choice-veil');
       this.pulseEl = h('div.karma-pulse');
       this.whisperEl = h('div.whispers', { 'aria-live': 'polite' });
+      this.noticeEl = h('div.item-notices', { 'aria-live': 'polite' });
       this.uiLayer.prepend(this.veil, this.pulseEl);
-      this.uiLayer.append(this.choicesEl, this.quickmenu, this.indicators, this.whisperEl);
+      this.uiLayer.append(this.choicesEl, this.quickmenu, this.indicators, this.whisperEl, this.noticeEl);
       this.choice = null;
       this.applySettings();
     }
@@ -515,41 +549,109 @@
     }
 
     // ---- choices -------------------------------------------------------------------------
-    showChoices(options) {
+    /**
+     * Show the options. Each has a tone (tender, cold, obsession...) that decides its glow,
+     * its emblem and how its words arrive; hovering one previews that feeling in the text
+     * box. With a time, a silk thread burns down from both ends; when it is gone, Hervé
+     * hesitates and the promise resolves to -1.
+     */
+    showChoices(options, { time = 0 } = {}) {
       this.cancelChoices();
+      const list = options.map((o) => (typeof o === 'string' ? { text: o, tone: 'neutral' } : o));
       return new Promise((resolve, reject) => {
-        const buttons = options.map((text, i) => {
-          const b = h('button.choice', { type: 'button', style: { animationDelay: `${i * 60}ms` } },
-            h('span.choice-key', String(i + 1)), h('span.choice-text', VN.stripTags(text)));
+        const tb = this.textbox.box;
+        const preview = (tone) => { if (tone) tb.dataset.tone = tone; else delete tb.dataset.tone; };
+        const buttons = list.map((o, i) => {
+          const tone = TONES[o.tone] ? o.tone : 'neutral';
+          const words = h('span.choice-text');
+          const chips = [];
+          if (o.cost) chips.push(h(`span.choice-chip.cost${o.cost.ok ? '' : '.short'}`, h('i', o.cost.kind === 'francs' ? '◎' : '✦'), o.cost.kind === 'francs' ? `−${o.cost.n} francs` : `Give up: ${o.cost.label}`));
+          if (o.needs) chips.push(h(`span.choice-chip.needs${o.needs.ok ? '' : '.short'}`, h('i', '✦'), o.needs.ok ? `With ${o.needs.label}` : `Needs ${o.needs.label}`));
+          if (o.gain) chips.push(h('span.choice-chip.gain', h('i', '+'), o.gain.kind === 'francs' ? `${o.gain.n} francs` : o.gain.label));
+          const b = h(`button.choice.tone-${tone}${o.locked ? '.locked' : ''}`, { type: 'button', style: { animationDelay: `${i * 70}ms` }, 'aria-disabled': o.locked ? 'true' : null },
+            h('span.choice-glow'),
+            h('span.choice-emblem', { html: TONES[tone].icon }),
+            h('span.choice-key', String(i + 1)),
+            h('span.choice-body', words, chips.length ? h('span.choice-chips', chips) : null));
+          const plain = VN.stripTags(o.text);
+          b._reveal = () => revealWords(words, plain, tone, this.settings.reduceMotion);
+          b._reveal();
           b.addEventListener('click', (e) => { e.stopPropagation(); pick(i); });
-          b.addEventListener('mouseenter', () => { b.focus({ preventScroll: true }); this.audio.ui('hover'); });
+          b.addEventListener('mouseenter', () => { b.focus({ preventScroll: true }); });
+          b.addEventListener('focus', () => {
+            if (done) return;
+            this.audio.ui('hover');
+            preview(tone);
+            if (b !== lastFocus) { lastFocus = b; b._reveal(); }
+          });
           return b;
         });
         let done = false;
+        let lastFocus = null;
+        let raf = 0;
+        const finish = (i) => {
+          cancelAnimationFrame(raf);
+          preview(null);
+          this.veil.classList.remove('urgent');
+          this.choicesEl.replaceChildren();
+          this.choicesEl.classList.remove('on');
+          this.choice = null;
+          resolve(i);
+        };
         const pick = (i) => {
-          if (done) return;
+          if (done || list[i].locked) { if (!done && list[i].locked) { this.audio.ui('error'); buttons[i].animate([{ transform: 'translateX(0)' }, { transform: 'translateX(-6px)' }, { transform: 'translateX(5px)' }, { transform: 'translateX(0)' }], { duration: 260 }); } return; }
           done = true;
           this.audio.ui('select');
           buttons.forEach((b, j) => b.classList.add(j === i ? 'picked' : 'dropped'));
+          timer.classList.add('stopped');
           // the chosen line lingers a moment, so the choice is felt before the story moves on
           const hold = this.engine && this.engine.isSkipping() ? 200 : 620;
-          setTimeout(() => {
-            this.choicesEl.replaceChildren();
-            this.choicesEl.classList.remove('on');
-            this.choice = null;
-            resolve(i);
-          }, hold);
+          setTimeout(() => finish(i), hold);
         };
+        const hesitate = () => {
+          if (done) return;
+          done = true;
+          this.choicesEl.classList.add('hesitating');
+          this.audio.fx('breath', { volume: 0.8 });
+          this.whisper('You hesitated, and the moment passed.', '#b9ab93');
+          setTimeout(() => { this.choicesEl.classList.remove('hesitating'); finish(-1); }, this.settings.reduceMotion ? 300 : 1100);
+        };
+        // the timer: a silk thread burning down from both ends
+        const timer = h('div.choice-timer', { 'aria-hidden': 'true' }, h('span.ct-thread'), h('span.ct-ember.l'), h('span.ct-ember.r'));
+        if (time > 0) {
+          let left = time;
+          let last = performance.now();
+          const beats = [0.3, 0.12];
+          const tick = (now) => {
+            const dt = Math.min(0.1, (now - last) / 1000);
+            last = now;
+            if (done) return;
+            // the clock stops while a menu is open or the page is hidden
+            if (!this.modalOpen && !document.hidden) left -= dt;
+            const p = Math.max(0, left / time);
+            timer.style.setProperty('--p', p.toFixed(4));
+            if (beats.length && p <= beats[0]) {
+              beats.shift();
+              this.audio.fx('heartbeat', { volume: 0.45 });
+              this.veil.classList.add('urgent');
+              timer.classList.add('urgent');
+            }
+            if (left <= 0) { hesitate(); return; }
+            raf = requestAnimationFrame(tick);
+          };
+          raf = requestAnimationFrame(tick);
+        } else timer.classList.add('none');
         this.pulseEl.classList.remove('on');
         this.veil.classList.add('on');
         clearTimeout(this.unduckTimer);
         this.audio.music.duck(0.6, 0.8);
-        this.choicesEl.replaceChildren(...buttons);
+        this.choicesEl.replaceChildren(timer, ...buttons);
         this.choicesEl.classList.add('on');
         this.choice = {
           buttons,
           pick,
           reject,
+          cancel: () => { done = true; cancelAnimationFrame(raf); preview(null); this.veil.classList.remove('urgent'); },
           key: (e) => {
             const n = parseInt(e.key, 10);
             if (n >= 1 && n <= buttons.length) { pick(n - 1); return true; }
@@ -557,7 +659,6 @@
               const i = buttons.indexOf(document.activeElement);
               const next = e.key === 'ArrowDown' ? (i + 1) % buttons.length : (i - 1 + buttons.length) % buttons.length;
               buttons[i < 0 ? 0 : next].focus({ preventScroll: true });
-              this.audio.ui('hover');
               return true;
             }
             if ((e.key === 'Enter' || e.key === ' ') && buttons.includes(document.activeElement)) {
@@ -570,8 +671,21 @@
       });
     }
 
+    /** A keepsake or money changing hands: a small card slides in at the top right. */
+    itemNotice(item, kind) {
+      const money = item.id === 'francs';
+      const card = h(`div.item-notice.${kind}${money ? '.money' : ''}`,
+        h('span.in-icon', money ? h('i', '◎') : itemIcon(item.id)),
+        h('span.in-text', h('small', kind === 'gain' ? (money ? 'Received' : 'Keepsake') : money ? 'Spent' : 'Given up'), h('b', item.name)));
+      this.noticeEl.append(card);
+      this.audio.fx(kind === 'gain' ? 'chime' : 'paper', { volume: 0.6 });
+      setTimeout(() => card.classList.add('out'), 3200);
+      setTimeout(() => card.remove(), 3900);
+    }
+
     cancelChoices() {
       if (!this.choice) return;
+      if (this.choice.cancel) this.choice.cancel();
       this.choice = null;
       this.settleChoice(0.4);
       this.choicesEl.replaceChildren();
@@ -961,6 +1075,7 @@
             textSpeed,
             preview,
             slider('set-auto', 'Auto-advance delay', 0.5, 6, 0.25, () => s.autoDelay, (v) => { s.autoDelay = v; }, (v) => `${v.toFixed(2)} s`),
+            slider('set-timer', 'Choice timer', 0, 2, 1, () => (s.choiceTimer == null ? 2 : s.choiceTimer), (v) => { s.choiceTimer = v; }, (v) => ['Off', 'Relaxed', 'Normal'][v]),
             toggle('set-unseen', 'Skip unread text', 'skipUnseen', 'Off: skipping stops at lines you haven\'t read'),
             toggle('set-afterchoice', 'Keep skipping after choices', 'skipAfterChoices')),
           h('section.set-group',

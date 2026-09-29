@@ -45,6 +45,13 @@ for (const [name, dir, synth, where] of soundChecks) {
   if (!hasFile(dir, name) && !(synth && synth[name])) story.warnings.push({ line: where, msg: `no assets/${dir}/${name}.mp3 and no synthesized "${name}"` });
 }
 
+// Every timed choice should say what happens when the player hesitates.
+for (const i of lines) {
+  if (i.op !== 'menu') continue;
+  const time = i.time != null ? i.time : story.choiceTime || 0;
+  if (time > 0 && !i.hesitate) story.warnings.push({ line: i.line, msg: 'timed menu has no "- hesitate" option (the first option is used when time runs out)' });
+}
+
 const unreachable = Object.entries(story.labels).filter(([name, idx]) => {
   if (name === 'start' || targets.has(idx)) return false;
   // falls through from the previous instruction?

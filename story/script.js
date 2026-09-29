@@ -29,6 +29,9 @@ titlefx ginkgo sun=0.3,-0.25 sway=0.28,0.22,0.34,0.3 pivot=0.4,0.85
 titlelogo brush
 # The press-start screen: a glowing thread of silk that branches into light when clicked.
 splash strand
+# Every choice waits this many seconds; if the player takes longer, Hervé hesitates
+# (a menu's "- hesitate" option says what happens then). "menu time 8" changes one menu.
+choicetime 14
 # The backgrounds are detailed pixel art at high resolution, so everything is scaled smoothly.
 artstyle smooth
 credits "Adapted from Silk by Alessandro Baricco"

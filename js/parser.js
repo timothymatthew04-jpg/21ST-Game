@@ -60,7 +60,7 @@
   function parse(source) {
     const story = {
       title: 'Untitled', subtitle: '', emblem: '', artStyle: 'mixed', titleFx: null, titleLogo: 'carved', titleMusic: null, titleBackground: null, warning: null, credits: null,
-      characters: {}, backgrounds: {}, poemWords: [], karma: [], bgFx: {}, places: {}, bgSound: {}, bgLight: {},
+      characters: {}, backgrounds: {}, poemWords: [], karma: [], bgFx: {}, places: {}, bgSound: {}, bgLight: {}, items: {},
       program: [], labels: {}, endings: [], errors: [], warnings: [],
       hash: hashString(source),
     };
@@ -232,24 +232,37 @@
       for (const f of ifStack) err(f.line, '"if" block is missing "endif"');
     }
 
+    const TONES = ['tender', 'warm', 'honest', 'cold', 'duty', 'obsession', 'danger', 'curious', 'quiet', 'neutral'];
+
     function compileMenu(L, j0, j1) {
       const tk = tokenizeLine(L.text);
       const prompt = tk[1] && tk[1].t === 'str' ? tk[1].v : null;
-      const menu = emit(L, { op: 'menu', prompt, options: [], end: null, key: `${currentLabel}:menu${sayCount++}` });
+      // menu time 8 → this choice waits 8 seconds; menu notime → no timer for this one
+      const tm0 = L.text.match(/\btime\s+(\d+(?:\.\d+)?)\s*$/);
+      const time = /\bnotime\s*$/.test(L.text) ? 0 : tm0 ? parseFloat(tm0[1]) : null;
+      const menu = emit(L, { op: 'menu', prompt, time, options: [], hesitate: null, end: null, key: `${currentLabel}:menu${sayCount++}` });
       const ends = [];
       let k = j0;
       while (k < j1) {
         const O = lines[k];
         let e = k + 1;
         while (e < j1 && lines[e].indent > O.indent) e++;
-        const m = O.text.match(/^-\s*"((?:[^"\\]|\\.)*)"\s*(.*)$/);
+        // "- hesitate": what happens when the player lets the time run out
+        const hm = O.text.match(/^-\s*hesitate\b\s*(.*)$/);
+        const m = hm ? [null, '', hm[1]] : O.text.match(/^-\s*"((?:[^"\\]|\\.)*)"\s*(.*)$/);
         if (!m) {
-          err(O, 'Menu options look like:  - "Choice text" -> label [trust += 1]');
+          err(O, 'Menu options look like:  - "Choice text" tone=tender -> label [trust += 1]');
           k = e;
           continue;
         }
-        const opt = { text: m[1].replace(/\\(.)/g, (_, c) => (c === 'n' ? '\n' : c)), cond: null, effects: [], target: null, label: null };
+        const opt = { text: m[1].replace(/\\(.)/g, (_, c) => (c === 'n' ? '\n' : c)), cond: null, effects: [], target: null, label: null, tone: null, cost: null, needs: null, gain: null };
         let rest = m[2].trim();
+        // tone=tender  cost=francs:40  cost=item:watch  needs=item:note  gain=item:glove
+        rest = rest.replace(/(?:^|\s)(tone|cost|needs|gain)=(\S+)/g, (_, key, val) => {
+          if (key === 'tone' && !TONES.includes(val)) err(O, `Unknown tone "${val}" (use ${TONES.join(', ')})`);
+          opt[key] = val;
+          return ' ';
+        }).trim();
         const ifm = rest.match(/(?:^|\s)if\s+(.+)$/);
         if (ifm) { opt.cond = expr(O, ifm[1]); rest = rest.slice(0, ifm.index).trim(); }
         const em = rest.match(/\[(.*)\]/);
@@ -269,13 +282,14 @@
         } else if (!opt.label) {
           opt.target = 'END';
         }
-        menu.options.push(opt);
+        if (hm) { if (menu.hesitate) err(O, 'A menu can only have one "- hesitate"'); menu.hesitate = opt; } else menu.options.push(opt);
         k = e;
       }
       if (!menu.options.length) err(L, 'menu has no options');
       menu.end = program.length;
       ends.forEach((j) => (j.target = program.length));
       menu.options.forEach((o) => { if (o.target === 'END') o.target = program.length; });
+      if (menu.hesitate && menu.hesitate.target === 'END') menu.hesitate.target = program.length;
     }
 
     function compileSimple(L) {
@@ -347,6 +361,26 @@
           // splash strand — the press-start screen is a glowing thread of silk that branches into light
           if (!tk[1] || !['strand', 'logo'].includes(tk[1].v)) throw new Error('Usage: splash strand|logo');
           story.splash = tk[1].v;
+          return;
+        case 'item': {
+          // item watch "Pocket watch" "His father's; it has never lost a minute."
+          need(3, 'item id "Name" ["Description"]');
+          story.items[tk[1].v] = { id: tk[1].v, name: str(tk[2], 'item id "Name"'), desc: tk[3] ? tk[3].v : '' };
+          return;
+        }
+        case 'gain':
+        case 'lose': {
+          // gain item watch / lose item watch / gain francs 40 / lose francs 40
+          need(3, `${w0.v} item name | ${w0.v} francs amount`);
+          if (tk[1].v === 'francs') emit(L, { op: 'francs', delta: (w0.v === 'gain' ? 1 : -1) * (parseInt(tk[2].v, 10) || 0) });
+          else if (tk[1].v === 'item') emit(L, { op: 'item', id: tk[2].v, gain: w0.v === 'gain' });
+          else throw new Error(`Usage: ${w0.v} item name | ${w0.v} francs amount`);
+          return;
+        }
+        case 'choicetime':
+          // choicetime 14 — how many seconds every choice waits before Hervé hesitates (0 = no timer)
+          need(2, 'choicetime seconds');
+          story.choiceTime = parseFloat(tk[1].v) || 0;
           return;
         case 'titlelogo':
           if (!tk[1] || !['brush', 'carved'].includes(tk[1].v)) throw new Error('Usage: titlelogo brush|carved');
@@ -516,7 +550,7 @@
     };
     for (const ins of program) {
       if ((ins.op === 'jump' || ins.op === 'call' || ins.op === 'jumpIf') && ins.label) ins.target = resolve(ins, ins.label);
-      if (ins.op === 'menu') for (const o of ins.options) if (o.label) o.target = resolve(ins, o.label);
+      if (ins.op === 'menu') for (const o of [...ins.options, ins.hesitate].filter(Boolean)) if (o.label) o.target = resolve(ins, o.label);
     }
     if (!('start' in story.labels)) errors.push({ line: 0, msg: 'The script needs a "label start" where the game begins' });
     return story;
