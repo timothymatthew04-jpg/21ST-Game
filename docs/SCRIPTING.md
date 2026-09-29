@@ -360,7 +360,7 @@ A journey is Hervé's route drawn across the old map of Eurasia, like the journe
 ride stops at some towns for something to happen: a card with what is going on and two or three
 things to do (keys 1–3 or a click). Options can cost francs or a keepsake (they can't be chosen
 without it), can need a keepsake to be offered at all, and can add to or set story variables; then
-Hervé says what came of it and the ride goes on. The journeys are written in `story/journeys.js`:
+Hervé says what came of it and the ride goes on. A journey stops skipping, like a choice. The journeys are written in `story/journeys.js`:
 `first`, `second` and `third` out to Japan, and `home`, back with the eggs, where how well the eggs
 are kept (`eggs_care`) decides how many have gone grey in the egg-sorting minigame. Other variables
 the road changes: `days` (Hélène counts them), `fever`, `danger`, and `road` (the second journey's
@@ -457,8 +457,9 @@ the game: `walk ruins into how` sets `how` to caught, escaped, arrived or skippe
 goes on from there. Action is set to one difficulty for everyone.
 
 Walks never replace the rest: choices, cutscenes and minigames happen around them as before. The
-game menu (Esc) pauses a walk, saving during one saves just before it, and a walk is passed over
-while skipping. Every walk has a Skip button for players who would rather read on.
+game menu (Esc) pauses a walk, and saving during one saves just before it. A quiet walk is passed
+over while skipping; a walk with danger in it (a chase, patrols, shelling, or `into`) stops skipping
+the way a choice does. Every walk has a Skip button for players who would rather read on.
 
 ## The word game (DDLC's poem game)
 

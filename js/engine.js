@@ -808,7 +808,9 @@
     /** The Road East: the route across the map, stopping for what happens along the way. */
     async op_journey(ins) {
       this.checkpoint();
-      if (!this.isSkipping() && VN.playJourney) {
+      // the road has decisions on it: stop skipping, the way a choice does
+      this.setSkip(false);
+      if (VN.playJourney) {
         this.ui.textbox.hideBox();
         this.ui.textbox.hideCentered();
         this.stage.setSpeaker(null);
@@ -968,6 +970,10 @@
     /** A walking area (js/walk.js): Hervé walks through a place, then the story goes on. */
     async op_walk(ins) {
       this.checkpoint();
+      // a walk where something can go wrong (a chase, patrols, shelling) is played like a minigame:
+      // it stops skipping. A quiet walk is passed over while skipping.
+      const def = (globalThis.VN_WALKS || {})[ins.area];
+      if (ins.into || (def && (def.chase || def.patrols || def.shelling))) this.setSkip(false);
       if (!this.isSkipping() && VN.playWalk) {
         this.ui.textbox.hideBox();
         this.ui.textbox.hideCentered();
