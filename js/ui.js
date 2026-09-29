@@ -1201,15 +1201,15 @@
         this.close(this.menuEntry);
         this.menuEntry = null;
       };
-      nav.append(this.button('Return', closeMenu, '.nav-return'));
+      nav.append(this.button(inGame ? 'Resume' : 'Back', closeMenu, '.nav-return'));
       for (const [id, label] of tabs) {
         const b = this.button(label, () => this.showTab(id), '.nav-item');
         this.menuTabs[id] = b;
         nav.append(b);
       }
       if (inGame) {
-        nav.append(this.button('Main Menu', async () => {
-          if (await this.confirm('Return to the main menu? Anything since your last save will be lost.')) {
+        nav.append(this.button('Exit to Title', async () => {
+          if (await this.confirm('Return to the title? Anything since your last save will be lost.', { yes: 'Exit to title', no: 'Stay' })) {
             closeMenu();
             eng.returnToTitle();
           }
@@ -1217,7 +1217,9 @@
       }
       this.menuBody = h('div.menu-body');
       this.menuTitle = h('div.menu-title');
-      const el = h('div.overlay.menu', h('div.menu-side', h('div.menu-logo', this.story.title), nav), h('div.menu-main', this.menuTitle, this.menuBody));
+      const el = h('div.overlay.menu', h('div.menu-glow'),
+        h('div.menu-side', h('div.menu-logo', h('span.ml-kanji', this.story.emblem || '絹'), h('span.ml-name', this.story.title)), nav, h('div.menu-foot', 'A Choice Simulation')),
+        h('div.menu-main', this.menuTitle, this.menuBody));
       this.menuEntry = this.open(el, {
         onBack: closeMenu,
         onKey: (e) => {
