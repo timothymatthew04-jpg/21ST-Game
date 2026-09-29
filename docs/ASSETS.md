@@ -115,10 +115,19 @@ To use a recording instead, save it under the same name and it takes over: music
 | `journey` | The long journeys: a steady pulse, a flute looking ahead |
 | `japan` | Japan: koto and bamboo flute over a drone, a far temple bell |
 | `her_theme` | The woman, the cup, the note, the letter: high and weightless |
-| `war` | Chapter 10: drums and a crying flute |
-| `sorrow` | The empty mill, the sickroom |
+| `war` | Chapter 10: drums, war horns and a crying flute |
+| `sorrow` | The empty mill, the grey ending |
 | `letter` | Final Chapter: the truth, from minor into major |
 | `home` | The endings: music box and piano |
+| `departure` | Chapter 1: setting out, pizzicato strings and a flute |
+| `reverie` | Chapter 7: a harp, a celesta and a far choir |
+| `storm` | Chapter 9: the third journey through the rain |
+| `tension` | Chapter 9 and 11: Japan in turmoil, soldiers close by |
+| `battle` | Chapter 10: the war, with brass, choir, strings and drums |
+| `pursuit` | Chapter 11: hiding from the soldiers' lanterns |
+| `lament` | Chapter 11 and the far-shore ending: a bowed voice like an erhu |
+| `farewell` | Chapter 15: the sickroom, swelling slowly |
+| `revelation` | Final Chapter: the truth arriving |
 
 Each place's ambience is set by the `bgsound` lines at the top of the story script; the full list
 of ambiences and sounds is in docs/SCRIPTING.md.

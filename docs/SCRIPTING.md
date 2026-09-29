@@ -47,6 +47,34 @@ character inner  ""       color=#cbbef0 italic
 * `face=id` picks the portrait shown in the text box (`assets/faces/<id>.png`, the character's id by
   default); `face=none` turns it off. The portrait appears when the character speaks without
   standing in the scene: always for Hervé, who is the player, and for voices heard over a CG.
+* `voice=120` gives the character a muffled, wordless voice that murmurs while their lines type:
+  the number is its pitch in Hz (about 85–120 for men, 180–250 for women). `pace=130` is the time
+  between syllables in milliseconds, `muffle=1100` how muffled it is (lower is more muffled) and
+  `breath=0.3` how breathy (0–1). Characters without `voice=` use the text beeps instead.
+
+### Voices and the narrator
+
+Lines with no speaker, `inner` thoughts and `centered` text are read aloud by the browser's own
+text-to-speech, preferring natural "online" voices. The next line cuts the reading off, and
+auto-advance waits for it to finish. To help it with names, add `pronounce` lines at the top:
+
+```text
+pronounce "Hervé"   "Air-vay"
+pronounce "Hélène"  "Ay-lenn"
+```
+
+### First meetings
+
+```text
+intro helene "Hervé's wife. Her voice is the thing people remember about her." kanji 妻 sound chime
+...
+show helene neutral
+introduce helene
+```
+
+`intro` (at the top) says how a character is presented: a line about who they are, a seal of one or
+two kanji, and a sound. `introduce` plays the first-meeting animation at that moment, once per
+playthrough; it is skipped while skipping, and a click moves on.
 
 ## Choices
 
@@ -134,7 +162,7 @@ endif
 | `eggs` | `win` / `lose` | picks out the grey, sick eggs before the thread burns out (`minigame eggs dead`: the last eggs, where nothing can be won) |
 | `bargain` | `good` / `fair` / `poor` / `insult` | stops a brush on a fair price, three rounds |
 | `hide` | `safe` / `caught` | runs from wall to wall while the soldier's lantern looks away |
-| `letter` | `win` | swaps torn strips of a letter back into order |
+| `letter` | `win` | puts four torn strips back on the page, each where the faint trace of its words shows (a wrong strip slips back; after three misses the right one glows) |
 
 Games that can be failed offer another try or let the moment pass; none can stop the story. The
 script decides what each result costs or brings.
@@ -338,12 +366,16 @@ Files are found by name, see the asset folders below. When there is no file, the
 music and sounds, composed in code (js/synth.js):
 
 * **Music**: `town_theme`, `helene_theme`, `journey`, `japan`, `her_theme`, `war`, `letter`, `home`,
-  `sorrow`.
+  `sorrow`; intense: `battle`, `tension`, `pursuit`, `storm`; emotional: `lament`, `farewell`,
+  `reverie`, `departure`, `revelation`.
 * **Ambience**: `waves`, `wind`, `birds`, `rain`, `storm`, `fire`, `crickets`, `night`, `temple`,
   `forest`, `camp`, `mill`, `clock`, `room`, `city`, `harbour`, `boat`, `stream`, `ruins`, `unrest`,
-  `aviary`.
-* **Sounds**: `bell`, `temple_bell`, `chime`, `heartbeat`, `thunder`, `cannon`, `page`, `paper`,
-  `knock`, `cup`, `gong`, `wind_gust`, `breath`, `ink`, `whoosh`, `stamp`, `sparkle`, `candle_out`.
+  `aviary`, `battle` (the war all around), `battle_far` (the war heard from the hills).
+* **Sounds**: `bell`, `temple_bell`, `chime`, `heartbeat`, `heartbeat_fast`, `thunder`, `cannon`,
+  `page`, `paper`, `knock`, `cup`, `gong`, `wind_gust`, `breath`, `ink`, `whoosh`, `stamp`,
+  `sparkle`, `candle_out`; war: `musket`, `volley`, `explosion`, `shell`, `horn`, `drumroll`,
+  `shouts`, `sword`; drama: `sting` (an orchestral hit), `swell`, `dread`; everyday: `footsteps`,
+  `running`, `gallop`, `door`, `creak`, `pour`, `rustle`, `shatter`, `splash`.
 
 Music and ambience loop seamlessly: recordings crossfade the last few seconds of each pass into the
 next, and the composed pieces never repeat exactly. `titlemusic` plays only on the title screen;

@@ -64,7 +64,16 @@ On a phone, tap to advance and use the buttons under the text box.
   threatening, giving up the watch, sending for the doctor from Nîmes. What Hervé gives away is
   noticed later.
 * **Minigames**: the tea ceremony, sorting the eggs, bargaining with Hara Kei, hiding from soldiers
-  in the burned village, and mending the torn letter. Short and forgiving, and none can stop the story.
+  in the burned village, and mending the torn letter (four strips, each matched to the faint trace
+  of its words on the page). Short and forgiving, and none can stop the story.
+* **Voices.** Characters murmur as they talk: a muffled, wordless voice of their own (Hara Kei low
+  and slow, Balbadiou quick and gruff, Hélène soft), so you hear that someone is speaking without
+  hearing words. Narration and Hervé's thoughts are read aloud by the browser's own voice, choosing
+  the most natural one it has (Edge and Chrome offer good "online" voices; some browsers have none).
+  Settings → Voices turns either off, picks the narrator's voice and sets its speed.
+* **First meetings.** The first time we meet each character, the scene dims and a band of their
+  colour sweeps across with a streak of light and silk threads; their portrait slides in, their
+  name rises letter by letter, and a seal is stamped beside a line about who they are.
 * **Routes you can feel.** At every chapter the story works out where Hervé's heart is heading:
   devoted, torn or lost. The chapter card turns to dawn rose and petals or to crimson, ash and a
   crack; the text box warms or darkens; and characters speak to him differently.
@@ -88,8 +97,11 @@ On a phone, tap to advance and use the buttons under the text box.
   burned village, the candle going out at dawn, and the truth in Hélène's own handwriting. Click to
   move on, Esc to skip.
 * Scene transitions (dissolve, fade, flash), tints, filters and screen effects.
-* **Settings** for text speed, auto speed, music and sound volume, text beeps, speaker highlight
-  and reduced motion.
+* **Settings** for text speed, auto speed, the choice timer, music, sound and voice volume, the
+  character voices and the narrator, text beeps, speaker highlight and reduced motion.
+* **A thread of silk to begin.** Before the menu, a single glowing strand flows across the dark;
+  click and it branches into a burst of light that swells until the whole screen is bright, then
+  slowly draws back to reveal the menu.
 * **Animated title screen** on the ginkgo courtyard painting (`assets/bg/title_cover.webp`): golden
   leaves tumbling with depth of field, gusts of wind that tear leaves from the swaying tree, shimmering
   sun-dapples, glints, light rays and pollen, a slow camera drift and mouse parallax. The logo is
@@ -106,10 +118,13 @@ On a phone, tap to advance and use the buttons under the text box.
   turns, and the view shifts a little with the mouse. On top, sakura petals and autumn leaves fall,
   lanterns and fires flicker, water glints, fireflies wander, smoke and steam rise and birds cross
   the sky. The name of each new place fades in at the top of the screen when the story arrives.
-* **Music and sound composed in code**: nine pieces (a waltz for the town, Hélène's piano, koto and
-  bamboo flute for Japan, drums for the war…), a sound for every place (the sea, the mill, a
-  ticking clock, crickets, a fire, the harbour, rain and thunder) and effects at the key moments.
-  A recording with the same name in `assets/` always takes over.
+* **Music and sound composed in code**: eighteen pieces with strings, brass, choir, piano, koto,
+  flute and drums, from a waltz for the town and Hélène's piano to a battle, a chase through the
+  ruins, a storm, a lament, a farewell that swells slowly, and the truth arriving in the major. Each
+  piece moves through sections instead of looping one phrase. Every place has its own sound (the
+  sea, the mill, a ticking clock, crickets, a fire, the harbour, rain and thunder), the war is heard
+  all around (cannon, volleys, falling shells, shouting, drums and horns), and effects mark the key
+  moments. A recording with the same name in `assets/` always takes over.
 * **Characters who feel alive**: Hélène, Balbadiou, Hara Kei, the woman and Madame Blanche breathe,
   sway a little, blink now and then, nod while they talk, react to their mood, and take on the light
   of the place they stand in (firelight, dusk, moonlight, grey rain). Hervé's face is in the text box.
