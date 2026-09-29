@@ -408,14 +408,14 @@
   }
 
   /**
-   * grass=y,h,density,plumes,#tip — blades rooted from y (a fraction of the picture) to the bottom,
-   * up to h tall, nearer ones taller. A steady breeze, and every few seconds a gust that runs across
+   * grass=y,h,density,plumes,gap0,gap1,#tip — blades rooted from y (a fraction of the picture) to the
+   * bottom, up to h tall, nearer ones taller, none between gap0 and gap1 (a path, some steps). A steady breeze, and every few seconds a gust that runs across
    * the field and lays the grass over as it passes. Some blades carry silver-grass plumes.
    */
   class Grass {
     constructor(nums, color) {
-      const [y = 0.8, hh = 0.2, density = 1, plumes = 0.25] = nums;
-      Object.assign(this, { y0: y, hh, density, plumes, tip: color || '#e8d49a' });
+      const [y = 0.8, hh = 0.2, density = 1, plumes = 0.25, gap0 = 0, gap1 = 0] = nums;
+      Object.assign(this, { y0: y, hh, density, plumes, gap0, gap1, tip: color || '#e8d49a' });
       this.gust = { x: -200, v: 110, next: rnd(1, 4) };
     }
     resize(W, H) {
@@ -428,8 +428,10 @@
       for (let i = 0; i < n; i++) {
         const d = Math.pow(Math.random(), 0.65);
         const by = top + d * (H - top + 3);
+        const x = rnd(-6, W + 6);
+        if (this.gap1 > this.gap0 && x > this.gap0 * W && x < this.gap1 * W) continue;
         this.blades.push({
-          x: rnd(-6, W + 6), y: by, d,
+          x, y: by, d,
           len: this.hh * H * (0.35 + 0.65 * d) * rnd(0.6, 1.1),
           flex: rnd(0.7, 1.3), ph: rnd(0, TAU),
           plume: Math.random() < this.plumes,
@@ -730,12 +732,14 @@
   /**
    * army=y,dir,speed,count,type,scale,x0,x1,fire — soldiers marching in ranks across the field.
    * type 0: the imperial army (dark coats, rifles with bayonets, officers in the red "shaguma" wig);
-   * type 1: samurai of the old order (lacquered armour, spears, a small banner on every back).
+   * type 1: samurai of the old order (lacquered armour, spears, a small banner on every back);
+   * type 2: French infantry (blue coats, red trousers, kepis).
    * fire: how often the front rank lets off a volley (per second).
    */
   const ARMY = [
     { coat: '#1e2438', legs: '#15151e', hat: '#0e0e12', face: '#c89a78', arm: '#b8bcc8', flag: null },
     { coat: '#6a2a22', legs: '#2a1a18', hat: '#1a1414', face: '#c89a78', arm: '#8a7050', flag: ['#f0ece4', '#c83a2a', '#e8c040'] },
+    { coat: '#2e4a9a', legs: '#b8363a', hat: '#2a3a6a', face: '#e0b090', arm: '#c8ccd8', flag: null },
   ];
   class Army {
     constructor(nums) {
@@ -750,10 +754,12 @@
       this.men = [];
       const ranks = 3, per = Math.ceil(this.count / ranks), gap = 5 * this.sc;
       const span = (this.x1 - this.x0) * W;
+      // a column crossing the whole view starts somewhere along its way, not off-screen
+      const off = this.x0 < 0 || this.x1 > 1 ? rnd(0, span * 0.6) : 0;
       for (let r = 0; r < ranks; r++) {
         for (let i = 0; i < per; i++) {
           this.men.push({
-            x: this.x0 * W + ((i * gap + r * 2 * this.sc + rnd(-1, 1)) % Math.max(gap, span)),
+            x: this.x0 * W + off + ((i * gap + r * 2 * this.sc + rnd(-1, 1)) % Math.max(gap, span)),
             r, ph: rnd(0, TAU), chief: this.type === 0 && Math.random() < 0.08, flag: this.look.flag ? pick(this.look.flag) : null,
           });
         }
@@ -796,8 +802,9 @@
         if (step) { P(x - s, y + 6 * s, 1, 2, L.legs); P(x + s, y + 6 * s, 1, 2, L.legs); } else P(x, y + 6 * s, 1, 2, L.legs);
         P(x - s, y + 2 * s, 3, 4, L.coat);
         P(x, y + s, 1, 1, L.face);
-        if (this.type === 0) {
+        if (this.type === 0 || this.type === 2) {
           P(x - s, y, 3, 1, L.hat);
+          if (this.type === 2) P(x, y - s, 1, 1, '#b8363a');
           if (m.chief) { P(x - s, y - s, 3, 1, '#d83a2a'); P(x + d * -2 * s, y, 1, 3, '#d83a2a'); }
           P(x + d * 2 * s, y - 2 * s, 1, 5, '#3a2a1e');
           P(x + d * 2 * s, y - 3 * s, 1, 1, L.arm);
@@ -810,6 +817,192 @@
         }
       }
       this.bits.draw(c);
+    }
+  }
+
+  // ---------------------------------------------------------------- small life in the scenes
+  /** People going about their day, in the dress of the place. */
+  const FOLK = [
+    // the south of France: coats and waistcoats, long skirts, bonnets and hats
+    [{ top: '#4a3a2e', legs: '#2e2a26', hat: '#2a2220', skirt: false }, { top: '#6a4a3a', legs: '#3a2e28', hat: '#3a2e24', skirt: false }, { top: '#8a5a5a', legs: '#5a3a3a', hat: '#e8dcc8', skirt: true }, { top: '#4a5a7a', legs: '#3a4460', hat: '#e8dcc8', skirt: true }, { top: '#7a6a4a', legs: '#5a4a34', hat: '#3a3024', skirt: false }],
+    // Japan: kimono in indigo, brown and rose, straw hats, a pole across the shoulders
+    [{ top: '#2e3a5a', legs: '#2e3a5a', hat: '#c8a860', skirt: true, pole: true }, { top: '#6a4a34', legs: '#4a3424', hat: '#c8a860', skirt: false }, { top: '#8a4a5a', legs: '#8a4a5a', hat: '#1a1414', skirt: true }, { top: '#4a5a4a', legs: '#3a4034', hat: '#c8a860', skirt: false, pole: true }],
+    // the docks: shirtsleeves, caps, a crate on the shoulder
+    [{ top: '#c8c0b0', legs: '#3a3a44', hat: '#2a2a30', skirt: false, load: true }, { top: '#5a6a7a', legs: '#2e2e36', hat: '#2a2a30', skirt: false }, { top: '#8a7a60', legs: '#3a3228', hat: '#4a3a2a', skirt: false, load: true }],
+  ];
+  /** walkers=y,x0,x1,count,kind,scale,depth — people strolling back and forth along a path, stopping now and then. */
+  class Walkers {
+    constructor(nums) {
+      const [y = 0.8, x0 = 0, x1 = 1, count = 4, kind = 0, scale = 1, depth = 0.02] = nums;
+      Object.assign(this, { yf: y, x0, x1, count, looks: FOLK[kind] || FOLK[0], sc: Math.max(1, Math.round(scale)), dy: depth });
+    }
+    resize(W, H) {
+      const first = !this.W;
+      this.W = W;
+      this.H = H;
+      if (!first) return;
+      this.p = [];
+      for (let i = 0; i < this.count; i++) {
+        this.p.push({ x: rnd(this.x0, this.x1) * W, y: (this.yf + rnd(0, this.dy)) * H, dir: Math.random() < 0.5 ? -1 : 1, v: rnd(4, 9), wait: rnd(0, 3), ph: rnd(0, TAU), look: pick(this.looks) });
+      }
+      this.p.sort((a, b) => a.y - b.y);
+    }
+    step(dt) {
+      if (!this.p) return;
+      const lo = this.x0 * this.W, hi = this.x1 * this.W;
+      for (const w of this.p) {
+        if (w.wait > 0) { w.wait -= dt; continue; }
+        w.x += w.dir * w.v * dt;
+        if (w.x < lo || w.x > hi) { w.dir *= -1; w.x = Math.max(lo, Math.min(hi, w.x)); w.wait = rnd(0.5, 2.5); }
+        else if (Math.random() < dt * 0.08) w.wait = rnd(1, 4);
+      }
+    }
+    draw(c, t) {
+      if (!this.p) return;
+      const s = this.sc;
+      const P = (x, y, w, h, col) => { c.fillStyle = col; c.fillRect(Math.round(x), Math.round(y), w * s, h * s); };
+      c.globalAlpha = 1;
+      for (const w of this.p) {
+        const L = w.look, moving = w.wait <= 0, step = moving ? Math.floor(t * 5 + w.ph) % 2 : 0;
+        const x = w.x, y = w.y - 7 * s - (step ? s * 0.5 : 0);
+        if (L.skirt) P(x - s, y + 4 * s, 3, 3, L.legs);
+        else if (step) { P(x - s, y + 5 * s, 1, 2, L.legs); P(x + s, y + 5 * s, 1, 2, L.legs); } else P(x, y + 5 * s, 1, 2, L.legs);
+        P(x - s, y + 2 * s, 3, 3, L.top);
+        P(x, y + s, 1, 1, '#d8b090');
+        P(x - s, y, 3, 1, L.hat);
+        if (L.pole) { P(x - 3 * s, y + 2 * s, 7, 1, '#6a4a2a'); P(x - 3 * s, y + 3 * s, 1, 2, '#8a6a3a'); P(x + 3 * s, y + 3 * s, 1, 2, '#8a6a3a'); }
+        if (L.load) P(x - s + w.dir * s, y - s, 3, 2, '#8a6a40');
+      }
+    }
+  }
+
+  /** ripples=x,y,w,h,rate,#color — rings spreading on still water (a fish, a raindrop, a falling leaf). */
+  class Ripples {
+    constructor(nums, color) {
+      const [x = 0, y = 0.7, w = 1, h = 0.2, rate = 0.8] = nums;
+      Object.assign(this, { box: { x, y, w, h }, rate, col: color || '#dfe8ff', list: [], wait: rnd(0, 1) });
+    }
+    resize(W, H) { this.W = W; this.H = H; }
+    step(dt) {
+      if (!this.W) return;
+      this.wait -= dt;
+      if (this.wait <= 0) {
+        this.wait = rnd(0.4, 1.6) / this.rate;
+        const b = this.box;
+        this.list.push({ x: (b.x + Math.random() * b.w) * this.W, y: (b.y + Math.random() * b.h) * this.H, age: 0, life: rnd(1.4, 2.4), size: rnd(5, 10) });
+      }
+      for (let i = this.list.length - 1; i >= 0; i--) { const r = this.list[i]; r.age += dt; if (r.age > r.life) this.list.splice(i, 1); }
+    }
+    draw(c) {
+      c.fillStyle = this.col;
+      for (const r of this.list) {
+        const k = r.age / r.life;
+        for (const [f, a] of [[1, 0.7], [0.55, 0.45]]) {
+          const rx = 1 + r.size * k * f, ry = rx * 0.3;
+          c.globalAlpha = (1 - k) * a;
+          const n = Math.max(8, Math.round(rx * 3));
+          for (let i = 0; i < n; i++) { const t = (i / n) * TAU; c.fillRect(Math.round(r.x + Math.cos(t) * rx), Math.round(r.y + Math.sin(t) * ry), 1, 1); }
+        }
+      }
+      c.globalAlpha = 1;
+    }
+  }
+
+  /** shade=y,h,count,alpha — the shadows of clouds sliding slowly over the land. */
+  class Shade {
+    constructor(nums, color) {
+      const [y = 0.6, h = 0.4, count = 3, alpha = 0.12] = nums;
+      Object.assign(this, { yf: y, hf: h, count, alpha, col: color || '#0e1420' });
+    }
+    resize(W, H) {
+      const first = !this.W;
+      this.W = W;
+      this.H = H;
+      if (!first) return;
+      this.list = [];
+      for (let i = 0; i < this.count; i++) this.list.push({ x: rnd(-0.2, 1.1) * W, y: (this.yf + rnd(0.1, 0.9) * this.hf) * H, r: rnd(0.08, 0.16) * W, v: rnd(3, 6) });
+    }
+    step(dt) {
+      if (!this.list) return;
+      for (const s of this.list) { s.x += s.v * dt; if (s.x - s.r * 1.6 > this.W) { s.x = -s.r * 1.6; s.y = (this.yf + rnd(0.1, 0.9) * this.hf) * this.H; } }
+    }
+    draw(c) {
+      if (!this.list) return;
+      c.save();
+      c.beginPath();
+      c.rect(0, this.yf * this.H, this.W, this.hf * this.H);
+      c.clip();
+      c.fillStyle = this.col;
+      for (const s of this.list) {
+        for (const [dx, dy, f] of [[0, 0, 1], [s.r * 0.7, s.r * 0.08, 0.7], [-s.r * 0.6, s.r * 0.05, 0.6]]) {
+          c.globalAlpha = this.alpha;
+          c.beginPath();
+          c.ellipse(s.x + dx, s.y + dy, s.r * f, s.r * f * 0.3, 0, 0, TAU);
+          c.fill();
+        }
+      }
+      c.restore();
+      c.globalAlpha = 1;
+    }
+  }
+
+  /** lightning=rate — now and then the sky whitens, twice, and a bolt forks down to the hills. */
+  class Lightning {
+    constructor(nums) {
+      const [rate = 0.1, horizon = 0.55] = nums;
+      Object.assign(this, { rate, horizon, wait: rnd(2, 6), t: 99, bolt: null });
+    }
+    resize(W, H) { this.W = W; this.H = H; }
+    step(dt) {
+      if (!this.W) return;
+      this.t += dt;
+      this.wait -= dt;
+      if (this.wait <= 0) {
+        this.wait = rnd(0.5, 1.5) / this.rate;
+        this.t = 0;
+        const pts = [];
+        let x = rnd(0.15, 0.85) * this.W, y = 0;
+        while (y < this.horizon * this.H) { pts.push([x, y]); x += rnd(-5, 5); y += rnd(3, 7); }
+        this.bolt = pts;
+      }
+    }
+    draw(c) {
+      if (!this.W || this.t > 0.6) return;
+      // two flashes: a bright one, then a weaker echo
+      const f = this.t < 0.08 ? 1 : this.t > 0.18 && this.t < 0.26 ? 0.55 : 0;
+      if (f) { c.globalAlpha = 0.3 * f; c.fillStyle = '#e8f0ff'; c.fillRect(0, 0, this.W, this.H); }
+      if (this.bolt && this.t < 0.3) {
+        c.globalAlpha = f ? 1 : 0.4;
+        c.fillStyle = '#ffffff';
+        for (const [x, y] of this.bolt) c.fillRect(Math.round(x), Math.round(y), 1, 4);
+      }
+      c.globalAlpha = 1;
+    }
+  }
+
+  /** splashes=y,h,rate — raindrops bursting on the puddles and paving. */
+  class Splashes {
+    constructor(nums, color) {
+      const [y = 0.8, h = 0.2, rate = 30] = nums;
+      Object.assign(this, { yf: y, hf: h, rate, col: color || '#c8d4ea', list: [] });
+    }
+    resize(W, H) { this.W = W; this.H = H; }
+    step(dt) {
+      if (!this.W) return;
+      const n = this.rate * dt;
+      for (let k = 0; k < Math.floor(n) + (Math.random() < n % 1 ? 1 : 0); k++) this.list.push({ x: Math.random() * this.W, y: (this.yf + Math.random() * this.hf) * this.H, age: 0 });
+      for (let i = this.list.length - 1; i >= 0; i--) { this.list[i].age += dt; if (this.list[i].age > 0.25) this.list.splice(i, 1); }
+    }
+    draw(c) {
+      c.fillStyle = this.col;
+      for (const s of this.list) {
+        const k = s.age / 0.25;
+        c.globalAlpha = 0.7 * (1 - k);
+        const x = Math.round(s.x), y = Math.round(s.y);
+        if (k < 0.4) c.fillRect(x, y - 1, 1, 1);
+        else { c.fillRect(x - 1, y - 1, 1, 1); c.fillRect(x + 1, y - 1, 1, 1); c.fillRect(x - 2, y, 1, 1); c.fillRect(x + 2, y, 1, 1); }
+      }
+      c.globalAlpha = 1;
     }
   }
 
@@ -843,6 +1036,11 @@
           case 'blasts': this.systems.push(new Blasts(n, s.color)); break;
           case 'rockets': this.systems.push(new Rockets(n)); break;
           case 'army': this.systems.push(new Army(n)); break;
+          case 'walkers': this.systems.push(new Walkers(n)); break;
+          case 'ripples': this.systems.push(new Ripples(n, s.color)); break;
+          case 'shade': this.systems.push(new Shade(n, s.color)); break;
+          case 'lightning': if (!this.reduce) this.systems.push(new Lightning(n)); break;
+          case 'splashes': this.systems.push(new Splashes(n, s.color)); break;
           case 'glow': case 'flame': lights.push(this.light(s)); break;
           case 'rays': lights.push(this.rays(s)); break;
           case 'mist': lights.push(this.mist(s)); break;

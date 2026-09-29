@@ -187,6 +187,10 @@ html, body {
 /* painted scenes built from moving layers (js/scenery.js) */
 .bg-layered { background: #000; }
 .bg-frame.bg-scenery { width: calc(max(100%, calc(720px * var(--ar))) * 1.04); }
+/* every painted scene breathes: the view drifts in and out, very slowly (the frame has room to spare) */
+.bg-frame.bg-scenery { animation: bg-breathe 34s ease-in-out infinite alternate; }
+@keyframes bg-breathe { from { scale: 1; } to { scale: 1.028; } }
+.reduce-motion .bg-frame.bg-scenery, .thumb-scene .bg-frame.bg-scenery { animation: none; }
 .bg-layer {
   position: absolute;
   translate: calc(var(--mx, 0) * var(--d, 0.5) * -14px) calc(var(--my, 0) * var(--d, 0.5) * -7px);

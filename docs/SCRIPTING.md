@@ -509,6 +509,21 @@ lantern or the pond at any window shape; `#colour` is optional everywhere.
 | `rays` | x,y [, spread, strength] | shafts of light fanning down from a point, swaying |
 | `mist` | y,height [, opacity] | a band of fog drifting across |
 | `rock` | | the whole picture rocks gently, like a boat |
+| `grass` | y,height [, density, plumes, gap0, gap1] | blades rooted from y to the bottom, swaying, with gusts that run across the field; `plumes` is the share of silver-grass heads; nothing grows between gap0 and gap1 (a path) |
+| `walkers` | y,x0,x1 [, count, kind, scale, depth] | people strolling and stopping along a path: kind 0 the south of France, 1 Japan (kimono, straw hats, carrying poles), 2 dockworkers with crates |
+| `ripples` | x,y,w,h [, rate] | rings spreading on still water |
+| `shade` | y,height [, count, darkness] | the shadows of clouds sliding over the land |
+| `lightning` | rate [, horizon] | the sky flashes twice and a bolt forks down (off with reduced motion) |
+| `splashes` | y,height [, rate] | raindrops bursting on the ground |
+| `army` | y,dir,speed,count,type [, scale, x0, x1, fire] | soldiers marching in ranks: type 0 the imperial army, 1 samurai with banners, 2 French infantry; `fire` makes the front rank let off volleys |
+| `gunfire` | y,x0,x1 [, rate, size] | muzzle flashes twinkling along a line, with volleys (a battle far off) |
+| `cannon` | x,y,period,offset [, dir, size] | a gun firing every `period` seconds, first after `offset`: flash, fire and rolling smoke |
+| `shells` | rate,y0,y1 [, x0, x1] | shells arcing in and bursting on the ground |
+| `blasts` | rate,y0,y1 [, x0, x1] | explosions across a stretch of ground |
+| `boom` | x,y,at [, size] | one explosion, `at` seconds after the picture appears (to match a sound in a cutscene) |
+| `rockets` | rate,y [, x0, x1] | war rockets screaming up in arcs with fire trails |
+
+Every painted scene also breathes: the view drifts in and out very slowly (not with reduced motion).
 
 `artstyle` decides how pictures are scaled. `pixel` keeps every pixel crisp (for pixel art),
 `smooth` scales everything softly (for painted or high-resolution art), and `mixed` (the default)

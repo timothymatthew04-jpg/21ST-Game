@@ -143,6 +143,23 @@ bgfx yuki_house rain=1.1,0.208,0.14,0.583,0.585 mist=0.62,0.15,0.3,#b8c4c8 glow=
 bgfx the_cup steam=0.52,0.54,0.9 glow=0.19,0.385,0.06,#ffc070 petals=0.3,0.62,0.07,0.25,0.25
 bgfx the_glove motes=0.1,0,0.7,0.8,22,#fff0c8 rays=0.3,0,1.2,0.5,#fff0c0
 bgfx the_letter flame=0.896,0.29,0.03,#ffc070 motes=0.6,0.1,0.3,0.5,14,#ffe0a0
+# the scenes come alive: grass in the wind, people about their day, rings on the water,
+# the shadows of clouds, and storms that flash
+bgfx lavilledieu ripples=0.56,0.7,0.12,0.25,0.9,#e8f4ff walkers=0.84,0.74,0.98,4,0,1,0.04 walkers=0.72,0.08,0.4,3,0,1,0.05 grass=0.93,0.07,0.7,0,0.55,0.75,#a8d068 shade=0.5,0.5,3,0.1
+bgfx army_camp army=0.735,1,6,16,2,1,-0.1,1.1,0 grass=0.92,0.08,0.8,0,0.62,0.8,#9aa858 shade=0.6,0.4,2,0.08
+bgfx helene_garden ripples=0.53,0.65,0.22,0.07,0.8,#f8e0f8 flutter=0.03,0.72,0.3,0.18,4 grass=0.92,0.08,0.7,0,0.25,0.62,#9ac070
+bgfx cemetery grass=0.88,0.12,0.9,0.1,0.42,0.6,#c8c078
+bgfx cemetery_two grass=0.88,0.12,0.9,0.1,0.42,0.6,#c8c078
+bgfx cemetery_night grass=0.88,0.12,0.9,0.05,0.42,0.6,#5a6a8a
+bgfx cemetery_grey splashes=0.72,0.28,24
+bgfx road_east grass=0.84,0.16,1,0.15,0.36,0.78,#d0b878 shade=0.62,0.38,2,0.08
+bgfx road_rain splashes=0.7,0.3,34 lightning=0.08,0.42
+bgfx china_dock ripples=0,0.6,1,0.2,0.7,#ffc8a0 walkers=0.86,0.05,0.95,5,2,1,0.04
+bgfx japan_coast ripples=0.48,0.76,0.48,0.2,0.6,#f0d0e0 walkers=0.71,0.52,0.95,3,1,1,0.02
+bgfx japan_path grass=0.9,0.1,0.8,0,0.34,0.66,#78a848
+bgfx hara_kei_estate ripples=0.1,0.83,0.82,0.14,0.7,#c8d8ff
+bgfx estate_day ripples=0.12,0.83,0.76,0.14,0.9,#e8f4ff walkers=0.79,0.26,0.74,2,1,1,0.02
+bgfx smuggler_boat ripples=0,0.52,1,0.25,0.6,#c8d8ff
 bgfx op_sky rays=0.27,0.72,1.4,0.8,#ffd8b0 glow=0.275,0.72,0.2,#ffc8a0 birds=4,0.1,0.35 stars=0,0,1,0.18,16
 bgfx op_grass grass=0.8,0.13,1.2,0.3,#f0dca0 rays=0.775,0.4,1.2,0.7,#fff0c0 motes=0,0.3,1,0.5,36,#fff4d0 flutter=0.1,0.55,0.8,0.25,5 birds=3,0.08,0.3
 bgfx op_sunset glints=0.3,0.64,0.26,0.36,46,#fff0c0 glow=0.43,0.555,0.12,#ffc890 birds=5,0.1,0.32 mist=0.6,0.08,0.25,#ffb8a8
