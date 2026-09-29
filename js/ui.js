@@ -375,6 +375,7 @@
 
     // ---- splash & warning ----------------------------------------------------------
     splash() {
+      if (this.story.splash === 'strand' && VN.StrandSplash) return this.strandSplash();
       return new Promise((resolve) => {
         const el = h('div.overlay.splash',
           this.story.titleLogo === 'brush' && VN.buildBrushLogo
@@ -395,6 +396,46 @@
         };
         el.addEventListener('click', go);
         entry = this.open(el, { onKey: (ev) => { if (!ev.repeat && ev.key !== 'Tab') go(); return true; }, focus: false });
+      });
+    }
+
+    /** Press start: a glowing thread of silk; on a click it branches into light and the menu opens. */
+    strandSplash() {
+      return new Promise((resolve) => {
+        const cv = h('canvas.strand-canvas');
+        const el = h('div.overlay.splash.strand-splash',
+          cv,
+          h('div.strand-press', 'Click to begin'),
+          h('div.strand-hint', 'or press any key'),
+          h('div.strand-flash'));
+        let entry;
+        let fx;
+        const go = () => {
+          if (!entry) return;
+          const e = entry;
+          entry = null;
+          this.audio.unlock();
+          setTimeout(() => {
+            this.audio.fx('whoosh', { volume: 0.9 });
+            this.audio.fx('sparkle', { volume: 0.8, delay: 0.15 });
+            this.audio.fx('chime', { volume: 0.6, delay: 0.35 });
+          }, 60);
+          el.classList.add('bursting');
+          if (fx) fx.burst();
+          // the menu opens under the flash, and the thread fades away over it
+          setTimeout(() => {
+            e.removeAfter = 1100;
+            this.close(e);
+            setTimeout(() => fx && fx.stop(), 1100);
+            resolve();
+          }, this.settings.reduceMotion ? 200 : 900);
+        };
+        el.addEventListener('click', go);
+        entry = this.open(el, { onKey: (ev) => { if (!ev.repeat && ev.key !== 'Tab') go(); return true; }, focus: false });
+        requestAnimationFrame(() => {
+          fx = new VN.StrandSplash(cv, { reduce: !!this.settings.reduceMotion });
+          fx.start();
+        });
       });
     }
 

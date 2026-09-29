@@ -343,6 +343,11 @@
           story.titleFx = fx.preset === 'none' ? null : fx;
           return;
         }
+        case 'splash':
+          // splash strand — the press-start screen is a glowing thread of silk that branches into light
+          if (!tk[1] || !['strand', 'logo'].includes(tk[1].v)) throw new Error('Usage: splash strand|logo');
+          story.splash = tk[1].v;
+          return;
         case 'titlelogo':
           if (!tk[1] || !['brush', 'carved'].includes(tk[1].v)) throw new Error('Usage: titlelogo brush|carved');
           story.titleLogo = tk[1].v;

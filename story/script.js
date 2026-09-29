@@ -27,11 +27,13 @@ emblem "絹"
 titlebackground title_cover
 titlefx ginkgo sun=0.3,-0.25 sway=0.28,0.22,0.34,0.3 pivot=0.4,0.85
 titlelogo brush
+# The press-start screen: a glowing thread of silk that branches into light when clicked.
+splash strand
 # The backgrounds are detailed pixel art at high resolution, so everything is scaled smoothly.
 artstyle smooth
 credits "Adapted from Silk by Alessandro Baricco"
 titlemusic title
-warning "SILK is a branching story adapted from Alessandro Baricco's novel.\n\nYour choices shape Hervé's relationships, his obsession and his memories — the great events of his life stay the same.\n\nThis is an early build: the backgrounds are placeholders until the art arrives."
+warning "SILK is a branching story adapted from Alessandro Baricco's novel.\n\nYour choices shape Hervé's relationships, his obsession and his memories — the great events of his life stay the same.\n\nChoices wait only so long. If you take too long, Hervé hesitates, and silence is a choice too."
 
 # ---------------------------------------------------------------- characters
 # Hervé is the player. His spoken lines use "herve"; his inner thoughts use "inner".
