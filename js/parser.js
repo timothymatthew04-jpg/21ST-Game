@@ -246,9 +246,12 @@
       const tk = tokenizeLine(L.text);
       const prompt = tk[1] && tk[1].t === 'str' ? tk[1].v : null;
       // menu time 8 → this choice waits 8 seconds; menu notime → no timer for this one
-      const tm0 = L.text.match(/\btime\s+(\d+(?:\.\d+)?)\s*$/);
-      const time = /\bnotime\s*$/.test(L.text) ? 0 : tm0 ? parseFloat(tm0[1]) : null;
-      const menu = emit(L, { op: 'menu', prompt, time, options: [], hesitate: null, end: null, key: `${currentLabel}:menu${sayCount++}` });
+      // menu ... slow → the moment slows down while the player decides (the colour drains, a heartbeat)
+      const rest = L.text.replace(/"[^"]*"/g, '');
+      const slow = /\bslow\b/.test(rest);
+      const tm0 = rest.match(/\btime\s+(\d+(?:\.\d+)?)\b/);
+      const time = /\bnotime\b/.test(rest) ? 0 : tm0 ? parseFloat(tm0[1]) : null;
+      const menu = emit(L, { op: 'menu', prompt, time, slow, options: [], hesitate: null, end: null, key: `${currentLabel}:menu${sayCount++}` });
       const ends = [];
       let k = j0;
       while (k < j1) {
@@ -501,7 +504,7 @@
         case 'filter': need(2, 'filter sepia|grayscale|faded|dream|none'); emit(L, { op: 'filter', value: tk[1].v }); return;
         case 'vignette': emit(L, { op: 'vignette', on: tk[1] ? tk[1].v !== 'off' : true }); return;
         case 'effect': {
-          need(2, 'effect shake|flash|glitch|static|pulse [seconds] [color]');
+          need(2, 'effect shake|flash|glitch|static|pulse|ringing [seconds] [color]');
           emit(L, { op: 'effect', kind: tk[1].v, duration: tk[2] ? parseFloat(tk[2].v) : null, color: tk[3] ? tk[3].v : null });
           return;
         }
@@ -540,6 +543,10 @@
           emit(L, { op: 'journey', name: tk[1].v, into: tk[2] && tk[2].v === 'into' && tk[3] ? tk[3].v : null });
           return;
         }
+        case 'silence':
+          // silence 1.5 — the music and the place's sound fall away for a held breath (a click ends it)
+          emit(L, { op: 'silence', seconds: tk[1] ? parseFloat(tk[1].v) : 1.5 });
+          return;
         case 'clueboard':
           // clueboard into truth_seen — what has Hervé not wanted to see? (story/clues.js); all, some, none
           need(3, 'clueboard into <variable>');

@@ -5,6 +5,7 @@
  *
  *   tea      Chapter 3: watch her serve the tea, then repeat her movements in order
  *   eggs     Chapter 4: sort the sick eggs from the healthy before the thread burns out
+ *   patience Chapter 6: choose your words while Hara Kei's fan tells you how he takes them
  *   bargain  Chapter 5: stop the brush on a fair price while Hara Kei weighs you
  *   hide     Chapter 11: run from wall to wall while the soldier's lantern looks away
  *   letter   Final chapter: put the torn letter back together, strip by strip
@@ -216,6 +217,57 @@
   }
 
   // ---------------------------------------------------------------- bargaining with Hara Kei
+  // ---------------------------------------------------------------- Hara Kei's patience
+  /**
+   * Before the price: three things Hara Kei says, and three ways to answer each. No numbers; only
+   * his fan, steady while he is content, slowing as his patience wears thin, and snapped shut when
+   * it is gone. Resolves "calm", "tested" or "lost" (the bargain that follows is easier or harder).
+   */
+  async function patience(ui) {
+    const sh = new Shell(ui, { title: 'Hara Kei\'s Patience', kanji: '忍', hint: 'Choose your words carefully. Watch his fan.' });
+    const fan = h('div.mg-fan', h('i.mg-fan-leaf'), h('span.mg-fan-rivet'));
+    const said = h('div.mg-said');
+    sh.area.append(h('div.mg-duel', fan, said));
+    let p = 3;
+    const rounds = [
+      { says: 'Last year you paid what I asked. This year the eggs are fewer, and the roads are worse.', options: [
+        ['“The eggs are worth what they were last year.”', 0],
+        ['“Everyone knows your roads are safe. It is your price that isn\'t.”', -2],
+        ['Say nothing, and bow.', 1],
+      ] },
+      { says: 'You came back sooner than I expected, Monsieur Joncour. Men who come back quickly want something.', options: [
+        ['“I want eggs.”', 0],
+        ['“I wanted to see your house again.”', -1, { danger: 1, fascination: 1 }],
+        ['“What any merchant wants: to be trusted.”', 1],
+      ] },
+      { says: 'Name your price.', options: [
+        ['“You name it, and I will answer.”', 1],
+        ['“Half of what you asked last year.”', -2],
+        ['“The same as last year, and my word that I will come back.”', 0],
+      ] },
+    ];
+    const show = () => {
+      fan.style.setProperty('--fan', String(Math.max(0, Math.min(3, p - 1))));
+      fan.classList.toggle('shut', p <= 0);
+    };
+    show();
+    for (const r of rounds) {
+      said.replaceChildren(h('div.mg-harakei', h('b', 'Hara Kei'), h('span', r.says)));
+      const [, delta, add] = r.options[await sh.choose(r.options.map((o, i) => [o[0], i]))];
+      p += delta;
+      if (add && VN.engine) for (const [k, v] of Object.entries(add)) VN.engine.setVar(k, (Number(VN.engine.getVar(k)) || 0) + v);
+      ui.audio.fx(delta > 0 ? 'chime' : delta < 0 ? 'fan_snap' : 'paper', { volume: 0.5 });
+      show();
+      await wait(700);
+      if (p <= 0) break;
+    }
+    const how = p >= 5 ? 'calm' : p > 0 ? 'tested' : 'lost';
+    sh.say({ calm: 'His fan moves slowly, evenly. He is ready to deal.', tested: 'His fan has slowed. He will deal, but he will not be generous.', lost: 'The fan snaps shut. The next words will cost you.' }[how], how === 'lost' ? 'bad' : how === 'calm' ? 'good' : '');
+    await wait(1800);
+    sh.close();
+    return how;
+  }
+
   async function bargain(ui) {
     const sh = new Shell(ui, { title: 'The Price of the Eggs', kanji: '値', hint: 'Stop the brush on a fair price. Too low insults him; too high wastes the town\'s money.' });
     const bar = h('div.mg-scale', h('span.zone.insult', 'insult'), h('span.zone.fair', 'fair'), h('span.zone.generous', 'too generous'), h('span.mg-needle'));
@@ -223,13 +275,15 @@
     sh.area.append(bar, rounds);
     const needle = bar.querySelector('.mg-needle');
     const results = [];
-    const bands = [[0.36, 0.64], [0.4, 0.6], [0.43, 0.57]]; // the fair band narrows each round
+    const mood = VN.engine ? VN.engine.getVar('patience') : null;
+    const w = mood === 'calm' ? 0.03 : mood === 'lost' ? -0.03 : 0;
+    const bands = [[0.36 - w, 0.64 + w], [0.4 - w, 0.6 + w], [0.43 - w, 0.57 + w]]; // the fair band narrows each round
     for (let r = 0; r < 3; r++) {
       const [lo, hi] = bands[r];
       bar.style.setProperty('--lo', lo);
       bar.style.setProperty('--hi', hi);
       sh.say(['Hara Kei names a price. You answer.', 'He waits. Another offer.', 'Last offer. He is losing patience.'][r]);
-      const speed = [0.55, 0.75, 0.95][r] * (sh.reduce ? 0.7 : 1);
+      const speed = [0.55, 0.75, 0.95][r] * (sh.reduce ? 0.7 : 1) * (mood === 'lost' ? 1.2 : 1);
       const t0 = performance.now();
       let x = 0, raf = 0;
       const pos = await new Promise((resolve) => {
@@ -432,7 +486,7 @@
     return 'win';
   }
 
-  const GAMES = { tea, eggs, bargain, hide, letter };
+  const GAMES = { tea, eggs, bargain, patience, hide, letter };
 
   /** Play a minigame; resolves to its result word. */
   VN.playMinigame = function (ui, name, arg) {

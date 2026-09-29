@@ -315,6 +315,7 @@ label start
   set eggs_care = 0
   set road = ""
   set chase_how = ""
+  set patience = ""
   scene black with none
   # the opening plays on its own, straight into the story (click to hurry it, Esc to skip)
   play music japan fadein 3
@@ -529,6 +530,9 @@ label chapter2
   tint none
   play music departure fadein 3
   journey first
+  if persistent.any_ending
+    call helene_window
+  endif
   scene road_east with slow
   split joncour_home road_east helene herve "Lavilledieu" "The road east"
   "I crossed France by train, then the Alps. Austria. Hungary. Then Russia, where the roads stopped being roads."
@@ -889,6 +893,7 @@ label chapter6
         harakei neutral "A man who does not know why he travels should travel less, Monsieur Joncour."
         set ch6_choice = "silent"
   "Then we came to the price."
+  minigame patience into patience
   minigame bargain into price
   if price == "good"
     harakei neutral "You bargain like a man who means to come back. Take this."
@@ -1014,7 +1019,6 @@ label chapter8
   show blanche neutral
   introduce blanche
   "Madame Blanche kept a fine house in the city and asked very few questions. She took the note and studied it carefully."
-  clue cups 0.74 0.6 "Two cups on the table" "Madame Blanche's tray held two cups, and one was still warm. Someone had left just before I came."
   cutscene the_note
   herve "What does it say?"
   "Madame Blanche looked at me."
@@ -1063,6 +1067,7 @@ label chapter9
   scene helene_garden with fade
   play music helene_theme fadein 2
   cutscene garden
+  cutscene seasons
   "I stayed in France for a while."
   "I spent my days with Hélène. We walked in the garden in the evenings, and the trees were a little taller every time. But my thoughts kept drifting toward Japan."
   show helene soft
@@ -1148,6 +1153,9 @@ label chapter9
         "I meant to answer her. The silence answered first."
         hinner "And if Hélène mentally notes all the time Hervé spaces out in bed, nobody has to know."
         set ch9_choice = "space"
+  if persistent.any_ending
+    call helene_blanche
+  endif
   jump chapter10
 
 
@@ -1183,7 +1191,7 @@ label chapter10
     "It was for the eggs. I told myself that every morning, like a prayer."
   endif
   "At the coast, soldiers had put a barrier across the road. The officer wanted to know my business, and then he wanted money."
-  menu
+  menu slow
     - "Show him Hara Kei's pass." tone=honest needs=item:pass
         "The officer looked at the red seal and stepped back as if it were hot."
         set danger -= 1
@@ -1239,6 +1247,7 @@ label chapter11
   play music battle fadein 1
   play ambience battle
   cutscene war
+  effect ringing
   scene balbadiou_office with fade
   play music war fadein 3 volume 0.8
   show balbadiou worried
@@ -1317,6 +1326,9 @@ label chapter12
   chapter "Chapter 12" "The Abandoned Village" seal 灰
   play music battle fadein 1 volume 0.6
   walk crossing
+  if wounded
+    effect ringing
+  endif
   scene burned_village with fade
   stop music fadeout 3
   cutscene ashes
@@ -1394,7 +1406,7 @@ label chapter13
   if route() == "lost"
     harakei cold "{shake}Every time you come, something burns.{/shake}"
   endif
-  menu time 16
+  menu time 16 slow
     - "Leave." tone=quiet [danger -= 2, obsession -= 1]
         herve "Give me the eggs."
         "Hara Kei handed them to me."
@@ -1516,6 +1528,9 @@ label chapter14
 # ============================================================================
 label chapter15
   chapter "Chapter 15" "The Final Letter" seal 手紙
+  if persistent.any_ending
+    call helene_candle
+  endif
   scene joncour_home with fade
   play music her_theme fadein 3
   play sound paper
@@ -1525,6 +1540,7 @@ label chapter15
   "I immediately brought it to Madame Blanche."
   scene blanche_salon with fade
   show blanche neutral
+  clue cups 0.74 0.6 "Two cups on the table" "Madame Blanche's tray held two cups, and one was still warm. Someone had left just before I came."
   herve "Please translate it."
   "Madame Blanche read silently."
   clue primer 0.2 0.58 "A primer with a pink ribbon" "On her side table, a French–Japanese primer, much used. A pink ribbon marked a page halfway through."
@@ -1637,6 +1653,7 @@ label left_behind
 # ============================================================================
 label chapter16
   chapter "Chapter 16" "Hélène's Death" seal 別
+  cutscene years
   scene garden_winter with fade
   play music helene_theme fadein 3
   "Years passed. The trees in the garden grew tall. I learned the names of the birds that came to the pond."
@@ -1673,6 +1690,7 @@ label chapter16
   elif helene_trust < 0
     helene tired "{speed=0.7}I know. I got used to talking to you when you were somewhere else.{/speed}"
   endif
+  silence 1.2
   cutscene candle
   "Hélène died peacefully, at the beginning of September, on a morning with a clear sky."
   filter none
@@ -1699,6 +1717,7 @@ label chapter17
   if truth_seen == "all"
     inner "I did not need to read them. I read them anyway."
   endif
+  silence 1.8
   minigame letter into letter_result
   play music revelation fadein 2
   cutscene truth
@@ -1811,4 +1830,51 @@ label ending
   "The journey was finally over."
   cutscene end_home
   ending home "Kikyō — Home" true kanji 帰 music farewell hint "What if he came home, stayed, and learned the truth?"
+
+
+# ============================================================================
+#  HÉLÈNE — her side of the story (on later playthroughs, once any ending has been seen)
+# ============================================================================
+label helene_window
+  scene joncour_home with fade
+  play music helene_theme fadein 2
+  tint night
+  show helene sad
+  hinner "He left at three o'clock. I know because I watched the clock, and not the road. The road I watched afterwards."
+  hinner "Every carriage that comes over the hill is him, for exactly as long as it takes to see that it isn't."
+  helene sad "Japan."
+  hinner "I found it in the atlas. It is the last thing on the page. After it there is only the edge of the paper."
+  hinner "I will learn where every one of those places is. Kiev. The Urals. The lake they call a sea. So that when he tells me about them, I will already know."
+  hide helene with slow
+  tint none
+  return
+
+label helene_blanche
+  scene blanche_salon with fade
+  play music reverie fadein 2
+  show blanche neutral at right
+  show helene neutral at left
+  blanche neutral "Madame Joncour. You came alone."
+  helene soft "I would like you to teach me something. A little Japanese."
+  blanche serious "That is a strange thing for a wife in Lavilledieu to want."
+  helene neutral "My husband goes to the end of the world. I would like to be able to write to it."
+  "Madame Blanche looked at her for a long time. Then she poured a second cup of tea, and did not ask anything else."
+  hide blanche
+  hide helene
+  return
+
+label helene_candle
+  scene joncour_bedroom with fade
+  play music her_theme fadein 2
+  show helene tired
+  hinner "The characters will not sit still. Each one is a little house, and I keep leaving the doors open."
+  play sound ink
+  hinner "Madame Blanche says my hand is getting better. She says it without looking at me."
+  helene soft "{i}You crossed the whole world to look at me.{/i}"
+  hinner "It is not a lie. It is only not mine. Or it is mine, and he will never know it."
+  hinner "Seven sheets. Stamps soaked off the letters that came with the eggs. No post office between this room and his hands."
+  hinner "I pressed a sprig of lavender between the pages, the way I do with everything I mean to keep. That much, at least, is only mine."
+  play sound candle_out
+  hide helene with slow
+  return
 `;

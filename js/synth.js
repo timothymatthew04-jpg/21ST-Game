@@ -1219,6 +1219,22 @@
     shell: (S, o, t) => shell(S, o, t),
     // a war rocket: a rising hiss that crackles as it burns, then a pop high in the air
     rocket: (S, o, t) => { const n = S.noise(o, t, 1.7, { type: 'bandpass', f: 700, q: 2.2, gain: 0.2, attack: 0.08 }); n.flt.frequency.exponentialRampToValueAtTime(3600, t + 1.5); for (let i = 0; i < 16; i++) crackle(S, o, t + 0.1 + Math.random() * 1.5); crack(S, o, t + 1.7, 0.22); },
+    // ringing in the ears: two high tones beating against each other, fading slowly
+    ringing: (S, o, t) => {
+      for (const [f, v] of [[4100, 0.035], [4172, 0.03], [2050, 0.012]]) {
+        const osc = S.ctx.createOscillator(), g = S.ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.value = f;
+        g.gain.setValueAtTime(0, t);
+        g.gain.linearRampToValueAtTime(v, t + 0.05);
+        g.gain.exponentialRampToValueAtTime(0.0001, t + 4.2);
+        osc.connect(g).connect(o);
+        osc.start(t);
+        osc.stop(t + 4.3);
+      }
+    },
+    // a paper fan snapped shut
+    fan_snap: (S, o, t) => { S.noise(o, t, 0.06, { type: 'highpass', f: 2400, gain: 0.35, attack: 0.001 }); S.noise(o, t + 0.02, 0.12, { type: 'bandpass', f: 900, q: 3, gain: 0.2, attack: 0.002 }); },
     // something heavy hitting the ground: a stumble, a fall
     thud: (S, o, t) => { S.taiko(o, t, 0.7, 0.8); S.noise(o, t, 0.35, { type: 'lowpass', f: 300, gain: 0.5, attack: 0.004 }); },
     // a gun far across the valley: more rumble than bang

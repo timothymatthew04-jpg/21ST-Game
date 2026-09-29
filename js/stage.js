@@ -512,21 +512,25 @@
       this.content.style.transform = scale === 1 ? 'none' : `scale(${scale})`;
     }
 
-    /** A glint where there is something to notice (scene.clue); clicking it calls onFind. */
+    /** Glints where there is something to notice (scene.clues); clicking one calls onFind. */
     applyClue(scene, onFind) {
       if (onFind) this.onClue = onFind;
-      const cl = scene.clue || null;
-      const key = cl ? cl.id : null;
-      if (key === this.clueKey) return;
-      this.clueKey = key;
-      if (this.clueEl) { const old = this.clueEl; old.classList.add('found'); setTimeout(() => old.remove(), 700); this.clueEl = null; }
-      if (!cl) return;
-      const el = h('button.clue-glint', { type: 'button', 'aria-label': 'Look closer', title: 'Look closer', style: { left: `${cl.x * 100}%`, top: `${cl.y * 100}%` } }, h('i'));
-      const find = (e) => { e.stopPropagation(); e.preventDefault(); if (this.onClue) this.onClue(cl); };
-      el.addEventListener('click', find);
-      el.addEventListener('pointerdown', (e) => e.stopPropagation());
-      this.scene.insertBefore(el, this.tintEl);
-      this.clueEl = el;
+      const want = new Map((scene.clues || []).map((c) => [c.id, c]));
+      this.clueEls = this.clueEls || new Map();
+      for (const [id, el] of this.clueEls) {
+        if (want.has(id)) continue;
+        this.clueEls.delete(id);
+        el.classList.add('found');
+        setTimeout(() => el.remove(), 700);
+      }
+      for (const [id, cl] of want) {
+        if (this.clueEls.has(id)) continue;
+        const el = h('button.clue-glint', { type: 'button', 'aria-label': 'Look closer', title: 'Look closer', style: { left: `${cl.x * 100}%`, top: `${cl.y * 100}%` } }, h('i'));
+        el.addEventListener('click', (e) => { e.stopPropagation(); e.preventDefault(); if (this.onClue) this.onClue(cl); });
+        el.addEventListener('pointerdown', (e) => e.stopPropagation());
+        this.scene.insertBefore(el, this.tintEl);
+        this.clueEls.set(id, el);
+      }
     }
 
     /** Two places side by side, split on a slant: scene.split = { a, b, ida, idb, la, lb }. */
@@ -624,6 +628,18 @@
       const reduce = this.settings.reduceMotion;
       const ms = Math.max(50, (seconds || { shake: 0.5, flash: 0.5, glitch: 0.8, static: 1.2, pulse: 1.2 }[kind] || 0.6) * 1000);
       switch (kind) {
+        case 'ringing': {
+          // after a blast: the ears ring, the world goes blurred and far away, then comes back
+          const long = Math.max(ms, 3200);
+          if (audio) {
+            audio.fx('ringing', { volume: 0.8 });
+            audio.music.duck(0.12, 0.15);
+            audio.ambience.duck(0.12, 0.15);
+            setTimeout(() => { audio.music.duck(1, 2.2); audio.ambience.duck(1, 2.2); }, long * 0.6);
+          }
+          this.scene.animate([{ filter: reduce ? 'brightness(1.2)' : 'blur(3px) brightness(1.5)' }, { filter: reduce ? 'none' : 'blur(1.5px) brightness(1.1)', offset: 0.35 }, { filter: 'none' }], { duration: long, easing: 'ease-out' });
+          return;
+        }
         case 'shake': {
           const amp = reduce ? 3 : 14;
           const frames = [];

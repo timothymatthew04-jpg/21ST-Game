@@ -734,6 +734,28 @@
       setTimeout(() => card.remove(), 3900);
     }
 
+    /**
+     * A moment slowed down while the player decides: the colour drains out of the scene, everything
+     * in it moves at a quarter of its speed, a heartbeat, and the music falls away.
+     */
+    slowMo(on) {
+      const scene = this.engine.stage.scene;
+      clearInterval(this.slowBeat);
+      if (on && !this.settings.reduceMotion) {
+        scene.classList.add('slowmo');
+        VN.fxTimeScale = 0.25;
+        for (const a of scene.getAnimations({ subtree: true })) a.playbackRate = 0.25;
+        this.audio.fx('whoosh', { volume: 0.4 });
+        setTimeout(() => this.audio.music.duck(0.2, 0.5), 60);
+        this.audio.fx('heartbeat', { volume: 0.45 });
+        this.slowBeat = setInterval(() => this.audio.fx('heartbeat', { volume: 0.4 }), 1300);
+      } else {
+        scene.classList.remove('slowmo');
+        VN.fxTimeScale = 1;
+        for (const a of scene.getAnimations({ subtree: true })) a.playbackRate = 1;
+      }
+    }
+
     /** Something noticed: a card with what it was, and what Hervé made of it. */
     clueNotice(clue) {
       const card = h('div.item-notice.clue-notice',

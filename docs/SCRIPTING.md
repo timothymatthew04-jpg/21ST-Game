@@ -105,6 +105,13 @@ menu
 
 Choices trigger an autosave, so players can always go back to them.
 
+### Slow motion
+
+`menu slow` (or `menu time 16 slow`) makes a choice a moment that has to be decided now: while it
+is open the colour drains from the scene, everything in it moves at a quarter of its speed, the
+music falls away and a heartbeat takes its place. SILK uses it at the soldiers' barrier on the
+coast and at Hara Kei's warning in the forest.
+
 ### Timed choices and hesitation
 
 ```text
@@ -373,6 +380,20 @@ remembered for the rest of the playthrough. `clueboard` opens the board in `stor
 clues found on one side, three questions on the other; the variable is set to all, some or none.
 In SILK the seven clues point to who really wrote the last letter, and a player who answers all
 three before reading it gets a scene of their own in the Home ending.
+
+## Silence, and ringing ears
+
+```text
+silence 1.8            # every sound falls away for a held breath (a click ends it), then returns gently
+effect ringing         # after a blast: a high ringing, the world blurred and far away, then back
+```
+
+## Hélène's side of the story
+
+Once any ending has been seen, `persistent.any_ending` is true, and later playthroughs show three
+scenes from Hélène's side at the moments they happened: watching the road the day Hervé first
+leaves, asking Madame Blanche to teach her Japanese, and writing the letter by candlelight. They
+are ordinary labels at the end of the script, reached with `call`.
 
 ## Cutscenes
 

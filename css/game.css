@@ -3608,3 +3608,32 @@ input[type='range']::-moz-range-thumb { width: 18px; height: 24px; background: v
 .jr-go:hover, .jr-go:focus-visible { filter: brightness(1.1); }
 .cs-place.event i { animation: jr-pulse 1s ease-in-out infinite; }
 @keyframes jr-pulse { 50% { box-shadow: 0 0 0 6px rgba(192, 48, 28, 0.35); } }
+
+/* ---- slow motion: a choice that has to be made now ------------------------------------------ */
+.scene { transition: filter 0.6s ease; }
+.scene.slowmo { filter: saturate(0.2) contrast(1.15) brightness(0.92); }
+.scene.slowmo::after {
+  content: ''; position: absolute; inset: 0; z-index: 3; pointer-events: none;
+  background: radial-gradient(ellipse 70% 65% at 50% 45%, transparent 55%, rgba(120, 10, 10, 0.45));
+  animation: slowmo-beat 1.3s ease-in-out infinite;
+}
+@keyframes slowmo-beat { 0%, 100% { opacity: 0.55; } 12% { opacity: 1; } 30% { opacity: 0.7; } 42% { opacity: 0.95; } }
+
+/* ---- Hara Kei's patience: a fan that tells you how your words were taken -------------------- */
+.mg-duel { display: flex; align-items: center; gap: 34px; min-height: 180px; }
+.mg-fan { position: relative; flex: none; width: 170px; height: 110px; --fan: 2; }
+.mg-fan-leaf {
+  position: absolute; left: 0; bottom: 0; width: 170px; height: 170px; transform-origin: 50% 100%;
+  clip-path: polygon(50% 100%, 0% 36%, 12% 16%, 30% 4%, 50% 0%, 70% 4%, 88% 16%, 100% 36%);
+  background: repeating-conic-gradient(from -64deg at 50% 100%, #f4ead4 0deg 6deg, #d8c8a4 6deg 7deg), #f4ead4;
+  box-shadow: inset 0 0 0 2px rgba(120, 40, 30, 0.25);
+  animation: fan-wave 2.2s ease-in-out infinite;
+}
+.mg-fan-leaf::after { content: ''; position: absolute; left: 30%; top: 10%; width: 40%; height: 26%; border-radius: 50%; background: radial-gradient(circle, #c8323a 40%, transparent 42%); opacity: 0.85; }
+.mg-fan-rivet { position: absolute; left: 50%; bottom: -4px; width: 10px; height: 10px; margin-left: -5px; border-radius: 50%; background: #2a1a10; box-shadow: 0 0 0 2px #c9a24d; }
+@keyframes fan-wave { 0%, 100% { rotate: calc(var(--fan) * -3deg); } 50% { rotate: calc(var(--fan) * 3deg); } }
+.mg-fan[style*="--fan: 1"] .mg-fan-leaf { animation-duration: 0.9s; }
+.mg-fan.shut .mg-fan-leaf { animation: none; scale: 0.1 1; transition: scale 0.25s cubic-bezier(0.6, 0, 0.9, 0.3); }
+.mg-said { flex: 1; }
+.mg-harakei b { display: block; font-family: var(--name-font); font-size: 16px; letter-spacing: 0.08em; color: #c9a24d; margin-bottom: 6px; }
+.mg-harakei span { font-family: var(--name-font); font-style: italic; font-size: 20px; line-height: 1.5; color: #fff0d8; }

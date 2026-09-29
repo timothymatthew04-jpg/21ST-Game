@@ -248,6 +248,24 @@
       ],
     },
 
+    // ---------------------------------------------------------------- the seasons turning in Lavilledieu
+    seasons: {
+      shots: [
+        { bg: 'helene_garden', dur: 3.2, cam: [[1.25, 0.3, 0.55], [1.12, 0.4, 0.5]], tint: 'rgba(255,190,210,0.12)', fx: 'petals=1.6', kanji: '春', text: 'Spring.', textAt: 0.5, sound: [['wind_gust', 0.2, 0.3]] },
+        { bg: 'silk_mill', dur: 3.2, cam: [[1.1, 0.4, 0.5], [1.25, 0.55, 0.5]], text: 'The mill ran day and night.', textAt: 0.4, sound: [['creak', 0.3, 0.4]] },
+        { bg: 'helene_garden', dur: 3.2, cam: [[1.12, 0.6, 0.5], [1.25, 0.7, 0.55]], tint: 'rgba(255,140,40,0.22)', fx: 'leaves=1.8', kanji: '秋', text: 'Autumn.', textAt: 0.5 },
+        { bg: 'garden_winter', dur: 3.4, cam: [[1.25, 0.45, 0.5], [1.08, 0.5, 0.5]], kanji: '冬', text: 'Winter.', textAt: 0.5, sound: [['wind_gust', 0.3, 0.4]] },
+      ],
+    },
+    years: {
+      shots: [
+        { bg: 'helene_garden', dur: 2.4, cam: [[1.1, 0.5, 0.5], [1.2, 0.5, 0.5]], tint: 'rgba(255,190,210,0.12)', fx: 'petals=1.4', text: 'Years passed.', textAt: 0.4 },
+        { bg: 'helene_garden', dur: 2.2, cam: [[1.2, 0.5, 0.5], [1.3, 0.5, 0.5]], tint: 'rgba(255,140,40,0.22)', fx: 'leaves=1.8', trans: 'cut' },
+        { bg: 'silk_mill_empty', dur: 2.6, cam: [[1.1, 0.5, 0.5], [1.22, 0.5, 0.45]], text: 'The mill fell quiet.', textAt: 0.3 },
+        { bg: 'garden_winter', dur: 2.6, cam: [[1.3, 0.5, 0.5], [1.1, 0.5, 0.5]], trans: 'cut', kanji: '歳月' },
+      ],
+    },
+
     // ---------------------------------------------------------------- Chapter 1: the army camp
     camp: {
       shots: [

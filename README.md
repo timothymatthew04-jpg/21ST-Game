@@ -105,6 +105,17 @@ On a phone, tap to advance and use the buttons under the text box.
 * **Action in the walks**: hiding from soldiers' lanterns in the burned village (crouch behind walls
   while their light sweeps past), outriding bandits across the steppe (jump the logs, duck the
   branches), and crossing a road under shellfire. Getting caught changes the story, never ends it.
+* **Hara Kei's patience.** Before the price is set, a duel of words: three things he says, three
+  ways to answer each, and only his fan to show how they were taken (steady, slowing, snapped shut).
+  How it goes makes the bargaining easier or harder.
+* **Slow-motion choices** at the soldiers' barrier and in the forest: the colour drains, everything
+  slows, the music falls away and a heartbeat takes its place. **Silence** right before the truth,
+  and a **ringing in the ears** after the war and after a shell lands too close.
+* **Hélène's side of the story.** After the first ending, three scenes of her own appear where they
+  happened: watching the road the day he leaves, asking Madame Blanche for lessons, and writing the
+  letter by candlelight.
+* **The seasons turn**: montages of the garden through spring, autumn and winter while Hervé stays
+  in France, and the years passing before the end.
 * **Clues to the letter.** Seven small things can be noticed along the way, if the player looks.
   Before the truth, a board asks who wrote the letter, who helped, and why; seeing it first gives the
   Home ending a scene of its own.

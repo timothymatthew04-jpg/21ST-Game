@@ -30,7 +30,9 @@
   function loop(now) {
     const dt = Math.min(0.05, (now - last) / 1000 || 0.016);
     last = now;
-    for (const fx of running) fx.frame(dt, now / 1000);
+    // a slow-motion moment slows the particles too (VN.fxTimeScale)
+    const k = VN.fxTimeScale == null ? 1 : VN.fxTimeScale;
+    for (const fx of running) fx.frame(dt * k, now / 1000);
     raf = running.size ? requestAnimationFrame(loop) : 0;
   }
   function start(fx) {

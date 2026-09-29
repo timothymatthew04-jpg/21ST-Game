@@ -608,7 +608,10 @@
       const base = ins.time != null ? ins.time : this.story.choiceTime != null ? this.story.choiceTime : 0;
       const factor = TIMER_FACTOR[this.settings.choiceTimer == null ? 2 : this.settings.choiceTimer] || 0;
       const time = this.isSkipping() ? 0 : base * factor;
-      const idx = await this.guard(this.ui.showChoices(shown, { time }));
+      const slow = ins.slow && !this.isSkipping();
+      if (slow) this.ui.slowMo(true);
+      let idx;
+      try { idx = await this.guard(this.ui.showChoices(shown, { time })); } finally { if (slow) this.ui.slowMo(false); }
       // letting the time run out is a choice too
       const hesitated = idx < 0;
       const opt = hesitated ? ins.hesitate || options[0] : options[idx];
@@ -674,7 +677,7 @@
       // a new place: the camera goes back to the whole view, and a split screen closes
       sc.cam = null;
       sc.split = null;
-      sc.clue = null;
+      sc.clues = [];
       this.stage.setSpeaker(null);
       this.ui.textbox.hideBox();
       this.ui.textbox.hideCentered();
@@ -786,6 +789,22 @@
       this.state.pc++;
     }
 
+    /** A held breath: every sound falls away for a moment, then the music comes back gently. */
+    async op_silence(ins) {
+      if (!this.isSkipping()) {
+        this.audio.music.duck(0, 0.35);
+        this.audio.ambience.duck(0, 0.35);
+        this.ui.textbox.hideBox();
+        await this.guard(new Promise((resolve) => {
+          this.waiter = resolve;
+          setTimeout(() => { if (this.waiter === resolve) { this.waiter = null; resolve(); } }, ins.seconds * 1000);
+        }));
+        this.audio.music.duck(1, 2.5);
+        this.audio.ambience.duck(1, 2.5);
+      }
+      this.state.pc++;
+    }
+
     /** The Road East: the route across the map, stopping for what happens along the way. */
     async op_journey(ins) {
       this.checkpoint();
@@ -803,7 +822,8 @@
     op_clue(ins) {
       const sc = this.state.scene;
       const found = (this.state.clues || []).some((c) => c.id === ins.id);
-      sc.clue = ins.off || found ? null : { id: ins.id, x: ins.x, y: ins.y, label: ins.label, detail: ins.detail };
+      if (ins.off) sc.clues = [];
+      else if (!found && !(sc.clues || []).some((c) => c.id === ins.id)) sc.clues = (sc.clues || []).concat({ id: ins.id, x: ins.x, y: ins.y, label: ins.label, detail: ins.detail });
       this.stage.applyClue(sc, (clue) => this.noticeClue(clue));
       this.state.pc++;
     }
@@ -814,7 +834,7 @@
       list.push({ id: clue.id, label: clue.label, detail: clue.detail });
       (this.persistent.cluesEver || (this.persistent.cluesEver = {}))[clue.id] = 1;
       this.savePersistent();
-      this.state.scene.clue = null;
+      this.state.scene.clues = (this.state.scene.clues || []).filter((c) => c.id !== clue.id);
       this.stage.applyClue(this.state.scene);
       this.ui.clueNotice(clue);
     }
@@ -1001,6 +1021,8 @@
       this.setSkip(false);
       this.setAuto(false);
       this.persistent.endings[ins.id] = { time: Date.now(), title: ins.title };
+      // once any ending has been seen, Hélène's own scenes appear on later playthroughs
+      this.persistent.vars.any_ending = true;
       VN.store.set('persistent', this.persistent);
       this.ui.textbox.hideBox();
       this.ui.textbox.hideCentered();
