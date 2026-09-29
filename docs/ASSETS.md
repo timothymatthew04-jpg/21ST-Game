@@ -90,6 +90,13 @@ is used only for a CG that has no painted version.
 | `the_glove` | Chapter 6: the glove among her belongings |
 | `the_letter` | Chapter 14 and Final Chapter: the seven pages of black ink |
 
+## Keepsake icons: `assets/ui/items/<id>.png`
+
+32×32 pixel-art icons for the Keepsakes page and the cards that slide in when Hervé gains or parts
+with something, painted by `tools/paint-items.js`: `francs`, `watch`, `handkerchief`, `journal`,
+`egg_box`, `blossom`, `pass`, `note`, `letter`. A new keepsake needs an `item` line at the top of
+the story script and, ideally, an icon here (until then it shows a small knot).
+
 ## Word-game chibis: `assets/chibi/<character>.png`
 
 Small transparent PNGs (about 110 px wide) for Hervé's Journal: `helene`, `woman`, `balbadiou`.

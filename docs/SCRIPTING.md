@@ -72,6 +72,85 @@ menu
 
 Choices trigger an autosave, so players can always go back to them.
 
+### Timed choices and hesitation
+
+```text
+choicetime 14                       # at the top: every choice waits 14 seconds
+menu time 8                         # this one waits 8 (menu notime: no timer at all)
+  - "Look away." tone=quiet [danger -= 1]
+  - "Ask Hara Kei who she is." tone=danger [danger += 2]
+  - hesitate [fascination += 1]
+      "I meant to look away. I didn't. I didn't do anything at all."
+```
+
+A silk thread above the choices burns down from both ends; near the end it turns vermilion, the
+scene reddens and a heartbeat sounds. When it is gone, Hervé **hesitates**: the `- hesitate` option
+(never shown) runs, with its own changes and scene. Silence is a choice too. The clock stops while
+a menu is open, and players can set the timer to Relaxed or Off in Settings.
+`node tools/check-script.js` warns about timed menus without a `- hesitate`.
+
+### Tones
+
+`tone=` gives an option its feeling, and with it a look: `tender` (rose, petals), `warm` (gold),
+`honest` (clear blue), `cold` (frosted glass), `duty` (bronze, a coin), `obsession` (crimson lacquer, a
+red thread), `danger` (black and embers), `curious` (midnight, stars), `quiet` (faded) or `neutral`.
+Without one, the tone is guessed from what the option changes (Hélène's trust up is tender, obsession
+up is obsession, and so on). While the player considers an option, its words move the way they would
+be said (a wave, a tremble, a shimmer, a fade) and the text box glows, shakes, cools or fades with it.
+
+### Costs, keepsakes and money
+
+```text
+item watch "Father's pocket watch" "Gold and heavy, never a minute wrong."   # at the top
+gain item watch                # Hervé now carries it (a card slides in at the top right)
+lose item watch
+gain francs 300                # money is the variable "francs"
+lose francs 40
+menu
+  - "Pay him what he asks." cost=francs:80
+  - "Give him your father's watch instead." cost=item:watch
+  - "Show him Hara Kei's pass." needs=item:pass
+  - "Press a blossom for Hélène." gain=item:blossom [helene_trust += 1]
+```
+
+`cost=` is given up when the option is chosen; `needs=` must be carried but is kept; `gain=` is
+received. Options the player can't afford are shown but locked, with what they lack; a menu never
+locks every option. `has("watch")` tests for a keepsake in conditions, and `francs >= 100` for money.
+The Keepsakes page in the game menu shows everything Hervé carries; icons live in
+`assets/ui/items/<id>.png` (painted by `tools/paint-items.js`).
+
+### Minigames
+
+```text
+minigame tea into tea_result
+if tea_result == "win"
+  harakei "You watch carefully, Monsieur Joncour."
+endif
+```
+
+| Game | Result | What the player does |
+| --- | --- | --- |
+| `tea` | `win` / `lose` | watches her serve the tea, then repeats the movements in order |
+| `eggs` | `win` / `lose` | picks out the grey, sick eggs before the thread burns out (`minigame eggs dead`: the last eggs, where nothing can be won) |
+| `bargain` | `good` / `fair` / `poor` / `insult` | stops a brush on a fair price, three rounds |
+| `hide` | `safe` / `caught` | runs from wall to wall while the soldier's lantern looks away |
+| `letter` | `win` | swaps torn strips of a letter back into order |
+
+Games that can be failed offer another try or let the moment pass; none can stop the story. The
+script decides what each result costs or brings.
+
+### Routes
+
+```text
+routescore helene_trust * 2 - obsession * 0.6 - danger * 0.4
+routes -4 3
+```
+
+At every chapter the score says where Hervé's heart is heading: at or below the first number the
+route is `lost`, at or above the second `devoted`, otherwise `torn`. The chapter card takes on that
+mood (dawn rose and petals, or crimson, ash and a crack), a line marks the moment the route changes,
+and the text box's rim warms or darkens during play. Scenes can ask `if route() == "lost"`.
+
 ## Karma: making choices felt
 
 The variables a choice changes are never shown as numbers. Instead, declare which ones matter at
@@ -281,6 +360,10 @@ titlemusic title
 titlebackground title_cover       # picture behind the title screen (assets/bg/title_cover.webp)
 titlefx ginkgo sun=0.3,-0.25 sway=0.28,0.22,0.34,0.3 pivot=0.4,0.85   # animate the title screen (see below)
 titlelogo brush                   # glowing brush lettering (or: carved)
+splash strand                     # press start: a glowing thread of silk that branches into light (or: logo)
+choicetime 14                     # every choice waits this long before Hervé hesitates (0: no timer)
+routescore helene_trust * 2 - obsession * 0.6 - danger * 0.4   # where the heart is heading
+routes -4 3                       # at or below: "lost"; at or above: "devoted"; between: "torn"
 artstyle smooth                   # pixel | smooth | mixed (see below)
 warning "Text shown once, the first time the game is opened."
 background hara_kei_estate "assets/bg/some-other-name.jpg"   # only if a file doesn't follow the naming rule

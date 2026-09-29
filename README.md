@@ -54,6 +54,20 @@ On a phone, tap to advance and use the buttons under the text box.
   ending, **See your choices** reveals every choice you made and what each one set in motion.
 * **Choices** that change hidden variables: Hélène Trust, Business, Obsession, Fascination,
   Intimacy, Danger and Mystery.
+* **Choices under pressure.** A silk thread burns down above every choice (no numbers); when it is
+  gone, Hervé hesitates, and silence has consequences of its own. Each option glows with its
+  feeling (tender, warm, honest, cold, dutiful, obsessive, dangerous, curious, quiet), and
+  considering one previews how it would be said: the words tremble, shimmer or fade, and the text
+  box takes on its colour. Settings can relax or switch off the timer.
+* **Francs and keepsakes.** Balbadiou's purse, a father's watch, Hélène's handkerchief, a pressed
+  blossom, Hara Kei's pass… The kinder choice often costs something real: paying instead of
+  threatening, giving up the watch, sending for the doctor from Nîmes. What Hervé gives away is
+  noticed later.
+* **Minigames**: the tea ceremony, sorting the eggs, bargaining with Hara Kei, hiding from soldiers
+  in the burned village, and mending the torn letter. Short and forgiving, and none can stop the story.
+* **Routes you can feel.** At every chapter the story works out where Hervé's heart is heading:
+  devoted, torn or lost. The chapter card turns to dawn rose and petals or to crimson, ash and a
+  crack; the text box warms or darkens; and characters speak to him differently.
 * **Scenes only some players see.** Many choices open a short scene of their own, and later
   chapters change their dialogue based on the variables and on earlier choices.
 * **Three endings**, variations of the novel's ending "Home", tracked on an Endings screen.
@@ -121,6 +135,8 @@ js/                   the engine
   scenefx.js          living backgrounds (petals, lanterns, water, smoke, birds...)
   scenery.js          the painted backgrounds' moving layers
   cutscene.js         cutscenes: camera moves, captions, the journey map, letters
+  minigames.js        the minigames (tea, eggs, bargain, hide, letter)
+  strand.js           the press-start screen: a glowing thread of silk
   audio.js            music, sounds, menu beeps
   synth.js            the music, ambience and sound effects, composed in code
   main.js             start-up, keyboard/mouse input, screen scaling
