@@ -19,16 +19,13 @@
     musicVolume: 0.7,
     sfxVolume: 0.8,
     uiSounds: true,
-    textBlips: false,
+    typeSound: true, // a soft tap as narration types
     skipUnseen: false,
     skipAfterChoices: false,
     focus: true,
     reduceMotion: false,
     choiceTimer: 2, // 0 off, 1 relaxed, 2 normal
     charVoices: true, // muffled "speech" while characters talk
-    narrator: true, // narration read aloud by the browser's voice
-    narratorVoice: '', // '' = pick the best one
-    narratorRate: 1,
     voiceVolume: 0.8,
   };
 
@@ -64,7 +61,6 @@
       this.ui = ui;
       this.stage = stage;
       this.audio = audio;
-      this.audio.narrator.pronounce = story.pronounce || [];
       this.poem = poem;
       this.settings = settings;
       this.persistent = Object.assign({ vars: {}, seen: {}, endings: {}, warned: false, autoIndex: 0 }, VN.store.get('persistent', {}));
@@ -294,7 +290,6 @@
       if (this.line) { clearTimeout(this.line.autoTimer); clearTimeout(this.line.skipTimer); }
       this.line = null;
       this.waiter = null;
-      this.audio.narrator.stop();
     }
 
     guard(p) {
@@ -389,14 +384,9 @@
       const tb = this.ui.textbox;
       tb.onPause = () => this.onTyperPause();
       const typer = opts.centered ? tb.sayCentered({ text: opts.text, instant }) : tb.say({ ...opts, instant });
-      const line = { typer, seen, started: performance.now(), autoTimer: 0, skipTimer: 0, resolve: null, speech: null };
+      const line = { typer, seen, started: performance.now(), autoTimer: 0, skipTimer: 0, resolve: null };
       const done = new Promise((r) => { line.resolve = r; });
       this.line = line;
-      // narration (no one speaking) is read aloud; the next line cuts it off
-      if (opts.narrate && !instant && !this.isSkipping()) {
-        line.speech = this.audio.narrator.speak(VN.stripTags(opts.text), { soft: !!opts.italic });
-        line.speech.then(() => { line.spoken = true; });
-      } else this.audio.narrator.stop();
       if (!opts.centered && !instant && !this.isSkipping()) this.stage.setTalking(true);
       typer.done.then(() => { if (this.line === line || !this.line) this.stage.setTalking(false); this.onTyped(line); });
       this.updateSkip();
@@ -427,7 +417,6 @@
       this.line = null;
       this.ui.textbox.hideNext();
       this.stage.setTalking(false);
-      if (line.speech && !line.spoken) this.audio.narrator.stop();
       line.resolve();
     }
 
@@ -455,10 +444,8 @@
       const line = this.line;
       if (!line || !this.auto || this.ui.modalOpen || !line.typer.finished) return;
       clearTimeout(line.autoTimer);
-      // auto waits for the narrator to finish reading, then a short breath
-      if (line.speech && !line.spoken) { line.speech.then(() => { if (this.line === line) this.scheduleAuto(); }); return; }
-      const chars = line.speech ? 0 : line.typer.plan.length;
-      line.autoTimer = setTimeout(() => this.resolveLine(line), (this.settings.autoDelay * (line.speech ? 0.5 : 1) + chars * 0.022) * 1000);
+      const chars = line.typer.plan.length;
+      line.autoTimer = setTimeout(() => this.resolveLine(line), (this.settings.autoDelay + chars * 0.022) * 1000);
     }
 
     updateSkip() {
@@ -577,8 +564,9 @@
       // Speakers who aren't standing in the scene (Hervé, voices over a CG) get their face in the text box.
       const face = ch && ch.face && !ins.centered && !st.scene.sprites[ins.who] ? VN.assets.lookup('face', ch.face) || null : null;
       this.history.push({ who: name, color: ch && ch.color, italic: !!(ch && ch.italic), text: VN.stripTags(text) });
-      const narrate = !name || !!ins.centered;
-      await this.showLine(ins, { name, color: ch && ch.color, italic: ch && ch.italic, blip: ch && ch.blip, voice: !narrate && ch.voice, narrate, text, centered: ins.centered, face });
+      // characters murmur as they talk; narration and thoughts get the soft typing sound
+      const voice = name && !ins.centered ? ch.voice : null;
+      await this.showLine(ins, { name, color: ch && ch.color, italic: ch && ch.italic, voice, text, centered: ins.centered, face });
       this.state.pc++;
     }
 

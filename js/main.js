@@ -180,11 +180,8 @@
 
     // ---- start -----------------------------------------------------------------------------
     await ui.splash();
-    if (story.warning && !engine.persistent.warned) {
-      await ui.warning(story.warning);
-      engine.persistent.warned = true;
-      VN.store.set('persistent', engine.persistent);
-    }
+    // "Before you begin" greets the player every time the game starts
+    if (story.warning) await ui.warning(story.warning);
     const jump = decodeURIComponent((location.hash || '').slice(1));
     if (jump && jump in story.labels) engine.newGame(jump);
     else engine.returnToTitle();

@@ -45,23 +45,17 @@ warning "SILK is a branching story adapted from Alessandro Baricco's novel.\n\nY
 
 # ---------------------------------------------------------------- characters
 # Hervé is the player. His spoken lines use "herve"; his inner thoughts use "inner".
-character herve     "Hervé"          color=#e9c46a blip=440 voice=112 pace=125
+character herve     "Hervé"          color=#e9c46a voice=112 pace=125 muffle=1500
 character inner     ""               color=#cbbef0 italic face=none
-character helene    "Hélène"         color=#f4a7b9 blip=620 voice=215 pace=120 breath=0.2
-character balbadiou "Balbadiou"      color=#9ccf9f blip=380 voice=98 pace=100 muffle=1250
-character harakei   "Hara Kei"       color=#e0503c blip=300 voice=86 pace=165 muffle=950
-character woman     "???"            color=#f6ecdb blip=700 voice=240 pace=150 breath=0.45 muffle=1000
-character blanche   "Madame Blanche" color=#b7c4ff blip=520 voice=185 pace=135 breath=0.15
+character helene    "Hélène"         color=#f4a7b9 voice=215 pace=120 muffle=1700 breath=0.2 volume=0.9
+character balbadiou "Balbadiou"      color=#9ccf9f voice=98 pace=100 muffle=1700 volume=1.15
+character harakei   "Hara Kei"       color=#e0503c voice=86 pace=165 muffle=1300 volume=1.05
+character woman     "???"            color=#f6ecdb voice=240 pace=150 muffle=1400 breath=0.45 volume=0.8
+character blanche   "Madame Blanche" color=#b7c4ff voice=185 pace=135 muffle=1600 breath=0.15 volume=0.95
 
-# Characters murmur while they talk (voice= pitch in Hz, pace= ms per syllable, muffle= how
-# muffled, breath= how breathy). Narration is read aloud by the browser's own voice; these lines
-# tell it how to say the French names.
-pronounce "Hervé"       "Air-vay"
-pronounce "Joncour"     "Zhon-coor"
-pronounce "Hélène"      "Ay-lenn"
-pronounce "Balbadiou"   "Bal-ba-dyoo"
-pronounce "Lavilledieu" "La-veel-dyuh"
-pronounce "Blanche"     "Blonsh"
+# Characters murmur while they talk, a muffled voice with no words: voice= is the pitch in Hz,
+# pace= the milliseconds between syllables, muffle= how clear it is (lower is more muffled),
+# breath= how breathy (0-1) and volume= how loud next to the others (1 is normal).
 
 # The first time we meet each character, "introduce <id>" presents them with these words.
 intro herve     "A silk merchant of Lavilledieu. This is his story, and every choice in it is yours." kanji 旅 sound chime

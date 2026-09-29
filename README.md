@@ -66,11 +66,10 @@ On a phone, tap to advance and use the buttons under the text box.
 * **Minigames**: the tea ceremony, sorting the eggs, bargaining with Hara Kei, hiding from soldiers
   in the burned village, and mending the torn letter (four strips, each matched to the faint trace
   of its words on the page). Short and forgiving, and none can stop the story.
-* **Voices.** Characters murmur as they talk: a muffled, wordless voice of their own (Hara Kei low
-  and slow, Balbadiou quick and gruff, Hélène soft), so you hear that someone is speaking without
-  hearing words. Narration and Hervé's thoughts are read aloud by the browser's own voice, choosing
-  the most natural one it has (Edge and Chrome offer good "online" voices; some browsers have none).
-  Settings → Voices turns either off, picks the narrator's voice and sets its speed.
+* **Voices.** Characters murmur as they talk: a muffled, wordless voice of their own (Hara Kei low,
+  slow and firm, Balbadiou quick and loud, Hélène gentle, the woman barely above a whisper), so you
+  hear that someone is speaking without hearing words. Narration and Hervé's thoughts come with a
+  soft tap as the words appear, like a nib touching paper. Both can be turned off in Settings.
 * **First meetings.** The first time we meet each character, the scene dims and a band of their
   colour sweeps across with a streak of light and silk threads; their portrait slides in, their
   name rises letter by letter, and a seal is stamped beside a line about who they are.
@@ -98,7 +97,7 @@ On a phone, tap to advance and use the buttons under the text box.
   move on, Esc to skip.
 * Scene transitions (dissolve, fade, flash), tints, filters and screen effects.
 * **Settings** for text speed, auto speed, the choice timer, music, sound and voice volume, the
-  character voices and the narrator, text beeps, speaker highlight and reduced motion.
+  character voices, the typing sound, speaker highlight and reduced motion.
 * **A thread of silk to begin.** Before the menu, a single glowing strand flows across the dark;
   click and it branches into a burst of light that swells until the whole screen is bright, then
   slowly draws back to reveal the menu.

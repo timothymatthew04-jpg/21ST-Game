@@ -247,7 +247,7 @@
       return !this.box.classList.contains('hidden');
     }
 
-    say({ name, color, text, italic, instant, blip, voice, face }) {
+    say({ name, color, text, italic, instant, voice, face }) {
       this.stop();
       this.hideCentered();
       this.showBox();
@@ -263,8 +263,8 @@
       this.typer = new Typer(this.text, text, {
         cps: this.settings.textSpeed,
         instant,
-        // a character's muffled voice while they talk (or, with voices off, the soft blips)
-        onChar: this.audio.voiceLine(!instant && voice) ? (ch) => this.audio.voiceChar(ch) : () => this.audio.blip(blip || 520),
+        // a character's muffled voice while they talk; narration gets a soft typing sound
+        onChar: this.audio.voiceLine(!instant && voice) ? (ch) => this.audio.voiceChar(ch) : (ch) => this.audio.typeTick(ch),
         onPause: () => { this.showNext(); if (this.onPause) this.onPause(); },
       });
       return this.typer;
@@ -290,6 +290,7 @@
       this.typer = new Typer(this.centeredText, text, {
         cps: this.settings.textSpeed * 0.8,
         instant,
+        onChar: (ch) => this.audio.typeTick(ch),
         onPause: () => { this.showNext(); if (this.onPause) this.onPause(); },
       });
       return this.typer;

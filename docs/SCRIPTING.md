@@ -35,12 +35,11 @@ Indentation is only for readability, except inside `menu` blocks (see below).
 ## Characters
 
 ```text
-character helene "Hélène" color=#f4a7b9 blip=620
+character helene "Hélène" color=#f4a7b9 voice=215 pace=120 breath=0.2 volume=0.9
 character inner  ""       color=#cbbef0 italic
 ```
 
 * `color` is the colour of the name tag.
-* `blip` is the pitch of the optional text beeps (Settings → Text blips).
 * `italic` renders the lines in italics (used for inner thoughts).
 * An empty name (`""`) hides the name tag.
 * `sprite=folder` uses a different sprite folder than the character's id.
@@ -49,19 +48,9 @@ character inner  ""       color=#cbbef0 italic
   standing in the scene: always for Hervé, who is the player, and for voices heard over a CG.
 * `voice=120` gives the character a muffled, wordless voice that murmurs while their lines type:
   the number is its pitch in Hz (about 85–120 for men, 180–250 for women). `pace=130` is the time
-  between syllables in milliseconds, `muffle=1100` how muffled it is (lower is more muffled) and
-  `breath=0.3` how breathy (0–1). Characters without `voice=` use the text beeps instead.
-
-### Voices and the narrator
-
-Lines with no speaker, `inner` thoughts and `centered` text are read aloud by the browser's own
-text-to-speech, preferring natural "online" voices. The next line cuts the reading off, and
-auto-advance waits for it to finish. To help it with names, add `pronounce` lines at the top:
-
-```text
-pronounce "Hervé"   "Air-vay"
-pronounce "Hélène"  "Ay-lenn"
-```
+  between syllables in milliseconds, `muffle=1500` how clear it is (lower is more muffled),
+  `breath=0.3` how breathy (0–1) and `volume=1` how loud next to the others. Lines with no speaker,
+  `inner` thoughts and `centered` text get a soft typing sound instead (Settings → Typing sound).
 
 ### First meetings
 
