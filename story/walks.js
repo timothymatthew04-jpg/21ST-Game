@@ -18,6 +18,17 @@
  *  for a character of the story, who then murmurs in their own voice). look draws a person:
  *  soldier, drummer, baldabiou, villager, merchant, guard, servant, boy, patrol.
  *  set: { variable: value } changes a story variable when the thing is used.
+ *
+ *  Some walks have action too:
+ *    cover:    [{ x0, x1, kind }]  places to crouch behind (↓): wall, rubble, sandbags, cart
+ *    patrols:  [{ x0, x1, speed, reach, start, dir }]  soldiers with lanterns; if their light finds
+ *              Hervé standing (or they hear him running), a meter fills, and at the top he is caught
+ *    chase:    { speed, from, to, spacing, gap, kinds }  on horseback, riders behind: jump (↑) logs
+ *              and rocks, duck (↓) branches; every stumble lets them close in
+ *    shelling: { rate, first, until, set }  shells whistle in and burst; crouch behind cover or be
+ *              knocked down (`set` counts the times Hervé was hit in a story variable)
+ *    caughtLines / escapedLines: what is said when he is caught, or gets away
+ *  The walk then ends as "caught" or "escaped" instead of "arrived" (see `walk ... into`).
  * ============================================================================
  */
 window.VN_WALKS = {
@@ -96,15 +107,56 @@ window.VN_WALKS = {
     title: 'The Burned Village', region: 'The hills of Japan',
     hero: 'traveller', start: 40, weather: 'ash', weatherCount: 90, accent: '255,140,90',
     water: ['rgba(120,50,30,0.5)', 'rgba(20,6,4,0.92)'],
-    hint: 'Search the ruins →',
+    hint: 'Search the ruins → · hold ↓ behind cover when a lantern comes',
+    // soldiers on patrol: each walks its stretch of road with a lantern, stops, looks back
+    patrols: [
+      { x0: 420, x1: 700, speed: 15, reach: 90, start: 640, dir: -1 },
+      { x0: 960, x1: 1250, speed: 17, reach: 96, start: 1000, dir: 1 },
+    ],
+    cover: [
+      { x0: 318, x1: 350, kind: 'rubble' }, { x0: 480, x1: 516, kind: 'wall' }, { x0: 612, x1: 648, kind: 'cart' },
+      { x0: 930, x1: 962, kind: 'rubble' }, { x0: 1086, x1: 1122, kind: 'wall' }, { x0: 1200, x1: 1236, kind: 'rubble' },
+    ],
+    caughtLines: [['A soldier', 'Who is there?'], 'A lantern swung my way. I ran, and threw myself down behind the last wall with my heart in my throat.'],
     things: [
       { x: 190, kind: 'look', label: 'A burned house', lines: ['The house I had slept in, the first time. I knew it by the shape of its door, which was all that was left.'] },
       { x: 365, kind: 'coin', amount: 10, label: 'Coins in the ash', lines: ['Coins melted together in the ash. Someone had hidden their savings under the floor.'] },
       { x: 555, kind: 'look', label: 'A doll', lines: ['A child\'s doll, half burned, sitting upright in the ash as if someone had put it there on purpose.'] },
       { x: 780, kind: 'look', label: 'The empty aviary', lines: ['The aviary. The paper walls were gone and its door hung open. There were no birds anywhere, not even dead ones. They had all flown.'] },
       { x: 860, kind: 'item', item: 'hairpin', label: 'A hairpin', set: { found_hairpin: true }, lines: ['A lacquered hairpin in the ashes, red and gold. I had seen it before, in her hair.'] },
-      { x: 1150, kind: 'look', look: 'patrol', label: 'Lanterns on the road', lines: ['Lanterns, far off on the road. Soldiers, going from ruin to ruin. I had to hide.'] },
       { x: 1345, kind: 'goal', label: 'The last wall', verb: 'Hide', lines: ['The last wall still standing. I pressed myself into its shadow and held my breath.'] },
+    ],
+  },
+
+  // ---------------------------------------------------------------- Chapter 6: bandits on the steppe
+  chase: {
+    scene: 'steppe',
+    title: 'Riders on the Steppe', region: 'The second journey',
+    hero: 'traveller', ride: true, start: 40, weather: 'motes', accent: '255,160,120',
+    water: ['rgba(150,90,110,0.5)', 'rgba(30,18,40,0.9)'],
+    hint: 'Outride them! ↑ to jump the logs and rocks, ↓ to duck the branches',
+    chase: { speed: 108, from: 320, to: 2180, spacing: [150, 220], gap: 110, kinds: ['log', 'rock', 'branch'] },
+    caughtLines: [['A rider', 'Your purse, Frenchman. Slowly.'], 'They caught my bridle and took the money meant for the eggs. Then, laughing, they let me go.'],
+    escapedLines: ['Somewhere behind me the hoofbeats thinned, and then there was only the wind over the grass.'],
+    things: [],
+  },
+
+  // ---------------------------------------------------------------- Chapter 12: the road from the coast, through the war
+  crossing: {
+    title: 'The Road from the Coast', region: 'Japan at war',
+    hero: 'traveller', start: 30, weather: 'embers', weatherCount: 60, accent: '255,140,90',
+    water: ['rgba(120,40,30,0.5)', 'rgba(20,6,6,0.92)'],
+    hint: 'Get through to the hills → · when a shell whistles, crouch (↓) behind cover',
+    shelling: { rate: 1.1, first: 2.6, until: 1330, set: 'wounded' },
+    cover: [
+      { x0: 150, x1: 186, kind: 'sandbags' }, { x0: 300, x1: 336, kind: 'wall' }, { x0: 452, x1: 490, kind: 'cart' },
+      { x0: 610, x1: 646, kind: 'sandbags' }, { x0: 770, x1: 806, kind: 'rubble' }, { x0: 920, x1: 956, kind: 'wall' },
+      { x0: 1080, x1: 1116, kind: 'sandbags' }, { x0: 1230, x1: 1266, kind: 'rubble' },
+    ],
+    things: [
+      { x: 700, kind: 'look', label: 'A signpost', lines: ['A signpost, its arms shot away. It still pointed somewhere, bravely, at nothing.'] },
+      { x: 1040, kind: 'look', label: 'An abandoned gun', lines: ['A field gun, left where it stood. Its crew had not had time to take it with them, or had not needed to.'] },
+      { x: 1395, kind: 'goal', label: 'The hills', verb: 'Climb', lines: ['The road climbed out of the smoke. Behind me, the guns went on arguing with each other.'] },
     ],
   },
 

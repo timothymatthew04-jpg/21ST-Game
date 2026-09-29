@@ -1219,6 +1219,8 @@
     shell: (S, o, t) => shell(S, o, t),
     // a war rocket: a rising hiss that crackles as it burns, then a pop high in the air
     rocket: (S, o, t) => { const n = S.noise(o, t, 1.7, { type: 'bandpass', f: 700, q: 2.2, gain: 0.2, attack: 0.08 }); n.flt.frequency.exponentialRampToValueAtTime(3600, t + 1.5); for (let i = 0; i < 16; i++) crackle(S, o, t + 0.1 + Math.random() * 1.5); crack(S, o, t + 1.7, 0.22); },
+    // something heavy hitting the ground: a stumble, a fall
+    thud: (S, o, t) => { S.taiko(o, t, 0.7, 0.8); S.noise(o, t, 0.35, { type: 'lowpass', f: 300, gain: 0.5, attack: 0.004 }); },
     // a gun far across the valley: more rumble than bang
     cannon_far: (S, o, t) => { S.taiko(o, t, 0.45, 0.4); S.noise(o, t, 3.2, { type: 'lowpass', f: 150, gain: 0.45, attack: 0.03 }); },
     // a battery firing down the line

@@ -3479,3 +3479,35 @@ input[type='range']::-moz-range-thumb { width: 18px; height: 24px; background: v
 @keyframes eyes-streak { to { left: 110%; } }
 .eyes-cut.closing { opacity: 0; transition: opacity 0.4s ease; }
 .eyes-cut.still .eyes-pic, .eyes-cut.still .eyes-streak { animation: none; }
+
+/* ---- the walks' action: being seen, being chased, being hit ------------------------------- */
+.wk-alert {
+  position: absolute; left: 50%; top: 78px; transform: translateX(-50%); pointer-events: none; opacity: 0;
+  display: flex; align-items: center; gap: 10px; padding: 6px 16px 6px 8px; border-radius: 999px;
+  background: rgba(14, 10, 12, 0.7); border: 1px solid rgba(255, 214, 140, 0.35);
+  font-family: var(--name-font); font-weight: 700; font-size: 15px; letter-spacing: 0.1em; color: #fff0d8;
+  transition: opacity 0.3s ease, border-color 0.3s ease;
+}
+.wk-alert.on { opacity: 1; }
+.wk-alert-eye {
+  width: 30px; height: 30px; display: grid; place-items: center; border-radius: 50%; font-family: var(--seal); font-size: 16px; color: #fff4e0;
+  background: conic-gradient(#ff5a3a calc(var(--a, 0) * 360deg), rgba(255, 255, 255, 0.12) 0);
+  box-shadow: inset 0 0 0 4px rgba(14, 10, 12, 0.85);
+}
+.wk-alert.high { border-color: rgba(255, 90, 58, 0.8); animation: wk-alert 0.6s ease-in-out infinite; }
+@keyframes wk-alert { 50% { box-shadow: 0 0 22px rgba(255, 70, 40, 0.7); } }
+.wk-chase {
+  position: absolute; left: 50%; top: 78px; width: 320px; transform: translateX(-50%); pointer-events: none;
+  display: flex; align-items: center; gap: 12px; padding: 8px 16px; border-radius: 999px;
+  background: rgba(14, 10, 12, 0.7); border: 1px solid rgba(255, 214, 140, 0.35);
+  font-family: var(--name-font); font-weight: 700; font-size: 14px; color: #fff0d8; letter-spacing: 0.06em;
+}
+.wk-chase-track { position: relative; flex: 1; height: 6px; border-radius: 3px; background: rgba(255, 255, 255, 0.14); }
+.wk-chase-you, .wk-chase-them { position: absolute; top: 50%; width: 12px; height: 12px; margin: -6px 0 0 -6px; border-radius: 50%; }
+.wk-chase-you { left: 100%; background: #f3d58e; box-shadow: 0 0 10px rgba(243, 213, 142, 0.9); }
+.wk-chase-them { left: calc((1 - var(--gap, 1)) * 100%); background: #d8402a; box-shadow: 0 0 10px rgba(216, 64, 42, 0.9); transition: left 0.2s linear; }
+.wk-chase.close { border-color: rgba(216, 64, 42, 0.8); animation: wk-alert 0.5s ease-in-out infinite; }
+.wk-hurt { position: absolute; inset: 0; pointer-events: none; opacity: 0; background: radial-gradient(ellipse at center, rgba(180, 20, 10, 0) 40%, rgba(180, 20, 10, 0.55)); }
+.wk-hurt.on { animation: wk-hurt 0.7s ease-out; }
+@keyframes wk-hurt { from { opacity: 1; } to { opacity: 0; } }
+.overlay.walk:has(.wk-say.on) .wk-alert, .overlay.walk:has(.wk-say.on) .wk-chase { opacity: 0; transition: opacity 0.2s; }

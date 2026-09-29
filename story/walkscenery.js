@@ -219,6 +219,79 @@ window.VN_WALKSCENERY = {
    }
   ]
  },
+ "crossing": {
+  "w": 1440,
+  "h": 270,
+  "layers": [
+   {
+    "id": "sky",
+    "x": 0,
+    "y": 0,
+    "w": 480,
+    "h": 270,
+    "depth": 0,
+    "anim": null,
+    "src": "assets/walks/crossing/sky.png"
+   },
+   {
+    "id": "clouds",
+    "x": 0,
+    "y": 37,
+    "w": 1440,
+    "h": 52,
+    "depth": 0.05,
+    "anim": {
+     "type": "drift",
+     "t": 140
+    },
+    "src": "assets/walks/crossing/clouds.png"
+   },
+   {
+    "id": "far",
+    "x": 0,
+    "y": 69,
+    "w": 645,
+    "h": 201,
+    "depth": 0.12,
+    "anim": null,
+    "src": "assets/walks/crossing/far.png"
+   },
+   {
+    "id": "mid",
+    "x": 0,
+    "y": 135,
+    "w": 868,
+    "h": 63,
+    "depth": 0.4,
+    "anim": null,
+    "src": "assets/walks/crossing/mid.png"
+   },
+   {
+    "id": "ground",
+    "x": 0,
+    "y": 174,
+    "w": 1440,
+    "h": 38,
+    "depth": 1,
+    "anim": null,
+    "src": "assets/walks/crossing/ground.png"
+   },
+   {
+    "id": "front",
+    "x": 3,
+    "y": 233,
+    "w": 1404,
+    "h": 37,
+    "depth": 1.3,
+    "anim": {
+     "type": "sway",
+     "a": 2,
+     "t": 3.6
+    },
+    "src": "assets/walks/crossing/front.png"
+   }
+  ]
+ },
  "ruins": {
   "w": 1440,
   "h": 270,

@@ -219,6 +219,38 @@ WALKS.ruins = (c, L) => {
   return { colors: 64, vignette: [0.5, '20,4,0'] };
 };
 
+// ---------------------------------------------------------------- the road from the coast, through the war
+WALKS.crossing = (c, L) => {
+  const r = rng(461);
+  vgrad(c, 0, 0, 480, WY, [[0, '#140c14'], [0.35, '#3a1622'], [0.65, '#8a2e24'], [0.88, '#e0602a'], [1, '#ffa050']]);
+  const cl = L('clouds', { depth: 0.05, anim: { type: 'drift', t: 140 } });
+  for (let x = 0; x < S(0.1); x += 170) cloudBand(cl, r, x + r.r(0, 60), r.r(18, 100), r.r(170, 250), r.r(10, 16), { body: '#2e1418', rim: '#e0602a', shadow: '#1e0c10', hi: '#ffa050', lightFromBelow: true });
+  const far = L('far', { depth: 0.12 });
+  ridge(far, r, 176, 40, '#2e1420', { x1: S(0.12) });
+  // fires along the far hills, and smoke going up from them
+  for (let x = 30; x < S(0.12); x += r.r(90, 160)) {
+    glow(far, x, 172, 30, 'rgba(255,120,50,0.55)');
+    for (let k = 0; k < 5; k++) ellipse(far, x + r.r(-5, 5), 172 - r.r(0, 6), r.r(1.5, 3), r.r(3, 6), r.pick(['#ffb040', '#ff7a2a', '#e0502a']));
+    for (let i = 0; i < 22; i++) { const t = i / 22; ellipse(far, x + t * t * 40 + r.r(-2, 2), 168 - t * 90, 3 + t * 14, 3 + t * 11, t < 0.2 ? '#6a2a20' : '#241016'); }
+  }
+  const mid = L('mid', { depth: 0.4 });
+  for (let x = 0; x < S(0.4); x += r.r(50, 110)) {
+    bareTree(mid, r, x, 198, r.r(28, 46), '#140a0c', null);
+    if (r() < 0.4) { glow(mid, x, 170, 16, 'rgba(255,120,40,0.6)'); for (let k = 0; k < 4; k++) ellipse(mid, x + r.r(-6, 6), 168 - r.r(0, 14), r.r(1.5, 3), r.r(3, 6), r.pick(['#ffb040', '#ff7a2a'])); }
+  }
+  const g = L('ground', { depth: 1 });
+  vgrad(g, 0, 188, W, 16, [[0, '#3a2020'], [1, '#2a1616']]);
+  bank(g, r, 0, W, { grass0: '#3a2a22', grass1: '#2a1c18', tip: '#5a3a2a', earth: '#221412', dark: '#100808', stone: '#4a3632' });
+  // craters, a broken fence, a signpost, a field gun left behind
+  for (let x = 90; x < W; x += r.r(110, 190)) { ellipse(g, x, GY - 1, r.r(10, 16), 3, '#140a0a'); ellipse(g, x, GY - 2, r.r(7, 12), 2, '#0a0606'); for (let k = 0; k < 5; k++) rect(g, x + r.r(-14, 14), GY - r.r(2, 5), 2, 1, '#4a3024'); }
+  for (let x = 240; x < 420; x += 12) { rect(g, x, GY - 14 + (x % 3), 2, 14, '#2a1a14'); if (x % 24 === 0) line(g, x, GY - 10, x + 12, GY - 8 - (x % 5), '#2a1a14', 1); }
+  rect(g, 700, GY - 30, 2, 30, '#2a1a14'); rect(g, 692, GY - 30, 22, 6, '#4a3020'); rect(g, 692, GY - 30, 22, 1, '#7a5234');
+  rect(g, 1030, GY - 12, 26, 3, '#1e1a20'); circle(g, 1036, GY - 5, 5, '#2a1a10'); circle(g, 1036, GY - 5, 3, '#4a3020'); line(g, 1044, GY - 10, 1060, GY - 16, '#1e1a20', 3);
+  const fr = L('front', { depth: 1.3, anim: sway(2, 3.6) });
+  reeds(fr, r, ['#1a0e0c', '#2a1814', '#3e2218'], 80);
+  return { colors: 64, vignette: [0.5, '24,4,4'] };
+};
+
 // ---------------------------------------------------------------- the cemetery by the river, at dusk
 WALKS.cemetery = (c, L) => {
   const r = rng(451);

@@ -307,6 +307,7 @@ label start
   set woman_name = "???"
   # found_hairpin is set by the walk through the burned village (story/walks.js)
   set found_hairpin = false
+  set wounded = 0
   scene black with none
   # the opening plays on its own, straight into the story (click to hurry it, Esc to skip)
   play music japan fadein 3
@@ -836,6 +837,15 @@ label chapter6
   "Baldabiou sent me back to Japan for more eggs."
   "The same trains. The same steppe. The same boat without lights."
   "It was easier the second time. That frightened me a little. It meant I was getting used to it."
+  play music pursuit fadein 1
+  walk chase into chase_how
+  if chase_how == "caught"
+    if francs >= 60
+      lose francs 60
+    endif
+    "I reached the coast poorer than I had left it, and a good deal more careful."
+    set danger += 1
+  endif
   scene estate_day with fade
   play music japan fadein 2
   show harakei neutral
@@ -1287,6 +1297,8 @@ label lost_without_goodbye
 # ============================================================================
 label chapter12
   chapter "Chapter 12" "The Abandoned Village" seal 灰
+  play music battle fadein 1 volume 0.6
+  walk crossing
   scene burned_village with fade
   stop music fadeout 3
   cutscene ashes
@@ -1298,7 +1310,13 @@ label chapter12
   herve "Hara Kei?"
   "No answer."
   "I continued searching."
-  walk ruins
+  if wounded
+    "My shoulder still ached where a shell had thrown me into the ditch. I did not look at it."
+  endif
+  walk ruins into ruins_how
+  if ruins_how == "caught"
+    set danger += 1
+  endif
   scene burned_village with fade
   inner "I had crossed an ocean for a place that no longer seemed to exist."
   if found_hairpin

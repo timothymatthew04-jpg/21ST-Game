@@ -47,14 +47,15 @@
     servant: { coat: '#8a5a7a', coatDark: '#6a4460', legs: '#6a4460', boots: '#e8e0d0', skin: '#f0d0b8', hat: 'bun', hatCol: '#1a1418', robe: 1 },
     boy: { coat: '#6a5a3a', coatDark: '#50442a', legs: '#50442a', boots: '#e8c0a0', skin: '#e8c0a0', hat: 'none', hatCol: '#1a1414', small: 1 },
     patrol: { coat: '#3a3a2a', coatDark: '#2a2a1e', legs: '#2a2a1e', boots: '#141410', skin: '#d8b090', hat: 'jingasa', hatCol: '#2a2420', lantern: 1 },
+    bandit: { coat: '#3a3028', coatDark: '#2a221c', legs: '#2a221c', boots: '#141010', skin: '#c89878', hat: 'fur', hatCol: '#1a1410', beard: '#3a2a20' },
   };
 
   function rect(c, x, y, w, hh, col) { c.fillStyle = col; c.fillRect(Math.round(x), Math.round(y), Math.round(w), Math.round(hh)); }
 
   /** A person standing (or walking) with their feet at (x, y), facing right; flip the canvas to face left. */
-  function drawPerson(c, L, t, moving, running) {
+  function drawPerson(c, L, t, moving, running, crouch = false) {
     const k = L.small ? 0.8 : 1;
-    const legH = Math.round(8 * k), bodyH = Math.round(10 * k), w = Math.round((L.wide ? 8 : 6) * k);
+    const legH = Math.round((crouch ? 3 : 8) * k), bodyH = Math.round((crouch ? 8 : 10) * k), w = Math.round((L.wide ? 8 : 6) * k);
     const ph = t * (running ? 16 : 10);
     const swing = moving ? Math.sin(ph) : 0;
     const bob = moving ? Math.round(Math.abs(Math.sin(ph)) * 1) : 0;
@@ -99,7 +100,7 @@
   }
 
   /** A horse at a walk or a gallop, facing right, with its rider. */
-  function drawHorse(c, t, moving, running, rider) {
+  function drawHorse(c, t, moving, running, rider, duck = false) {
     const ph = t * (running ? 14 : 8);
     const gait = moving ? Math.sin(ph) : 0;
     const bob = moving ? Math.round(Math.abs(Math.sin(ph)) * (running ? 2 : 1)) : 0;
@@ -118,8 +119,8 @@
     rect(c, -13, y - 16 + Math.round(gait), 3, 7, mane); // the tail
     if (rider) {
       c.save();
-      c.translate(0, y - 13);
-      drawPerson(c, { ...rider, legs: rider.coatDark }, 0, false, false);
+      c.translate(0, y - 13 + (duck ? 3 : 0));
+      drawPerson(c, { ...rider, legs: rider.coatDark }, 0, false, false, duck);
       c.restore();
     }
   }
@@ -149,6 +150,18 @@
       else if (wx.kind === 'fireflies') { c.fillStyle = `rgba(220,255,140,${0.25 + tw * 0.75})`; c.fillRect(p.x * SS, p.y * SS, SS, SS); }
       else { c.fillStyle = `rgba(255,240,200,${0.2 + tw * 0.4})`; c.fillRect(p.x * SS, p.y * SS, SS, SS); }
     }
+  }
+
+  // ---------------------------------------------------------------- fire and smoke, for the shelling
+  const FIRE = ['#fff6d0', '#ffd070', '#ff9a3a', '#e0502a'];
+  const pick = (a) => a[Math.floor(Math.random() * a.length)];
+  const rnd = (a, b) => a + Math.random() * (b - a);
+  function burst(parts, x, y, size = 1) {
+    parts.push({ x, y: y - 4, r: 10 * size, grow: 30, col: '#fff4d8', a: 0.9, life: 0.12, age: 0, z: 2 });
+    parts.push({ x, y: y - 3, r: 3 * size, grow: 18 * size, col: pick(FIRE.slice(1)), a: 0.95, life: 0.35, age: 0, z: 2 });
+    for (let i = 0; i < 14 * size; i++) parts.push({ x, y, vx: rnd(-40, 40) * size, vy: rnd(-90, -30) * size, g: 140, col: pick(['#2e2018', '#4a3426', '#6a4a30']), s: Math.random() < 0.3 ? 2 : 1, life: rnd(0.6, 1.2), age: 0, z: 1 });
+    for (let i = 0; i < 8; i++) parts.push({ x, y, vx: rnd(-50, 50), vy: rnd(-70, -10), g: 80, col: pick(FIRE), s: 1, life: rnd(0.25, 0.6), age: 0, z: 2 });
+    for (let i = 0; i < 6; i++) parts.push({ x: x + rnd(-4, 4), y: y - rnd(0, 6), r: 3 * size, grow: rnd(6, 10), vx: rnd(-4, 6), vy: -rnd(6, 14), col: '#3a3030', hi: '#6a5a56', a: 0.7, life: rnd(2, 3.5), age: 0, z: 0 });
   }
 
   // ---------------------------------------------------------------- the walk itself
@@ -187,7 +200,24 @@
       this.things = (def.things || []).map((th, i) => ({ ...th, id: i, used: false, bob: Math.random() * 6 }))
         .filter((th) => !(th.kind === 'item' && th.item && this.engine.hasItem(th.item)));
       this.weather = def.weather ? makeWeather(def.weather, def.weatherCount || 60) : null;
+      // the action some walks have: cover to crouch behind, lanterns on patrol, a chase, falling shells
+      this.cover = def.cover || [];
+      this.crouch = false;
+      this.stun = 0;
+      this.shake = 0;
+      this.parts = [];
+      this.patrols = (def.patrols || []).map((p) => ({ ...p, x: p.start != null ? p.start : p.x0, dir: p.dir || 1, wait: 0, look: LOOKS[p.look || 'patrol'] }));
+      this.alert = 0;
+      if (def.chase) {
+        const ch = def.chase;
+        const obstacles = [];
+        for (let x = ch.from || 260; x < (ch.to || this.W - 200); x += rnd(ch.spacing ? ch.spacing[0] : 150, ch.spacing ? ch.spacing[1] : 230)) obstacles.push({ x, kind: pick(ch.kinds || ['log', 'rock', 'branch']), done: false });
+        this.chase = { ...ch, gap: ch.gap || 110, obstacles, jumpY: 0, vy: 0 };
+      }
+      if (def.shelling) this.shelling = { ...def.shelling, list: [], wait: def.shelling.first || 2.2, hits: 0 };
     }
+
+    inCover(x = this.x) { return this.cover.some((cv) => x >= cv.x0 && x <= cv.x1); }
 
     async start() {
       this.layers = [];
@@ -210,9 +240,14 @@
       this.purse = h('div.wk-purse', h('span.wk-coin'), h('b', String(this.engine.francs())));
       const skip = h('button.wk-skip', { type: 'button' }, 'Skip ▸▸');
       skip.addEventListener('click', (e) => { e.stopPropagation(); this.finish('skipped'); });
-      const help = h('div.wk-help', h('span', h('kbd', '←'), h('kbd', '→'), ' walk'), h('span', h('kbd', 'Shift'), ' run'), h('span', h('kbd', 'E'), ' look · take · talk'));
+      const help = this.def.chase
+        ? h('div.wk-help', h('span', h('kbd', '↑'), ' jump'), h('span', h('kbd', '↓'), ' duck'), h('span', h('kbd', '←'), h('kbd', '→'), ' rein in · spur on'))
+        : h('div.wk-help', h('span', h('kbd', '←'), h('kbd', '→'), ' walk'), h('span', h('kbd', 'Shift'), ' run'), this.cover.length ? h('span', h('kbd', '↓'), ' crouch') : null, h('span', h('kbd', 'E'), ' look · take · talk'));
+      this.alertEl = this.patrols.length ? h('div.wk-alert', h('span.wk-alert-eye', '目'), h('span.wk-alert-text', 'Unseen')) : null;
+      this.chaseEl = this.chase ? h('div.wk-chase', h('span.wk-chase-label', 'The riders'), h('div.wk-chase-track', h('i.wk-chase-them'), h('i.wk-chase-you'))) : null;
+      this.hurtEl = h('div.wk-hurt');
       const title = h('div.wk-title', h('b', this.def.title || ''), h('span', this.def.region || ''));
-      this.el = h('div.overlay.walk', this.canvas, h('div.wk-vignette'), this.prompt, title, this.hint, this.purse, this.notices, help, this.say, skip, h('div.wk-fade'));
+      this.el = h('div.overlay.walk', this.canvas, h('div.wk-vignette'), this.prompt, title, this.hint, this.purse, this.notices, help, this.alertEl, this.chaseEl, this.hurtEl, this.say, skip, h('div.wk-fade'));
       this.el.style.setProperty('--wk-accent', this.def.accent || '255,214,140');
       this.say.addEventListener('click', (e) => { e.stopPropagation(); this.use(); });
       return new Promise((resolve) => {
@@ -262,6 +297,8 @@
       if (k === 'ArrowLeft' || k === 'a' || k === 'A') { this.keys.left = down; this.target = null; return true; }
       if (k === 'ArrowRight' || k === 'd' || k === 'D') { this.keys.right = down; this.target = null; return true; }
       if (k === 'Shift') { this.keys.run = down; return true; }
+      if (k === 'ArrowDown' || k === 's' || k === 'S') { this.keys.down = down; return true; }
+      if (this.chase && (k === 'ArrowUp' || k === 'w' || k === 'W' || k === ' ')) { if (down && !e.repeat) this.jump(); return true; }
       if (!down) return false;
       if (k === 'e' || k === 'E' || k === ' ' || k === 'Enter' || k === 'ArrowUp' || k === 'w' || k === 'W') { if (!e.repeat) this.use(); return true; }
       if (k === 'Escape') { this.ui.openMenu('save'); return true; }
@@ -378,10 +415,119 @@
       this.draw(dt);
     }
 
+    jump() {
+      const ch = this.chase;
+      if (!ch || this.talking || this.stun > 0 || ch.jumpY < 0) return;
+      ch.vy = -150;
+      this.audio.fx('whoosh', { volume: 0.25 });
+    }
+
+    /** Someone caught Hervé: they say so, and the walk ends that way. */
+    caught(lines) {
+      if (this.isCaught) return;
+      this.isCaught = true;
+      this.keys.left = this.keys.right = this.keys.down = false;
+      this.audio.fx('shouts', { volume: 0.6 });
+      this.hurtEl.classList.remove('on'); void this.hurtEl.offsetWidth; this.hurtEl.classList.add('on');
+      this.talk(null, lines && lines.length ? lines : ['They had me.'], () => this.finish('caught'));
+    }
+
+    action(dt) {
+      if (this.stun > 0) this.stun -= dt;
+      if (this.shake > 0) this.shake = Math.max(0, this.shake - dt * 2.5);
+      this.crouch = !!this.keys.down && !this.def.ride && !this.talking;
+      // lanterns on patrol: they walk their stretch of road, stop, look back, and walk on
+      for (const p of this.patrols) {
+        if (p.wait > 0) { p.wait -= dt; if (p.wait <= 0) p.dir *= -1; continue; }
+        p.x += p.dir * (p.speed || 16) * dt;
+        if ((p.dir > 0 && p.x >= p.x1) || (p.dir < 0 && p.x <= p.x0)) { p.x = VN.clamp(p.x, p.x0, p.x1); p.wait = p.pause || 1.8; }
+      }
+      if (this.patrols.length && !this.talking && !this.isCaught) {
+        let seen = 0, heard = 0;
+        const hidden = this.crouch && this.inCover();
+        for (const p of this.patrols) {
+          const dx = this.x - p.x, len = p.reach || 92;
+          if (Math.sign(dx) === p.dir && Math.abs(dx) < len && !hidden) seen = Math.max(seen, 1.3 - (Math.abs(dx) / len) * 0.8);
+          if (this.running && Math.abs(dx) < 120) heard = 0.45;
+        }
+        const was = this.alert;
+        this.alert = VN.clamp(this.alert + dt * (seen || heard || -0.28), 0, 1);
+        if (was < 0.5 && this.alert >= 0.5) this.audio.fx('heartbeat_fast', { volume: 0.4 });
+        this.alertEl.style.setProperty('--a', this.alert.toFixed(3));
+        this.alertEl.classList.toggle('on', this.alert > 0.02);
+        this.alertEl.classList.toggle('high', this.alert > 0.6);
+        this.alertEl.querySelector('.wk-alert-text').textContent = this.alert > 0.6 ? 'Seen!' : this.alert > 0.02 ? 'Careful' : 'Unseen';
+        if (this.alert >= 1) this.caught(this.def.caughtLines);
+      }
+      // the chase: the horse gallops on by itself; jump, duck, and keep ahead of the riders
+      const ch = this.chase;
+      if (ch && !this.talking && !this.isCaught) {
+        ch.vy += 460 * dt;
+        ch.jumpY = Math.min(0, ch.jumpY + ch.vy * dt);
+        if (ch.jumpY === 0) ch.vy = 0;
+        const base = ch.speed || 110;
+        const mine = this.stun > 0 ? base * 0.35 : base * (this.keys.right ? 1.12 : this.keys.left ? 0.85 : 1);
+        ch.gap = Math.min(170, ch.gap + (mine - base * 0.98) * dt);
+        for (const o of ch.obstacles) {
+          if (o.done || Math.abs(o.x - this.x) > 6) continue;
+          o.done = true;
+          const clear = o.kind === 'branch' ? this.keys.down : ch.jumpY < -9;
+          if (clear) continue;
+          o.hit = true;
+          this.stun = 0.8;
+          this.shake = 1;
+          ch.gap -= 26;
+          this.audio.fx('thud', { volume: 0.7 });
+          this.hurtEl.classList.remove('on'); void this.hurtEl.offsetWidth; this.hurtEl.classList.add('on');
+        }
+        this.chaseEl.style.setProperty('--gap', String(VN.clamp(ch.gap / 170, 0, 1).toFixed(3)));
+        this.chaseEl.classList.toggle('close', ch.gap < 50);
+        if (ch.gap < 14) this.caught(this.def.caughtLines);
+        else if (this.x >= (ch.to || this.W - 200) + 40) { this.isCaught = true; this.talk(null, this.def.escapedLines || ['I left them behind in the dust.'], () => this.finish('escaped')); }
+      }
+      // shells: a shadow grows where one will land, and then it does
+      const sh = this.shelling;
+      if (sh && !this.talking) {
+        sh.wait -= dt;
+        if (sh.wait <= 0 && this.x < (sh.until || this.W - 120)) {
+          sh.wait = rnd(1.6, 2.8) / (sh.rate || 1);
+          sh.list.push({ x: VN.clamp(this.x + rnd(-30, 110), 20, this.W - 20), t: 0 });
+          this.audio.fx('shell', { volume: 0.55 });
+        }
+        for (let i = sh.list.length - 1; i >= 0; i--) {
+          const s = sh.list[i];
+          s.t += dt;
+          if (s.t < 1.3) continue;
+          sh.list.splice(i, 1);
+          burst(this.parts, s.x, GY, 1.2);
+          this.shake = Math.max(this.shake, Math.abs(s.x - this.x) < 80 ? 1 : 0.4);
+          if (Math.abs(s.x - this.x) < 26 && !(this.crouch && this.inCover())) {
+            this.stun = 1.3;
+            this.vx = Math.sign(this.x - s.x || 1) * 60;
+            sh.hits++;
+            if (sh.set) this.engine.setVar(sh.set, sh.hits);
+            this.hurtEl.classList.remove('on'); void this.hurtEl.offsetWidth; this.hurtEl.classList.add('on');
+          }
+        }
+      }
+      // the bits of the explosions
+      for (let i = this.parts.length - 1; i >= 0; i--) {
+        const b = this.parts[i];
+        b.age += dt;
+        if (b.age > b.life) { this.parts.splice(i, 1); continue; }
+        if (b.g) b.vy += b.g * dt;
+        b.x += (b.vx || 0) * dt;
+        b.y += (b.vy || 0) * dt;
+        if (b.grow) b.r += b.grow * dt;
+        if (b.g && b.y > GY) { b.y = GY; b.vx *= 0.5; b.vy = 0; }
+      }
+    }
+
     update(dt) {
+      this.action(dt);
       const riding = !!this.def.ride;
       let dir = 0;
-      if (!this.talking) {
+      if (!this.talking && this.stun <= 0 && !this.isCaught) {
         if (this.keys.left || this.pointer < 0) dir -= 1;
         if (this.keys.right || this.pointer > 0) dir += 1;
         if (!dir && this.target) {
@@ -390,9 +536,12 @@
           else dir = Math.sign(d);
         }
       }
-      const run = this.keys.run || (this.target && Math.abs(this.target.x - this.x) > 120);
-      const speed = (riding ? (run ? 190 : 120) : (run ? 105 : 58)) * dir;
-      this.vx += (speed - this.vx) * Math.min(1, dt * 8);
+      const run = (this.keys.run || (this.target && Math.abs(this.target.x - this.x) > 120)) && !this.crouch;
+      let speed = (riding ? (run ? 190 : 120) : (run ? 105 : this.crouch ? 26 : 58)) * dir;
+      // in a chase the horse runs on its own (slower for a moment after a stumble)
+      if (this.chase && !this.talking && !this.isCaught) { dir = 1; speed = (this.stun > 0 ? 0.35 : this.keys.right ? 1.12 : this.keys.left ? 0.85 : 1) * (this.chase.speed || 110); }
+      if (this.stun > 0 && !this.chase) speed = 0;
+      this.vx += (speed - this.vx) * Math.min(1, dt * (this.stun > 0 && !this.chase ? 3 : 8));
       if (Math.abs(this.vx) < 1 && !dir) this.vx = 0;
       if (dir) this.facing = dir;
       this.x = VN.clamp(this.x + this.vx * dt, 14, this.W - 14);
@@ -404,14 +553,14 @@
         if (this.stepAcc > 1) { this.stepAcc = 0; this.audio.fx(riding ? 'hoof' : 'step', { volume: this.running ? 0.35 : 0.25 }); }
       }
       // the camera leads a little in the direction of travel
-      const lead = this.facing * (this.moving ? 70 : 40);
+      const lead = this.facing * (this.chase ? 120 : this.moving ? 70 : 40);
       const want = VN.clamp(this.x - LW / 2 + lead, 0, this.W - LW);
       const before = this.camX;
       this.camX += (want - this.camX) * Math.min(1, dt * 2.2);
       this.camDx = this.camX - before;
       // an automatic goal ends the walk as soon as Hervé gets there
       for (const th of this.things) if (th.kind === 'goal' && th.auto && !th.used && Math.abs(th.x - this.x) < 10) { th.used = true; this.use(th); }
-      const n = this.talking ? null : this.near();
+      const n = this.talking || this.chase ? null : this.near();
       this.showPrompt(n);
     }
 
@@ -436,12 +585,20 @@
       for (const l of behind) this.layer(c, l, cam);
       // the things along the way, and the people
       for (const th of this.things) this.thing(c, th, cam);
+      this.drawShadows(c, cam);
+      for (const p of this.patrols) this.drawPatrol(c, p, cam);
+      if (this.chase) this.drawChase(c, cam, false);
       c.save();
-      c.translate(Math.round((this.x - cam) * SS), GY * SS);
+      const ch = this.chase;
+      c.translate(Math.round((this.x - cam) * SS), Math.round((GY + (ch ? ch.jumpY : 0)) * SS));
       c.scale(SS * this.facing, SS);
-      if (this.def.ride) drawHorse(c, this.t, this.moving, this.running, this.hero);
-      else drawPerson(c, this.hero, this.t, this.moving, this.running);
+      if (this.stun > 0 && !ch) c.rotate(-0.25 * Math.sin(Math.min(1, this.stun) * Math.PI));
+      if (this.def.ride) drawHorse(c, this.t, this.moving, this.running, this.hero, ch ? !!this.keys.down : false);
+      else drawPerson(c, this.hero, this.t, this.moving, this.running, this.crouch);
       c.restore();
+      for (const cv of this.cover) this.drawCover(c, cv, cam);
+      if (this.chase) this.drawChase(c, cam, true);
+      this.drawParts(c, cam);
       if (this.fly) {
         this.fly.t += dt;
         const a = Math.max(0, 1 - this.fly.t / 1.2);
@@ -462,7 +619,119 @@
       out.imageSmoothingEnabled = false;
       const sx = this.canvas.width / this.cssW;
       out.clearRect(0, 0, this.canvas.width, this.canvas.height);
-      out.drawImage(this.buf, this.view.ox * sx, this.view.oy * sx, LW * this.view.k * sx, LH * this.view.k * sx);
+      const jolt = this.shake > 0 && !this.reduce ? this.shake * 6 : 0;
+      out.drawImage(this.buf, this.view.ox * sx + rnd(-jolt, jolt), this.view.oy * sx + rnd(-jolt, jolt), LW * this.view.k * sx, LH * this.view.k * sx);
+    }
+
+    /** Somewhere to hide: a charred wall, a heap of rubble, sandbags, an overturned cart. */
+    drawCover(c, cv, cam) {
+      const x0 = cv.x0 - cam, x1 = cv.x1 - cam;
+      if (x1 < -10 || x0 > LW + 10) return;
+      const R = (x, y, w, hh, col) => { c.fillStyle = col; c.fillRect(Math.round(x * SS), Math.round(y * SS), Math.round(w * SS), Math.round(hh * SS)); };
+      const w = x1 - x0, kind = cv.kind || 'wall';
+      if (kind === 'wall') {
+        R(x0, GY - 16, w, 16, '#2a1c1a');
+        for (let x = 0; x < w; x += 5) R(x0 + x, GY - 16 - ((x * 7) % 4), 5, 4, '#2a1c1a');
+        R(x0, GY - 16, w, 1, '#6a4a3a');
+        for (let x = 3; x < w; x += 9) R(x0 + x, GY - 10, 1, 8, '#1a1010');
+      } else if (kind === 'sandbags') {
+        for (let j = 0; j < 3; j++) for (let x = 0; x < w; x += 7) R(x0 + x + (j % 2) * 3, GY - 5 - j * 5, 6, 5, j % 2 ? '#8a7a58' : '#a8966a');
+      } else if (kind === 'cart') {
+        R(x0, GY - 14, w, 10, '#4a3020'); R(x0, GY - 14, w, 1, '#7a5234');
+        c.fillStyle = '#2a1a10'; c.beginPath(); c.arc((x0 + w * 0.3) * SS, (GY - 4) * SS, 5 * SS, 0, Math.PI * 2); c.fill();
+      } else {
+        for (let k = 0; k < w / 3; k++) R(x0 + ((k * 13) % w), GY - 4 - ((k * 7) % 12), 6, 5, k % 3 ? '#3a2a24' : '#5a4034');
+        R(x0 - 2, GY - 13, w + 4, 2, '#2a1a14');
+      }
+    }
+
+    /** A soldier with a lantern, and the light it throws along the road. */
+    drawPatrol(c, p, cam) {
+      const x = p.x - cam;
+      if (x < -120 || x > LW + 120) return;
+      const len = p.reach || 92, lx = x + p.dir * 5, ly = GY - 12;
+      c.save();
+      c.globalCompositeOperation = 'lighter';
+      const g = c.createRadialGradient(lx * SS, ly * SS, 2, lx * SS, ly * SS, len * SS);
+      g.addColorStop(0, 'rgba(255,214,130,0.42)');
+      g.addColorStop(0.6, 'rgba(255,190,100,0.16)');
+      g.addColorStop(1, 'rgba(255,170,80,0)');
+      c.fillStyle = g;
+      c.beginPath();
+      c.moveTo(lx * SS, ly * SS);
+      c.lineTo((lx + p.dir * len) * SS, (GY - 38) * SS);
+      c.lineTo((lx + p.dir * len) * SS, (GY + 5) * SS);
+      c.closePath();
+      c.fill();
+      c.restore();
+      c.save();
+      c.translate(Math.round(x * SS), GY * SS);
+      c.scale(SS * p.dir, SS);
+      drawPerson(c, p.look, this.t, p.wait <= 0, false);
+      c.restore();
+    }
+
+    /** The chase: what lies ahead on the road, and the riders behind. */
+    drawChase(c, cam, front) {
+      const ch = this.chase;
+      const R = (x, y, w, hh, col) => { c.fillStyle = col; c.fillRect(Math.round(x * SS), Math.round(y * SS), Math.round(w * SS), Math.round(hh * SS)); };
+      if (!front) {
+        for (let i = 0; i < 2; i++) {
+          const x = this.x - ch.gap - i * 24 - cam;
+          if (x < -30 || x > LW + 30) continue;
+          c.save();
+          c.translate(Math.round(x * SS), GY * SS);
+          c.scale(SS, SS);
+          drawHorse(c, this.t + i * 0.37, true, true, LOOKS.bandit);
+          c.restore();
+        }
+        return;
+      }
+      for (const o of ch.obstacles) {
+        const x = o.x - cam;
+        if (x < -20 || x > LW + 20) continue;
+        if (o.kind === 'log') { R(x - 9, GY - 6, 18, 6, '#4a3020'); R(x - 9, GY - 6, 18, 1, '#7a5234'); R(x + 7, GY - 6, 3, 6, '#c8a878'); }
+        else if (o.kind === 'rock') { R(x - 7, GY - 7, 14, 7, '#5a5660'); R(x - 5, GY - 9, 9, 3, '#7a7680'); R(x - 5, GY - 9, 4, 1, '#9a96a0'); }
+        else {
+          R(x - 1, GY - 70, 3, 36, '#2a1e14');
+          R(x - 12, GY - 38, 26, 3, '#2a1e14');
+          for (let k = 0; k < 6; k++) R(x - 12 + k * 5, GY - 42 + (k % 2) * 2, 5, 4, k % 2 ? '#3a5a2a' : '#4a6a34');
+        }
+      }
+    }
+
+    /** Where a shell is about to land: a shadow that grows, then a streak from the sky. */
+    drawShadows(c, cam) {
+      const sh = this.shelling;
+      if (!sh) return;
+      for (const s of sh.list) {
+        const x = s.x - cam, k = Math.min(1, s.t / 1.3);
+        c.globalAlpha = 0.2 + k * 0.4;
+        c.fillStyle = '#100808';
+        c.beginPath();
+        c.ellipse(x * SS, GY * SS, (4 + k * 14) * SS, (1 + k * 2.5) * SS, 0, 0, Math.PI * 2);
+        c.fill();
+        if (s.t > 1.0) { c.globalAlpha = 0.9; c.fillStyle = '#1a1414'; const y = GY - (1.3 - s.t) * 400; c.fillRect(Math.round(x * SS), Math.round(y * SS), 2 * SS, 3 * SS); }
+        c.globalAlpha = 1;
+      }
+    }
+
+    drawParts(c, cam) {
+      for (let z = 0; z < 3; z++) {
+        for (const b of this.parts) {
+          if (b.z !== z) continue;
+          const k = 1 - b.age / b.life;
+          c.globalAlpha = (b.a == null ? 1 : b.a) * k;
+          c.fillStyle = b.col;
+          const x = b.x - cam;
+          if (b.r) {
+            const R = Math.max(1, b.r), n = Math.floor(R);
+            for (let dy = -n; dy <= n; dy++) { const w = Math.floor(Math.sqrt(R * R - dy * dy)); c.fillRect(Math.round((x - w) * SS), Math.round((b.y + dy) * SS), (w * 2 + 1) * SS, SS); }
+            if (b.hi && R > 3) { c.fillStyle = b.hi; const r2 = R * 0.5, m = Math.floor(r2); for (let dy = -m; dy <= m; dy++) { const w = Math.floor(Math.sqrt(r2 * r2 - dy * dy)); c.fillRect(Math.round((x - R * 0.3 - w) * SS), Math.round((b.y - R * 0.3 + dy) * SS), (w * 2 + 1) * SS, SS); } }
+          } else c.fillRect(Math.round(x * SS), Math.round(b.y * SS), (b.s || 1) * SS, (b.s || 1) * SS);
+        }
+      }
+      c.globalAlpha = 1;
     }
 
     layer(c, l, cam) {

@@ -396,6 +396,14 @@ Any thing can `set: { variable: value }` when it is used, so the script can reac
 play a `sound`. The pictures are painted by `node tools/paint-walks.js` from `tools/paint/walks.js`
 into `assets/walks/<area>/`.
 
+Some walks have action (see the top of `story/walks.js`): **cover** to crouch behind with ↓;
+**patrols** with lanterns, whose light fills a meter if it finds Hervé standing (or they hear him
+running), until he is caught; a **chase** on horseback, jumping logs and rocks (↑) and ducking
+branches (↓) while riders close in after every stumble; and **shelling**, where a shadow grows
+where a shell will land and Hervé is knocked down unless he is crouched behind cover. Nothing ends
+the game: `walk ruins into how` sets `how` to caught, escaped, arrived or skipped, and the story
+goes on from there. Action is set to one difficulty for everyone.
+
 Walks never replace the rest: choices, cutscenes and minigames happen around them as before. The
 game menu (Esc) pauses a walk, saving during one saves just before it, and a walk is passed over
 while skipping. Every walk has a Skip button for players who would rather read on.
