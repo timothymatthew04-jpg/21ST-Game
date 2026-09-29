@@ -308,6 +308,7 @@ label start
   # found_hairpin is set by the walk through the burned village (story/walks.js)
   set found_hairpin = false
   set wounded = 0
+  set truth_seen = ""
   scene black with none
   # the opening plays on its own, straight into the story (click to hurry it, Esc to skip)
   play music japan fadein 3
@@ -1002,6 +1003,7 @@ label chapter8
   show blanche neutral
   introduce blanche
   "Madame Blanche kept a fine house in the city and asked very few questions. She took the note and studied it carefully."
+  clue cups 0.74 0.6 "Two cups on the table" "Madame Blanche's tray held two cups, and one was still warm. Someone had left just before I came."
   cutscene the_note
   herve "What does it say?"
   "Madame Blanche looked at me."
@@ -1054,6 +1056,7 @@ label chapter9
   "I spent my days with Hélène. We walked in the garden in the evenings, and the trees were a little taller every time. But my thoughts kept drifting toward Japan."
   show helene soft
   helene soft "You're quiet since you came back. Quieter than the first time."
+  clue paper 0.37 0.6 "Rice paper in her sewing basket" "Thin sheets of it, the kind the eggs came wrapped in from Japan. I thought she was cutting patterns."
   if not has("handkerchief")
     helene neutral "The handkerchief I gave you. I haven't seen it since you came back."
     herve "I must have lost it on the road."
@@ -1144,6 +1147,7 @@ label chapter10
   "I decided to return to Japan."
   "Before I left, Hélène watched me prepare."
   show helene neutral
+  clue ink 0.5 0.55 "Ink on her fingers" "Black ink, not the blue she kept the accounts in. When she saw me look, she folded her hands."
   helene neutral "Another journey?"
   herve "Yes."
   helene sad "And how long will you be gone?"
@@ -1502,12 +1506,14 @@ label chapter15
   play music her_theme fadein 3
   play sound paper
   "One day, I received another letter: a thick envelope with Japanese stamps, seven sheets covered in black ink."
+  clue postmark 0.5 0.52 "No postmark" "Japanese stamps, and not a single postmark. It had never been through a post office."
   gain item letter
   "I immediately brought it to Madame Blanche."
   scene blanche_salon with fade
   show blanche neutral
   herve "Please translate it."
   "Madame Blanche read silently."
+  clue primer 0.2 0.58 "A primer with a pink ribbon" "On her side table, a French–Japanese primer, much used. A pink ribbon marked a page halfway through."
   show blanche serious
   "Her expression changed."
   herve "What does it say?"
@@ -1523,6 +1529,7 @@ label chapter15
   hide blanche
   cutscene final_letter
   cg the_letter with dissolve
+  clue lavender 0.55 0.42 "Lavender on the paper" "The pages smelled faintly of lavender. Hélène grew it along the garden wall."
   window show
   if persistent.knows_truth
     woman "You crossed the whole world to look at me. I know what that journey costs. I have {color=#c2476a}waited at a window{/color} for every mile of it."
@@ -1625,6 +1632,7 @@ label chapter16
   filter faded
   show helene tired
   "I stayed beside her."
+  clue ticket 0.8 0.56 "A coach ticket to the city" "Folded small in her prayer book: a coach ticket to the city, from the spring before the last letter came. She had never said she'd gone."
   "The town doctor shook his head. There was a physician in Nîmes, people said, who had saved patients the town had given up on. He was not cheap."
   menu time 12
     - "Send for him, whatever it costs." tone=tender cost=francs:150 [helene_trust += 2]
@@ -1673,6 +1681,10 @@ label chapter17
   "Japanese characters. The same few lines, copied again and again, in a careful, unsteady hand that was learning as it went."
   play sound heartbeat
   "I knew those characters. I had carried them across the world."
+  clueboard into truth_seen
+  if truth_seen == "all"
+    inner "I did not need to read them. I read them anyway."
+  endif
   minigame letter into letter_result
   play music revelation fadein 2
   cutscene truth
@@ -1755,6 +1767,18 @@ label ending
   herve "I spent so many years looking for something I couldn't have."
   "I placed the letter beside the grave."
   herve "And you were here the whole time."
+  if truth_seen == "all"
+    # the scene only a player who saw it coming gets: every clue was in front of him
+    scene helene_garden with flash
+    play sound swell
+    show helene soft
+    camera push
+    "I remembered her at the garden gate, the summer before the last letter came. Ink on her fingers. Lavender on her sleeves. A coach ticket she never mentioned."
+    helene soft "You're home."
+    "Every piece of it had been in front of me. At the end, at least, I had let myself see."
+    hide helene with slow
+    scene cemetery with slow
+  endif
   play sound wind_gust volume 0.6
   "The wind moved through the trees."
   if final_choice == "tell"

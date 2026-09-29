@@ -527,6 +527,18 @@
           emit(L, { op: 'split', a: tk[1].v, b: tk[2].v, ida: words[0] || null, idb: words[1] || null, la: caps[0] || null, lb: caps[1] || null });
           return;
         }
+        case 'clue':
+          // clue ink 0.52 0.62 "Ink on her fingers" "What Hervé notices" — a glint in the scene; clicking it notes a clue
+          need(2, 'clue <id> <x> <y> "What it is" ["What Hervé notices"] | clue off');
+          if (tk[1].v === 'off') { emit(L, { op: 'clue', off: true }); return; }
+          need(5, 'clue <id> <x> <y> "What it is" ["What Hervé notices"]');
+          emit(L, { op: 'clue', id: tk[1].v, x: parseFloat(tk[2].v), y: parseFloat(tk[3].v), label: str(tk[4], 'clue label'), detail: tk[5] ? tk[5].v : '' });
+          return;
+        case 'clueboard':
+          // clueboard into truth_seen — what has Hervé not wanted to see? (story/clues.js); all, some, none
+          need(3, 'clueboard into <variable>');
+          emit(L, { op: 'clueboard', into: tk[2].v });
+          return;
         case 'eyes':
           // eyes woman [sound] — a moment's cut-in on a character's eyes
           need(2, 'eyes <character> [sound]');

@@ -674,6 +674,7 @@
       // a new place: the camera goes back to the whole view, and a split screen closes
       sc.cam = null;
       sc.split = null;
+      sc.clue = null;
       this.stage.setSpeaker(null);
       this.ui.textbox.hideBox();
       this.ui.textbox.hideCentered();
@@ -782,6 +783,37 @@
       const sc = this.state.scene;
       sc.split = ins.off ? null : { a: ins.a, b: ins.b, ida: ins.ida, idb: ins.idb, la: ins.la, lb: ins.lb };
       this.stage.applySplit(sc, this.isSkipping());
+      this.state.pc++;
+    }
+
+    /** A glint in the scene: something to notice, if the player looks. It stays until the next scene. */
+    op_clue(ins) {
+      const sc = this.state.scene;
+      const found = (this.state.clues || []).some((c) => c.id === ins.id);
+      sc.clue = ins.off || found ? null : { id: ins.id, x: ins.x, y: ins.y, label: ins.label, detail: ins.detail };
+      this.stage.applyClue(sc, (clue) => this.noticeClue(clue));
+      this.state.pc++;
+    }
+
+    noticeClue(clue) {
+      const list = this.state.clues || (this.state.clues = []);
+      if (list.some((c) => c.id === clue.id)) return;
+      list.push({ id: clue.id, label: clue.label, detail: clue.detail });
+      (this.persistent.cluesEver || (this.persistent.cluesEver = {}))[clue.id] = 1;
+      this.savePersistent();
+      this.state.scene.clue = null;
+      this.stage.applyClue(this.state.scene);
+      this.ui.clueNotice(clue);
+    }
+
+    /** What has Hervé not wanted to see? Three questions, and the clues he found. */
+    async op_clueboard(ins) {
+      this.checkpoint();
+      this.setSkip(false);
+      this.ui.textbox.hideBox();
+      this.stage.setSpeaker(null);
+      const res = await this.guard(this.ui.clueBoard(this.state.clues || [], globalThis.VN_CLUEBOARD || { questions: [] }));
+      this.setVar(ins.into, res);
       this.state.pc++;
     }
 

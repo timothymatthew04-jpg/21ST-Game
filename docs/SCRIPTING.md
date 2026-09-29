@@ -343,6 +343,21 @@ is kept in saves and rollback, and reduced motion turns the camera moves off.
 The **flowchart** also lets the player play any chapter they have reached again from its
 beginning, as it was the last time the story arrived there.
 
+## Clues
+
+```text
+clue ink 0.5 0.55 "Ink on her fingers" "Black ink, not the blue she kept the accounts in."
+clueboard into truth_seen
+```
+
+`clue` puts a faint glint in the scene at x,y (fractions of the screen; keep y above 0.62, where
+the text box begins). It stays through the lines that follow until the next scene; the player may
+click it or not. A clue found shows a card with what it was and what Hervé made of it, and is
+remembered for the rest of the playthrough. `clueboard` opens the board in `story/clues.js`: the
+clues found on one side, three questions on the other; the variable is set to all, some or none.
+In SILK the seven clues point to who really wrote the last letter, and a player who answers all
+three before reading it gets a scene of their own in the Home ending.
+
 ## Cutscenes
 
 `cutscene name` plays one of the cutscenes defined in `story/cutscenes.js`. A cutscene is a list of

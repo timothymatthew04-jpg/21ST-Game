@@ -460,6 +460,7 @@
 
       this.applyLook(scene, instant);
       this.applySplit(scene, instant);
+      this.applyClue(scene);
       return longest;
     }
 
@@ -509,6 +510,23 @@
       this.content.style.transitionDuration = instant ? '0ms' : `0.8s, ${move}, ${move}`;
       this.content.style.transformOrigin = origin;
       this.content.style.transform = scale === 1 ? 'none' : `scale(${scale})`;
+    }
+
+    /** A glint where there is something to notice (scene.clue); clicking it calls onFind. */
+    applyClue(scene, onFind) {
+      if (onFind) this.onClue = onFind;
+      const cl = scene.clue || null;
+      const key = cl ? cl.id : null;
+      if (key === this.clueKey) return;
+      this.clueKey = key;
+      if (this.clueEl) { const old = this.clueEl; old.classList.add('found'); setTimeout(() => old.remove(), 700); this.clueEl = null; }
+      if (!cl) return;
+      const el = h('button.clue-glint', { type: 'button', 'aria-label': 'Look closer', title: 'Look closer', style: { left: `${cl.x * 100}%`, top: `${cl.y * 100}%` } }, h('i'));
+      const find = (e) => { e.stopPropagation(); e.preventDefault(); if (this.onClue) this.onClue(cl); };
+      el.addEventListener('click', find);
+      el.addEventListener('pointerdown', (e) => e.stopPropagation());
+      this.scene.insertBefore(el, this.tintEl);
+      this.clueEl = el;
     }
 
     /** Two places side by side, split on a slant: scene.split = { a, b, ida, idb, la, lb }. */

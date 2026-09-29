@@ -734,6 +734,66 @@
       setTimeout(() => card.remove(), 3900);
     }
 
+    /** Something noticed: a card with what it was, and what Hervé made of it. */
+    clueNotice(clue) {
+      const card = h('div.item-notice.clue-notice',
+        h('span.in-icon.clue-icon', '察'),
+        h('span.in-text', h('small', 'Noticed'), h('b', clue.label), clue.detail ? h('em', clue.detail) : null));
+      this.noticeEl.append(card);
+      this.audio.fx('sparkle', { volume: 0.5 });
+      setTimeout(() => card.classList.add('out'), 6500);
+      setTimeout(() => card.remove(), 7200);
+    }
+
+    /**
+     * The clue board: what Hervé noticed on one side, three questions on the other. Resolves
+     * "all" when every answer is right, "some", or "none".
+     */
+    clueBoard(found, board) {
+      return new Promise((resolve) => {
+        const qs = board.questions || [];
+        const picks = qs.map(() => -1);
+        const cards = found.length
+          ? found.map((c) => h('div.cb-clue', h('i', '察'), h('div', h('b', c.label), c.detail ? h('span', c.detail) : null)))
+          : [h('p.cb-none', 'I had noticed nothing. Or I had not let myself.')];
+        const confirm = this.button('This is what I see', () => finish(), '.cb-confirm');
+        confirm.disabled = true;
+        const qEls = qs.map((q, i) => h('div.cb-q',
+          h('div.cb-q-text', h('span.cb-num', String(i + 1)), q.q),
+          h('div.cb-opts', q.options.map((o, j) => {
+            const b = this.button(o, () => {
+              picks[i] = j;
+              for (const x of b.parentNode.children) x.classList.toggle('on', x === b);
+              confirm.disabled = picks.includes(-1);
+            }, '.cb-opt');
+            return b;
+          }))));
+        const result = h('div.cb-result');
+        let entry;
+        const el = h('div.overlay.clueboard',
+          h('div.cb-head', h('span.cb-seal', '真'), h('div', h('div.cb-title', board.title || 'What had I not wanted to see?'), board.intro ? h('div.cb-intro', board.intro) : null)),
+          h('div.cb-body', h('section.cb-found', h('h3', 'What I noticed'), ...cards), h('section.cb-questions', ...qEls, result, confirm)));
+        const finish = () => {
+          if (el.classList.contains('answered')) return;
+          el.classList.add('answered');
+          let right = 0;
+          qEls.forEach((qe, i) => {
+            const ok = picks[i] === qs[i].answer;
+            if (ok) right++;
+            qe.classList.add(ok ? 'right' : 'wrong');
+            [...qe.querySelectorAll('.cb-opt')].forEach((b, j) => { b.disabled = true; if (j === qs[i].answer) b.classList.add('answer'); });
+          });
+          const how = right === qs.length ? 'all' : right ? 'some' : 'none';
+          this.audio.fx(how === 'all' ? 'swell' : 'paper', { volume: 0.6 });
+          result.textContent = (board.results || {})[how] || '';
+          result.classList.add('on', how);
+          confirm.replaceWith(this.button('Go on', () => { this.close(entry); resolve(how); }, '.cb-confirm'));
+        };
+        entry = this.open(el, { onKey: () => false, onBack: () => {} });
+        this.audio.fx('page', { volume: 0.5 });
+      });
+    }
+
     cancelChoices() {
       if (!this.choice) return;
       if (this.choice.cancel) this.choice.cancel();
