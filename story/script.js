@@ -32,6 +32,11 @@ splash strand
 # Every choice waits this many seconds; if the player takes longer, Hervé hesitates
 # (a menu's "- hesitate" option says what happens then). "menu time 8" changes one menu.
 choicetime 14
+# Where Hervé's heart is heading, worked out at every chapter: toward Hélène ("devoted"),
+# pulled east ("lost"), or in between ("torn"). The chapter card and the text box take on
+# that mood, and scenes can ask:  if route() == "lost"
+routescore helene_trust * 2 - obsession * 0.6 - danger * 0.4
+routes -4 3
 # The backgrounds are detailed pixel art at high resolution, so everything is scaled smoothly.
 artstyle smooth
 credits "Adapted from Silk by Alessandro Baricco"

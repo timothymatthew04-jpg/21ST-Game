@@ -136,8 +136,8 @@
     </svg>`, 'div.jc-blot');
   }
 
-  /** Gold sparks: a few always drifting up, and a burst on demand. */
-  function sparkField(cv) {
+  /** Gold sparks: a few always drifting up, and a burst on demand (or petals falling, or ash). */
+  function sparkField(cv, kind = 'sparks') {
     const dpr = Math.min(1.5, window.devicePixelRatio || 1);
     const rect = cv.getBoundingClientRect();
     const W = (cv.width = Math.max(1, Math.round(rect.width * dpr)));
@@ -148,12 +148,19 @@
     dot.width = dot.height = 32;
     const d = dot.getContext('2d');
     const g = d.createRadialGradient(16, 16, 0, 16, 16, 16);
-    g.addColorStop(0, 'rgba(255,250,225,1)');
-    g.addColorStop(0.25, 'rgba(255,214,130,0.9)');
-    g.addColorStop(0.6, 'rgba(255,140,40,0.25)');
-    g.addColorStop(1, 'rgba(255,120,30,0)');
+    const stops = {
+      sparks: ['rgba(255,250,225,1)', 'rgba(255,214,130,0.9)', 'rgba(255,140,40,0.25)', 'rgba(255,120,30,0)'],
+      petals: ['rgba(255,244,248,1)', 'rgba(255,176,204,0.9)', 'rgba(240,110,160,0.25)', 'rgba(240,110,160,0)'],
+      ash: ['rgba(255,190,160,0.9)', 'rgba(200,60,50,0.7)', 'rgba(90,20,20,0.3)', 'rgba(60,10,10,0)'],
+    }[kind];
+    g.addColorStop(0, stops[0]);
+    g.addColorStop(0.25, stops[1]);
+    g.addColorStop(0.6, stops[2]);
+    g.addColorStop(1, stops[3]);
     d.fillStyle = g;
+    if (kind === 'petals') { d.translate(16, 16); d.scale(1, 0.55); d.translate(-16, -16); }
     d.fillRect(0, 0, 32, 32);
+    const fall = kind !== 'sparks'; // petals and ash drift down instead of rising
     const parts = [];
     let last = 0;
     let acc = 0;
@@ -171,7 +178,8 @@
         acc += dt * 26;
         while (acc > 1) {
           acc--;
-          add(Math.random() * W, H * (0.55 + Math.random() * 0.5), (Math.random() - 0.5) * 20 * unit, -(30 + Math.random() * 60) * unit, 2.5 + Math.random() * 2.5, (3 + Math.random() * 6) * unit);
+          if (fall) add(Math.random() * W * 1.1 - W * 0.05, -10 * unit, (kind === 'petals' ? 15 : -8 + Math.random() * 16) * unit, (25 + Math.random() * 45) * unit, 4 + Math.random() * 3, (kind === 'petals' ? 5 + Math.random() * 6 : 3 + Math.random() * 5) * unit);
+          else add(Math.random() * W, H * (0.55 + Math.random() * 0.5), (Math.random() - 0.5) * 20 * unit, -(30 + Math.random() * 60) * unit, 2.5 + Math.random() * 2.5, (3 + Math.random() * 6) * unit);
         }
         c.clearRect(0, 0, W, H);
         c.globalCompositeOperation = 'lighter';
@@ -182,7 +190,7 @@
           // burst sparks slow down quickly; then, like the drifting ones, they float upward
           const drag = p.burst ? Math.pow(0.08, dt) : 1;
           p.vx *= drag;
-          p.vy = p.vy * drag - (p.burst ? 40 : 6) * unit * dt;
+          p.vy = p.vy * drag - (p.burst ? 40 : fall ? -2 : 6) * unit * dt;
           p.x += p.vx * dt + Math.sin(t / 700 + p.tw) * 10 * unit * dt;
           p.y += p.vy * dt;
           const k = p.age / p.life;
@@ -238,6 +246,11 @@
 
     setInGame(on) {
       this.gameLayer.classList.toggle('inactive', !on);
+    }
+
+    /** The road the player is on colours the frame of the story a little (and the chapter cards a lot). */
+    setRoute(route) {
+      if (route) this.gameLayer.dataset.route = route; else delete this.gameLayer.dataset.route;
     }
 
     setHidden(on) {
@@ -750,7 +763,7 @@
      * as big brushed kanji, the name glowing over a vermilion brush stroke, and a red
      * seal stamped at the end in a burst of gold sparks.
      */
-    chapterCard(title, subtitle, { fast, seal, kanji } = {}) {
+    chapterCard(title, subtitle, { fast, seal, kanji, mood = 'torn', turned = null } = {}) {
       return new Promise((resolve) => {
         const reduce = this.settings.reduceMotion;
         const eyebrow = spellChapter(title);
@@ -769,9 +782,17 @@
               h('span.jc-shine', { 'aria-hidden': 'true' }, sub.toUpperCase())),
             sealEl));
         const sparks = h('canvas.jc-sparks');
-        const el = h(`div.overlay.card.jcard${fast ? '.fast' : ''}${reduce ? '.still' : ''}`,
+        // where the heart has turned since the last chapter, said once, softly
+        const TURNS = {
+          devoted: 'Your heart is turning toward home.',
+          torn: 'You stand between two shores.',
+          lost: 'Something in you is drifting east.',
+        };
+        const el = h(`div.overlay.card.jcard.mood-${mood}${fast ? '.fast' : ''}${reduce ? '.still' : ''}`,
           h('div.jc-wash'), inkBlot(), h('div.jc-rays'), h('div.jc-grain'), sparks,
           h('div.jc-group', main, kanjiCol),
+          turned && TURNS[mood] ? h('div.jc-turn', TURNS[mood]) : null,
+          h('div.jc-crack'),
           h('div.jc-flash'));
         let entry;
         let raf = 0;
@@ -799,10 +820,15 @@
         this.audio.fx('ink', { volume: 0.9, delay: 0.3 });
         this.audio.fx('ink', { volume: 0.7, delay: 0.6 });
         this.audio.fx('stamp', { delay: 1.95 });
-        this.audio.fx('sparkle', { volume: 0.9, delay: 2.0 });
+        if (mood === 'lost') {
+          this.audio.fx('heartbeat', { volume: 0.7, delay: 0.9 });
+          this.audio.fx('gong', { volume: 0.45, delay: 1.95 });
+        } else if (mood === 'devoted') {
+          this.audio.fx('chime', { volume: 0.7, delay: 2.0 });
+        } else this.audio.fx('sparkle', { volume: 0.9, delay: 2.0 });
         if (reduce) return;
-        // gold sparks drifting up, and a burst when the seal lands
-        const field = sparkField(sparks);
+        // gold sparks drifting up (petals on a kind road, ash on a dark one), and a burst when the seal lands
+        const field = sparkField(sparks, mood === 'devoted' ? 'petals' : mood === 'lost' ? 'ash' : 'sparks');
         const loop = (t) => { field.step(t); raf = requestAnimationFrame(loop); };
         raf = requestAnimationFrame(loop);
         stampTimer = setTimeout(() => {

@@ -377,6 +377,16 @@
           else throw new Error(`Usage: ${w0.v} item name | ${w0.v} francs amount`);
           return;
         }
+        case 'routescore':
+          // routescore helene_trust * 2 - obsession * 0.6 — where Hervé's heart is heading
+          need(2, 'routescore expression');
+          story.routeScore = L.text.replace(/^routescore\s+/, '');
+          return;
+        case 'routes':
+          // routes -4 3 — at or below the first number the route is "lost", at or above the second "devoted"
+          need(3, 'routes lostAtOrBelow devotedAtOrAbove');
+          story.routeBounds = [parseFloat(tk[1].v), parseFloat(tk[2].v)];
+          return;
         case 'choicetime':
           // choicetime 14 — how many seconds every choice waits before Hervé hesitates (0 = no timer)
           need(2, 'choicetime seconds');

@@ -45,6 +45,8 @@
     top: (e, a) => a.reduce((best, n) => ((e.getVar(n) || 0) > (e.getVar(best) || 0) ? n : best), a[0]),
     visited: (e, a) => (e.state.visited[a[0]] || 0),
     seen_ending: (e, a) => !!e.persistent.endings[a[0]],
+    /** route() → "devoted", "torn" or "lost": where Hervé's heart is heading */
+    route: (e) => e.route(),
     /** has("watch") → whether Hervé carries that keepsake */
     has: (e, a) => e.hasItem(a[0]),
     endings: (e) => Object.keys(e.persistent.endings).length,
@@ -107,6 +109,24 @@
         choices: [], // what the player chose and how it was felt, for the ending recap
         items: [], // the keepsakes Hervé carries (money is the variable "francs")
       };
+    }
+
+    // ---- the route: where the player's choices are taking Hervé ------------------------
+    route() {
+      if (!this.story.routeScore) return 'torn';
+      let score = 0;
+      try { score = Number(this.evaluate(this.story.routeScore)) || 0; } catch (e) { score = 0; }
+      const [lost, devoted] = this.story.routeBounds || [-4, 3];
+      return score >= devoted ? 'devoted' : score <= lost ? 'lost' : 'torn';
+    }
+
+    /** Keep the route in a variable (for the script) and on the stage (for the look). */
+    updateRoute() {
+      const r = this.route();
+      const before = this.state.vars.route;
+      this.state.vars.route = r;
+      this.ui.setRoute(r);
+      return { route: r, changed: before && before !== r ? before : null };
     }
 
     // ---- keepsakes and money --------------------------------------------------------
@@ -343,6 +363,7 @@
       this.ui.setHidden(false);
       this.stage.setSpeaker(null);
       this.stage.reset(state.scene);
+      this.ui.setRoute((state.vars && state.vars.route) || null);
       this.audio.sync(state);
       this.instantNext = instant;
       this.start();
@@ -731,7 +752,9 @@
       this.ui.textbox.hideBox();
       this.ui.textbox.hideCentered();
       this.autosavePending = true;
-      await this.guard(this.ui.chapterCard(this.interp(ins.title), this.interp(ins.subtitle), { fast: this.isSkipping(), seal: ins.seal, kanji: ins.kanji }));
+      // the card wears the mood of the road the player is on
+      const { route, changed } = this.updateRoute();
+      await this.guard(this.ui.chapterCard(this.interp(ins.title), this.interp(ins.subtitle), { fast: this.isSkipping(), seal: ins.seal, kanji: ins.kanji, mood: route, turned: changed }));
       this.state.pc++;
     }
 

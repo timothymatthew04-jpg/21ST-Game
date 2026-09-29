@@ -2364,3 +2364,79 @@ input[type='range']::-moz-range-thumb { width: 18px; height: 24px; background: v
 .strand-flash { position: absolute; inset: 0; pointer-events: none; opacity: 0; background: radial-gradient(ellipse at 50% 50%, rgba(255, 244, 214, 0.95), rgba(255, 190, 110, 0.5) 45%, rgba(255, 150, 60, 0) 80%); }
 .strand-splash.bursting .strand-flash { animation: strand-flash 1.6s 0.35s ease-out both; }
 @keyframes strand-flash { 0% { opacity: 0; } 30% { opacity: 1; } 100% { opacity: 0.2; } }
+
+/* ---------------------------------------------------------------- the route's mood */
+/* On a kind road the chapter card is dawn: rose and gold, petals falling.
+   On a dark one it is dusk and embers: crimson and black, a crack, ash drifting down. */
+.jcard.mood-devoted .jc-wash {
+  background:
+    radial-gradient(ellipse 45% 36% at 28% 38%, rgba(160, 70, 90, 0.45), transparent 70%),
+    radial-gradient(ellipse 40% 30% at 74% 66%, rgba(190, 120, 60, 0.4), transparent 70%),
+    radial-gradient(ellipse 30% 22% at 62% 24%, rgba(255, 190, 150, 0.2), transparent 70%),
+    radial-gradient(ellipse 85% 70% at 50% 50%, #2a1418 0%, #0c0607 85%);
+}
+.jcard.mood-devoted .jc-rays { background: repeating-conic-gradient(from 0deg, rgba(255, 190, 200, 0) 0deg, rgba(255, 200, 190, 0.08) 3.5deg, rgba(255, 190, 200, 0) 7deg, transparent 15deg); }
+.jcard.mood-devoted .jc-kanji { color: #fff4f0; text-shadow: 0 0 10px rgba(255, 200, 200, 0.9), 0 0 34px rgba(255, 140, 150, 0.55), 0 4px 6px rgba(20, 8, 0, 0.9); }
+.jcard.mood-devoted .jc-sub { text-shadow: 0 0 8px rgba(255, 226, 220, 0.95), 0 0 24px rgba(255, 150, 170, 0.7), 0 0 50px rgba(255, 120, 140, 0.35), 0 3px 4px rgba(40, 6, 0, 0.9); }
+.jcard.mood-devoted .jc-brush { filter: hue-rotate(-12deg) saturate(0.8) brightness(1.18); }
+.jcard.mood-devoted .jc-seal-face { background: radial-gradient(circle at 35% 30%, #f07a86, #c2425a 70%); box-shadow: inset 0 0 0 4px #c2425a, inset 0 0 0 6px #ffe4e8, 0 6px 18px rgba(0, 0, 0, 0.5), 0 0 30px rgba(255, 120, 150, 0.45); }
+
+.jcard.mood-lost .jc-wash {
+  background:
+    radial-gradient(ellipse 45% 36% at 28% 38%, rgba(90, 10, 16, 0.55), transparent 70%),
+    radial-gradient(ellipse 40% 30% at 74% 66%, rgba(60, 6, 12, 0.5), transparent 70%),
+    radial-gradient(ellipse 85% 70% at 50% 50%, #140406 0%, #030101 85%);
+  animation-duration: 6s;
+}
+.jcard.mood-lost .jc-rays { background: repeating-conic-gradient(from 0deg, rgba(200, 30, 30, 0) 0deg, rgba(200, 40, 40, 0.07) 2deg, rgba(200, 30, 30, 0) 5deg, transparent 17deg); animation-duration: 1.4s, 90s; }
+.jcard.mood-lost .jc-kanji { color: #ffd6d0; text-shadow: 0 0 10px rgba(255, 60, 60, 0.85), 0 0 34px rgba(160, 0, 20, 0.7), 0 4px 6px rgba(0, 0, 0, 0.95); }
+.jcard.mood-lost .jc-kanji::before { background: linear-gradient(transparent, rgba(200, 40, 40, 0.85) 20%, rgba(200, 40, 40, 0.85) 80%, transparent); box-shadow: 0 0 10px rgba(255, 40, 40, 0.8); }
+.jcard.mood-lost .jc-eyebrow, .jcard.mood-lost .jc-sub { color: #ffe8e4; text-shadow: 0 0 8px rgba(255, 90, 80, 0.85), 0 0 24px rgba(180, 20, 30, 0.7), 0 3px 4px rgba(0, 0, 0, 0.95); }
+.jcard.mood-lost .jc-eyebrow::before { background: #ff5a4a; box-shadow: 0 0 8px rgba(255, 60, 40, 0.9); }
+.jcard.mood-lost .jc-brush { filter: brightness(0.5) saturate(1.3) contrast(1.3); }
+.jcard.mood-lost .jc-sub-text { animation: jc-glitch 3.2s 2.4s steps(1) infinite; }
+@keyframes jc-glitch { 0%, 92%, 100% { transform: none; } 93% { transform: translate(3px, -1px); filter: blur(0.5px); } 95% { transform: translate(-2px, 1px); } 97% { transform: translate(1px, 0); } }
+.jcard.mood-lost .jc-seal-face { background: radial-gradient(circle at 35% 30%, #3a0c10, #140306 70%); color: #ff6a5a; box-shadow: inset 0 0 0 4px #140306, inset 0 0 0 6px #8a1a1a, 0 6px 18px rgba(0, 0, 0, 0.7), 0 0 30px rgba(200, 30, 30, 0.5); }
+.jcard.mood-lost .jc-flash { background: radial-gradient(ellipse 40% 35% at 50% 50%, rgba(255, 120, 100, 0.35), rgba(160, 20, 20, 0.15) 50%, transparent 75%); }
+/* the crack: a hairline split across the dark card, opening when the seal lands */
+.jc-crack { display: none; }
+.jcard.mood-lost .jc-crack {
+  display: block;
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  pointer-events: none;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1280 720' preserveAspectRatio='none'%3E%3Cpath d='M0 470 L160 452 L230 470 L360 440 L420 455 L560 430 L610 444 L760 418 L820 436 L980 410 L1040 428 L1280 400' fill='none' stroke='%23ff4a3a' stroke-width='1.6' opacity='0.8'/%3E%3Cpath d='M360 440 L380 480 L372 520 M760 418 L748 380 L770 350 M980 410 L1000 450' fill='none' stroke='%23ff4a3a' stroke-width='1' opacity='0.6'/%3E%3C/svg%3E") center / 100% 100% no-repeat;
+  filter: drop-shadow(0 0 4px rgba(255, 50, 30, 0.9));
+  clip-path: inset(0 100% 0 0);
+  animation: jc-crack 0.5s 2s cubic-bezier(0.6, 0, 0.3, 1) forwards;
+}
+@keyframes jc-crack { to { clip-path: inset(0 0 0 0); } }
+.jc-turn {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 13%;
+  text-align: center;
+  font-family: 'Zen Old Mincho', serif;
+  font-weight: 600;
+  font-size: 22px;
+  font-style: italic;
+  letter-spacing: 0.04em;
+  color: #fff0e0;
+  text-shadow: 0 0 10px rgba(255, 190, 120, 0.6), 0 2px 3px rgba(0, 0, 0, 0.9);
+  animation: fade-up 1.2s 2.6s ease both;
+}
+.jcard.mood-devoted .jc-turn { color: #ffe8ec; text-shadow: 0 0 12px rgba(255, 150, 170, 0.8), 0 2px 3px rgba(0, 0, 0, 0.9); }
+.jcard.mood-lost .jc-turn { color: #ffd4cc; text-shadow: 0 0 12px rgba(255, 50, 40, 0.8), 0 2px 3px rgba(0, 0, 0, 0.9); }
+.jcard.fast .jc-crack { animation-duration: 0.01s; animation-delay: 0s; }
+
+/* and in the story itself, the text box's gold rim warms or darkens with the route */
+.game-layer[data-route='devoted'] .textbox:not([data-tone]) .tb-panel {
+  box-shadow: inset 0 0 0 2px rgba(150, 50, 70, 0.85), inset 0 0 0 6px rgba(255, 250, 244, 0.55), inset 0 0 0 7px rgba(236, 170, 180, 0.9), 0 0 22px rgba(255, 170, 190, 0.35), 0 14px 34px rgba(24, 10, 4, 0.38);
+}
+.game-layer[data-route='lost'] .textbox:not([data-tone]) .tb-panel {
+  box-shadow: inset 0 0 0 2px rgba(90, 10, 16, 0.95), inset 0 0 0 6px rgba(255, 250, 244, 0.5), inset 0 0 0 7px rgba(150, 40, 40, 0.85), 0 0 22px rgba(140, 10, 20, 0.35), 0 14px 34px rgba(24, 10, 4, 0.45);
+}
