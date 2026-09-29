@@ -3593,6 +3593,358 @@ window.VN_SCENERY = {
    }
   ]
  },
+ "war_field": {
+  "flat": "assets/scenes/war_field/flat.png",
+  "vignette": [
+   0.4,
+   "20,10,6"
+  ],
+  "layers": [
+   {
+    "id": "sky",
+    "x": 0,
+    "y": 0,
+    "w": 480,
+    "h": 270,
+    "depth": 0,
+    "anim": null,
+    "src": "assets/scenes/war_field/sky.png"
+   },
+   {
+    "id": "smoke_sky",
+    "x": 0,
+    "y": 31,
+    "w": 480,
+    "h": 54,
+    "depth": 0.04,
+    "anim": {
+     "type": "drift",
+     "t": 220
+    },
+    "src": "assets/scenes/war_field/smoke_sky.png"
+   },
+   {
+    "id": "far",
+    "x": 0,
+    "y": 106,
+    "w": 480,
+    "h": 164,
+    "depth": 0.07,
+    "anim": null,
+    "src": "assets/scenes/war_field/far.png"
+   },
+   {
+    "id": "smoke",
+    "x": 52,
+    "y": 55,
+    "w": 361,
+    "h": 127,
+    "depth": 0.1,
+    "anim": null,
+    "src": "assets/scenes/war_field/smoke.png"
+   },
+   {
+    "id": "land",
+    "x": 0,
+    "y": 146,
+    "w": 480,
+    "h": 124,
+    "depth": 0.25,
+    "anim": null,
+    "src": "assets/scenes/war_field/land.png"
+   },
+   {
+    "id": "banner362",
+    "x": 363,
+    "y": 150,
+    "w": 9,
+    "h": 28,
+    "depth": 0.26,
+    "anim": {
+     "type": "wave",
+     "a": 1,
+     "t": 2.0520367255434397
+    },
+    "src": "assets/scenes/war_field/banner362.png"
+   },
+   {
+    "id": "banner388",
+    "x": 389,
+    "y": 150,
+    "w": 9,
+    "h": 28,
+    "depth": 0.26,
+    "anim": {
+     "type": "wave",
+     "a": 1,
+     "t": 2.020845962688327
+    },
+    "src": "assets/scenes/war_field/banner388.png"
+   },
+   {
+    "id": "banner414",
+    "x": 415,
+    "y": 150,
+    "w": 9,
+    "h": 28,
+    "depth": 0.26,
+    "anim": {
+     "type": "wave",
+     "a": 1,
+     "t": 1.4230985244736074
+    },
+    "src": "assets/scenes/war_field/banner414.png"
+   },
+   {
+    "id": "banner446",
+    "x": 447,
+    "y": 150,
+    "w": 9,
+    "h": 28,
+    "depth": 0.26,
+    "anim": {
+     "type": "wave",
+     "a": 1,
+     "t": 1.8617228133603931
+    },
+    "src": "assets/scenes/war_field/banner446.png"
+   },
+   {
+    "id": "banner470",
+    "x": 471,
+    "y": 150,
+    "w": 9,
+    "h": 28,
+    "depth": 0.26,
+    "anim": {
+     "type": "wave",
+     "a": 1,
+     "t": 1.53338020183146
+    },
+    "src": "assets/scenes/war_field/banner470.png"
+   },
+   {
+    "id": "nishiki",
+    "x": 65,
+    "y": 148,
+    "w": 16,
+    "h": 11,
+    "depth": 0.26,
+    "anim": {
+     "type": "wave",
+     "a": 1,
+     "t": 1.8
+    },
+    "src": "assets/scenes/war_field/nishiki.png"
+   },
+   {
+    "id": "front",
+    "x": 2,
+    "y": 240,
+    "w": 475,
+    "h": 30,
+    "depth": 0.8,
+    "anim": {
+     "type": "sway",
+     "a": 1.2,
+     "t": 3.6
+    },
+    "src": "assets/scenes/war_field/front.png"
+   }
+  ]
+ },
+ "war_guns": {
+  "flat": "assets/scenes/war_guns/flat.png",
+  "vignette": [
+   0.45,
+   "20,4,6"
+  ],
+  "layers": [
+   {
+    "id": "sky",
+    "x": 0,
+    "y": 0,
+    "w": 480,
+    "h": 270,
+    "depth": 0,
+    "anim": null,
+    "src": "assets/scenes/war_guns/sky.png"
+   },
+   {
+    "id": "smoke_sky",
+    "x": 0,
+    "y": 39,
+    "w": 480,
+    "h": 66,
+    "depth": 0.04,
+    "anim": {
+     "type": "drift",
+     "t": 180
+    },
+    "src": "assets/scenes/war_guns/smoke_sky.png"
+   },
+   {
+    "id": "far",
+    "x": 0,
+    "y": 172,
+    "w": 480,
+    "h": 98,
+    "depth": 0.08,
+    "anim": null,
+    "src": "assets/scenes/war_guns/far.png"
+   },
+   {
+    "id": "smoke",
+    "x": 291,
+    "y": 56,
+    "w": 107,
+    "h": 134,
+    "depth": 0.1,
+    "anim": null,
+    "src": "assets/scenes/war_guns/smoke.png"
+   },
+   {
+    "id": "land",
+    "x": 0,
+    "y": 190,
+    "w": 480,
+    "h": 80,
+    "depth": 0.3,
+    "anim": null,
+    "src": "assets/scenes/war_guns/land.png"
+   },
+   {
+    "id": "gun_far",
+    "x": 278,
+    "y": 188,
+    "w": 170,
+    "h": 38,
+    "depth": 0.35,
+    "anim": null,
+    "src": "assets/scenes/war_guns/gun_far.png"
+   },
+   {
+    "id": "gun_near",
+    "x": 16,
+    "y": 192,
+    "w": 269,
+    "h": 74,
+    "depth": 0.55,
+    "anim": null,
+    "src": "assets/scenes/war_guns/gun_near.png"
+   },
+   {
+    "id": "bags",
+    "x": 0,
+    "y": 255,
+    "w": 480,
+    "h": 15,
+    "depth": 0.8,
+    "anim": null,
+    "src": "assets/scenes/war_guns/bags.png"
+   }
+  ]
+ },
+ "war_horizon": {
+  "flat": "assets/scenes/war_horizon/flat.png",
+  "vignette": [
+   0.45,
+   "20,4,6"
+  ],
+  "layers": [
+   {
+    "id": "sky",
+    "x": 0,
+    "y": 0,
+    "w": 480,
+    "h": 270,
+    "depth": 0,
+    "anim": null,
+    "src": "assets/scenes/war_horizon/sky.png"
+   },
+   {
+    "id": "smoke_sky",
+    "x": 0,
+    "y": 23,
+    "w": 480,
+    "h": 89,
+    "depth": 0.04,
+    "anim": {
+     "type": "drift",
+     "t": 260
+    },
+    "src": "assets/scenes/war_horizon/smoke_sky.png"
+   },
+   {
+    "id": "balloon",
+    "x": 89,
+    "y": 63,
+    "w": 33,
+    "h": 122,
+    "depth": 0.08,
+    "anim": {
+     "type": "bob",
+     "a": 1.5,
+     "t": 7
+    },
+    "src": "assets/scenes/war_horizon/balloon.png"
+   },
+   {
+    "id": "far",
+    "x": 0,
+    "y": 154,
+    "w": 480,
+    "h": 116,
+    "depth": 0.06,
+    "anim": null,
+    "src": "assets/scenes/war_horizon/far.png"
+   },
+   {
+    "id": "town",
+    "x": 2,
+    "y": 101,
+    "w": 478,
+    "h": 90,
+    "depth": 0.1,
+    "anim": null,
+    "src": "assets/scenes/war_horizon/town.png"
+   },
+   {
+    "id": "smoke",
+    "x": 91,
+    "y": 0,
+    "w": 330,
+    "h": 186,
+    "depth": 0.12,
+    "anim": null,
+    "src": "assets/scenes/war_horizon/smoke.png"
+   },
+   {
+    "id": "land",
+    "x": 0,
+    "y": 152,
+    "w": 480,
+    "h": 118,
+    "depth": 0.3,
+    "anim": null,
+    "src": "assets/scenes/war_horizon/land.png"
+   },
+   {
+    "id": "grass",
+    "x": 0,
+    "y": 246,
+    "w": 480,
+    "h": 24,
+    "depth": 0.7,
+    "anim": {
+     "type": "sway",
+     "a": 1.6,
+     "t": 3.4
+    },
+    "src": "assets/scenes/war_horizon/grass.png"
+   }
+  ]
+ },
  "yuki_house": {
   "flat": "assets/scenes/yuki_house/flat.png",
   "vignette": [

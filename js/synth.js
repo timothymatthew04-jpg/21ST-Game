@@ -1217,6 +1217,12 @@
     volley: (S, o, t) => volley(S, o, t, 14, 0.45, 0.7),
     explosion: (S, o, t) => { boom(S, o, t, 1.6); S.noise(o, t + 0.05, 1.2, { type: 'highpass', f: 2500, gain: 0.12, attack: 0.02 }); for (let i = 0; i < 10; i++) S.noise(o, t + 0.4 + Math.random() * 1.2, 0.05, { type: 'bandpass', f: 1500 + Math.random() * 2000, q: 3, gain: 0.08, attack: 0.001 }); },
     shell: (S, o, t) => shell(S, o, t),
+    // a war rocket: a rising hiss that crackles as it burns, then a pop high in the air
+    rocket: (S, o, t) => { const n = S.noise(o, t, 1.7, { type: 'bandpass', f: 700, q: 2.2, gain: 0.2, attack: 0.08 }); n.flt.frequency.exponentialRampToValueAtTime(3600, t + 1.5); for (let i = 0; i < 16; i++) crackle(S, o, t + 0.1 + Math.random() * 1.5); crack(S, o, t + 1.7, 0.22); },
+    // a gun far across the valley: more rumble than bang
+    cannon_far: (S, o, t) => { S.taiko(o, t, 0.45, 0.4); S.noise(o, t, 3.2, { type: 'lowpass', f: 150, gain: 0.45, attack: 0.03 }); },
+    // a battery firing down the line
+    battery: (S, o, t) => { for (let i = 0; i < 4; i++) { S.taiko(o, t + i * 0.55, 0.9, 0.5); S.noise(o, t + i * 0.55, 2.2, { type: 'lowpass', f: 240, gain: 0.5, attack: 0.005 }); } },
     horn: (S, o, t) => horn(S, o, t, 0.14),
     drumroll: (S, o, t) => { for (let i = 0; i < 24; i++) S.snare(o, t + i * 0.06, 0.05 + 0.25 * (i / 23)); S.timpani(o, 38, t + 1.45, 0.5); },
     shouts: (S, o, t) => shouts(S, o, t, 10, 0.1),

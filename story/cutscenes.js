@@ -139,12 +139,47 @@
       ],
     },
 
-    // ---------------------------------------------------------------- Chapter 10: war
+    // ---------------------------------------------------------------- Chapter 11: the war
+    // The horizon burning, two armies meeting, the guns, the ships, the villages, and after.
     war: {
       shots: [
-        { bg: 'cs_warships', dur: 6, cam: [[1.15, 0.4, 0.55], [1.3, 0.5, 0.6]], tint: 'rgba(10,6,30,0.45)', fx: 'embers=0.39,0.7,1 smoke=0.39,0.66,1,#1a1010', flash: [1.2, 2.6, 3.4, 4.7], shake: [[1.2, 1.2], [2.6, 0.8], [4.7, 1.3]], sound: [['horn', 0.1, 0.8], ['cannon', 1.2, 0.9], ['cannon', 2.6, 0.7], ['volley', 3, 0.6], ['cannon', 3.4, 0.5], ['explosion', 4.7, 0.8]], text: 'In Japan, the war had come.', textAt: 1.6 },
-        { bg: 'estate_unrest', dur: 5, cam: [[1.3, 0.35, 0.5], [1.1, 0.55, 0.55]], tint: 'rgba(70,14,0,0.3)', fx: 'embers=0.5,0.8,1.6 smoke=0.5,0.7,1,#1a1010', flash: [1.9], shake: [[1.9, 1.3]], sound: [['shouts', 0.1, 0.9], ['shell', 0.6, 0.9], ['volley', 2.7, 0.8], ['drumroll', 3.2, 0.5]], text: 'Villages burned. Foreigners were hunted on the roads.', textAt: 0.6 },
-        { bg: 'estate_unrest', dur: 4.5, cam: [[1.1, 0.5, 0.5], [1.3, 0.6, 0.6]], fx: 'embers=0.5,0.8,1.2 ash=0.8', trans: 'white', sound: [['wind_gust', 0.2, 0.6], ['musket', 1.4, 0.5], ['musket', 2.3, 0.35]] },
+        {
+          bg: 'war_horizon', dur: 8.5, cam: [[1.04, 0.5, 0.56], [1.3, 0.64, 0.52]], kanji: '戦',
+          fx: 'gunfire=0.69,0.02,0.98,16,1 gunfire=0.68,0.05,0.95,1.3,2.6 rockets=1.1,0.69,0.08,0.92 shells=0.5,0.7,0.78,0.15,0.85 embers=0.7,0.5,0.8',
+          text: 'In Japan, the war had come.', textAt: 1.8,
+          sound: [['horn', 0.2, 0.6], ['cannon_far', 1.0, 0.8], ['rocket', 1.7, 0.5], ['cannon_far', 2.8, 0.7], ['volley', 3.6, 0.35], ['rocket', 4.6, 0.45], ['cannon_far', 5.4, 0.8], ['shell', 6.2, 0.5]],
+          shake: [[1.0, 0.4], [5.4, 0.5]],
+        },
+        {
+          bg: 'war_field', dur: 9, cam: [[1.6, 0.22, 0.68], [1.6, 0.78, 0.66]], ease: 'cubic-bezier(0.35, 0, 0.65, 1)', trans: 'cut',
+          fx: 'army=0.7,1,5,34,0,1,0,0.42,0.5 army=0.69,-1,6,30,1,1,0.58,1,0.3 army=0.77,1,8,24,0,2,0,0.44,0.8 army=0.76,-1,11,20,1,2,0.56,1,0.4 gunfire=0.63,0.1,0.9,5,1 shells=0.35,0.72,0.86,0.3,0.7 boom=0.46,0.8,2.3,1.8 boom=0.6,0.76,6.4,2 boom=0.34,0.84,4.4,1.4',
+          sound: [['drumroll', 0.1, 0.6], ['volley', 1.1, 0.6], ['shell', 0.9, 0.5], ['explosion', 2.3, 0.9], ['shouts', 3.0, 0.7], ['explosion', 4.4, 0.6], ['volley', 5.3, 0.55], ['shell', 5.0, 0.5], ['explosion', 6.4, 1], ['horn', 7.4, 0.6]],
+          shake: [[2.3, 1.2], [4.4, 0.6], [6.4, 1.5]], flash: [6.4],
+        },
+        {
+          bg: 'war_guns', dur: 6, cam: [[1.22, 0.36, 0.7], [1.42, 0.46, 0.66]], trans: 'cut',
+          fx: 'cannon=0.482,0.745,2.6,0.9,1,1.7 cannon=0.81,0.713,2.6,2.2,1,1.1 gunfire=0.71,0.05,0.95,6,1 embers=0.6,0.7,0.8',
+          sound: [['cannon', 0.9, 1], ['cannon', 2.2, 0.7], ['cannon', 3.5, 1], ['cannon', 4.8, 0.7], ['shouts', 1.6, 0.4]],
+          shake: [[0.9, 1.6], [2.2, 0.7], [3.5, 1.6], [4.8, 0.7]], flash: [0.9, 3.5],
+        },
+        {
+          bg: 'cs_warships', dur: 6.5, cam: [[1.3, 0.3, 0.58], [1.12, 0.62, 0.52]], tint: 'rgba(10,6,30,0.4)', trans: 'cut',
+          fx: 'cannon=0.24,0.8,3.2,0.7,-1,1.2 cannon=0.3,0.8,3.2,1.25,-1,1.2 cannon=0.36,0.8,3.2,1.8,-1,1.2 cannon=0.66,0.72,3.2,2.35,-1,0.8 rockets=0.4,0.62,0.2,0.8 shells=0.5,0.6,0.66,0.02,0.4 smoke=0.39,0.66,1,#1a1010',
+          sound: [['battery', 0.7, 0.9], ['rocket', 2.6, 0.4], ['battery', 3.9, 0.8], ['explosion', 5.6, 0.6]],
+          shake: [[0.7, 1.1], [1.25, 0.6], [1.8, 0.9], [2.35, 0.5], [3.9, 1.1], [4.45, 0.6], [5.0, 0.9]], flash: [0.7, 3.9],
+        },
+        {
+          bg: 'estate_unrest', dur: 5.5, cam: [[1.3, 0.35, 0.5], [1.1, 0.55, 0.55]], tint: 'rgba(70,14,0,0.3)',
+          fx: 'embers=0.5,0.8,1.6 smoke=0.5,0.7,1,#1a1010 blasts=0.5,0.62,0.74,0.1,0.9 ash=0.8',
+          text: 'Villages burned. Foreigners were hunted on the roads.', textAt: 0.6,
+          sound: [['shouts', 0.1, 0.9], ['shell', 0.6, 0.9], ['volley', 2.7, 0.8], ['drumroll', 3.2, 0.5]],
+          flash: [1.9], shake: [[1.9, 1.3]],
+        },
+        {
+          bg: 'war_horizon', dur: 6, cam: [[1.35, 0.62, 0.52], [1.02, 0.5, 0.55]], trans: 'white', tint: 'rgba(20,8,10,0.35)',
+          fx: 'ash=1.3 gunfire=0.69,0.2,0.8,2.5,1',
+          sound: [['wind_gust', 0.2, 0.6], ['musket', 1.4, 0.4], ['musket', 2.6, 0.25], ['cannon_far', 3.8, 0.4]],
+        },
       ],
     },
 

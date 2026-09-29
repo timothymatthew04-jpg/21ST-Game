@@ -18,6 +18,7 @@
   const h = VN.h;
 
   const PX = 720 / 270; // one pixel of the pixel-art scenes, in stage units
+  const SUB = 2; // the particle canvas has SUB×SUB canvas pixels for every art pixel
   const TAU = Math.PI * 2;
   const rnd = (a, b) => a + Math.random() * (b - a);
   const pick = (list) => list[Math.floor(Math.random() * list.length)];
@@ -490,6 +491,328 @@
     }
   }
 
+  // ---------------------------------------------------------------- war
+  const FIRE = ['#fff6d0', '#ffe08a', '#ffb04a', '#ff7a2a'];
+  /** Short-lived bits shared by the war effects: smoke puffs (back), debris, then fire and sparks (front). */
+  /** A hard-edged disc, row by row, so smoke and fire read as pixel art. */
+  function disc(c, cx, cy, r) {
+    const R = Math.max(0.5, r), x0 = Math.round(cx), y0 = Math.round(cy), n = Math.floor(R);
+    for (let dy = -n; dy <= n; dy++) { const w = Math.floor(Math.sqrt(R * R - dy * dy)); c.fillRect(x0 - w, y0 + dy, w * 2 + 1, 1); }
+  }
+  class Bits {
+    constructor() { this.z = [[], [], []]; }
+    add(z, o) { o.age = 0; this.z[z].push(o); }
+    step(dt) {
+      for (const list of this.z) {
+        for (let i = list.length - 1; i >= 0; i--) {
+          const b = list[i];
+          b.age += dt;
+          if (b.age > b.life) { list.splice(i, 1); continue; }
+          if (b.g) b.vy += b.g * dt;
+          if (b.drag) { const k = Math.max(0, 1 - b.drag * dt); b.vx *= k; b.vy *= k; }
+          b.x += (b.vx || 0) * dt;
+          b.y += (b.vy || 0) * dt;
+          if (b.grow) b.r += b.grow * dt;
+        }
+      }
+    }
+    draw(c) {
+      for (const list of this.z) {
+        for (const b of list) {
+          const k = 1 - b.age / b.life;
+          const a = (b.a == null ? 1 : b.a) * (b.fadeIn ? Math.min(1, b.age / b.fadeIn) : 1) * (b.hold ? Math.min(1, k * 3) : k);
+          if (a <= 0.01) continue;
+          if (b.glow) {
+            c.globalCompositeOperation = 'lighter';
+            const g = c.createRadialGradient(b.x, b.y, 0, b.x, b.y, b.r);
+            g.addColorStop(0, b.col);
+            g.addColorStop(1, 'rgba(255,120,40,0)');
+            c.globalAlpha = a;
+            c.fillStyle = g;
+            c.fillRect(b.x - b.r, b.y - b.r, b.r * 2, b.r * 2);
+            c.globalCompositeOperation = 'source-over';
+            continue;
+          }
+          c.globalAlpha = a;
+          c.fillStyle = b.col;
+          if (b.r) {
+            disc(c, b.x, b.y, b.r);
+            if (b.hi && b.r > 2) { c.fillStyle = b.hi; disc(c, b.x - b.r * 0.3, b.y - b.r * 0.32, b.r * 0.55); }
+          } else c.fillRect(Math.round(b.x), Math.round(b.y), b.s || 1, b.s || 1);
+        }
+      }
+      c.globalAlpha = 1;
+    }
+  }
+  /** An explosion at x, y: a flash, a fireball, dirt thrown up, sparks, and a column of smoke. */
+  function blast(bits, x, y, size = 1, smoke = '#3a3030') {
+    bits.add(2, { x, y, r: 16 * size, col: 'rgba(255,240,200,0.95)', glow: true, life: 0.22 });
+    bits.add(2, { x, y, r: 1.5 * size, grow: 16 * size, col: pick(FIRE.slice(2)), hi: FIRE[1], a: 0.95, life: 0.34 });
+    bits.add(2, { x, y: y - 1, r: 1 * size, grow: 9 * size, col: FIRE[0], a: 0.9, life: 0.2 });
+    for (let i = 0; i < 12 * size; i++) bits.add(1, { x, y, vx: rnd(-34, 34) * size, vy: rnd(-70, -24) * size, g: 110, col: pick(['#2e2018', '#4a3426', '#6a4a30', '#1e1612']), life: rnd(0.6, 1.3), s: Math.random() < 0.3 ? 2 : 1 });
+    for (let i = 0; i < 8; i++) bits.add(2, { x, y, vx: rnd(-40, 40) * size, vy: rnd(-60, -10) * size, g: 70, col: pick(FIRE), life: rnd(0.25, 0.6) });
+    for (let i = 0; i < 6; i++) bits.add(0, { x: x + rnd(-3, 3) * size, y: y - rnd(0, 6) * size, r: 2 * size, grow: rnd(4, 7) * size, vx: rnd(1, 5), vy: -rnd(5, 12), drag: 0.25, col: smoke, hi: '#6e5e58', a: rnd(0.55, 0.8), life: rnd(2.5, 4.5), fadeIn: 0.12 });
+  }
+
+  /** boom=x,y,at,size — one explosion at x, y, `at` seconds after the picture appears (for cutscenes, in time with a sound). */
+  class Boom {
+    constructor(nums, color) {
+      const [x = 0.5, y = 0.7, at = 1, size = 1.4] = nums;
+      Object.assign(this, { xf: x, yf: y, at, size, smoke: color || '#3a3030', t: 0, done: false, bits: new Bits() });
+    }
+    resize(W, H) { this.W = W; this.H = H; }
+    step(dt) {
+      if (!this.W) return;
+      this.t += dt;
+      if (!this.done && this.t >= this.at) { this.done = true; blast(this.bits, this.xf * this.W, this.yf * this.H, this.size, this.smoke); }
+      this.bits.step(dt);
+    }
+    draw(c) { this.bits.draw(c); }
+  }
+
+  /** gunfire=y,x0,x1,rate,size — muzzle flashes twinkling along a line (a far battle), with volleys. */
+  class Gunfire {
+    constructor(nums, color) {
+      const [y = 0.66, x0 = 0, x1 = 1, rate = 14, size = 1] = nums;
+      Object.assign(this, { yf: y, x0, x1, rate, size, col: color || '#ffe8b0', bits: new Bits(), volley: rnd(1, 3) });
+    }
+    resize(W, H) { this.W = W; this.H = H; }
+    flash(x, y) {
+      this.bits.add(2, { x, y, r: 3 * this.size, col: 'rgba(255,230,170,0.9)', glow: true, life: rnd(0.06, 0.14) });
+      this.bits.add(2, { x, y, col: this.col, life: rnd(0.05, 0.12), s: this.size > 1.4 ? 2 : 1 });
+      if (Math.random() < 0.6) this.bits.add(0, { x, y: y - 1, r: 0.7 * this.size, grow: 1.4 * this.size, vx: rnd(1, 3), vy: -rnd(1, 3), col: '#8a7a78', a: 0.4, life: rnd(1.2, 2.4), fadeIn: 0.1 });
+    }
+    step(dt) {
+      if (!this.W) return;
+      const X = (f) => f * this.W;
+      const n = this.rate * dt;
+      for (let k = 0; k < Math.floor(n) + (Math.random() < n % 1 ? 1 : 0); k++) this.flash(rnd(X(this.x0), X(this.x1)), this.yf * this.H + rnd(-1.5, 1.5));
+      this.volley -= dt;
+      if (this.volley <= 0) {
+        this.volley = rnd(2.5, 5);
+        const cx = rnd(X(this.x0), X(this.x1)), len = rnd(14, 40);
+        for (let k = 0; k < 16; k++) this.flash(cx + rnd(-len / 2, len / 2), this.yf * this.H + rnd(-1, 1));
+      }
+      this.bits.step(dt);
+    }
+    draw(c) { this.bits.draw(c); }
+  }
+
+  /** cannon=x,y,period,offset,dir,size — a gun firing every few seconds: flash, fire, and a rolling cloud of smoke. */
+  class Cannon {
+    constructor(nums) {
+      const [x = 0.3, y = 0.6, period = 3, offset = 0.8, dir = 1, size = 1] = nums;
+      Object.assign(this, { xf: x, yf: y, period, dir: dir < 0 ? -1 : 1, size, next: offset, bits: new Bits() });
+    }
+    resize(W, H) { this.W = W; this.H = H; }
+    step(dt) {
+      if (!this.W) return;
+      this.next -= dt;
+      if (this.next <= 0) {
+        this.next += this.period;
+        const x = this.xf * this.W, y = this.yf * this.H, d = this.dir, z = this.size;
+        this.bits.add(2, { x: x + d * 6 * z, y, r: 34 * z, col: 'rgba(255,236,190,1)', glow: true, life: 0.2 });
+        for (let k = 0; k < 5; k++) this.bits.add(2, { x: x + d * k * 4 * z, y: y + rnd(-1, 1), r: (4 - k * 0.5) * z, grow: 10 * z, vx: d * 40 * z, col: pick(FIRE), a: 0.95, life: 0.12 + k * 0.03 });
+        for (let k = 0; k < 12; k++) this.bits.add(0, { x: x + d * 4 * z, y, r: 2.5 * z, grow: rnd(5, 9) * z, vx: d * rnd(30, 100) * z, vy: rnd(-12, 4), drag: 1.6, col: pick(['#b8aea8', '#a09692', '#8a807e']), hi: '#ece6e0', a: rnd(0.65, 0.9), life: rnd(2.8, 4.2), fadeIn: 0.05 });
+        for (let k = 0; k < 10; k++) this.bits.add(2, { x: x + d * 6 * z, y, vx: d * rnd(40, 120), vy: rnd(-40, 20), g: 60, col: pick(FIRE), life: rnd(0.2, 0.5) });
+      }
+      this.bits.step(dt);
+    }
+    draw(c) { this.bits.draw(c); }
+  }
+
+  /** shells=rate,y0,y1,x0,x1 — shells arcing in from either side and bursting on the ground between y0 and y1. */
+  class Shells {
+    constructor(nums) {
+      const [rate = 0.6, y0 = 0.6, y1 = 0.8, x0 = 0.1, x1 = 0.9] = nums;
+      Object.assign(this, { rate, y0, y1, x0, x1, list: [], bits: new Bits(), wait: rnd(0.3, 1) });
+    }
+    resize(W, H) { this.W = W; this.H = H; }
+    step(dt) {
+      if (!this.W) return;
+      this.wait -= dt;
+      if (this.wait <= 0) {
+        this.wait = rnd(0.5, 1.5) / this.rate;
+        const side = Math.random() < 0.5 ? -1 : 1;
+        const tx = rnd(this.x0, this.x1) * this.W, ty = rnd(this.y0, this.y1) * this.H;
+        this.list.push({ sx: side < 0 ? -8 : this.W + 8, sy: rnd(0.05, 0.3) * this.H, tx, ty, u: 0, T: rnd(1, 1.6), arc: rnd(20, 50), trail: [] });
+      }
+      for (let i = this.list.length - 1; i >= 0; i--) {
+        const s = this.list[i];
+        s.u += dt / s.T;
+        const u = Math.min(1, s.u);
+        s.x = s.sx + (s.tx - s.sx) * u;
+        s.y = s.sy + (s.ty - s.sy) * u * u - Math.sin(Math.PI * u) * s.arc * 0.4;
+        s.trail.push([s.x, s.y]);
+        if (s.trail.length > 7) s.trail.shift();
+        if (s.u >= 1) { this.list.splice(i, 1); blast(this.bits, s.tx, s.ty, 0.7 + (s.ty / this.H) * 0.7); }
+      }
+      this.bits.step(dt);
+    }
+    draw(c) {
+      for (const s of this.list) {
+        s.trail.forEach(([x, y], k) => { c.globalAlpha = (k / s.trail.length) * 0.35; c.fillStyle = '#d8d0c8'; c.fillRect(Math.round(x), Math.round(y), 1, 1); });
+        c.globalAlpha = 1;
+        c.fillStyle = '#1a1414';
+        c.fillRect(Math.round(s.x), Math.round(s.y), 2, 2);
+      }
+      this.bits.draw(c);
+    }
+  }
+
+  /** blasts=rate,y0,y1,x0,x1 — explosions bursting across a stretch of ground (nearer ones bigger). */
+  class Blasts {
+    constructor(nums, color) {
+      const [rate = 0.8, y0 = 0.6, y1 = 0.85, x0 = 0, x1 = 1] = nums;
+      Object.assign(this, { rate, y0, y1, x0, x1, smoke: color || '#3a3030', bits: new Bits(), wait: rnd(0.2, 0.8) });
+    }
+    resize(W, H) { this.W = W; this.H = H; }
+    step(dt) {
+      if (!this.W) return;
+      this.wait -= dt;
+      if (this.wait <= 0) {
+        this.wait = rnd(0.4, 1.6) / this.rate;
+        const y = rnd(this.y0, this.y1) * this.H;
+        blast(this.bits, rnd(this.x0, this.x1) * this.W, y, 0.6 + (y / this.H) * 0.9, this.smoke);
+      }
+      this.bits.step(dt);
+    }
+    draw(c) { this.bits.draw(c); }
+  }
+
+  /** rockets=rate,y — war rockets launched from the ground at y, screaming up in arcs with fire trails. */
+  class Rockets {
+    constructor(nums) {
+      const [rate = 0.5, y = 0.75, x0 = 0.05, x1 = 0.95] = nums;
+      Object.assign(this, { rate, yf: y, x0, x1, list: [], bits: new Bits(), wait: rnd(0.2, 1) });
+    }
+    resize(W, H) { this.W = W; this.H = H; }
+    step(dt) {
+      if (!this.W) return;
+      this.wait -= dt;
+      if (this.wait <= 0) {
+        this.wait = rnd(0.6, 1.8) / this.rate;
+        const dir = Math.random() < 0.5 ? -1 : 1;
+        this.list.push({ x: rnd(this.x0, this.x1) * this.W, y: this.yf * this.H, vx: dir * rnd(25, 60), vy: -rnd(70, 110), life: rnd(1.4, 2.4), age: 0 });
+      }
+      for (let i = this.list.length - 1; i >= 0; i--) {
+        const r = this.list[i];
+        r.age += dt;
+        r.vy += 28 * dt;
+        r.x += r.vx * dt;
+        r.y += r.vy * dt;
+        for (let k = 0; k < 2; k++) this.bits.add(2, { x: r.x - r.vx * dt * k * 0.5, y: r.y - r.vy * dt * k * 0.5, vx: rnd(-6, 6), vy: rnd(-4, 8), g: 30, col: pick(FIRE), life: rnd(0.3, 0.7) });
+        if (Math.random() < 0.8) this.bits.add(0, { x: r.x, y: r.y, r: 0.8, grow: 1.8, vx: rnd(-2, 2), vy: rnd(-2, 1), col: '#b0a4a0', a: 0.45, life: rnd(1.2, 2) });
+        if (r.age > r.life) {
+          this.list.splice(i, 1);
+          for (let k = 0; k < 16; k++) { const a = rnd(0, TAU), v = rnd(15, 45); this.bits.add(2, { x: r.x, y: r.y, vx: Math.cos(a) * v, vy: Math.sin(a) * v, g: 35, col: pick(FIRE), life: rnd(0.4, 0.8) }); }
+          this.bits.add(2, { x: r.x, y: r.y, r: 10, col: 'rgba(255,220,160,0.9)', glow: true, life: 0.18 });
+        }
+      }
+      this.bits.step(dt);
+    }
+    draw(c) {
+      this.bits.draw(c);
+      for (const r of this.list) {
+        c.globalCompositeOperation = 'lighter';
+        const g = c.createRadialGradient(r.x, r.y, 0, r.x, r.y, 10);
+        g.addColorStop(0, 'rgba(255,236,170,1)');
+        g.addColorStop(1, 'rgba(255,120,40,0)');
+        c.fillStyle = g;
+        c.fillRect(r.x - 10, r.y - 10, 20, 20);
+        c.globalCompositeOperation = 'source-over';
+        c.fillStyle = '#fffbe8';
+        c.fillRect(Math.round(r.x), Math.round(r.y), 2, 2);
+      }
+    }
+  }
+
+  /**
+   * army=y,dir,speed,count,type,scale,x0,x1,fire — soldiers marching in ranks across the field.
+   * type 0: the imperial army (dark coats, rifles with bayonets, officers in the red "shaguma" wig);
+   * type 1: samurai of the old order (lacquered armour, spears, a small banner on every back).
+   * fire: how often the front rank lets off a volley (per second).
+   */
+  const ARMY = [
+    { coat: '#1e2438', legs: '#15151e', hat: '#0e0e12', face: '#c89a78', arm: '#b8bcc8', flag: null },
+    { coat: '#6a2a22', legs: '#2a1a18', hat: '#1a1414', face: '#c89a78', arm: '#8a7050', flag: ['#f0ece4', '#c83a2a', '#e8c040'] },
+  ];
+  class Army {
+    constructor(nums) {
+      const [y = 0.7, dir = 1, speed = 8, count = 30, type = 0, scale = 1, x0 = 0, x1 = 1, fire = 0] = nums;
+      Object.assign(this, { yf: y, dir: dir < 0 ? -1 : 1, speed, count, look: ARMY[type] || ARMY[0], type, sc: Math.max(1, Math.round(scale)), x0, x1, fire, bits: new Bits(), wait: rnd(0.5, 2) });
+    }
+    resize(W, H) {
+      const first = !this.W;
+      this.W = W;
+      this.H = H;
+      if (!first) return;
+      this.men = [];
+      const ranks = 3, per = Math.ceil(this.count / ranks), gap = 5 * this.sc;
+      const span = (this.x1 - this.x0) * W;
+      for (let r = 0; r < ranks; r++) {
+        for (let i = 0; i < per; i++) {
+          this.men.push({
+            x: this.x0 * W + ((i * gap + r * 2 * this.sc + rnd(-1, 1)) % Math.max(gap, span)),
+            r, ph: rnd(0, TAU), chief: this.type === 0 && Math.random() < 0.08, flag: this.look.flag ? pick(this.look.flag) : null,
+          });
+        }
+      }
+      this.men.sort((a, b) => a.r - b.r);
+    }
+    step(dt, t) {
+      if (!this.men) return;
+      const lo = this.x0 * this.W - 12, hi = this.x1 * this.W + 12;
+      for (const m of this.men) {
+        m.x += this.dir * this.speed * dt;
+        if (this.dir > 0 && m.x > hi) m.x -= hi - lo;
+        if (this.dir < 0 && m.x < lo) m.x += hi - lo;
+      }
+      if (this.fire) {
+        this.wait -= dt;
+        if (this.wait <= 0) {
+          this.wait = rnd(0.6, 1.4) / this.fire;
+          const front = this.men.filter((m) => m.r === 2);
+          const from = Math.floor(rnd(0, Math.max(1, front.length - 8)));
+          for (const m of front.slice(from, from + 8)) {
+            const x = m.x + this.dir * 3 * this.sc, y = this.yf * this.H + 4 * this.sc - 7 * this.sc;
+            this.bits.add(2, { x, y, r: 3 * this.sc, col: 'rgba(255,230,170,0.9)', glow: true, life: rnd(0.06, 0.14) });
+            this.bits.add(0, { x, y, r: 1 * this.sc, grow: 3 * this.sc, vx: this.dir * rnd(4, 10), vy: -rnd(1, 4), col: '#c8c0b8', a: 0.5, life: rnd(1.5, 2.5), fadeIn: 0.05 });
+          }
+        }
+      }
+      this.bits.step(dt);
+    }
+    draw(c, t) {
+      if (!this.men) return;
+      const L = this.look, s = this.sc, d = this.dir;
+      const P = (x, y, w, h, col) => { c.fillStyle = col; c.fillRect(Math.round(x), Math.round(y), w * s, h * s); };
+      c.globalAlpha = 1;
+      for (const m of this.men) {
+        const base = this.yf * this.H + m.r * 2 * s;
+        const step = Math.floor(t * 4 + m.ph) % 2;
+        const x = m.x, y = base - 8 * s - (step ? 0 : s * 0.5);
+        // legs, striding
+        if (step) { P(x - s, y + 6 * s, 1, 2, L.legs); P(x + s, y + 6 * s, 1, 2, L.legs); } else P(x, y + 6 * s, 1, 2, L.legs);
+        P(x - s, y + 2 * s, 3, 4, L.coat);
+        P(x, y + s, 1, 1, L.face);
+        if (this.type === 0) {
+          P(x - s, y, 3, 1, L.hat);
+          if (m.chief) { P(x - s, y - s, 3, 1, '#d83a2a'); P(x + d * -2 * s, y, 1, 3, '#d83a2a'); }
+          P(x + d * 2 * s, y - 2 * s, 1, 5, '#3a2a1e');
+          P(x + d * 2 * s, y - 3 * s, 1, 1, L.arm);
+        } else {
+          P(x - s, y, 3, 1, L.hat);
+          P(x, y - s, 1, 1, '#c8a040');
+          P(x + d * 2 * s, y - 5 * s, 1, 9, '#4a3420');
+          P(x + d * 2 * s, y - 6 * s, 1, 1, L.arm);
+          if (m.flag) { P(x - d * 2 * s, y - 4 * s, 1, 6, '#2a1a10'); P(x - d * 2 * s - (d > 0 ? 2 * s : -s), y - 4 * s, 2, 3, m.flag); }
+        }
+      }
+      this.bits.draw(c);
+    }
+  }
+
   // ---------------------------------------------------------------- the per-background controller
   class SceneFx {
     constructor(bgEl, specs, settings, frame = null) {
@@ -513,6 +836,13 @@
           case 'birds': this.systems.push(new Birds(n)); break;
           case 'flutter': this.systems.push(new Flutter(n)); break;
           case 'grass': this.systems.push(new Grass(n, s.color)); break;
+          case 'gunfire': this.systems.push(new Gunfire(n, s.color)); break;
+          case 'cannon': this.systems.push(new Cannon(n)); break;
+          case 'boom': this.systems.push(new Boom(n, s.color)); break;
+          case 'shells': this.systems.push(new Shells(n)); break;
+          case 'blasts': this.systems.push(new Blasts(n, s.color)); break;
+          case 'rockets': this.systems.push(new Rockets(n)); break;
+          case 'army': this.systems.push(new Army(n)); break;
           case 'glow': case 'flame': lights.push(this.light(s)); break;
           case 'rays': lights.push(this.rays(s)); break;
           case 'mist': lights.push(this.mist(s)); break;
@@ -580,17 +910,22 @@
       const hh = this.frameEl.clientHeight;
       if (!w || !hh) return;
       const W = Math.round(w / PX), H = Math.round(hh / PX);
-      if (this.canvas.width === W && this.canvas.height === H) return;
-      this.canvas.width = W;
-      this.canvas.height = H;
+      // drawn at twice the art's resolution, so its pixels stay crisp when a camera zooms in
+      if (this.W === W && this.H === H) return;
+      this.W = W;
+      this.H = H;
+      this.canvas.width = W * SUB;
+      this.canvas.height = H * SUB;
       for (const s of this.systems) s.resize(W, H);
     }
 
     frame(dt, t) {
       if (!this.bg.isConnected) { this.destroy(); return; }
-      if (!this.canvas.width) return;
+      if (!this.W) return;
       const c = this.ctx;
+      c.setTransform(1, 0, 0, 1, 0, 0);
       c.clearRect(0, 0, this.canvas.width, this.canvas.height);
+      c.setTransform(SUB, 0, 0, SUB, 0, 0);
       for (const s of this.systems) { s.step(dt, t); s.draw(c, t); }
       c.globalAlpha = 1;
     }
