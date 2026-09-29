@@ -81,7 +81,11 @@
       this.flashEl = h('div.cs-flash');
       const skip = h('button.cs-skip', { type: 'button' }, 'Skip', h('span', '▸▸'));
       skip.addEventListener('click', (e) => { e.stopPropagation(); this.finish(); });
-      this.el = h('div.overlay.cutscene', this.view, this.flashEl, h('div.cs-bar.top'), h('div.cs-bar.bottom', this.caption), skip);
+      // flourishes laid over every shot: a drifting light leak, a flare streak, sparks
+      this.leak = h('div.cs-leak');
+      this.streak = h('div.cs-streak');
+      this.sparkCv = h('canvas.cs-sparks');
+      this.el = h('div.overlay.cutscene', this.view, this.leak, this.sparkCv, this.flashEl, this.streak, h('div.cs-bar.top'), h('div.cs-bar.bottom', this.caption), skip);
       this.el.addEventListener('click', () => this.next());
       this.entry = this.ui.open(this.el, {
         onKey: (e) => {
@@ -96,6 +100,32 @@
       this.entry.cleanup = () => this.stop();
       this.ui.cardEntry = this.entry;
       this.next();
+    }
+
+    /** Sparks that burst when a title or a kanji lands (none while motion is reduced). */
+    sparks() {
+      if (this.reduce || !VN.sparkField) return null;
+      if (!this.field) {
+        this.field = VN.sparkField(this.sparkCv, 'sparks', null, { ambient: false });
+        const loop = (t) => { if (this.done) return; this.field.step(t); const id = requestAnimationFrame(loop); this.rafs.add(id); };
+        this.rafs.add(requestAnimationFrame(loop));
+      }
+      return this.field;
+    }
+
+    burstAt(node) {
+      const f = this.sparks();
+      if (!f || !node || !node.isConnected) return;
+      const r = node.getBoundingClientRect(), c = this.sparkCv.getBoundingClientRect();
+      if (c.width && r.width) f.burst((r.left + r.width / 2 - c.left) / c.width, (r.top + r.height / 2 - c.top) / c.height);
+    }
+
+    /** A thin line of light racing across the frame (on white cuts and flashes). */
+    flare() {
+      if (this.reduce) return;
+      this.streak.classList.remove('go');
+      void this.streak.offsetWidth;
+      this.streak.classList.add('go');
     }
 
     later(ms, fn) { const id = setTimeout(() => { if (!this.done) fn(); }, ms); this.timers.push(id); return id; }
@@ -129,8 +159,9 @@
         for (const sp of shot.sprites || []) cam.append(this.sprite(sp, dur));
       }
       if (shot.tint) el.append(h('div.cs-tint', { style: { background: shot.tint } }));
-      if (shot.title) el.append(h('div.cs-title', { style: { animationDelay: `${shot.titleAt || 0.5}s` } }, shot.title));
-      if (shot.kanji) el.append(h('div.cs-kanji', [...shot.kanji].map((c, i) => h('span', { style: { animationDelay: `${0.4 + i * 0.25}s` } }, c))));
+      let titleEl = null, kanjiEl = null;
+      if (shot.title) { titleEl = h('div.cs-title', { style: { animationDelay: `${shot.titleAt || 0.5}s` } }, shot.title); el.append(titleEl); }
+      if (shot.kanji) { kanjiEl = h('div.cs-kanji', [...shot.kanji].map((c, i) => h('span', { style: { animationDelay: `${0.4 + i * 0.25}s` } }, c))); el.append(kanjiEl); }
       // the camera
       const moves = shot.cam ? (Array.isArray(shot.cam[0]) ? shot.cam : [shot.cam, shot.cam]) : [[1.1, 0.5, 0.5], [1.02, 0.5, 0.5]];
       if (!shot.map) {
@@ -154,6 +185,17 @@
         if (prev) at((shot.fade || 1.1) + 0.1, () => prev.remove());
       }
       this.current = el;
+      // a light leak drifts through every shot, warm or cool to match the picture
+      const cool = /rgba\((\d+),(\d+),(\d+)/.exec(shot.tint || '');
+      this.leak.style.setProperty('--lh', cool && +cool[3] > +cool[1] ? String(210 + Math.random() * 30) : String(20 + Math.random() * 25));
+      this.leak.style.setProperty('--ly', `${20 + Math.random() * 50}%`);
+      this.leak.style.animationDuration = `${Math.max(4, dur + 1)}s`;
+      this.leak.classList.remove('go');
+      void this.leak.offsetWidth;
+      this.leak.classList.add('go');
+      if (titleEl) at((shot.titleAt || 0.5) + 0.35, () => { this.burstAt(titleEl); this.flare(); this.audio.fx('sparkle', { volume: 0.5 }); });
+      if (kanjiEl) at(0.6, () => this.burstAt(kanjiEl));
+      if (trans === 'white') at(0.25, () => this.flare());
       // words, sounds, flashes and shakes
       this.caption.classList.remove('on');
       if (shot.text) {
@@ -164,10 +206,20 @@
         const [name, delay = 0, volume = 1] = Array.isArray(snd) ? snd : [snd];
         this.audio.fx(name, { delay, volume });
       }
-      for (const t of [].concat(shot.flash || [])) at(t, () => this.flash('#fff6e0', 0.5));
+      for (const t of [].concat(shot.flash || [])) at(t, () => {
+        this.flash('#fff6e0', 0.5);
+        this.flare();
+        // the picture punches in a little with the light
+        if (!this.reduce && el.animate) el.animate([{ scale: '1' }, { scale: '1.035' }, { scale: '1' }], { duration: 450, easing: 'ease-out' });
+      });
       for (const s of [].concat(shot.shake || [])) {
         const [t, amt = 1] = Array.isArray(s) ? s : [s];
-        at(t, () => { if (this.reduce) return; this.view.animate([{ transform: 'none' }, { transform: `translate(${6 * amt}px, ${3 * amt}px)` }, { transform: `translate(${-5 * amt}px, ${-2 * amt}px)` }, { transform: `translate(${3 * amt}px, ${1 * amt}px)` }, { transform: 'none' }], { duration: 420, easing: 'ease-out' }); });
+        at(t, () => {
+          if (this.reduce) return;
+          // a shake splits the colours for a moment, like a jolted lens
+          this.view.classList.add('chroma');
+          this.later(420, () => this.view.classList.remove('chroma'));
+          this.view.animate([{ transform: 'none' }, { transform: `translate(${6 * amt}px, ${3 * amt}px)` }, { transform: `translate(${-5 * amt}px, ${-2 * amt}px)` }, { transform: `translate(${3 * amt}px, ${1 * amt}px)` }, { transform: 'none' }], { duration: 420, easing: 'ease-out' }); });
       }
       at(dur, () => this.next());
     }

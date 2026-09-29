@@ -1226,6 +1226,69 @@
       n.flt.frequency.exponentialRampToValueAtTime(6000, t + 0.45);
       [2350, 3710, 5230].forEach((f, i) => { const ctx = S.ctx, x = ctx.createOscillator(), g = ctx.createGain(); x.frequency.value = f; g.gain.setValueAtTime(0, t + 0.42); g.gain.linearRampToValueAtTime(0.05 / (i + 1), t + 0.44); g.gain.exponentialRampToValueAtTime(0.0001, t + 2.2); x.connect(g).connect(o); x.start(t + 0.42); x.stop(t + 2.3); });
     },
+    // ---- a theme for each character, played when we first meet them (5 to 7 seconds)
+    // Hervé: the traveller. A drum roll, horns, and a flute that climbs toward the horizon.
+    theme_herve: (S, o, t) => {
+      S.roll(o, 38, t, 0.8, 0.03, 0.26);
+      S.cymbal(o, t + 0.8, 2.6, 0.08);
+      S.brass(o, [50, 57, 62], t + 0.8, 1.6, 0.065, { bright: 0.8 });
+      S.pad(o, [50, 54, 57, 62], t + 0.8, 4.6, 0.035, { cutoff: 1400, vibrato: 0.004 });
+      [[69, 0.8, 0.9], [74, 1.7, 0.45], [76, 2.15, 0.45], [78, 2.6, 1.2], [76, 3.8, 0.6], [74, 4.4, 1.8]].forEach(([m, k, d]) => S.flute(o, m, t + k, d, 0.13, { scoop: 0.5 }));
+      for (let i = 0; i < 10; i++) S.pluck(o, [38, 45, 50, 45][i % 4], t + 0.8 + i * 0.45, 0.2, { bright: 0.4, dur: 1 });
+      S.timpani(o, 38, t + 4.4, 0.26);
+    },
+    // Hélène: home. A piano opening like a window, a music box, strings that turn from minor to major.
+    theme_helene: (S, o, t) => {
+      [45, 52, 57, 60, 64].forEach((m, i) => S.piano(o, m, t + i * 0.18, 0.2, 3));
+      [[76, 0.9], [74, 1.35], [72, 1.8], [76, 2.25], [79, 3.1], [76, 3.55], [72, 4.0]].forEach(([m, k]) => S.musicBox(o, m, t + k, 0.14));
+      S.pad(o, [57, 60, 64], t + 0.3, 2.6, 0.04, { cutoff: 1200, vibrato: 0.004, type: 'triangle' });
+      S.pad(o, [60, 64, 67], t + 2.9, 3, 0.045, { cutoff: 1400, vibrato: 0.004, type: 'triangle' });
+      S.bowed(o, 64, t + 2.9, 2.6, 0.06, { vib: 0.007, bright: 0.55, glide: -1 });
+      S.choir(o, [72, 76], t + 3, 2.6, 0.025, { vowel: 'a', attack: 1.2 });
+      [48, 55, 60, 64, 67].forEach((m, i) => S.piano(o, m, t + 2.9 + i * 0.16, 0.16, 3));
+    },
+    // Baldabiou: a bouncing waltz, oom-pah-pah, with a brass flourish at the end.
+    theme_balbadiou: (S, o, t) => {
+      const b = 0.36;
+      for (let bar = 0; bar < 4; bar++) {
+        const root = [43, 50, 43, 50][bar];
+        S.pluck(o, root, t + bar * b * 3, 0.4, { bright: 0.4, dur: 0.9 });
+        for (const k of [1, 2]) { S.pluck(o, root + 16, t + (bar * 3 + k) * b, 0.18, { bright: 0.6, dur: 0.5 }); S.pluck(o, root + 19, t + (bar * 3 + k) * b, 0.14, { bright: 0.6, dur: 0.5 }); }
+        S.brass(o, [root + 12], t + bar * b * 3, b * 0.6, 0.06, { bright: 0.5 });
+      }
+      [[67, 0], [71, 1], [74, 2], [71, 3], [67, 4], [69, 5], [71, 6], [74, 7.5], [79, 9]].forEach(([m, k]) => S.musicBox(o, m, t + k * b, 0.14));
+      S.brass(o, [62, 67, 71], t + 12 * b, 0.4, 0.1, { bright: 1 });
+      S.brass(o, [67, 71, 74, 79], t + 13 * b, 1.4, 0.11, { bright: 1 });
+      S.snare(o, t + 12 * b, 0.12); S.cymbal(o, t + 13 * b, 2, 0.07);
+    },
+    // Hara Kei: authority. Taiko, a low horn, a bamboo flute falling through the old scale, a gong.
+    theme_harakei: (S, o, t) => {
+      [[0, 0.42, 0.8], [0.55, 0.3, 0.9], [1.1, 0.5, 0.7]].forEach(([k, v, p]) => S.taiko(o, t + k, v, p));
+      S.brass(o, [38, 45], t + 1.1, 3.4, 0.07, { bright: 0.35, attack: 0.4 });
+      S.choir(o, [50, 57], t + 1.1, 3.6, 0.04, { vowel: 'o', attack: 1 });
+      [[4, 1.4, 1.1], [3, 2.5, 0.6], [2, 3.1, 0.6], [0, 3.7, 1.6]].forEach(([d, k, dur]) => S.flute(o, [62, 63, 67, 69, 70, 74][d] + 12, t + k, dur, 0.14, { scoop: 1.6, vib: 0.02 }));
+      S.bell(o, 33, t + 3.7, 0.24, 6);
+      S.taiko(o, t + 3.7, 0.45, 0.7);
+    },
+    // Yukimura: a mystery. A koto sweeping upward, far bells, a flute that never quite lands.
+    theme_woman: (S, o, t) => {
+      [57, 59, 60, 64, 65, 69, 71, 72, 76, 77, 81].forEach((m, i) => S.pluck(o, m, t + i * 0.07, 0.16, { bright: 0.85, dur: 2.4 }));
+      S.bell(o, 93, t + 0.8, 0.06, 3); S.bell(o, 88, t + 1.6, 0.05, 3);
+      S.choir(o, [76, 81], t + 0.6, 4.4, 0.03, { vowel: 'u', attack: 1.8 });
+      S.pad(o, [45, 52], t + 0.6, 4.6, 0.035, { cutoff: 500, attack: 1.6 });
+      S.flute(o, 81, t + 1.2, 1.6, 0.11, { scoop: 1.8, vib: 0.018 });
+      S.flute(o, 77, t + 2.9, 2.2, 0.1, { scoop: 1.2, vib: 0.02 });
+      [[88, 4.6], [89, 4.75], [93, 4.9]].forEach(([m, k]) => S.musicBox(o, m, t + k, 0.06));
+    },
+    // Madame Blanche: the salon. A celesta, a harp, and a violin that slides into its notes.
+    theme_blanche: (S, o, t) => {
+      [52, 59, 64, 67, 71].forEach((m, i) => S.pluck(o, m, t + i * 0.12, 0.16, { bright: 0.8, dur: 2.6 }));
+      [[83, 0.6], [81, 0.9], [79, 1.2], [78, 1.5], [79, 2.4], [83, 2.7]].forEach(([m, k]) => S.musicBox(o, m, t + k, 0.11));
+      [[71, 0.9, 0.9, -2], [73, 1.8, 0.6, -1], [74, 2.4, 0.6, 0], [76, 3.0, 2.2, -2]].forEach(([m, k, d, g]) => S.bowed(o, m, t + k, d, 0.07, { vib: 0.009, bright: 0.6, glide: g }));
+      S.pad(o, [52, 55, 59, 62], t + 0.4, 4.6, 0.035, { cutoff: 1100, vibrato: 0.004, type: 'triangle' });
+      for (let i = 0; i < 8; i++) S.snare(o, t + 0.6 + i * 0.6, 0.02);
+    },
+
     // hits and swells for dramatic moments
     sting: (S, o, t) => { S.brass(o, [38, 45, 50, 53], t, 1.2, 0.16, { bright: 0.9, attack: 0.02 }); S.taiko(o, t, 0.6, 0.6); S.timpani(o, 38, t, 0.45); S.cymbal(o, t, 2.5, 0.12); S.choir(o, [62, 65, 69], t, 1.2, 0.08, { vowel: 'a', attack: 0.05 }); },
     swell: (S, o, t) => { S.pad(o, [60, 64, 67, 72], t, 2.4, 0.07, { cutoff: 1500, attack: 2.2, vibrato: 0.004 }); S.cymbal(o, t, 2.6, 0.06, true); S.choir(o, [72, 76, 79], t + 0.6, 1.8, 0.04, { vowel: 'a', attack: 1.4 }); },

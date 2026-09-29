@@ -138,7 +138,7 @@
   }
 
   /** Gold sparks: a few always drifting up, and a burst on demand (or petals falling, or ash). */
-  function sparkField(cv, kind = 'sparks', tint = null) {
+  function sparkField(cv, kind = 'sparks', tint = null, { ambient = true } = {}) {
     if (kind === 'tinted' && !tint) kind = 'sparks';
     const dpr = Math.min(1.5, window.devicePixelRatio || 1);
     const rect = cv.getBoundingClientRect();
@@ -180,7 +180,7 @@
       step(t) {
         const dt = last ? Math.min(0.05, (t - last) / 1000) : 0.016;
         last = t;
-        acc += dt * 26;
+        acc += ambient ? dt * 26 : 0;
         while (acc > 1) {
           acc--;
           if (fall) add(Math.random() * W * 1.1 - W * 0.05, -10 * unit, (kind === 'petals' ? 15 : -8 + Math.random() * 16) * unit, (25 + Math.random() * 45) * unit, 4 + Math.random() * 3, (kind === 'petals' ? 5 + Math.random() * 6 : 3 + Math.random() * 5) * unit);
@@ -232,6 +232,8 @@
     if (x.length === 3) x = x.split('').map((c) => c + c).join('');
     return [0, 2, 4].map((i) => parseInt(x.slice(i, i + 2), 16)).join(',');
   }
+
+  VN.sparkField = sparkField;
 
   class UI {
     constructor(stageEl, story, settings, audio) {
@@ -545,9 +547,9 @@
         this.button('New Game', () => eng.newGame(), `.title-item${hasSaves ? '' : '.active-default'}`),
         this.button('Load', () => this.openMenu('load', { fromTitle: true }), '.title-item'),
         this.story.endings.length && this.button(`Endings  ${endingsFound}/${this.story.endings.length}`, () => this.openMenu('endings', { fromTitle: true }), '.title-item'),
+        this.button('Flowchart', () => this.openMenu('flowchart', { fromTitle: true }), '.title-item'),
         this.button('Settings', () => this.openMenu('settings', { fromTitle: true }), '.title-item'),
         this.button('Help', () => this.openMenu('help', { fromTitle: true }), '.title-item'),
-        this.button('Flowchart', () => this.openMenu('flowchart', { fromTitle: true }), '.title-item'),
         this.button('Quit', async () => { await this.farewell(); }, '.title-item'),
       ].filter(Boolean);
 
@@ -899,26 +901,33 @@
         const sparks = h('canvas.in-sparks');
         const el = h(`div.overlay.intro${reduce ? '.still' : ''}`, { style: { '--c': color, '--c-rgb': rgb } },
           h('div.in-dim'),
+          // a huge faint kanji behind everything, and lines rushing out from the portrait
+          kanji ? h('div.in-bigkanji', [...kanji].slice(0, 2).join('')) : null,
+          h('div.in-speed'),
           h('div.in-band', h('div.in-band-fill'), threads, h('i.in-edge.top'), h('i.in-edge.bottom'), h('i.in-streak')),
+          h('i.in-streak2'),
           sparks,
-          face ? h('div.in-portrait', h('div.in-portrait-img', { style: { backgroundImage: `url("${face}")` } }), h('i.in-portrait-shine')) : null,
+          face ? h('div.in-portrait', h('div.in-portrait-img', { style: { backgroundImage: `url("${face}")` } }), h('i.in-portrait-shine'), h('i.in-portrait-flash')) : null,
           h('div.in-text',
             reveal ? h('div.in-eyebrow', h('span.in-deai', '名前'), h('span', 'A NAME, AT LAST')) : h('div.in-eyebrow', h('span.in-deai', '出会い'), h('span', 'A FIRST MEETING')),
-            h('div.in-names', oldName, nameEl),
+            h('div.in-names', h('i.in-brush'), oldName, nameEl),
             h('div.in-rule'),
             h('div.in-sub', subtitle),
             sealEl),
-          h('div.in-flash'));
+          h('div.in-flash'),
+          h('i.in-bar.top'), h('i.in-bar.bottom'));
         let entry;
         let raf = 0;
         const born = performance.now();
         const timers = [];
+        let lift = null;
         const finish = () => {
           if (!entry) return;
           const e = entry;
           entry = null;
           this.cardEntry = null;
           timers.forEach(clearTimeout);
+          if (lift) lift();
           e.removeAfter = reduce ? 300 : 650;
           this.close(e);
           setTimeout(() => cancelAnimationFrame(raf), e.removeAfter);
@@ -930,12 +939,24 @@
         entry = this.open(el, { onKey: (e) => { if ([' ', 'Enter', 'Escape'].includes(e.key)) tryFinish(); return true; }, onBack: tryFinish, focus: false });
         entry.cleanup = () => { timers.forEach(clearTimeout); cancelAnimationFrame(raf); };
         this.cardEntry = entry;
-        timers.push(setTimeout(finish, reduce ? 3200 : 4300));
+        timers.push(setTimeout(finish, reduce ? 3600 : 5600));
+        // their own theme plays over the moment, and the scene's music steps back for it
+        const theme = VN.SYNTH_SOUNDS && VN.SYNTH_SOUNDS[`theme_${id}`] ? `theme_${id}` : null;
+        const music = this.audio.music;
+        if (theme) {
+          music.duck(0.18, 0.4);
+          lift = () => { if (music.duckLevel === 0.18) music.duck(1, 2); };
+          timers.push(setTimeout(lift, 5400));
+          entry.cleanup = ((old) => () => { old(); lift(); })(entry.cleanup);
+        }
         this.audio.fx('whoosh', { volume: 0.9 });
-        this.audio.fx('sparkle', { volume: 0.6, delay: 0.35 });
-        if (kanji) this.audio.fx('stamp', { volume: 0.8, delay: 1.75 });
-        this.audio.fx(sound || 'chime', { volume: 0.75, delay: 1.8 });
+        if (theme) this.audio.fx(theme, { volume: 0.95 * ({ herve: 0.7, harakei: 0.65, blanche: 1.25, balbadiou: 1.1 }[id] || 1), delay: 0.1 });
+        else this.audio.fx(sound || 'chime', { volume: 0.75, delay: 1.8 });
+        this.audio.fx('sparkle', { volume: 0.5, delay: 0.35 });
+        if (kanji) this.audio.fx('stamp', { volume: 0.8, delay: 1.45 });
         if (reduce) return;
+        // the seal lands hard enough to shake the picture
+        if (kanji) timers.push(setTimeout(() => this.stageEl.animate([{ transform: 'none' }, { transform: 'translate(5px, 3px)' }, { transform: 'translate(-4px, -2px)' }, { transform: 'translate(2px, 1px)' }, { transform: 'none' }], { duration: 380, easing: 'ease-out' }), 1480));
         const field = sparkField(sparks, 'tinted', rgb);
         const loop = (t) => { field.step(t); raf = requestAnimationFrame(loop); };
         raf = requestAnimationFrame(loop);
@@ -943,8 +964,10 @@
           const r = node.getBoundingClientRect(), c = sparks.getBoundingClientRect();
           if (c.width && r.width) field.burst((r.left + r.width / 2 - c.left) / c.width, (r.top + r.height / 2 - c.top) / c.height);
         }, when));
-        burstAt(nameEl, reveal ? 1500 : 380);
-        if (sealEl) burstAt(sealEl, 1780);
+        const portrait = el.querySelector('.in-portrait');
+        if (portrait) burstAt(portrait, 420);
+        burstAt(nameEl, reveal ? 1500 : 700);
+        if (sealEl) { burstAt(sealEl, 1480); burstAt(sealEl, 1520); }
       });
     }
 
