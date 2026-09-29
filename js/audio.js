@@ -148,6 +148,8 @@
       this.unlocked = false;
       this.unlockCallbacks = [];
       this.lastBlip = 0;
+      this.bab = null;
+      this.narrator = new Narrator(settings);
     }
 
     get musicVolume() { return this.settings.musicVolume; }
@@ -289,6 +291,36 @@
       }
     }
 
+    // ---- voices ------------------------------------------------------------
+    get voiceVolume() { return this.settings.voiceVolume == null ? 0.8 : this.settings.voiceVolume; }
+
+    /** A character starts a new line: their muffled voice begins a fresh phrase. */
+    voiceLine(profile) {
+      this.bab = profile && this.settings.charVoices !== false ? { profile, last: 0, gap: 0, n: 0, vowel: 'a', consonant: false } : null;
+      return !!this.bab;
+    }
+
+    /** Each letter typed: now and then it becomes a syllable of the character's voice. */
+    voiceChar(ch) {
+      const b = this.bab;
+      if (!b) return;
+      const low = ch.toLowerCase().normalize('NFD').charAt(0);
+      if (!/\p{L}/u.test(low)) return;
+      if ('aeiouy'.includes(low)) b.vowel = low; else b.consonant = true;
+      const now = performance.now();
+      if (now - b.last < b.gap) return;
+      b.last = now;
+      b.gap = b.profile.pace * (0.75 + Math.random() * 0.55);
+      const S = this.ctx && this.ctx.state === 'running' ? this.getSynth() : null;
+      const vol = 0.26 * this.voiceVolume;
+      if (!S || vol <= 0) return;
+      // a phrase starts a little high and settles as it goes on
+      const bend = 1.05 - Math.min(0.1, b.n * 0.007);
+      b.n++;
+      S.syllable(b.profile, b.vowel, vol * (0.7 + Math.random() * 0.45), bend, b.consonant && Math.random() < 0.6);
+      b.consonant = false;
+    }
+
     blip(freq) {
       if (!this.settings.textBlips) return;
       const now = performance.now();
@@ -298,5 +330,102 @@
     }
   }
 
+  /**
+   * The narrator: narration is read aloud by the best voice the browser has (the system's own
+   * text-to-speech). Browsers differ a lot here: Edge and Chrome offer natural "online" voices,
+   * others only robotic ones, and some none at all, in which case the narrator stays silent.
+   */
+  class Narrator {
+    constructor(settings) {
+      this.settings = settings;
+      this.tts = globalThis.speechSynthesis || null;
+      this.voices = [];
+      this.pronounce = [];
+      this.token = 0;
+      this.held = []; // utterances are kept alive until they finish (Chrome drops their events otherwise)
+      if (this.tts) {
+        const load = () => { try { this.voices = this.tts.getVoices() || []; } catch (e) { this.voices = []; } };
+        load();
+        try { this.tts.addEventListener('voiceschanged', load); } catch (e) { /* older browsers */ }
+      }
+    }
+
+    get available() { return !!this.tts && this.english().length > 0; }
+
+    english() {
+      return this.voices.filter((v) => /^en([-_]|$)/i.test(v.lang || ''));
+    }
+
+    /** The narrator's voice: the one chosen in Settings, else the most natural-sounding man's voice. */
+    pick() {
+      const list = this.english();
+      if (!list.length) return null;
+      const want = this.settings.narratorVoice;
+      if (want) {
+        const v = list.find((x) => x.voiceURI === want || x.name === want);
+        if (v) return v;
+      }
+      return list.slice().sort((a, b) => scoreVoice(b) - scoreVoice(a))[0];
+    }
+
+    /** Read a line aloud. Resolves when it has been read (or straight away if it can't be). */
+    speak(text, { soft = false } = {}) {
+      this.stop();
+      const vol = (this.settings.voiceVolume == null ? 0.8 : this.settings.voiceVolume);
+      if (!this.tts || this.settings.narrator === false || vol <= 0) return Promise.resolve();
+      const voice = this.pick();
+      if (!voice) return Promise.resolve();
+      let spoken = text;
+      for (const [from, to] of this.pronounce) spoken = spoken.split(from).join(to);
+      spoken = spoken.replace(/[“”"]/g, '').replace(/\s*[—–]\s*/g, ', ').replace(/…/g, '...').replace(/\s+/g, ' ').trim();
+      if (!/[\p{L}\p{N}]/u.test(spoken)) return Promise.resolve();
+      const token = ++this.token;
+      const rate = (this.settings.narratorRate || 1) * (soft ? 0.92 : 0.97);
+      // long lines are read a sentence at a time (some online voices stop after ~15 seconds)
+      const parts = spoken.match(/[^.!?]+[.!?]+["')\]]*|[^.!?]+$/g) || [spoken];
+      return new Promise((resolve) => {
+        let i = 0;
+        const next = () => {
+          if (token !== this.token) { resolve(); return; }
+          if (i >= parts.length) { this.held = []; resolve(); return; }
+          const u = new SpeechSynthesisUtterance(parts[i++].trim());
+          u.voice = voice;
+          u.lang = voice.lang;
+          u.rate = rate;
+          u.pitch = soft ? 0.9 : 0.96;
+          u.volume = Math.min(1, vol * (soft ? 0.85 : 1));
+          u.onend = next;
+          u.onerror = () => { if (token === this.token) { this.held = []; resolve(); } };
+          this.held.push(u);
+          try { this.tts.speak(u); } catch (e) { resolve(); }
+        };
+        next();
+        this.finish = resolve;
+      });
+    }
+
+    stop() {
+      this.token++;
+      if (this.finish) { const f = this.finish; this.finish = null; f(); }
+      if (this.tts && (this.tts.speaking || this.tts.pending)) { try { this.tts.cancel(); } catch (e) { /* ignore */ } }
+      this.held = [];
+    }
+  }
+
+  function scoreVoice(v) {
+    const n = `${v.name} ${v.voiceURI}`;
+    let s = 0;
+    if (/natural|neural|online|premium|enhanced/i.test(n)) s += 50;
+    if (/google uk english male/i.test(n)) s += 40;
+    if (/\b(daniel|arthur|ryan|guy|george|thomas|oliver|christopher|eric|roger|brian|william|andrew|davis|tony|jason|steffan|noah|evan|alfie|elliot|ethan)\b/i.test(n)) s += 30;
+    if (/\b(male|man)\b/i.test(n) && !/female/i.test(n)) s += 20;
+    if (/en[-_]gb/i.test(v.lang)) s += 12;
+    else if (/en[-_](ie|au|ca)/i.test(v.lang)) s += 6;
+    if (v.localService === false) s += 5;
+    if (/compact|espeak|robot|whisper|zarvox|trinoids|albert|bad news|bells|boing|bubbles|cellos|jester|organ|superstar|wobble|novelty|fred|junior|ralph/i.test(n)) s -= 80;
+    return s;
+  }
+
+  VN.Narrator = Narrator;
   VN.AudioSystem = AudioSystem;
 })();

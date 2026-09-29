@@ -1982,6 +1982,20 @@ html, body {
 .set-row small { font-size: 15px; color: var(--muted); }
 .set-row output { min-width: 90px; text-align: right; color: var(--gold); font-size: 18px; }
 .set-row .btn { font-size: 18px; padding: 6px 32px 8px; grid-column: 2 / 4; }
+.set-row.voice-row { grid-template-columns: 1fr auto; }
+.set-row.voice-row label { grid-column: 1 / -1; }
+.set-row.voice-row .btn { grid-column: auto; padding: 4px 18px 6px; font-size: 16px; }
+.set-row select {
+  min-width: 0;
+  max-width: 100%;
+  font: inherit;
+  font-size: 16px;
+  color: #f1e6cf;
+  background: rgba(20, 14, 10, 0.8);
+  border: 2px solid #5a4128;
+  padding: 5px 8px;
+}
+.set-row select option { background: #1b140e; color: #f3e9d2; }
 .set-preview {
   min-height: 64px;
   padding: 12px 16px;

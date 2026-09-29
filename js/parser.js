@@ -106,6 +106,12 @@
           else if (k === 'sprite') ch.sprite = v;
           else if (k === 'chibi') ch.chibi = v;
           else if (k === 'face') ch.face = v === 'none' ? null : v;
+          // voice=120 pace=130 muffle=1100 breath=0.3 — the muffled "speech" heard while they talk
+          else if (k === 'voice') ch.voice = v === 'none' ? null : Object.assign(ch.voice || { pace: 125, muffle: 1100, breath: 0 }, { pitch: parseFloat(v) || 120 });
+          else if (k === 'pace' || k === 'muffle' || k === 'breath') {
+            ch.voice = ch.voice || { pitch: 120, pace: 125, muffle: 1100, breath: 0 };
+            ch.voice[k] = parseFloat(v) || 0;
+          }
           else err(L, `Unknown character option "${t.v}"`);
         }
         story.characters[id] = ch;
@@ -386,6 +392,11 @@
           // routes -4 3 — at or below the first number the route is "lost", at or above the second "devoted"
           need(3, 'routes lostAtOrBelow devotedAtOrAbove');
           story.routeBounds = [parseFloat(tk[1].v), parseFloat(tk[2].v)];
+          return;
+        case 'pronounce':
+          // pronounce "Hervé" "Air-vay" — how the narrator's voice should say a name
+          need(3, 'pronounce "Word" "How to say it"');
+          (story.pronounce = story.pronounce || []).push([str(tk[1], 'pronounce "Word" "Say it"'), str(tk[2], 'pronounce "Word" "Say it"')]);
           return;
         case 'choicetime':
           // choicetime 14 — how many seconds every choice waits before Hervé hesitates (0 = no timer)

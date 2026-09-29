@@ -1130,7 +1130,8 @@
             slider('set-music', 'Music volume', 0, 1, 0.05, () => s.musicVolume, (v) => { s.musicVolume = v; this.audio.refreshVolumes(); }, (v) => `${Math.round(v * 100)}%`),
             slider('set-sfx', 'Sound volume', 0, 1, 0.05, () => s.sfxVolume, (v) => { s.sfxVolume = v; }, (v) => `${Math.round(v * 100)}%`),
             toggle('set-ui', 'Menu sounds', 'uiSounds'),
-            toggle('set-blips', 'Text blips', 'textBlips', 'Soft ticks while text types')),
+            toggle('set-blips', 'Text blips', 'textBlips', 'Soft ticks while narration types')),
+          this.voiceSettings(slider, toggle, commit),
           h('section.set-group',
             h('h3', 'Display'),
             toggle('set-focus', 'Highlight the speaker', 'focus'),
@@ -1143,6 +1144,33 @@
       runPreview();
     }
   }
+
+  /** Settings: the characters' muffled voices and the narrator. */
+  UI.prototype.voiceSettings = function (slider, toggle, commit) {
+    const s = this.settings;
+    const nar = this.audio.narrator;
+    const pick = h('select#set-voice', { 'aria-label': 'Narrator voice' });
+    const fill = () => {
+      const list = nar.english();
+      const best = nar.pick();
+      // "Microsoft Ryan Online (Natural) - English (United Kingdom)" -> "Ryan (Natural), en-GB"
+      const short = (v) => `${v.name.replace(/^(Microsoft|Google|Apple)\s+/, '').replace(/\s*-\s*English.*$/, '').replace(/\bOnline\s*/, '')}`;
+      pick.replaceChildren(h('option', { value: '' }, best ? `Automatic: ${short(best)}` : 'Automatic'),
+        ...list.map((v) => h('option', { value: v.voiceURI }, `${short(v)}, ${v.lang}`)));
+      pick.value = list.some((v) => v.voiceURI === s.narratorVoice) ? s.narratorVoice : '';
+    };
+    fill();
+    if (nar.tts) { try { nar.tts.addEventListener('voiceschanged', fill); } catch (e) { /* older browsers */ } }
+    pick.addEventListener('change', () => { s.narratorVoice = pick.value; commit(); nar.speak('The mulberry trees were bare, and the whole valley waited.'); });
+    const hear = this.button('Listen', () => nar.speak('That year, the silkworms began to die.'));
+    return h('section.set-group',
+      h('h3', 'Voices'),
+      slider('set-voicevol', 'Voice volume', 0, 1, 0.05, () => (s.voiceVolume == null ? 0.8 : s.voiceVolume), (v) => { s.voiceVolume = v; }, (v) => `${Math.round(v * 100)}%`),
+      toggle('set-charvoices', 'Character voices', 'charVoices', 'A murmur of speech while someone talks'),
+      toggle('set-narrator', 'Narrator voice', 'narrator', nar.tts ? 'Narration read aloud by your browser\'s voice' : 'This browser has no voices'),
+      h('div.set-row.voice-row', h('label', { for: 'set-voice' }, 'Narrator', h('small', 'Voices depend on your browser and device')), pick, hear),
+      slider('set-rate', 'Narrator speed', 0.7, 1.3, 0.05, () => s.narratorRate || 1, (v) => { s.narratorRate = v; }, (v) => `${Math.round(v * 100)}%`));
+  };
 
   function toggleFullscreen() {
     try {

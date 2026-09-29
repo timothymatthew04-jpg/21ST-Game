@@ -45,13 +45,23 @@ warning "SILK is a branching story adapted from Alessandro Baricco's novel.\n\nY
 
 # ---------------------------------------------------------------- characters
 # Hervé is the player. His spoken lines use "herve"; his inner thoughts use "inner".
-character herve     "Hervé"          color=#e9c46a blip=440
+character herve     "Hervé"          color=#e9c46a blip=440 voice=112 pace=125
 character inner     ""               color=#cbbef0 italic face=none
-character helene    "Hélène"         color=#f4a7b9 blip=620
-character balbadiou "Balbadiou"      color=#9ccf9f blip=380
-character harakei   "Hara Kei"       color=#e0503c blip=300
-character woman     "???"            color=#f6ecdb blip=700
-character blanche   "Madame Blanche" color=#b7c4ff blip=520
+character helene    "Hélène"         color=#f4a7b9 blip=620 voice=215 pace=120 breath=0.2
+character balbadiou "Balbadiou"      color=#9ccf9f blip=380 voice=98 pace=100 muffle=1250
+character harakei   "Hara Kei"       color=#e0503c blip=300 voice=86 pace=165 muffle=950
+character woman     "???"            color=#f6ecdb blip=700 voice=240 pace=150 breath=0.45 muffle=1000
+character blanche   "Madame Blanche" color=#b7c4ff blip=520 voice=185 pace=135 breath=0.15
+
+# Characters murmur while they talk (voice= pitch in Hz, pace= ms per syllable, muffle= how
+# muffled, breath= how breathy). Narration is read aloud by the browser's own voice; these lines
+# tell it how to say the French names.
+pronounce "Hervé"       "Air-vay"
+pronounce "Joncour"     "Zhon-coor"
+pronounce "Hélène"      "Ay-lenn"
+pronounce "Balbadiou"   "Bal-ba-dyoo"
+pronounce "Lavilledieu" "La-veel-dyuh"
+pronounce "Blanche"     "Blonsh"
 
 # Each character's picture is assets/sprites/<id>/neutral.png, and their face in the
 # text box is assets/faces/<id>.png. The face appears when they speak without standing

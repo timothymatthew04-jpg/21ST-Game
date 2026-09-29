@@ -356,7 +356,62 @@
       setTimeout(() => out.disconnect(), (delay + 12) * 1000);
       return true;
     }
+
+    // -------------------------------------------------------------- muffled voices
+    /**
+     * One syllable of a character's voice, heard as if through a wall: a buzzing source shaped by
+     * the two formants of a vowel, then low-passed, so it sounds like speech without words.
+     * `profile` is { pitch (Hz), muffle (low-pass Hz), breath (0..1) }; `bend` shifts the pitch
+     * for intonation, and `consonant` adds a soft click before the vowel.
+     */
+    syllable({ pitch = 120, muffle = 1100, breath = 0 }, vowel, vol, bend = 1, consonant = false) {
+      const ctx = this.ctx;
+      if (!this.voiceOut) {
+        // voices skip the music's compressor, so speaking never pumps the music; a touch of the hall
+        this.voiceOut = ctx.createGain();
+        this.voiceOut.connect(ctx.destination);
+        const send = ctx.createGain();
+        send.gain.value = 0.1;
+        this.voiceOut.connect(send).connect(this.reverb);
+      }
+      const t = ctx.currentTime + 0.004;
+      const [f1, f2] = VOWELS[vowel] || VOWELS.a;
+      const tract = pitch > 165 ? 1.17 : 1; // a shorter voice has higher formants
+      const dur = 0.075 + Math.random() * 0.06;
+      const f0 = pitch * bend * (0.95 + Math.random() * 0.1);
+      const lp = ctx.createBiquadFilter();
+      lp.type = 'lowpass';
+      lp.frequency.value = muffle;
+      lp.Q.value = 0.6;
+      const env = ctx.createGain();
+      env.gain.setValueAtTime(0.0001, t);
+      env.gain.exponentialRampToValueAtTime(vol, t + 0.02);
+      env.gain.setValueAtTime(vol, t + dur * 0.55);
+      env.gain.exponentialRampToValueAtTime(0.0001, t + dur + 0.06);
+      lp.connect(env).connect(this.voiceOut);
+      const osc = ctx.createOscillator();
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(f0 * 1.03, t);
+      osc.frequency.exponentialRampToValueAtTime(f0 * 0.96, t + dur + 0.05);
+      // the chest of the voice, and the two formants of the vowel
+      for (const [type, f, q, g] of [['lowpass', 320, 0.7, 0.5], ['bandpass', f1 * tract, 5, 2.2], ['bandpass', f2 * tract, 8, 1.3]]) {
+        const flt = ctx.createBiquadFilter();
+        flt.type = type;
+        flt.frequency.value = f;
+        flt.Q.value = q;
+        const gg = ctx.createGain();
+        gg.gain.value = g;
+        osc.connect(flt).connect(gg).connect(lp);
+      }
+      osc.start(t);
+      osc.stop(t + dur + 0.1);
+      if (breath > 0) this.noise(lp, t, dur, { f: f2 * tract, q: 2, gain: 0.35 * breath, attack: 0.02 });
+      if (consonant) this.noise(lp, t - 0.002, 0.03, { f: 1800 + Math.random() * 1500, q: 1.2, gain: 0.5, attack: 0.002 });
+    }
   }
+
+  // Formants (Hz) of the vowels a man's voice makes; accented letters count as their plain vowel.
+  const VOWELS = { a: [730, 1090], e: [530, 1840], i: [300, 2250], o: [570, 840], u: [320, 900], y: [300, 2000] };
 
   // ---------------------------------------------------------------- composition helpers
   const SCALES = {
