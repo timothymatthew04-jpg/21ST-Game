@@ -9,6 +9,8 @@
  *   map     Hervé's route crossing the journey map, the camera following it
  *   letter  a sheet of paper and its words being written, column by column
  *
+ * A shot can also bring in the game's glowing brush logo (logo: true, logoAt: seconds).
+ *
  * Click (or Space) moves on to the next shot; Esc, right-click or "Skip" ends it.
  */
 (function () {
@@ -21,7 +23,8 @@
   const mercDeg = (lat) => (Math.log(Math.tan(Math.PI / 4 + (lat * Math.PI) / 360)) * 180) / Math.PI;
   const mapXY = (lon, lat) => [(lon - MAP.lon0) * MAP.k, (mercDeg(MAP.latTop) - mercDeg(lat)) * MAP.k];
 
-  const FX_TYPES = ['petals', 'leaves', 'foliage', 'snow', 'ash', 'rain', 'fireflies', 'motes', 'glints', 'stars', 'smoke', 'steam', 'embers', 'birds', 'flutter', 'glow', 'flame', 'rays', 'mist', 'rock'];
+  // the same effects a background can have (the list lives in parser.js)
+  const FX_TYPES = VN.BG_FX;
   /** "snow=1.2 flame=0.5,0.4,0.03,#ffc070" → effect specs, as in the script's bgfx lines. */
   function parseFx(str) {
     if (!str) return [];
@@ -195,6 +198,13 @@
       this.leak.classList.add('go');
       if (titleEl) at((shot.titleAt || 0.5) + 0.35, () => { this.burstAt(titleEl); this.flare(); this.audio.fx('sparkle', { volume: 0.5 }); });
       if (kanjiEl) at(0.6, () => this.burstAt(kanjiEl));
+      // the game's own glowing brush logo, painting itself in over the shot
+      if (shot.logo && VN.buildBrushLogo) at(shot.logoAt == null ? 1 : shot.logoAt, () => {
+        const logo = h('div.cs-logo', VN.buildBrushLogo(this.story.title || 'Silk', typeof shot.logo === 'string' ? shot.logo : '', { animate: !this.reduce }));
+        el.append(logo);
+        this.audio.fx('sparkle', { volume: 0.5 });
+        this.later(1700, () => { this.burstAt(logo); this.flare(); });
+      });
       if (trans === 'white') at(0.25, () => this.flare());
       // words, sounds, flashes and shakes
       this.caption.classList.remove('on');

@@ -2457,6 +2457,334 @@ window.VN_SCENERY = {
    }
   ]
  },
+ "op_grass": {
+  "flat": "assets/scenes/op_grass/flat.png",
+  "vignette": [
+   0.28,
+   "40,26,10"
+  ],
+  "layers": [
+   {
+    "id": "sky",
+    "x": 0,
+    "y": 0,
+    "w": 480,
+    "h": 270,
+    "depth": 0,
+    "anim": null,
+    "src": "assets/scenes/op_grass/sky.png"
+   },
+   {
+    "id": "clouds",
+    "x": 0,
+    "y": 27,
+    "w": 480,
+    "h": 62,
+    "depth": 0.04,
+    "anim": {
+     "type": "drift",
+     "t": 300
+    },
+    "src": "assets/scenes/op_grass/clouds.png"
+   },
+   {
+    "id": "far",
+    "x": 0,
+    "y": 108,
+    "w": 480,
+    "h": 162,
+    "depth": 0.07,
+    "anim": null,
+    "src": "assets/scenes/op_grass/far.png"
+   },
+   {
+    "id": "hills",
+    "x": 0,
+    "y": 145,
+    "w": 480,
+    "h": 29,
+    "depth": 0.14,
+    "anim": null,
+    "src": "assets/scenes/op_grass/hills.png"
+   },
+   {
+    "id": "field",
+    "x": 0,
+    "y": 164,
+    "w": 480,
+    "h": 106,
+    "depth": 0.25,
+    "anim": null,
+    "src": "assets/scenes/op_grass/field.png"
+   },
+   {
+    "id": "tree",
+    "x": 84,
+    "y": 118,
+    "w": 67,
+    "h": 52,
+    "depth": 0.2,
+    "anim": {
+     "type": "sway",
+     "a": 0.6,
+     "t": 7,
+     "oy": 1
+    },
+    "src": "assets/scenes/op_grass/tree.png"
+   },
+   {
+    "id": "path",
+    "x": 198,
+    "y": 172,
+    "w": 86,
+    "h": 98,
+    "depth": 0.3,
+    "anim": null,
+    "src": "assets/scenes/op_grass/path.png"
+   },
+   {
+    "id": "susuki_mid",
+    "x": 5,
+    "y": 180,
+    "w": 475,
+    "h": 55,
+    "depth": 0.45,
+    "anim": {
+     "type": "sway",
+     "a": 1.1,
+     "t": 4.6,
+     "oy": 1
+    },
+    "src": "assets/scenes/op_grass/susuki_mid.png"
+   },
+   {
+    "id": "susuki_front",
+    "x": 0,
+    "y": 184,
+    "w": 480,
+    "h": 86,
+    "depth": 0.85,
+    "anim": {
+     "type": "sway",
+     "a": 2,
+     "t": 3.8,
+     "oy": 1
+    },
+    "src": "assets/scenes/op_grass/susuki_front.png"
+   }
+  ]
+ },
+ "op_sky": {
+  "flat": "assets/scenes/op_sky/flat.png",
+  "vignette": [
+   0.3,
+   "20,10,40"
+  ],
+  "layers": [
+   {
+    "id": "sky",
+    "x": 0,
+    "y": 0,
+    "w": 480,
+    "h": 270,
+    "depth": 0,
+    "anim": null,
+    "src": "assets/scenes/op_sky/sky.png"
+   },
+   {
+    "id": "high",
+    "x": 0,
+    "y": 55,
+    "w": 480,
+    "h": 75,
+    "depth": 0.03,
+    "anim": {
+     "type": "drift",
+     "t": 420
+    },
+    "src": "assets/scenes/op_sky/high.png"
+   },
+   {
+    "id": "mountain",
+    "x": 180,
+    "y": 97,
+    "w": 300,
+    "h": 117,
+    "depth": 0.06,
+    "anim": null,
+    "src": "assets/scenes/op_sky/mountain.png"
+   },
+   {
+    "id": "sea_back",
+    "x": 0,
+    "y": 158,
+    "w": 480,
+    "h": 112,
+    "depth": 0.1,
+    "anim": {
+     "type": "drift",
+     "t": 380
+    },
+    "src": "assets/scenes/op_sky/sea_back.png"
+   },
+   {
+    "id": "sea_mid",
+    "x": 0,
+    "y": 182,
+    "w": 480,
+    "h": 88,
+    "depth": 0.18,
+    "anim": {
+     "type": "drift",
+     "t": 260
+    },
+    "src": "assets/scenes/op_sky/sea_mid.png"
+   },
+   {
+    "id": "sea_front",
+    "x": 0,
+    "y": 214,
+    "w": 480,
+    "h": 56,
+    "depth": 0.32,
+    "anim": {
+     "type": "drift",
+     "t": 160
+    },
+    "src": "assets/scenes/op_sky/sea_front.png"
+   }
+  ]
+ },
+ "op_sunset": {
+  "flat": "assets/scenes/op_sunset/flat.png",
+  "vignette": [
+   0.35,
+   "30,10,30"
+  ],
+  "layers": [
+   {
+    "id": "sky",
+    "x": 0,
+    "y": 0,
+    "w": 480,
+    "h": 270,
+    "depth": 0,
+    "anim": null,
+    "src": "assets/scenes/op_sunset/sky.png"
+   },
+   {
+    "id": "clouds",
+    "x": 0,
+    "y": 40,
+    "w": 480,
+    "h": 73,
+    "depth": 0.05,
+    "anim": {
+     "type": "drift",
+     "t": 340
+    },
+    "src": "assets/scenes/op_sunset/clouds.png"
+   },
+   {
+    "id": "far",
+    "x": 0,
+    "y": 139,
+    "w": 480,
+    "h": 131,
+    "depth": 0.08,
+    "anim": null,
+    "src": "assets/scenes/op_sunset/far.png"
+   },
+   {
+    "id": "sea",
+    "x": 0,
+    "y": 168,
+    "w": 480,
+    "h": 102,
+    "depth": 0.12,
+    "anim": null,
+    "src": "assets/scenes/op_sunset/sea.png"
+   },
+   {
+    "id": "boat70",
+    "x": 58,
+    "y": 172,
+    "w": 23,
+    "h": 17,
+    "depth": 0.2,
+    "anim": {
+     "type": "bob",
+     "a": 1,
+     "t": 5.5
+    },
+    "src": "assets/scenes/op_sunset/boat70.png"
+   },
+   {
+    "id": "boat410",
+    "x": 396,
+    "y": 177,
+    "w": 28,
+    "h": 21,
+    "depth": 0.2,
+    "anim": {
+     "type": "bob",
+     "a": 1,
+     "t": 6.5
+    },
+    "src": "assets/scenes/op_sunset/boat410.png"
+   },
+   {
+    "id": "torii",
+    "x": 278,
+    "y": 142,
+    "w": 104,
+    "h": 87,
+    "depth": 0.4,
+    "anim": null,
+    "src": "assets/scenes/op_sunset/torii.png"
+   },
+   {
+    "id": "torii_reflection",
+    "x": 278,
+    "y": 227,
+    "w": 104,
+    "h": 41,
+    "depth": 0.4,
+    "anim": {
+     "type": "wave",
+     "a": 0.6,
+     "t": 3
+    },
+    "src": "assets/scenes/op_sunset/torii_reflection.png"
+   },
+   {
+    "id": "shore",
+    "x": 0,
+    "y": 214,
+    "w": 170,
+    "h": 56,
+    "depth": 0.7,
+    "anim": null,
+    "src": "assets/scenes/op_sunset/shore.png"
+   },
+   {
+    "id": "pine",
+    "x": 3,
+    "y": 100,
+    "w": 106,
+    "h": 129,
+    "depth": 0.8,
+    "anim": {
+     "type": "sway",
+     "a": 0.8,
+     "t": 6.5,
+     "ox": 0,
+     "oy": 1
+    },
+    "src": "assets/scenes/op_sunset/pine.png"
+   }
+  ]
+ },
  "road_east": {
   "flat": "assets/scenes/road_east/flat.png",
   "vignette": [

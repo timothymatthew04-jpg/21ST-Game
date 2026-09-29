@@ -200,6 +200,16 @@
     },
 
     // ---------------------------------------------------------------- the endings
+    // ---------------------------------------------------------------- the opening: Japan, before the story reaches it
+    opening: {
+      shots: [
+        { bg: 'op_sky', dur: 8.5, cam: [[1.75, 0.42, 0.18], [1.12, 0.55, 0.52]], ease: 'cubic-bezier(0.45, 0, 0.25, 1)', kanji: '空', sound: [['wind_gust', 0.3, 0.3], ['chime', 3.2, 0.3]] },
+        { bg: 'op_grass', dur: 7.5, cam: [[1.5, 0.22, 0.72], [1.1, 0.58, 0.62]], kanji: '風', fade: 1.6, sound: [['wind_gust', 0.6, 0.45], ['wind_gust', 4.4, 0.35]] },
+        { bg: 'op_grass', dur: 5, cam: [[2.0, 0.84, 0.66], [2.4, 0.8, 0.58]], fade: 1.2, fx: 'motes=0.5,0.3,0.5,0.6,40,#fffbe0', sound: [['wind_gust', 0.8, 0.5]] },
+        { bg: 'op_sunset', dur: 10, cam: [[1.45, 0.38, 0.62], [1.04, 0.52, 0.5]], trans: 'white', logo: true, logoAt: 2.2, kanji: '絹', sound: [['temple_bell', 0.9, 0.5], ['swell', 2.4, 0.35]] },
+      ],
+    },
+
     // ---------------------------------------------------------------- Chapter 1: the army camp
     camp: {
       shots: [

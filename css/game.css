@@ -1472,15 +1472,17 @@ html, body {
 .splash-seal + .splash-title { margin-top: 0; }
 
 /* glowing menu to match */
-.glow-ui .title-block { left: 18px; top: -34px; }
+.glow-ui .title-block { left: 18px; top: -50px; }
 /* the logo is decoration: never let its glow area block clicks on the menu */
 .title-block, .title-block * { pointer-events: none; }
 .glow-ui .title-block::before { display: none; }
-.glow-ui .title-menu { left: 104px; top: 432px; gap: 6px; }
+/* seven items: they end well above the credit line at the bottom */
+.glow-ui .title-menu { left: 104px; top: 404px; gap: 2px; }
 .glow-ui .title-item {
   font-family: 'Julius Sans One', 'Josefin Sans', sans-serif;
   font-weight: 400;
-  font-size: 24px;
+  font-size: 22px;
+  line-height: 1.3;
   letter-spacing: 0.16em;
   text-transform: uppercase;
   color: #fffaf0 !important;
@@ -3412,3 +3414,8 @@ input[type='range']::-moz-range-thumb { width: 18px; height: 24px; background: v
 @keyframes wk-fade-in { from { opacity: 1; } to { opacity: 0; } }
 .overlay.walk.leaving .wk-fade { animation: wk-fade-out 0.7s ease both; }
 @keyframes wk-fade-out { from { opacity: 0; } to { opacity: 1; } }
+
+/* ---- the brush logo in a cutscene (the opening) --------------------------------------------- */
+.cs-logo { position: absolute; left: 50%; top: 44%; width: 600px; transform: translate(-50%, -50%); z-index: 3; pointer-events: none; animation: cs-logo-in 1.6s ease both; }
+.cs-logo .brush-logo { width: 100%; }
+@keyframes cs-logo-in { from { opacity: 0; transform: translate(-50%, -46%) scale(0.96); filter: blur(6px); } to { opacity: 1; transform: translate(-50%, -50%); filter: none; } }

@@ -398,6 +398,98 @@
     }
   }
 
+  // ---------------------------------------------------------------- grass in the wind
+  /** Mix two #rrggbb colours: t = 0 gives a, 1 gives b. */
+  function mix(a, b, t) {
+    const pa = parseInt(a.slice(1), 16), pb = parseInt(b.slice(1), 16);
+    const ch = (sh) => Math.round(((pa >> sh) & 255) * (1 - t) + ((pb >> sh) & 255) * t);
+    return `rgb(${ch(16)},${ch(8)},${ch(0)})`;
+  }
+
+  /**
+   * grass=y,h,density,plumes,#tip — blades rooted from y (a fraction of the picture) to the bottom,
+   * up to h tall, nearer ones taller. A steady breeze, and every few seconds a gust that runs across
+   * the field and lays the grass over as it passes. Some blades carry silver-grass plumes.
+   */
+  class Grass {
+    constructor(nums, color) {
+      const [y = 0.8, hh = 0.2, density = 1, plumes = 0.25] = nums;
+      Object.assign(this, { y0: y, hh, density, plumes, tip: color || '#e8d49a' });
+      this.gust = { x: -200, v: 110, next: rnd(1, 4) };
+    }
+    resize(W, H) {
+      this.W = W;
+      this.H = H;
+      const top = this.y0 * H;
+      const n = Math.round(W * 0.85 * this.density);
+      const base = '#2e3418';
+      this.blades = [];
+      for (let i = 0; i < n; i++) {
+        const d = Math.pow(Math.random(), 0.65);
+        const by = top + d * (H - top + 3);
+        this.blades.push({
+          x: rnd(-6, W + 6), y: by, d,
+          len: this.hh * H * (0.35 + 0.65 * d) * rnd(0.6, 1.1),
+          flex: rnd(0.7, 1.3), ph: rnd(0, TAU),
+          plume: Math.random() < this.plumes,
+          bucket: Math.min(3, Math.floor(d * 4)),
+        });
+      }
+      this.blades.sort((a, b) => a.y - b.y);
+      // four depths, far ones hazier and lighter, near ones darker; tips catch the light
+      this.cols = [0, 1, 2, 3].map((k) => mix(this.tip, base, 0.25 + k * 0.17));
+      this.tipCols = [0, 1, 2, 3].map((k) => mix(this.tip, '#ffffff', 0.25 - k * 0.06));
+    }
+    wind(x, t) {
+      const g = this.gust;
+      const gust = Math.exp(-Math.pow((x - g.x) / 55, 2)) * 1.3;
+      return 0.35 + 0.28 * Math.sin(t * 1.15 + x * 0.028) + 0.14 * Math.sin(t * 2.4 + x * 0.071) + gust;
+    }
+    step(dt) {
+      if (!this.blades) return;
+      const g = this.gust;
+      if (g.x > this.W + 200) { g.next -= dt; if (g.next <= 0) { g.x = -150; g.v = rnd(90, 150); g.next = rnd(4, 8); } }
+      else g.x += g.v * dt;
+    }
+    draw(c, t) {
+      if (!this.blades) return;
+      c.lineWidth = 1;
+      c.globalAlpha = 1;
+      for (let k = 0; k < 4; k++) {
+        c.strokeStyle = this.cols[k];
+        c.beginPath();
+        for (const b of this.blades) {
+          if (b.bucket !== k) continue;
+          const w = this.wind(b.x, t) * b.flex + Math.sin(t * 3 + b.ph) * 0.06;
+          const tx = b.x + w * b.len * 0.55, ty = b.y - b.len * (1 - 0.18 * w * w);
+          c.moveTo(b.x, b.y);
+          c.quadraticCurveTo(b.x + w * b.len * 0.08, b.y - b.len * 0.6, tx, ty);
+          b.tx = tx; b.ty = ty; b.w = w;
+        }
+        c.stroke();
+        // the light on the tips, and the plumes
+        c.strokeStyle = this.tipCols[k];
+        c.beginPath();
+        for (const b of this.blades) {
+          if (b.bucket !== k) continue;
+          if (b.plume) {
+            const s = 2 + b.d * 4;
+            for (let j = 0; j < 4; j++) {
+              const f = j / 4;
+              const px = b.tx - b.w * s * f * 0.8, py = b.ty + s * f;
+              c.moveTo(px, py);
+              c.lineTo(px + b.w * s * 0.7 + 1, py - s * 0.35);
+            }
+          } else {
+            c.moveTo(b.tx, b.ty);
+            c.lineTo(b.tx - b.w * 1.5, b.ty + 2);
+          }
+        }
+        c.stroke();
+      }
+    }
+  }
+
   // ---------------------------------------------------------------- the per-background controller
   class SceneFx {
     constructor(bgEl, specs, settings, frame = null) {
@@ -420,6 +512,7 @@
           case 'smoke': case 'steam': case 'embers': this.systems.push(new Rising(s.type, n, s.color)); break;
           case 'birds': this.systems.push(new Birds(n)); break;
           case 'flutter': this.systems.push(new Flutter(n)); break;
+          case 'grass': this.systems.push(new Grass(n, s.color)); break;
           case 'glow': case 'flame': lights.push(this.light(s)); break;
           case 'rays': lights.push(this.rays(s)); break;
           case 'mist': lights.push(this.mist(s)); break;

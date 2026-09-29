@@ -143,6 +143,9 @@ bgfx yuki_house rain=1.1,0.208,0.14,0.583,0.585 mist=0.62,0.15,0.3,#b8c4c8 glow=
 bgfx the_cup steam=0.52,0.54,0.9 glow=0.19,0.385,0.06,#ffc070 petals=0.3,0.62,0.07,0.25,0.25
 bgfx the_glove motes=0.1,0,0.7,0.8,22,#fff0c8 rays=0.3,0,1.2,0.5,#fff0c0
 bgfx the_letter flame=0.896,0.29,0.03,#ffc070 motes=0.6,0.1,0.3,0.5,14,#ffe0a0
+bgfx op_sky rays=0.27,0.72,1.4,0.8,#ffd8b0 glow=0.275,0.72,0.2,#ffc8a0 birds=4,0.1,0.35 stars=0,0,1,0.18,16
+bgfx op_grass grass=0.8,0.13,1.2,0.3,#f0dca0 rays=0.775,0.4,1.2,0.7,#fff0c0 motes=0,0.3,1,0.5,36,#fff4d0 flutter=0.1,0.55,0.8,0.25,5 birds=3,0.08,0.3
+bgfx op_sunset glints=0.3,0.64,0.26,0.36,46,#fff0c0 glow=0.43,0.555,0.12,#ffc890 birds=5,0.1,0.32 mist=0.6,0.08,0.25,#ffb8a8
 bgfx forest_camp_night flame=0.429,0.82,0.12,#ff9a40 embers=0.429,0.8,1 smoke=0.429,0.78,0.8,#6a7288 fireflies=0,0.55,1,0.3,14 mist=0.7,0.2,0.3,#b8c8ff rays=0.6,0,0.9,0.45,#b8d0ff flame=0.219,0.79,0.05,#ffb860 glow=0.625,0.096,0.03,#cfe0ff
 
 # Each place has its own sound, which starts when the story arrives there and fades
@@ -288,7 +291,9 @@ label start
   # found_hairpin is set by the walk through the burned village (story/walks.js)
   set found_hairpin = false
   scene black with none
-  centered "THE SOUTH OF FRANCE, 1861"
+  # the opening plays on its own, straight into the story (click to hurry it, Esc to skip)
+  play music japan fadein 3
+  cutscene opening
 
 
 # ============================================================================

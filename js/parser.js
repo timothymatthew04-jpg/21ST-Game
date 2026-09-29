@@ -10,7 +10,9 @@
   const POSITIONS = { farleft: 14, left: 28, center: 50, right: 72, farright: 86 };
   const ASSIGN_RE = /^([A-Za-z_]\w*(?:\.[A-Za-z_]\w*)?)\s*(\+=|-=|\*=|\/=|=)\s*(.+)$/;
   const IDENT_RE = /^[A-Za-z_]\w*$/;
-  const BG_FX = ['petals', 'leaves', 'foliage', 'snow', 'ash', 'rain', 'fireflies', 'motes', 'glints', 'stars', 'smoke', 'steam', 'embers', 'birds', 'flutter', 'glow', 'flame', 'rays', 'mist', 'rock'];
+  const BG_FX = ['petals', 'leaves', 'foliage', 'snow', 'ash', 'rain', 'fireflies', 'motes', 'glints', 'stars', 'smoke', 'steam', 'embers', 'birds', 'flutter', 'glow', 'flame', 'rays', 'mist', 'rock',
+    'grass'];
+  VN.BG_FX = BG_FX;
 
   /** Split a line into bare words and "quoted strings" (with \" and \n escapes). */
   function tokenizeLine(text) {
