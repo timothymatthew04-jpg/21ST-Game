@@ -114,6 +114,7 @@
         noRollback: false,
         choices: [], // what the player chose and how it was felt, for the ending recap
         items: [], // the keepsakes Hervé carries (money is the variable "francs")
+        met: {}, // characters already introduced in this playthrough
       };
     }
 
@@ -801,6 +802,31 @@
       if (!this.isSkipping() && (globalThis.VN_CUTSCENES || {})[ins.name]) {
         const ctx = { ui: this.ui, stage: this.stage, audio: this.audio, settings: this.settings, story: this.story };
         await this.guard(VN.playCutscene(ctx, ins.name));
+      }
+      this.state.pc++;
+    }
+
+    /** The first time we meet someone: a moment that presents them, then the conversation goes on. */
+    async op_introduce(ins) {
+      const met = this.state.met || (this.state.met = {});
+      const ch = this.story.characters[ins.id];
+      if (!met[ins.id] && ch) {
+        met[ins.id] = 1;
+        if (!this.isSkipping()) {
+          const intro = this.story.intros[ins.id] || {};
+          this.ui.textbox.hideBox();
+          this.ui.textbox.hideCentered();
+          this.stage.setSpeaker(this.state.scene.sprites[ins.id] ? ins.id : null);
+          await this.guard(this.ui.introCard({
+            id: ins.id,
+            name: VN.plainName(this.interp(ch.name)),
+            color: ch.color,
+            subtitle: intro.subtitle ? this.interp(intro.subtitle) : '',
+            kanji: intro.kanji,
+            sound: intro.sound,
+            face: ch.face ? VN.assets.lookup('face', ch.face) : null,
+          }));
+        }
       }
       this.state.pc++;
     }

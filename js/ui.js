@@ -137,7 +137,8 @@
   }
 
   /** Gold sparks: a few always drifting up, and a burst on demand (or petals falling, or ash). */
-  function sparkField(cv, kind = 'sparks') {
+  function sparkField(cv, kind = 'sparks', tint = null) {
+    if (kind === 'tinted' && !tint) kind = 'sparks';
     const dpr = Math.min(1.5, window.devicePixelRatio || 1);
     const rect = cv.getBoundingClientRect();
     const W = (cv.width = Math.max(1, Math.round(rect.width * dpr)));
@@ -152,6 +153,8 @@
       sparks: ['rgba(255,250,225,1)', 'rgba(255,214,130,0.9)', 'rgba(255,140,40,0.25)', 'rgba(255,120,30,0)'],
       petals: ['rgba(255,244,248,1)', 'rgba(255,176,204,0.9)', 'rgba(240,110,160,0.25)', 'rgba(240,110,160,0)'],
       ash: ['rgba(255,190,160,0.9)', 'rgba(200,60,50,0.7)', 'rgba(90,20,20,0.3)', 'rgba(60,10,10,0)'],
+      // sparks in a character's own colour ("r,g,b")
+      tinted: ['rgba(255,255,250,1)', `rgba(${tint},0.9)`, `rgba(${tint},0.28)`, `rgba(${tint},0)`],
     }[kind];
     g.addColorStop(0, stops[0]);
     g.addColorStop(0.25, stops[1]);
@@ -203,6 +206,15 @@
         c.globalAlpha = 1;
       },
     };
+  }
+
+  /** "#e0503c" -> "224,80,60" */
+  function hexRgb(hex) {
+    const m = /^#?([0-9a-f]{3}|[0-9a-f]{6})$/i.exec(hex || '');
+    if (!m) return '244,197,66';
+    let x = m[1];
+    if (x.length === 3) x = x.split('').map((c) => c + c).join('');
+    return [0, 2, 4].map((i) => parseInt(x.slice(i, i + 2), 16)).join(',');
   }
 
   class UI {
@@ -841,6 +853,78 @@
           const r = sealEl.getBoundingClientRect(), c = sparks.getBoundingClientRect();
           if (c.width) field.burst((r.left + r.width / 2 - c.left) / c.width, (r.top + r.height / 2 - c.top) / c.height);
         }, 1980);
+      });
+    }
+
+    /**
+     * The first time we meet someone: the scene dims, a band of their colour sweeps across with a
+     * streak of light and silk threads, their portrait slides in, their name rises letter by letter
+     * and a seal is stamped beside who they are. Click to move on; it also ends by itself.
+     */
+    introCard({ id, name, color = '#f4c542', subtitle = '', kanji = null, sound = null, face = null }) {
+      return new Promise((resolve) => {
+        const reduce = this.settings.reduceMotion;
+        const rgb = hexRgb(color);
+        const title = name || '???';
+        const size = Math.round(Math.min(96, 1100 / (Math.max(title.length, 5) * 0.72)));
+        const nameEl = h('div.in-name', { style: { fontSize: `${size}px` } },
+          [...title].map((c, i) => h('span', { style: { animationDelay: `${620 + i * 55}ms` } }, c === ' ' ? '\u00a0' : c)));
+        const threads = VN.h('div.in-threads', {
+          html: `<svg viewBox="0 0 1280 300" preserveAspectRatio="none" aria-hidden="true">${[0, 1, 2, 3, 4].map((i) => {
+            const y = 60 + i * 45, a = 18 + i * 7;
+            return `<path d="M-40 ${y} C 260 ${y - a}, 520 ${y + a}, 820 ${y - a * 0.6} S 1180 ${y + a}, 1330 ${y}" style="animation-delay:${180 + i * 90}ms"/>`;
+          }).join('')}</svg>`,
+        });
+        const sealEl = kanji ? h('div.in-seal', [...kanji].slice(0, 2).map((c) => h('span', c))) : null;
+        const sparks = h('canvas.in-sparks');
+        const el = h(`div.overlay.intro${reduce ? '.still' : ''}`, { style: { '--c': color, '--c-rgb': rgb } },
+          h('div.in-dim'),
+          h('div.in-band', h('div.in-band-fill'), threads, h('i.in-edge.top'), h('i.in-edge.bottom'), h('i.in-streak')),
+          sparks,
+          face ? h('div.in-portrait', h('div.in-portrait-img', { style: { backgroundImage: `url("${face}")` } }), h('i.in-portrait-shine')) : null,
+          h('div.in-text',
+            h('div.in-eyebrow', h('span.in-deai', '出会い'), h('span', 'A FIRST MEETING')),
+            nameEl,
+            h('div.in-rule'),
+            h('div.in-sub', subtitle),
+            sealEl),
+          h('div.in-flash'));
+        let entry;
+        let raf = 0;
+        const born = performance.now();
+        const timers = [];
+        const finish = () => {
+          if (!entry) return;
+          const e = entry;
+          entry = null;
+          this.cardEntry = null;
+          timers.forEach(clearTimeout);
+          e.removeAfter = reduce ? 300 : 650;
+          this.close(e);
+          setTimeout(() => cancelAnimationFrame(raf), e.removeAfter);
+          resolve();
+        };
+        // a click that was meant for the previous line shouldn't skip the moment at once
+        const tryFinish = () => { if (performance.now() - born > 550) finish(); };
+        el.addEventListener('click', tryFinish);
+        entry = this.open(el, { onKey: (e) => { if ([' ', 'Enter', 'Escape'].includes(e.key)) tryFinish(); return true; }, onBack: tryFinish, focus: false });
+        entry.cleanup = () => { timers.forEach(clearTimeout); cancelAnimationFrame(raf); };
+        this.cardEntry = entry;
+        timers.push(setTimeout(finish, reduce ? 3200 : 4300));
+        this.audio.fx('whoosh', { volume: 0.9 });
+        this.audio.fx('sparkle', { volume: 0.6, delay: 0.35 });
+        if (kanji) this.audio.fx('stamp', { volume: 0.8, delay: 1.75 });
+        this.audio.fx(sound || 'chime', { volume: 0.75, delay: 1.8 });
+        if (reduce) return;
+        const field = sparkField(sparks, 'tinted', rgb);
+        const loop = (t) => { field.step(t); raf = requestAnimationFrame(loop); };
+        raf = requestAnimationFrame(loop);
+        const burstAt = (node, when) => timers.push(setTimeout(() => {
+          const r = node.getBoundingClientRect(), c = sparks.getBoundingClientRect();
+          if (c.width && r.width) field.burst((r.left + r.width / 2 - c.left) / c.width, (r.top + r.height / 2 - c.top) / c.height);
+        }, when));
+        burstAt(nameEl, 380);
+        if (sealEl) burstAt(sealEl, 1780);
       });
     }
 

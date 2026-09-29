@@ -63,6 +63,14 @@ pronounce "Balbadiou"   "Bal-ba-dyoo"
 pronounce "Lavilledieu" "La-veel-dyuh"
 pronounce "Blanche"     "Blonsh"
 
+# The first time we meet each character, "introduce <id>" presents them with these words.
+intro herve     "A silk merchant of Lavilledieu. This is his story, and every choice in it is yours." kanji 旅 sound chime
+intro balbadiou "The man who built the town's silk trade with his own two hands." kanji 商 sound bell
+intro helene    "Hervé's wife. Her voice is the thing people remember about her." kanji 妻 sound chime
+intro harakei   "Master of a village in the hills. Nothing moves on his roads without his knowing." kanji 主 sound gong
+intro woman     "The young woman at Hara Kei's side. No one ever says her name." kanji 謎 sound temple_bell
+intro blanche   "The one person in France who can read Japanese, and who keeps what she reads to herself." kanji 文 sound bell
+
 # Each character's picture is assets/sprites/<id>/neutral.png, and their face in the
 # text box is assets/faces/<id>.png. The face appears when they speak without standing
 # in the scene: always for Hervé, who is the player.
@@ -269,12 +277,14 @@ label intro
   scene lavilledieu with fade
   play music town_theme fadein 3
   cutscene prologue
+  introduce herve
   "That year, the silkworms began to die."
   "First in one village, then in the next. The eggs turned grey before they could hatch, and the worms that did hatch stopped eating and lay still on the mulberry leaves."
   "It spread across Europe. Then, they said, it reached Africa."
   "Our whole town lived on silk. The mill, the weavers, the merchants, the bakers who fed them. If the worms died, so did we — only more slowly."
   scene balbadiou_office with dissolve
   show balbadiou serious
+  introduce balbadiou
   "Balbadiou had built the town's silk trade with his own two hands. He was the one who had talked me into it, years ago."
   "When he called me to his office, I knew he had already decided something."
   balbadiou "Japan."
@@ -297,6 +307,7 @@ label chapter1
   play music helene_theme fadein 2
   "Hélène was reading by the window when I came home. She put the book face-down on her lap. She always knew before I said anything."
   show helene neutral
+  introduce helene
   herve "I have to go to secure the silkworms."
   helene sad "You're leaving again."
   herve "Only for a few months."
@@ -394,6 +405,7 @@ label chapter2
   play sound temple_bell volume 0.6
   "At last I was brought to a village in the hills, and to the house of the man who controlled everything there: Hara Kei."
   show harakei neutral at center
+  introduce harakei
   "He sat perfectly still. He was younger than I had imagined, and he looked at me as if I were a piece of weather he was waiting to pass."
   harakei "You came for the eggs."
   herve "Yes."
@@ -405,6 +417,7 @@ label chapter2
   show woman neutral at right
   "Beside him sat a young woman. Her eyes were not Asian — that was the first strange thing. The second was that she did not lower them."
   "She looked directly at me."
+  introduce woman
   inner "She was not beautiful in the way people usually mean beautiful. She simply looked at me."
   menu
     - "Look away." tone=quiet [danger -= 1]
@@ -718,6 +731,7 @@ label chapter7
   scene blanche_salon with fade
   "In France there was only one person I knew who could read Japanese: Madame Blanche, who kept a fine house in the city and asked very few questions."
   show blanche neutral
+  introduce blanche
   "She unfolded the paper. She read it once. Then she looked at me for a long time before she spoke."
   cutscene the_note
   blanche serious "Come back."

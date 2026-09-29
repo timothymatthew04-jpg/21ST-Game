@@ -60,7 +60,7 @@
   function parse(source) {
     const story = {
       title: 'Untitled', subtitle: '', emblem: '', artStyle: 'mixed', titleFx: null, titleLogo: 'carved', titleMusic: null, titleBackground: null, warning: null, credits: null,
-      characters: {}, backgrounds: {}, poemWords: [], karma: [], bgFx: {}, places: {}, bgSound: {}, bgLight: {}, items: {},
+      characters: {}, backgrounds: {}, poemWords: [], karma: [], bgFx: {}, places: {}, bgSound: {}, bgLight: {}, items: {}, intros: {},
       program: [], labels: {}, endings: [], errors: [], warnings: [],
       hash: hashString(source),
     };
@@ -514,6 +514,23 @@
           emit(L, { op: 'minigame', name: tk[1].v, arg: pos[0] ? pos[0].v : null, into: kw.into || `${tk[1].v}_result` });
           return;
         }
+        case 'intro': {
+          // intro helene "Hervé's wife" kanji 妻 — how a character is presented the first time we meet them
+          need(3, 'intro character "Who they are" [kanji 字] [sound name]');
+          const it = { subtitle: str(tk[2], 'intro character "Who they are"'), kanji: null, sound: null };
+          for (let i = 3; i < tk.length - 1; i += 2) {
+            if (tk[i].v === 'kanji') it.kanji = tk[i + 1].v;
+            else if (tk[i].v === 'sound') it.sound = tk[i + 1].v;
+            else throw new Error(`Unknown intro option "${tk[i].v}"`);
+          }
+          story.intros[tk[1].v] = it;
+          return;
+        }
+        case 'introduce':
+          // introduce helene — the first-meeting animation (only once per playthrough)
+          need(2, 'introduce character');
+          emit(L, { op: 'introduce', id: tk[1].v });
+          return;
         case 'cutscene':
           // cutscene name — plays a cinematic sequence from story/cutscenes.js
           need(2, 'cutscene name');

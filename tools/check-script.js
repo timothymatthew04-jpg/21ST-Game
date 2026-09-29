@@ -45,6 +45,15 @@ for (const [name, dir, synth, where] of soundChecks) {
   if (!hasFile(dir, name) && !(synth && synth[name])) story.warnings.push({ line: where, msg: `no assets/${dir}/${name}.mp3 and no synthesized "${name}"` });
 }
 
+// First meetings: a known character, and an intro sound the synthesizer can play.
+for (const i of lines) {
+  if (i.op === 'introduce' && !story.characters[i.id]) story.warnings.push({ line: i.line, msg: `introduce: no character "${i.id}"` });
+}
+for (const [id, it] of Object.entries(story.intros || {})) {
+  if (!story.characters[id]) story.warnings.push({ line: `intro ${id}`, msg: `intro for unknown character "${id}"` });
+  if (it.sound && !ctx.VN.SYNTH_SOUNDS[it.sound]) story.warnings.push({ line: `intro ${id}`, msg: `no synthesized sound "${it.sound}"` });
+}
+
 // Every timed choice should say what happens when the player hesitates.
 for (const i of lines) {
   if (i.op !== 'menu') continue;
