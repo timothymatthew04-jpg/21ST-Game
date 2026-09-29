@@ -688,7 +688,7 @@
     itemNotice(item, kind) {
       const money = item.id === 'francs';
       const card = h(`div.item-notice.${kind}${money ? '.money' : ''}`,
-        h('span.in-icon', money ? h('i', '◎') : itemIcon(item.id)),
+        h('span.in-icon', itemIcon(money ? 'francs' : item.id)),
         h('span.in-text', h('small', kind === 'gain' ? (money ? 'Received' : 'Keepsake') : money ? 'Spent' : 'Given up'), h('b', item.name)));
       this.noticeEl.append(card);
       this.audio.fx(kind === 'gain' ? 'chime' : 'paper', { volume: 0.6 });
@@ -891,7 +891,7 @@
       const eng = this.engine;
       const inGame = eng.inGame && !fromTitle;
       const tabs = inGame
-        ? [['history', 'History'], ['save', 'Save'], ['load', 'Load'], ['settings', 'Settings'], ['endings', 'Endings'], ['help', 'Help']]
+        ? [['keepsakes', 'Keepsakes'], ['history', 'History'], ['save', 'Save'], ['load', 'Load'], ['settings', 'Settings'], ['endings', 'Endings'], ['help', 'Help']]
         : [['load', 'Load'], ['settings', 'Settings'], ['endings', 'Endings'], ['help', 'Help']];
       if (!this.story.endings.length) tabs.splice(tabs.findIndex((t) => t[0] === 'endings'), 1);
       this.menuTabs = {};
@@ -935,13 +935,14 @@
       this.menuTab = tab;
       this.savePageSwitch = null;
       for (const [id, b] of Object.entries(this.menuTabs)) b.classList.toggle('current', id === tab);
-      const titles = { history: 'History', save: 'Save', load: 'Load', settings: 'Settings', endings: 'Endings', help: 'Help' };
+      const titles = { keepsakes: 'Keepsakes', history: 'History', save: 'Save', load: 'Load', settings: 'Settings', endings: 'Endings', help: 'Help' };
       this.menuTitle.textContent = titles[tab] || '';
       const body = this.menuBody;
       body.scrollTop = 0;
       if (tab === 'save' || tab === 'load') this.renderSlots(body, tab);
       else if (tab === 'settings') this.renderSettings(body);
       else if (tab === 'history') this.renderHistory(body);
+      else if (tab === 'keepsakes') this.renderKeepsakes(body);
       else if (tab === 'endings') this.renderEndings(body);
       else if (tab === 'help') this.renderHelp(body);
       setTimeout(() => { if (this.menuTabs[tab]) this.menuTabs[tab].focus({ preventScroll: true }); }, 20);
@@ -1052,6 +1053,20 @@
         ['1–9', 'Pick a choice'],
       ];
       body.replaceChildren(h('div.help', h('table', rows.map(([k, v]) => h('tr', h('th', k), h('td', v))))));
+    }
+
+    /** What Hervé carries: his money, and the keepsakes he has gathered (or given away). */
+    renderKeepsakes(body) {
+      const eng = this.engine;
+      const items = eng.state.items || [];
+      body.replaceChildren(h('div.keepsakes',
+        h('div.ks-purse', itemIcon('francs'), h('div.ks-text', h('b', `${eng.francs()} francs`), h('p', 'What is left of the money for the journey.'))),
+        items.length
+          ? h('div.ks-grid', items.map((id) => {
+            const it = eng.itemInfo(id);
+            return h('div.ks-card', itemIcon(id), h('div.ks-text', h('b', it.name), it.desc ? h('p', it.desc) : null));
+          }))
+          : h('p.muted', 'Nothing yet. Hervé travels light.')));
     }
 
     renderSettings(body) {

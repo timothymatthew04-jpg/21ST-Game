@@ -758,6 +758,16 @@
       this.state.pc++;
     }
 
+    async op_minigame(ins) {
+      this.checkpoint();
+      this.setSkip(false);
+      this.ui.textbox.hideBox();
+      this.stage.setSpeaker(null);
+      const result = await this.guard(VN.playMinigame(this.ui, ins.name, ins.arg));
+      this.setVar(ins.into, result);
+      this.state.pc++;
+    }
+
     op_item(ins) {
       if (ins.gain) this.gainItem(ins.id, { quiet: this.isSkipping() }); else this.loseItem(ins.id, { quiet: this.isSkipping() });
       this.state.pc++;

@@ -496,6 +496,13 @@
 
         // ---- text ----
         case 'centered': emit(L, { op: 'say', who: null, centered: true, text: str(tk[1], 'centered "text"'), key: `${currentLabel}:${sayCount++}` }); return;
+        case 'minigame': {
+          // minigame tea [into tea_result] / minigame eggs dead into last_eggs
+          need(2, 'minigame name [argument] [into variable]');
+          const { pos, kw } = kwargs(tk, 2, ['into'], L);
+          emit(L, { op: 'minigame', name: tk[1].v, arg: pos[0] ? pos[0].v : null, into: kw.into || `${tk[1].v}_result` });
+          return;
+        }
         case 'cutscene':
           // cutscene name — plays a cinematic sequence from story/cutscenes.js
           need(2, 'cutscene name');
