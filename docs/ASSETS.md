@@ -33,7 +33,7 @@ no painted version.
 | `estate_room` | Chapter 6: the room with her belongings |
 | `aviary` | Chapter 6: Hara Kei's great bird cage |
 | `helene_garden`, `garden_winter` | Chapters 4, 8 and 15: the garden Hervé makes for Hélène |
-| `blanche_salon` | Chapters 7 and 14, Final Chapter: Madame Blanche's house |
+| `blanche_salon` | Chapters 8 and 15: Madame Blanche's house |
 | `burned_village` | Chapter 11: the abandoned village |
 | `forest_camp_night` | Chapter 12: Hara Kei's camp in the forest |
 | `helene_sickroom` | Chapter 15 |
@@ -42,7 +42,12 @@ no painted version.
 The cutscenes use a few more paintings: `journey_map` (Europe to Japan, drawn from Natural Earth
 coastlines), `cs_worms` (the dying silkworms), `cs_warships` (the black ships), `cs_candle` and
 `cs_candle_dawn`, and the close-ups `the_cup`, `the_glove` and `the_letter`, which are also the
-event pictures (CGs).
+event pictures (CGs). The opening has three of its own: `op_sky` (a sea of clouds at dawn with the
+mountain rising out of it), `op_grass` (silver grass in the afternoon wind) and `op_sunset` (the
+sea at sunset with a gate standing in the water). The war in Chapter 11 has `war_horizon` (a castle
+burning at dusk, an observation balloon over the lines), `war_field` (the battlefield between the
+two armies' earthworks) and `war_guns` (a battery in the smoke). The armies, guns, shells, rockets
+and gunfire are drawn by the game over them (see the scene effects in docs/SCRIPTING.md).
 
 The title screen uses `title_cover` (already added: the ginkgo courtyard painting, 2000×1117 at its
 original resolution with a gentle contrast curve for deeper shadows). It is sharp at 1080p; on 1440p
@@ -55,7 +60,7 @@ are scaled smoothly and stay sharp at any window size (see docs/SCRIPTING.md).
 
 ## Walking areas: painted in code, `assets/walks/<area>/`
 
-The six walking areas (`camp`, `steppe`, `village`, `aviary`, `ruins`, `cemetery`) are painted by
+The seven walking areas (`camp`, `steppe`, `village`, `aviary`, `ruins`, `crossing`, `cemetery`) are painted by
 `tools/paint-walks.js` from `tools/paint/walks.js`, with the same toolkit and style as the
 backgrounds but two to five screens wide. Each is saved as layers: the sky (one screen, it never
 scrolls), drifting clouds, far and middle distance (scrolling slower than Hervé walks), the ground
