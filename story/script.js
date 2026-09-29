@@ -273,7 +273,7 @@ label intro
   "He said it the way other men say it's raining."
   "Japan. The end of the world. A country that, officially, did not sell its silkworms to anyone."
   "He put a heavy purse on the desk between us: money for the road, for the smugglers, and for whatever else the road would ask."
-  gain francs 300
+  gain francs 200
   balbadiou "Spend it well, Hervé. Every franc that comes back is the town's."
   jump chapter1
 
@@ -512,10 +512,10 @@ label chapter4
   balbadiou happy "You did it. You did it, Hervé! The whole town will eat this year."
   if eggs_result == "win"
     balbadiou happy "And not one bad card in the lot. Here, your share. You earned it twice."
-    gain francs 120
+    gain francs 80
   else
     balbadiou "Here, your share. A few more like this and we'll all be rich."
-    gain francs 70
+    gain francs 40
   endif
   "The journey was called a success. For a while, everyone in town wanted to shake my hand."
   hide balbadiou
@@ -613,11 +613,11 @@ label chapter5
     "He slid a wooden tag across the mat, marked with his red seal."
     harakei "My men will let you through. Do not lose it."
     gain item pass
-    gain francs 80
+    gain francs 50
     set danger -= 1
   elif price == "fair"
     "We agreed on a price that insulted neither of us."
-    gain francs 30
+    gain francs 20
   elif price == "insult"
     harakei cold "In my country, a man who haggles like that is telling you something else."
     set danger += 2
