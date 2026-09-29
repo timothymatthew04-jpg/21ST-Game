@@ -206,12 +206,13 @@
       this.prompt = h('div.wk-prompt');
       this.say = h('div.wk-say', h('div.wk-say-name'), h('div.wk-say-text'), h('div.wk-say-next', '▼'));
       this.hint = h('div.wk-hint', this.def.hint || '');
+      this.notices = h('div.item-notices.wk-notices', { 'aria-live': 'polite' });
       this.purse = h('div.wk-purse', h('span.wk-coin'), h('b', String(this.engine.francs())));
       const skip = h('button.wk-skip', { type: 'button' }, 'Skip ▸▸');
       skip.addEventListener('click', (e) => { e.stopPropagation(); this.finish('skipped'); });
       const help = h('div.wk-help', h('span', h('kbd', '←'), h('kbd', '→'), ' walk'), h('span', h('kbd', 'Shift'), ' run'), h('span', h('kbd', 'E'), ' look · take · talk'));
       const title = h('div.wk-title', h('b', this.def.title || ''), h('span', this.def.region || ''));
-      this.el = h('div.overlay.walk', this.canvas, h('div.wk-vignette'), this.prompt, title, this.hint, this.purse, help, this.say, skip, h('div.wk-fade'));
+      this.el = h('div.overlay.walk', this.canvas, h('div.wk-vignette'), this.prompt, title, this.hint, this.purse, this.notices, help, this.say, skip, h('div.wk-fade'));
       this.el.style.setProperty('--wk-accent', this.def.accent || '255,214,140');
       this.say.addEventListener('click', (e) => { e.stopPropagation(); this.use(); });
       return new Promise((resolve) => {
@@ -307,7 +308,11 @@
         this.picked.push(`francs:${th.amount || 5}`);
       } else if (th.kind === 'item') {
         th.used = true;
-        this.engine.gainItem(th.item);
+        // the keepsake's card slides in here, over the walk (the usual place is underneath it)
+        if (!this.engine.hasItem(th.item)) {
+          this.engine.gainItem(th.item, { quiet: true });
+          this.ui.itemNotice(this.engine.itemInfo(th.item), 'gain', this.notices);
+        }
         this.fly = { x: th.x, y: GY - 10, t: 0, label: th.label || '' };
         this.picked.push(th.item);
       } else if (th.kind === 'look' || th.kind === 'talk') {

@@ -723,12 +723,12 @@
     }
 
     /** A keepsake or money changing hands: a small card slides in at the top right. */
-    itemNotice(item, kind) {
+    itemNotice(item, kind, into = this.noticeEl) {
       const money = item.id === 'francs';
       const card = h(`div.item-notice.${kind}${money ? '.money' : ''}`,
         h('span.in-icon', itemIcon(money ? 'francs' : item.id)),
         h('span.in-text', h('small', kind === 'gain' ? (money ? 'Received' : 'Keepsake') : money ? 'Spent' : 'Parted with'), h('b', item.name)));
-      this.noticeEl.append(card);
+      into.append(card);
       this.audio.fx(kind === 'gain' ? 'chime' : 'paper', { volume: 0.6 });
       setTimeout(() => card.classList.add('out'), 3200);
       setTimeout(() => card.remove(), 3900);
