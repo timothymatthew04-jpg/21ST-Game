@@ -20,33 +20,18 @@ const { chromium } = require('playwright');
 
 const root = path.join(__dirname, '..');
 
-// a, b: the eye's corners (outer, inner); up, low: a point on the upper and the lower lid
-const EYES = {
-  helene: [
-    { a: [181.5, 195], b: [224.5, 207.5], up: [200, 185.2], low: [205, 210] },
-    { a: [274.5, 189], b: [249.5, 205.5], up: [262, 184.6], low: [263, 208.2] },
-  ],
-  herve: [
-    { a: [140, 224.5], b: [181, 242], up: [160, 227], low: [165, 245] },
-    { a: [238, 230], b: [208, 241.5], up: [222, 228.5], low: [222, 246.5] },
-  ],
-  balbadiou: [
-    { a: [160, 223], b: [212, 222], up: [185, 211.5], low: [185, 237.5] },
-    { a: [272, 223], b: [240.5, 222], up: [257, 212.2], low: [258, 236] },
-  ],
-  harakei: [
-    { a: [103.5, 237], b: [148.5, 252], up: [125, 235.5], low: [130, 255] },
-    { a: [197, 241], b: [172, 252.5], up: [185, 238.5], low: [185, 255.5] },
-  ],
-  woman: [
-    { a: [163, 267], b: [202, 283], up: [183, 268.4], low: [185, 293.5], flick: true },
-    { a: [256, 267], b: [224.5, 281], up: [240, 268.4], low: [240, 293.5], flick: true },
-  ],
-  blanche: [
-    { a: [207, 238], b: [235, 250.5], up: [220, 237], low: [222, 251.5], flick: true },
-    { a: [283, 238.5], b: [262, 249.5], up: [273, 237], low: [273, 251] },
-  ],
-};
+// Where the eyes are: story/expressions.js (written by tools/import-sprites.js from
+// tools/paint/data/eyes.json) gives, per character, each eye's corners (a outer, b inner) and a
+// point on the upper (up) and lower (low) lid, in the sprite's own pixels.
+function loadEyes() {
+  const src = fs.readFileSync(path.join(root, 'story/expressions.js'), 'utf8');
+  const m = src.match(/=\s*(\{[\s\S]*\});/);
+  const all = m ? JSON.parse(m[1]) : {};
+  const out = {};
+  for (const [id, v] of Object.entries(all)) if (v.eyes && v.eyes.length) out[id] = v.eyes;
+  return out;
+}
+const EYES = loadEyes();
 
 function paint(spec) {
   // runs in the page
@@ -164,8 +149,8 @@ function paint(spec) {
   }
   for (const [id, eyes] of Object.entries(EYES)) {
     if (only.length && !only.includes(id)) continue;
-    const file = path.join(root, `assets/sprites/${id}/neutral.png`);
-    const src = `data:image/png;base64,${fs.readFileSync(file).toString('base64')}`;
+    const file = ['webp', 'png'].map((e) => path.join(root, `assets/sprites/${id}/neutral.${e}`)).find((f) => fs.existsSync(f));
+    const src = `data:image/${file.endsWith('webp') ? 'webp' : 'png'};base64,${fs.readFileSync(file).toString('base64')}`;
     const r = await page.evaluate(paint, { src, eyes });
     fs.writeFileSync(path.join(root, `assets/sprites/${id}/blink.png`), Buffer.from(r.png.split(',')[1], 'base64'));
     if (process.env.PREVIEW) fs.writeFileSync(path.join(process.env.PREVIEW, `blink-${id}.png`), Buffer.from(r.preview.split(',')[1], 'base64'));

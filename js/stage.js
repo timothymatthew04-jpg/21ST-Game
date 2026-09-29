@@ -17,6 +17,55 @@
   // used and the pose reacts instead: a small lift for happy moods, a sink for sad ones.
   const MOODS = { smile: 'up', happy: 'up', soft: 'soft', sad: 'down', hurt: 'hurt', tired: 'tired', worried: 'down', cold: 'cold', stern: 'cold', serious: 'cold', gaze: 'soft', surprised: 'up' };
 
+  // Any feeling the script names is shown with the nearest face the character has
+  // (story/expressions.js lists them): "tired" on someone with no tired face is their sad one.
+  const NEAR = {
+    happy: ['smile', 'amused', 'soft'],
+    smile: ['happy', 'amused', 'soft'],
+    soft: ['smile', 'happy'],
+    laugh: ['happy', 'smile', 'amused'],
+    amused: ['smile', 'happy'],
+    gaze: ['soft'],
+    sad: ['grave', 'upset', 'worried'],
+    hurt: ['sad', 'upset', 'grave'],
+    tired: ['sad', 'grave', 'worried'],
+    grief: ['sad', 'upset'],
+    crying: ['upset', 'sad'],
+    worried: ['uneasy', 'sad', 'grave'],
+    uneasy: ['worried', 'grave', 'sad'],
+    nervous: ['uneasy', 'worried'],
+    afraid: ['worried', 'uneasy', 'surprised'],
+    serious: ['stern', 'grave', 'cold'],
+    stern: ['serious', 'cold', 'grave', 'angry'],
+    cold: ['stern', 'serious', 'grave'],
+    grave: ['serious', 'sad', 'stern'],
+    angry: ['furious', 'stern', 'upset', 'serious'],
+    furious: ['angry', 'stern', 'upset'],
+    upset: ['sad', 'angry', 'worried'],
+    surprised: ['uneasy', 'worried'],
+    shocked: ['surprised', 'uneasy', 'worried'],
+  };
+  // a one-off movement when a face changes to a strong feeling
+  const REACT = {
+    surprised: 'jolt', shocked: 'jolt',
+    angry: 'shake', furious: 'shake',
+    sad: 'sink', hurt: 'sink', upset: 'sink', grief: 'sink', crying: 'sink', grave: 'sink', tired: 'sink',
+    happy: 'bob', smile: 'bob', laugh: 'bob', amused: 'bob',
+    uneasy: 'lean', worried: 'lean', nervous: 'lean', afraid: 'lean',
+    stern: 'rise', cold: 'rise', serious: 'rise',
+  };
+  const exprList = (folder) => ((globalThis.VN_EXPRESSIONS || {})[folder] || {}).expressions || null;
+  /** The face a character shows for a feeling: { name, exact } (exact: they have that face, or a near one). */
+  function resolveExpr(folder, expr) {
+    const want = expr || 'neutral';
+    const have = exprList(folder);
+    if (!have) return { name: want, exact: true };
+    if (have.includes(want)) return { name: want, exact: true };
+    for (const n of NEAR[want] || []) if (have.includes(n)) return { name: n, exact: true };
+    return { name: 'neutral', exact: want === 'neutral' };
+  }
+  VN.resolveExpr = resolveExpr;
+
   // How the light of a place falls on the characters standing in it (see "bglight").
   const LIGHTS = {
     day: 'none',
@@ -207,44 +256,89 @@
       return el;
     }
 
-    makeSprite(id, expr) {
+    /** The picture folder for a character: their own, or an outfit (Hervé's uniform: herve_army). */
+    folderOf(id, outfits) {
+      const ch = this.story.characters[id] || {};
+      const base = ch.sprite || id;
+      const o = (outfits || this.outfits || {})[id];
+      return o ? `${base}_${o}` : base;
+    }
+
+    makeSprite(id, expr, outfits) {
       const ch = this.story.characters[id] || { name: id, color: '#cccccc' };
       const el = h('div.sprite', { 'data-id': id });
       const inner = h('div.sprite-inner');
       el.append(inner);
       el.style.setProperty('--c', ch.color);
-      this.setSpriteExpr(el, id, expr);
+      el.dataset.folder = this.folderOf(id, outfits);
+      this.setSpriteExpr(el, id, expr, { fade: false });
       return el;
     }
 
-    setSpriteExpr(el, id, expr) {
+    /**
+     * Show a character's face for a feeling. With `fade`, the new face melts in over the old one
+     * (every face of a character is the same drawing, so only the face seems to move), and a strong
+     * feeling gets a small movement of its own.
+     */
+    setSpriteExpr(el, id, expr, { fade = true } = {}) {
       const ch = this.story.characters[id] || { name: id, sprite: null };
       const inner = el.firstChild;
-      const folder = ch.sprite || id;
-      const key = `${folder}/${expr || 'neutral'}`;
+      const folder = el.dataset.folder || this.folderOf(id);
+      const want = expr || 'neutral';
+      const pick = resolveExpr(folder, want);
+      const key = `${folder}/${pick.name}|${want}`;
       if (el.dataset.key === key) return;
+      const before = el.dataset.key;
       el.dataset.key = key;
       const showImage = (url, fallback) => {
         if (el.dataset.key !== key) return;
         let life = inner.firstChild;
-        let img = life && life.classList.contains('sprite-life') ? life.querySelector('.sprite-img') : null;
+        let react = life && life.classList.contains('sprite-life') ? life.querySelector('.sprite-react') : null;
+        let img = react ? react.querySelector('.sprite-img:not(.going)') : null;
         if (!img) {
-          img = h('img.sprite-img', { alt: '', draggable: 'false' });
+          img = h('img.sprite-img', { alt: '', draggable: 'false', src: url });
+          react = h('div.sprite-react', img);
           // breathing, a little sway, and a nod while they talk: every character at their own pace
           life = h('div.sprite-life', { style: { '--bt': `${(4.2 + Math.random() * 1.6).toFixed(2)}s`, '--bd': `${(-Math.random() * 5).toFixed(2)}s`, '--sw': `${(Math.random() < 0.5 ? -1 : 1) * (0.15 + Math.random() * 0.15)}deg` } },
-            h('div.sprite-talk', img));
+            h('div.sprite-talk', react));
           inner.replaceChildren(life);
+        } else if (img.getAttribute('src') !== url) {
+          // a face still fading in finishes now (solid), and the one under it goes
+          react.querySelectorAll('.sprite-img.coming').forEach((o) => o.classList.remove('coming', 'in'));
+          react.querySelectorAll('.sprite-img.going').forEach((o) => o.remove());
+          const quick = !fade || this.settings.reduceMotion || !el.isConnected;
+          if (quick) img.src = url;
+          else {
+            const next = h('img.sprite-img.coming', { alt: '', draggable: 'false' });
+            next.src = url;
+            // the new face fades in on top of the old, which stays solid underneath until it has
+            img.classList.add('going');
+            const swap = () => {
+              if (!next.isConnected) return;
+              next.classList.add('in');
+              setTimeout(() => { img.remove(); next.classList.remove('coming', 'in'); }, 240);
+            };
+            img.after(next);
+            (next.decode ? next.decode() : Promise.resolve()).then(() => requestAnimationFrame(swap), swap);
+          }
         }
-        if (img.getAttribute('src') !== url) img.src = url;
-        this.setBlink(el, folder, fallback || (expr || 'neutral') === 'neutral');
-        // One picture for every mood: let the pose itself react a little instead.
-        const mood = fallback ? MOODS[expr] || '' : '';
-        if (img.dataset.mood !== mood || mood === 'up') {
-          img.dataset.mood = '';
-          if (mood) { void img.offsetWidth; img.dataset.mood = mood; }
+        const blinkable = ((globalThis.VN_EXPRESSIONS || {})[folder] || {}).blink;
+        this.setBlink(el, folder, blinkable ? blinkable.includes(pick.name) : fallback || pick.name === 'neutral');
+        // no face for this feeling: the pose itself reacts a little instead
+        const mood = fallback || !pick.exact ? MOODS[want] || '' : '';
+        if (react.dataset.mood !== mood || mood === 'up') {
+          react.dataset.mood = '';
+          if (mood) { void react.offsetWidth; react.dataset.mood = mood; }
+        }
+        // a strong feeling arriving: a small movement to go with the new face
+        const move = before && fade && !this.settings.reduceMotion && pick.exact ? REACT[want] || REACT[pick.name] : null;
+        if (move) {
+          react.dataset.react = '';
+          void react.offsetWidth;
+          react.dataset.react = move;
         }
       };
-      const known = spriteLookup(folder, expr || 'neutral');
+      const known = spriteLookup(folder, pick.name);
       if (known) return showImage(known.url, known.fallback);
       // Still looking the picture up: keep the current one rather than flashing a placeholder.
       const hasArt = !!(inner.firstChild && inner.firstChild.classList && inner.firstChild.classList.contains('sprite-life'));
@@ -252,12 +346,37 @@
         inner.replaceChildren(
           h('div.ph-sprite',
             h('div.ph-hair'),
-            h('div.ph-head', h('span.ph-face', kaomoji(expr))),
+            h('div.ph-head', h('span.ph-face', kaomoji(want))),
             h('div.ph-body'),
-            h('div.ph-tag', h('b', VN.plainName ? VN.plainName(ch.name) : ch.name), h('span', expr || 'neutral')))
+            h('div.ph-tag', h('b', VN.plainName ? VN.plainName(ch.name) : ch.name), h('span', want)))
         );
       }
-      if (known === undefined) resolveSprite(folder, expr || 'neutral').then((r) => { if (r) showImage(r.url, r.fallback); });
+      if (known === undefined) resolveSprite(folder, pick.name).then((r) => { if (r) showImage(r.url, r.fallback); });
+    }
+
+    /** The plain portrait (introductions): the one for what they are wearing, or their own. */
+    faceUrl(id) {
+      const ch = this.story.characters[id] || {};
+      if (!ch.face) return null;
+      const folder = this.folderOf(id);
+      return (folder !== (ch.sprite || id) && VN.assets.lookup('face', folder)) || VN.assets.lookup('face', ch.face) || null;
+    }
+
+    /**
+     * The text-box portrait of a character who is speaking without standing in the scene: their
+     * face for the feeling, cut from the sprite (story/expressions.js says where the face is).
+     * Returns { url, rect } — rect as fractions of the sprite — or a plain portrait url.
+     */
+    portrait(id, expr) {
+      const folder = this.folderOf(id);
+      const info = (globalThis.VN_EXPRESSIONS || {})[folder];
+      const ch = this.story.characters[id] || {};
+      const plain = this.faceUrl(id);
+      if (!info || !info.face || !ch.face) return plain;
+      const pick = resolveExpr(folder, expr);
+      const found = spriteLookup(folder, pick.name);
+      if (!found) { resolveSprite(folder, pick.name); return plain; }
+      return { url: found.url, rect: info.face, key: `${folder}/${pick.name}` };
     }
 
     /** Eyelids painted by tools/paint-blinks.js, laid over the eyes now and then. */
@@ -337,12 +456,12 @@
         else VN.assets.resolve('bg', ins.bg);
       }
       if (ins.op === 'show') {
-        const ch = this.story.characters[ins.id];
-        resolveSprite((ch && ch.sprite) || ins.id, ins.expr || 'neutral');
+        const folder = this.folderOf(ins.id);
+        resolveSprite(folder, resolveExpr(folder, ins.expr).name);
       }
       if (ins.op === 'say' && ins.expr && ins.who) {
-        const ch = this.story.characters[ins.who];
-        resolveSprite((ch && ch.sprite) || ins.who, ins.expr);
+        const folder = this.folderOf(ins.who);
+        resolveSprite(folder, resolveExpr(folder, ins.expr).name);
       }
       if (ins.op === 'cg' && ins.name) VN.assets.resolve('cg', ins.name);
     }
@@ -355,8 +474,8 @@
         else jobs.push(VN.assets.resolveWithin('bg', scene.bg, 600));
       }
       for (const [id, s] of Object.entries(scene.sprites)) {
-        const ch = this.story.characters[id];
-        jobs.push(Promise.race([resolveSprite((ch && ch.sprite) || id, s.expr || 'neutral'), new Promise((r) => setTimeout(r, 600))]));
+        const folder = this.folderOf(id, scene.outfits);
+        jobs.push(Promise.race([resolveSprite(folder, resolveExpr(folder, s.expr).name), new Promise((r) => setTimeout(r, 600))]));
       }
       if (scene.cg) jobs.push(VN.assets.resolveWithin('cg', scene.cg, 600));
       await Promise.all(jobs);
@@ -382,9 +501,10 @@
      * Bring the DOM in line with `scene`. Returns how long the animation takes
      * (ms) so the engine can wait for it.
      */
-    sync(scene, { instant = false, duration = 500, bgTransition = 'dissolve' } = {}) {
+    sync(scene, { instant = false, duration = 500, bgTransition = 'dissolve', exprFade = !instant } = {}) {
       const d = instant ? 0 : duration;
       let longest = 0;
+      this.outfits = scene.outfits || {};
 
       if (scene.bg !== this.rendered.bg) {
         const light = (this.story.bgLight || {})[scene.bg] || 'day';
@@ -425,7 +545,10 @@
             longest = Math.max(longest, d);
           }
         } else {
-          this.setSpriteExpr(el, id, s.expr);
+          // a change of clothes on stage melts in like a change of face
+          const folder = this.folderOf(id);
+          if (el.dataset.folder !== folder) { el.dataset.folder = folder; el.dataset.key = ''; }
+          this.setSpriteExpr(el, id, s.expr, { fade: exprFade });
           const left = `${pos[id]}%`;
           if (el.style.left !== left) {
             el.style.transitionDuration = instant ? '0ms' : '';
@@ -562,10 +685,9 @@
 
     /** A letterboxed band across the screen with a close-up of a character's eyes. Returns { done, close } or null. */
     eyesCut(id, expr) {
-      const ch = this.story.characters[id] || {};
-      const folder = ch.sprite || id;
-      const onStage = this.spriteEls[id] && this.spriteEls[id].querySelector('.sprite-img');
-      const found = spriteLookup(folder, expr || 'neutral');
+      const folder = this.folderOf(id);
+      const onStage = this.spriteEls[id] && this.spriteEls[id].querySelector('.sprite-img:not(.going)');
+      const found = spriteLookup(folder, resolveExpr(folder, expr).name);
       const url = (onStage && onStage.getAttribute('src')) || (found && found.url);
       const eye = (globalThis.VN_BLINKS || {})[folder];
       if (!url || !eye) return null;
@@ -737,7 +859,7 @@
       if (scene.bg) content.append(this.makeBg(scene.bg, false));
       const { order, pos } = Stage.layout(scene.sprites || {});
       order.forEach((id, z) => {
-        const el = this.makeSprite(id, scene.sprites[id].expr);
+        const el = this.makeSprite(id, scene.sprites[id].expr, scene.outfits);
         el.style.left = `${pos[id]}%`;
         el.style.zIndex = String(10 + z);
         content.append(el);

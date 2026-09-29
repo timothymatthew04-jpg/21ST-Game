@@ -69,31 +69,45 @@ the horse, the water's reflection and the weather are drawn by the game itself (
 change a place, edit it in `tools/paint/walks.js` and run `node tools/paint-walks.js <area>`; what
 is where along the way is in `story/walks.js`.
 
-## Character sprites: `assets/sprites/<character>/<expression>.png`
+## Character sprites: `assets/sprites/<character>/<expression>.webp`
 
-Transparent PNG, about 720–1000 px tall, feet touching the bottom edge. All six characters are in
-(`neutral.png` for each, cut to a common scale so their heights match). Until a character has a
-picture for an expression, their neutral one is used and the pose reacts instead: it lifts for
-happy moods and sinks for sad ones. Expression pictures can be added one at a time.
+The artist's pictures are kept in `art/characters/<character>/<expression>.png` (1000×1000
+canvases, every face of a character the same drawing in the same place). `tools/import-sprites.js`
+turns them into the game's sprites: cut to the character with one box for all their faces (so
+only the face moves when it changes), 850 px tall with the feet 12 px from the bottom, saved as
+webp. It also cuts each character's portrait (`assets/faces/<character>.webp`) and writes
+`story/expressions.js`: who has which faces, where the face is on the sprite (the text box cuts
+the portrait of any expression from it), which faces can blink, and where the eyes are.
+
+    node tools/import-sprites.js            every character (or name one: ... helene)
+    node tools/paint-blinks.js              then the eyelids for the neutral faces
+
+To add a face, save it as `art/characters/<character>/<feeling>.png` and run both. The script can
+name any feeling: a character without that face shows their nearest one (see docs/SCRIPTING.md).
+
+The woman's new faces are a closer, turned pose cut off at the knees, so the tool lays them,
+mirrored, onto her full-length picture (`art/characters/woman/_body.png`), only where the face
+changes. Hervé's army uniform is `herve_army/`, worn with `outfit herve army`; it has one face
+(his civilian faces did not sit cleanly on the uniform's head), so in uniform he reacts with his
+pose instead.
 
 Each character also has `blink.png`: their eyes half closed and closed, painted from their own
-skin and lash colours by `tools/paint-blinks.js`, which lays them over the eyes every few seconds.
-If a new `neutral.png` moves the face, update the eye positions in that tool and run it again.
+skin and lash colours by `tools/paint-blinks.js`, laid over the eyes every few seconds on the faces
+whose eyes sit where the neutral face has them. The eye positions are in
+`tools/paint/data/eyes.json` (on the artist's canvas).
 
-Hervé is the player, so he never stands in a scene, like the protagonist in DDLC. His picture is
-used for his face in the text box.
+Hervé is the player, so he rarely stands in a scene, like the protagonist in DDLC. His faces are
+used for his portrait in the text box, which follows his feelings line by line.
 
-Text-box faces are in `assets/faces/<character>.png`: square head-and-shoulders crops of the
-sprites. A hand-drawn portrait can simply replace any of them.
-
-| Character | Folder | Expressions |
+| Character | Folder | Faces |
 | --- | --- | --- |
-| Hervé | `herve/` | `neutral` (used for his text-box face) |
-| Hélène | `helene/` | `neutral`, `soft`, `smile`, `sad`, `hurt`, `tired` |
-| Baldabiou | `balbadiou/` | `neutral`, `serious`, `happy`, `worried` |
-| Hara Kei | `harakei/` | `neutral`, `stern`, `cold` |
-| The woman | `woman/` | `neutral`, `gaze`, `smile`, `soft` |
-| Madame Blanche | `blanche/` | `neutral`, `serious`, `soft` |
+| Hervé | `herve/` | `neutral` (brooding), `happy`, `sad`, `surprised`, `uneasy`, `angry` |
+| Hervé in uniform | `herve_army/` | `neutral` |
+| Hélène | `helene/` | `neutral` (smiling), `sad`, `upset`, `surprised` |
+| Baldabiou | `balbadiou/` | `neutral` (his grin), `serious`, `worried`, `uneasy`, `surprised`, `angry` |
+| Hara Kei | `harakei/` | `neutral`, `speaking`, `amused`, `stern`, `angry`, `furious` |
+| The woman | `woman/` | `neutral`, `smile`, `sad`, `worried`, `surprised`, `cold` |
+| Madame Blanche | `blanche/` | `neutral`, `soft`, `smile`, `grave`, `surprised` |
 
 ## Event pictures (CGs)
 

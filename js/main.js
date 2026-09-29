@@ -76,8 +76,15 @@
     for (const [name, path] of Object.entries(story.backgrounds)) VN.assets.override('bg', name, path);
     // Start loading the cover art now so it's ready when the title screen appears.
     if (story.titleBackground) VN.assets.resolve('bg', story.titleBackground);
-    // Text-box portraits are small; fetch them all up front so they never pop in late.
+    // Text-box portraits are small; fetch them all up front so they never pop in late. The portraits
+    // of other expressions are cut from the sprites, so fetch every face of everyone too (in the
+    // background: a face appearing mid-scene is then already there to melt in).
     for (const ch of Object.values(story.characters)) if (ch.face) VN.assets.resolve('face', ch.face);
+    const faces = globalThis.VN_EXPRESSIONS || {};
+    for (const folder of Object.keys(faces)) VN.assets.resolve('face', folder);
+    setTimeout(() => {
+      for (const [folder, info] of Object.entries(faces)) for (const e of info.expressions || []) VN.assets.resolve('sprite', `${folder}/${e}`);
+    }, 1500);
 
     const settings = Object.assign({}, VN.DEFAULT_SETTINGS, VN.store.get('settings', {}));
     const audio = new VN.AudioSystem(settings);
@@ -171,6 +178,7 @@
         case 'l': case 'L': ui.openMenu('history'); break;
         case 's': case 'S': ui.openMenu('save'); break;
         case 'q': case 'Q': engine.quickSave(); break;
+        case 'F9': e.preventDefault(); engine.quickLoad(); break;
         case 'Escape': ui.uiHidden ? ui.setHidden(false) : ui.openMenu('save'); break;
       }
     });

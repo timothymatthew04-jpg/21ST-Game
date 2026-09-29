@@ -187,7 +187,9 @@
       const p = (async () => {
         const emb = embedded();
         const explicit = overrides[key];
-        const candidates = explicit ? [explicit] : (isAudio ? AUDIO_EXT : IMAGE_EXT).map((e) => `${stemFor(kind, name)}.${e}`);
+        // sprites and portraits are webp (tools/import-sprites.js), apart from the painted eyelids
+        const imageExt = (kind === 'sprite' || kind === 'face') && !/\/blink$/.test(name) ? ['webp', 'png', 'jpg'] : IMAGE_EXT;
+        const candidates = explicit ? [explicit] : (isAudio ? AUDIO_EXT : imageExt).map((e) => `${stemFor(kind, name)}.${e}`);
         if (isAudio && !explicit) {
           // Try formats this browser can actually play first.
           const probe = new Audio();
@@ -223,6 +225,15 @@
 
   VN.h = h;
   VN.clone = clone;
+
+  /** Wait until a picture is decoded and ready to draw (or `ms` have passed), so it never pops in late. */
+  VN.decodeImage = (url, ms = 600) => {
+    if (!url) return Promise.resolve();
+    const img = new Image();
+    img.src = url;
+    const ready = img.decode ? img.decode().catch(() => {}) : new Promise((r) => { img.onload = img.onerror = r; });
+    return Promise.race([ready, new Promise((r) => setTimeout(r, ms))]);
+  };
   VN.clamp = clamp;
   VN.store = store;
   VN.assets = assets;

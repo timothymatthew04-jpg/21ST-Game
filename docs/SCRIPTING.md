@@ -263,7 +263,8 @@ endif
 | Command | Example |
 | --- | --- |
 | `scene name [with transition]` | `scene japan_coast with fade`. It clears the characters. `black` and `white` are built in. |
-| `show id [expression] [at position] [with transition]` | `show helene soft at left` |
+| `show id [expression] [at position] [with transition]` | `show helene soft at left`. On someone already there, it only changes the face |
+| `outfit id [name]` | `outfit herve army` wears `sprites/herve_army/` from now on (scenes and saves keep it); `outfit herve` goes back |
 | `hide id` / `hide all` | `hide woman with slow` |
 | `cg name` / `cg hide` | a full-screen event picture (the painted close-ups `the_cup`, `the_glove`, `the_letter` move like backgrounds) |
 | `cutscene name` | play a cutscene from story/cutscenes.js (see below) |
@@ -608,6 +609,26 @@ Every painted scene also breathes: the view drifts in and out very slowly (not w
 `smooth` scales everything softly (for painted or high-resolution art), and `mixed` (the default)
 keeps backgrounds and CGs crisp but draws character sprites smoothly.
 
+## Faces and feelings
+
+Every line can carry a feeling: `helene upset "You never do."` changes her face as she says it,
+and `show helene sad` changes it between lines (for someone listening). A face stays until it
+changes again, so a flash of anger is `harakei angry "..."` and, a line or two later,
+`show harakei neutral`. The new face melts in over the old one (it is the same drawing, so only
+the face moves), and a strong feeling brings a small movement of its own: a jolt for surprise, a
+shake for anger, a sink for sadness, a bob for happiness, a lean back for unease.
+
+Any word can be used. Someone with no face for it shows their nearest one: `soft`, `smile` and
+`happy` → a smile or their neutral face; `hurt`, `tired`, `grief` → `sad`, then `grave`, `upset`,
+`worried`; `worried` ↔ `uneasy`; `serious`, `stern`, `cold`, `grave` → each other; `angry` →
+`furious`, `stern`, `upset`; `surprised`, `shocked` → `surprised`, `uneasy`. With no near face at
+all, the neutral one is used and the pose reacts instead. The faces each character has are listed
+in docs/ASSETS.md (and in story/expressions.js).
+
+Someone speaking from outside the scene (Hervé, always) has their portrait in the text box, and it
+follows their feelings too: `herve sad "I know."` A new speaker's portrait slides in; the same
+speaker's new feeling just melts in. A feeling given this way lasts until the next scene.
+
 ## Where the art and sound go
 
 Drop files into these folders with these names and they appear the next time you open the game.
@@ -616,14 +637,14 @@ Until then, the game draws placeholders.
 | What | Where | Notes |
 | --- | --- | --- |
 | Backgrounds | `assets/bg/<name>.png` (or `.jpg`, `.webp`) | 1280×720 or 1920×1080 |
-| Character sprites | `assets/sprites/<character>/<expression>.png` | transparent PNG, about 720–1000 px tall, feet at the bottom edge; `neutral.png` is the default and stands in for any expression without its own picture |
-| Text-box portraits | `assets/faces/<character>.png` | square transparent PNG of the head and shoulders |
+| Character sprites | `assets/sprites/<character>/<expression>.webp` (or `.png`) | made by `tools/import-sprites.js` from `art/characters/` (see docs/ASSETS.md); `neutral` is the default |
+| Text-box portraits | `assets/faces/<character>.webp` (or `.png`) | square head and shoulders; for other expressions the portrait is cut from the sprite |
 | Event pictures (CGs) | `assets/cg/<name>.png` | 1280×720 or larger, 16:9 |
 | Word-game chibis | `assets/chibi/<character>.png` | small transparent PNG |
 | Music | `assets/music/<name>.mp3` (or `.ogg`, `.m4a`) | loops automatically |
 | Sound effects | `assets/sfx/<name>.mp3` | |
 
-For example, `show helene sad` looks for `assets/sprites/helene/sad.png`.
+For example, `show helene sad` looks for `assets/sprites/helene/sad.webp`.
 
 ## Testing a chapter quickly
 

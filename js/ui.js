@@ -298,24 +298,17 @@
       };
       this.qmSkip = btn('Skip', 'Skip read text (Tab, or hold Ctrl)', () => this.engine.toggleSkip(), 'skip');
       this.qmAuto = btn('Auto', 'Auto-advance (A)', () => this.engine.setAuto(!this.engine.auto), 'auto');
-      const tab = (label, title, fn) => {
-        const b = btn(label, title, fn);
-        b.classList.add('qm-tab');
-        return b;
-      };
+      // one quiet row above the text box, as in DDLC (quick save is Q, quick load F9; both are in the menus too)
       return h('div.quickmenu', { onclick: (e) => e.stopPropagation() },
         h('div.qm-row',
           btn('Back', 'Go back one line (mouse wheel up)', () => this.engine.rollback()),
           btn('History', 'Dialogue history (L)', () => this.openMenu('history')),
           this.qmSkip,
           this.qmAuto,
+          btn('Save', 'Save (S) · quick save: Q', () => this.openMenu('save')),
+          btn('Load', 'Load · quick load: F9', () => this.openMenu('load')),
           btn('Config', 'Settings', () => this.openMenu('settings')),
-          btn('Hide', 'Hide the text box (H)', () => this.setHidden(true))),
-        h('div.qm-tabs',
-          tab('Q.Save', 'Quick save (Q)', () => this.engine.quickSave()),
-          tab('Q.Load', 'Quick load', () => this.engine.quickLoad()),
-          tab('Save', 'Save (S)', () => this.openMenu('save')),
-          tab('Load', 'Load', () => this.openMenu('load'))));
+          btn('Hide', 'Hide the text box (H)', () => this.setHidden(true))));
     }
 
     setModes({ skip, auto }) {
@@ -989,7 +982,7 @@
           h('div.in-band', h('div.in-band-fill'), threads, h('i.in-edge.top'), h('i.in-edge.bottom'), h('i.in-streak')),
           h('i.in-streak2'),
           sparks,
-          face ? h('div.in-portrait', h('div.in-portrait-img', { style: { backgroundImage: `url("${face}")` } }), h('i.in-portrait-shine'), h('i.in-portrait-flash')) : null,
+          face ? h('div.in-portrait', h('div.in-portrait-img', h('i.in-portrait-pic', { style: { backgroundImage: `url("${face}")` } })), h('i.in-portrait-shine'), h('i.in-portrait-flash')) : null,
           h('div.in-text',
             reveal ? h('div.in-eyebrow', h('span.in-deai', '名前'), h('span', 'A NAME, AT LAST')) : h('div.in-eyebrow', h('span.in-deai', '出会い'), h('span', 'A FIRST MEETING')),
             h('div.in-names', h('i.in-brush'), oldName, nameEl),
@@ -1038,7 +1031,9 @@
         if (kanji) this.audio.fx('stamp', { volume: 0.8, delay: 1.45 });
         if (reduce) return;
         // the seal lands hard enough to shake the picture
-        if (kanji) timers.push(setTimeout(() => this.stageEl.animate([{ transform: 'none' }, { transform: 'translate(5px, 3px)' }, { transform: 'translate(-4px, -2px)' }, { transform: 'translate(2px, 1px)' }, { transform: 'none' }], { duration: 380, easing: 'ease-out' }), 1480));
+        // (`translate`, not `transform`: the stage's transform centres and scales it in the window,
+        // and replacing it for the shake threw the whole picture half a screen aside)
+        if (kanji) timers.push(setTimeout(() => this.stageEl.animate([{ translate: '0 0' }, { translate: '5px 3px' }, { translate: '-4px -2px' }, { translate: '2px 1px' }, { translate: '0 0' }], { duration: 380, easing: 'ease-out' }), 1480));
         const field = sparkField(sparks, 'tinted', rgb);
         const loop = (t) => { field.step(t); raf = requestAnimationFrame(loop); };
         raf = requestAnimationFrame(loop);

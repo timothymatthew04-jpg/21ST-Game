@@ -509,6 +509,13 @@
           return;
         }
         case 'window': emit(L, { op: 'window', show: tk[1] && tk[1].v === 'show' }); return;
+        case 'outfit': {
+          // outfit herve army | outfit herve — what a character wears from now on (sprites/herve_army/)
+          need(2, 'outfit <character> [name]');
+          const name = tk[2] ? tk[2].v : null;
+          emit(L, { op: 'outfit', id: tk[1].v, name: name && name !== 'none' && name !== 'off' ? name : null });
+          return;
+        }
         case 'camera': {
           // camera close helene [zoom] | camera push [zoom] | camera wide — the camera during dialogue
           need(2, 'camera close <character> | camera push | camera wide');

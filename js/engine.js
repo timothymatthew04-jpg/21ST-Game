@@ -567,17 +567,21 @@
       const ch = ins.who ? this.story.characters[ins.who] : null;
       if (ins.expr && st.scene.sprites[ins.who]) {
         st.scene.sprites[ins.who].expr = ins.expr;
-        this.stage.sync(st.scene, { instant: true });
+        this.stage.sync(st.scene, { instant: true, exprFade: !this.isSkipping() });
+      } else if (ins.expr && ins.who) {
+        // someone speaking from outside the scene (Hervé) keeps the feeling until it changes
+        st.scene.moods = { ...(st.scene.moods || {}), [ins.who]: ins.expr };
       }
       this.stage.setSpeaker(ins.centered ? null : ins.who);
       const name = ch ? VN.plainName(this.interp(ch.name)) : '';
       const text = this.interp(ins.text);
-      // Speakers who aren't standing in the scene (Hervé, voices over a CG) get their face in the text box.
-      const face = ch && ch.face && !ins.centered && !st.scene.sprites[ins.who] ? VN.assets.lookup('face', ch.face) || null : null;
+      // Speakers who aren't standing in the scene (Hervé, voices over a CG) get their face in the text box,
+      // with the feeling of the moment.
+      const face = ch && ch.face && !ins.centered && !st.scene.sprites[ins.who] ? this.stage.portrait(ins.who, (st.scene.moods || {})[ins.who]) || null : null;
       this.history.push({ who: name, color: ch && ch.color, italic: !!(ch && ch.italic), text: VN.stripTags(text) });
       // characters murmur as they talk; narration and thoughts get the soft typing sound
       const voice = name && !ins.centered ? ch.voice : null;
-      await this.showLine(ins, { name, color: ch && ch.color, italic: ch && ch.italic, voice, text, centered: ins.centered, face });
+      await this.showLine(ins, { name, color: ch && ch.color, italic: ch && ch.italic, voice, text, centered: ins.centered, face, who: ins.who });
       this.state.pc++;
     }
 
@@ -678,6 +682,7 @@
       sc.cam = null;
       sc.split = null;
       sc.clues = [];
+      sc.moods = {};
       this.stage.setSpeaker(null);
       this.ui.textbox.hideBox();
       this.ui.textbox.hideCentered();
@@ -774,6 +779,16 @@
     }
 
     /** The camera during dialogue: close on a character, a slow push in, or the whole view again. */
+    /** What a character wears from now on: outfit herve army (sprites/herve_army/), outfit herve (their own). */
+    op_outfit(ins) {
+      const sc = this.state.scene;
+      const outfits = { ...(sc.outfits || {}) };
+      if (ins.name) outfits[ins.id] = ins.name; else delete outfits[ins.id];
+      sc.outfits = outfits;
+      this.stage.sync(sc, { instant: true, exprFade: !this.isSkipping() });
+      this.state.pc++;
+    }
+
     op_camera(ins) {
       const sc = this.state.scene;
       sc.cam = ins.mode === 'wide' ? null : { mode: ins.mode, id: ins.id || null, zoom: ins.zoom || null };
@@ -932,6 +947,8 @@
           this.ui.textbox.hideBox();
           this.ui.textbox.hideCentered();
           this.stage.setSpeaker(this.state.scene.sprites[ins.id] ? ins.id : null);
+          // the portrait is ready before the card starts, so it never arrives late into the animation
+          await this.guard(VN.decodeImage(this.stage.faceUrl(ins.id), 700));
           await this.guard(this.ui.introCard({
             id: ins.id,
             name: VN.plainName(this.interp(ch.name)),
@@ -939,7 +956,7 @@
             subtitle: intro.subtitle ? this.interp(intro.subtitle) : '',
             kanji: intro.kanji,
             sound: intro.sound,
-            face: ch.face ? VN.assets.lookup('face', ch.face) : null,
+            face: this.stage.faceUrl(ins.id),
           }));
         }
       }
@@ -953,6 +970,7 @@
         const intro = this.story.intros[ins.id] || {};
         this.ui.textbox.hideBox();
         this.ui.textbox.hideCentered();
+        await this.guard(VN.decodeImage(this.stage.faceUrl(ins.id), 700));
         await this.guard(this.ui.introCard({
           id: ins.id,
           name: VN.plainName(this.interp(ch.name)),
@@ -960,7 +978,7 @@
           subtitle: ins.text ? this.interp(ins.text) : 'A name, at last.',
           kanji: intro.kanji,
           sound: 'temple_bell',
-          face: ch.face ? VN.assets.lookup('face', ch.face) : null,
+          face: this.stage.faceUrl(ins.id),
           reveal: '???',
         }));
       }

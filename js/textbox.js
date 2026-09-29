@@ -228,7 +228,8 @@
       // The panel is drawn separately so the portrait and name plate can overhang its frame.
       const panel = h('div.tb-panel', ...['tl', 'tr', 'bl', 'br'].map((c) => h(`i.tb-corner.${c}`)));
       this.box = h('div.textbox.hidden', panel, this.face, this.name, this.text, this.next);
-      this.faceUrl = null;
+      this.faceKey = null;
+      this.faceWho = null;
       this.centeredText = h('div.centered-text');
       this.centered = h('div.centered.hidden', this.centeredText);
       root.append(this.centered, this.box);
@@ -247,12 +248,12 @@
       return !this.box.classList.contains('hidden');
     }
 
-    say({ name, color, text, italic, instant, voice, face }) {
+    say({ name, color, text, italic, instant, voice, face, who }) {
       this.stop();
       this.hideCentered();
       this.showBox();
       this.hideNext();
-      this.setFace(face);
+      this.setFace(face, who);
       if (name) {
         this.name.textContent = name;
         this.name.style.setProperty('--name-color', color || '#fff');
@@ -270,17 +271,37 @@
       return this.typer;
     }
 
-    setFace(url) {
-      url = url || null;
+    /**
+     * The speaker's portrait: a picture url, or { url, rect } — their face cut from the sprite, so
+     * it can be any of their expressions (rect: x and size as fractions of the sprite's width, y of
+     * its height, a = height / width).
+     */
+    setFace(face, who) {
+      const url = face ? (typeof face === 'string' ? face : face.url) : null;
       this.box.classList.toggle('has-face', !!url);
-      if (url === this.faceUrl) return;
-      this.faceUrl = url;
+      const key = face ? (typeof face === 'string' ? face : `${face.url}|${face.rect.x},${face.rect.y}`) : null;
+      if (key === this.faceKey) return;
+      const sameSpeaker = !!who && who === this.faceWho && !!this.faceKey;
+      this.faceKey = key;
+      this.faceWho = who || null;
       if (!url) return;
-      this.face.style.backgroundImage = `url("${url}")`;
-      // a new speaker's portrait slides in; the same speaker stays put
-      this.face.classList.remove('enter');
+      const st = this.face.style;
+      if (typeof face === 'string') {
+        st.backgroundImage = `url("${url}")`;
+        st.backgroundSize = '';
+        st.backgroundPosition = '';
+      } else {
+        // the square of the sprite that holds the face, filling the portrait box
+        const box = this.face.offsetWidth || 236;
+        const w = box / face.rect.s, hgt = w * (face.rect.a || 850 / 400);
+        st.backgroundImage = `url("${url}")`;
+        st.backgroundSize = `${w}px ${hgt}px`;
+        st.backgroundPosition = `${-face.rect.x * w}px ${-face.rect.y * hgt}px`;
+      }
+      this.face.classList.remove('enter', 'swap');
       void this.face.offsetWidth;
-      this.face.classList.add('enter');
+      // a new speaker's portrait slides in; the same speaker changing their face just melts
+      this.face.classList.add(sameSpeaker ? 'swap' : 'enter');
     }
 
     sayCentered({ text, instant }) {

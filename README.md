@@ -33,7 +33,7 @@ branch, root folder.
 | H, middle click | Hide the text box |
 | L | History |
 | S | Save screen |
-| Q | Quick save |
+| Q / F9 | Quick save / quick load |
 | Esc, right click | Game menu |
 | 1–9 | Pick a choice |
 | F | Fullscreen |
@@ -48,7 +48,8 @@ On a phone, tap to advance and use the buttons under the text box.
 
 * **Japanese-style text box**: a translucent washi panel with a vermilion and gold frame and
   seigaiha waves, a black-lacquer name plate, the speaker's face at its corner (for Hervé and for
-  voices heard off-scene), and save / load tabs at its side. Clean Zen Maru Gothic text, with
+  voices heard off-scene, changing with their feelings), and one quiet row of words above it:
+  Back, History, Skip, Auto, Save, Load, Config, Hide. Clean Zen Maru Gothic text, with
   Hervé's thoughts in a plum serif.
 * **Typewriter dialogue** with natural pauses at punctuation, text effects (shake, wave, glitch,
   colour, pauses), and a speed setting.
@@ -228,5 +229,6 @@ tools/extract-map.js        extracts the journey map's coastlines from Natural E
 
 ## Adding art and music
 
-Put files in `assets/` using the names listed in [`docs/ASSETS.md`](docs/ASSETS.md). For example,
-`assets/sprites/helene/sad.png` replaces Hélène's "sad" placeholder. Reload the page to see them.
+Put files in `assets/` using the names listed in [`docs/ASSETS.md`](docs/ASSETS.md) and reload the
+page to see them. A character's new face goes in `art/characters/<character>/<feeling>.png` (the
+artist's 1000×1000 canvas); `node tools/import-sprites.js` then makes the sprite and portrait.
