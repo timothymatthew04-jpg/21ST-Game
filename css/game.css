@@ -2337,7 +2337,8 @@ input[type='range']::-moz-range-thumb { width: 18px; height: 24px; background: v
   display: block;
   cursor: pointer;
 }
-.strand-splash.closing { opacity: 0; transition: opacity 1.1s ease; }
+.strand-splash.closing { opacity: 0; transition: opacity 1.9s cubic-bezier(0.45, 0, 0.25, 1); }
+.strand-splash.closing .strand-canvas { transform: scale(1.12); filter: blur(6px); transition: transform 2s ease-out, filter 2s ease-out; }
 .strand-canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
 .strand-press, .strand-hint {
   position: absolute;
@@ -2361,9 +2362,41 @@ input[type='range']::-moz-range-thumb { width: 18px; height: 24px; background: v
 .strand-hint { top: 75%; font-size: 12px; letter-spacing: 0.3em; text-indent: 0.3em; color: rgba(255, 236, 200, 0.45); animation: fade-up 1.4s 1s ease both; }
 @keyframes strand-press { 0%, 100% { opacity: 0.55; } 50% { opacity: 1; } }
 .strand-splash.bursting .strand-press, .strand-splash.bursting .strand-hint { opacity: 0; letter-spacing: 1.2em; animation: none; }
-.strand-flash { position: absolute; inset: 0; pointer-events: none; opacity: 0; background: radial-gradient(ellipse at 50% 50%, rgba(255, 244, 214, 0.95), rgba(255, 190, 110, 0.5) 45%, rgba(255, 150, 60, 0) 80%); }
-.strand-splash.bursting .strand-flash { animation: strand-flash 1.6s 0.35s ease-out both; }
-@keyframes strand-flash { 0% { opacity: 0; } 30% { opacity: 1; } 100% { opacity: 0.2; } }
+.strand-flash {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0;
+  background: radial-gradient(ellipse at 50% 50%, #fffdf6 0%, #fff4dc 35%, #ffe2b0 70%, #f6c888 100%);
+}
+.strand-splash.bursting .strand-flash { background: none; }
+.strand-splash.bursting .strand-flash::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 50% 50%, #fffdf6 0%, #fff4dc 35%, #ffe2b0 70%, #f6c888 100%);
+  opacity: 0;
+  animation: strand-bloom 0.7s 0.45s ease-in forwards;
+}
+.strand-splash.bloomed .strand-flash::after { opacity: 1; animation: none; }
+/* the light swells from the strand until the whole screen is bright: a soft glow with no
+   edge grows from the thread, and the warm white rises behind it */
+.strand-flash::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 60%;
+  aspect-ratio: 1;
+  translate: -50% -50%;
+  background: radial-gradient(circle, rgba(255, 255, 250, 1) 0%, rgba(255, 244, 220, 0.75) 25%, rgba(255, 226, 170, 0.3) 45%, rgba(255, 210, 140, 0) 70%);
+  opacity: 0;
+}
+.strand-splash.bursting .strand-flash { animation: strand-bloom 1.05s 0.1s cubic-bezier(0.6, 0, 0.8, 0.4) forwards; }
+.strand-splash.bursting .strand-flash::before { animation: strand-glow 1s 0s cubic-bezier(0.3, 0, 0.6, 1) forwards; }
+@keyframes strand-bloom { 0% { opacity: 0; } 100% { opacity: 1; } }
+@keyframes strand-glow { 0% { opacity: 0; scale: 0.2; } 40% { opacity: 1; } 100% { opacity: 1; scale: 4; } }
+.strand-splash.bloomed .strand-flash { opacity: 1; animation: none; }
 
 /* ---------------------------------------------------------------- the route's mood */
 /* On a kind road the chapter card is dawn: rose and gold, petals falling.

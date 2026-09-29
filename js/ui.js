@@ -469,13 +469,19 @@
           }, 60);
           el.classList.add('bursting');
           if (fx) fx.burst();
-          // the menu opens under the flash, and the thread fades away over it
+          // the light swells until the whole screen is bright; the menu is built underneath,
+          // and then the light slowly draws back to reveal it
+          const reduce = this.settings.reduceMotion;
           setTimeout(() => {
-            e.removeAfter = 1100;
-            this.close(e);
-            setTimeout(() => fx && fx.stop(), 1100);
+            el.style.zIndex = '50';
+            el.classList.add('bloomed');
             resolve();
-          }, this.settings.reduceMotion ? 200 : 900);
+            setTimeout(() => {
+              e.removeAfter = reduce ? 400 : 2000;
+              this.close(e);
+              setTimeout(() => fx && fx.stop(), e.removeAfter);
+            }, reduce ? 50 : 260);
+          }, reduce ? 250 : 1050);
         };
         el.addEventListener('click', go);
         entry = this.open(el, { onKey: (ev) => { if (!ev.repeat && ev.key !== 'Tab') go(); return true; }, focus: false });
