@@ -7,7 +7,7 @@
  *   eggs     Chapter 4: sort the sick eggs from the healthy before the thread burns out
  *   bargain  Chapter 5: stop the brush on a fair price while Hara Kei weighs you
  *   hide     Chapter 11: run from wall to wall while the soldier's lantern looks away
- *   letter   Chapter 14: put the torn letter back together, strip by strip
+ *   letter   Final chapter: put the torn letter back together, strip by strip
  *
  * Each game resolves to a word the script can test ("win", "lose", "good"...). None of
  * them can stop the story: the ones that can be failed offer another try, or let the
@@ -334,43 +334,96 @@
   }
 
   // ---------------------------------------------------------------- mending the torn letter
+  // Four torn strips, and four places on the page that still show a faint trace of the ink that
+  // belongs there. Pick a strip, then the place it fits; a strip that fits stays and glows.
+  const LETTER = [
+    ['世界を渡った', 'you crossed the world'],
+    ['私を見るため', 'to look at me'],
+    ['美しい物語で', 'let me be a lovely story'],
+    ['隣の人を見て', 'look at the one beside you'],
+  ];
+
   async function letter(ui) {
-    const sh = new Shell(ui, { title: 'The Torn Letter', kanji: '文', hint: 'Swap the strips until the columns read true: pick one, then another.' });
-    const cols = ['あなたは私を', '見るために', '世界を渡った', 'どうか今いる', '場所にいて', 'さようなら'];
-    const strips = cols.map((text, i) => ({ text, i }));
-    let order = shuffle(strips.slice());
-    while (order.every((s, k) => s.i === k)) order = shuffle(strips.slice());
-    const paper = h('div.mg-letter');
-    const draw = () => {
-      paper.replaceChildren(...order.map((s, k) => {
-        // vertical Japanese reads right to left: the first column sits on the right
-        const b = h('button.mg-strip', { type: 'button', style: { '--tear': `${(s.i * 37) % 11}` } }, h('span', s.text));
-        b.dataset.k = k;
-        if (order[k].i === k) b.classList.add('right');
-        return b;
-      }));
+    const sh = new Shell(ui, { title: 'The Torn Letter', kanji: '文', hint: 'Pick a strip, then the place on the page whose faint trace it matches. Japanese is read from the right.' });
+    const paper = h('div.mg-letter.slots');
+    const tray = h('div.mg-tray');
+    // the page: the first column is on the right, as Japanese is read
+    const slots = LETTER.map(([text], i) => {
+      const b = h('button.mg-slot', { type: 'button', 'aria-label': `Place ${i + 1}` }, h('span.mg-ghost', text));
+      b.dataset.i = i;
+      return b;
+    });
+    paper.append(...slots); // the page is laid out right to left
+    let order = shuffle(LETTER.map((_, i) => i));
+    while (order.every((v, k) => v === k)) order = shuffle(order);
+    const strips = order.map((i) => {
+      const b = h('button.mg-strip', { type: 'button', style: { '--tear': `${(i * 37) % 11}` } }, h('span', LETTER[i][0]), h('small', LETTER[i][1]));
+      b.dataset.i = i;
+      return b;
+    });
+    tray.append(...strips);
+    sh.area.append(h('div.mg-mend', tray, h('div.mg-arrow', { 'aria-hidden': 'true' }, '→'), paper));
+    let held = null;
+    let misses = 0;
+    let placed = 0;
+    const hint = () => {
+      // after a few misses, the next strip to place starts to glow, and so does its place
+      const next = LETTER.findIndex((_, i) => !slots[i].classList.contains('filled'));
+      if (next < 0) return;
+      strips.find((b) => +b.dataset.i === next).classList.add('hinted');
+      slots[next].classList.add('hinted');
     };
-    draw();
-    sh.area.append(paper);
-    let first = null;
-    let moves = 0;
     await new Promise((resolve) => {
-      paper.addEventListener('click', (e) => {
-        const b = e.target.closest('.mg-strip');
-        if (!b) return;
-        const k = parseInt(b.dataset.k, 10);
-        if (first === null) { first = k; b.classList.add('held'); ui.audio.fx('paper', { volume: 0.4 }); return; }
-        if (first !== k) { [order[first], order[k]] = [order[k], order[first]]; moves++; ui.audio.fx('paper', { volume: 0.5 }); }
-        first = null;
-        draw();
-        if (order.every((s, i) => s.i === i)) resolve();
-        else if (moves === 8) sh.say('The first column is the one on the right. It begins: あなたは私を…');
+      const pickStrip = (b) => {
+        if (b.classList.contains('placed')) return;
+        if (held) held.classList.remove('held');
+        held = held === b ? null : b;
+        if (held) { held.classList.add('held'); ui.audio.fx('paper', { volume: 0.4 }); }
+      };
+      const tryPlace = (slot) => {
+        if (!held || slot.classList.contains('filled')) return;
+        if (+held.dataset.i === +slot.dataset.i) {
+          slot.classList.add('filled');
+          slot.classList.remove('hinted');
+          slot.replaceChildren(h('span.mg-ink', LETTER[+slot.dataset.i][0]));
+          held.classList.remove('held', 'hinted');
+          held.classList.add('placed');
+          held = null;
+          placed++;
+          ui.audio.fx('paper', { volume: 0.55 });
+          ui.audio.fx('chime', { volume: 0.35 });
+          if (placed === LETTER.length) resolve();
+        } else {
+          misses++;
+          const b = held;
+          // the strip slips back to the table
+          held = null;
+          b.classList.remove('held', 'shake');
+          void b.offsetWidth;
+          b.classList.add('shake');
+          slot.classList.add('nope');
+          setTimeout(() => slot.classList.remove('nope'), 400);
+          ui.audio.fx('paper', { volume: 0.25 });
+          if (misses === 1) sh.say('That strip belongs somewhere else. Look at the shapes of the faint ink.');
+          if (misses >= 3) hint();
+        }
+      };
+      sh.area.addEventListener('click', (e) => {
+        const strip = e.target.closest('.mg-strip');
+        if (strip) { pickStrip(strip); return; }
+        const slot = e.target.closest('.mg-slot');
+        if (slot) {
+          // clicking a place first also works: take the matching strip if one is held, else wait for one
+          if (held) tryPlace(slot);
+          else sh.say('Pick a strip first, then its place on the page.');
+        }
       });
     });
     paper.classList.add('whole');
+    tray.classList.add('empty');
     ui.audio.fx('sparkle', { volume: 0.7 });
-    sh.say('The seams meet. Seven sheets, and the ink runs on unbroken.', 'good');
-    await wait(1800);
+    sh.say(`The seams meet, and the ink runs on unbroken: “${LETTER.map((l) => l[1]).join(' … ')}.”`, 'good');
+    await wait(2600);
     sh.close();
     return 'win';
   }
