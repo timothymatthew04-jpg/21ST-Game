@@ -158,7 +158,10 @@
     const dead = arg === 'dead'; // Chapter 13: almost none of them will live
     const sh = new Shell(ui, { title: dead ? 'The Last Eggs' : 'Sorting the Eggs', kanji: '卵', hint: dead ? 'Find the eggs that are still alive.' : 'Pick out the grey, sick eggs before they spoil the rest.' });
     const n = 20;
-    const sick = new Set(shuffle([...Array(n).keys()]).slice(0, dead ? 17 : 6));
+    // how the eggs were kept on the way home (story/journeys.js): cared for, fewer have gone grey
+    const care = Number(VN.engine && VN.engine.getVar('eggs_care')) || 0;
+    const sickN = dead ? 17 : Math.max(3, Math.min(11, 6 - care * 2));
+    const sick = new Set(shuffle([...Array(n).keys()]).slice(0, sickN));
     const card = h('div.mg-eggcard');
     const eggsEl = [...Array(n).keys()].map((i) => {
       const b = h(`button.mg-egg${sick.has(i) ? '.sick' : ''}`, { type: 'button', 'aria-label': 'egg', style: { '--r': `${(Math.random() * 40 - 20).toFixed(0)}deg` } });
@@ -166,6 +169,7 @@
       return b;
     });
     sh.area.append(card);
+    if (!dead && care) sh.say(care > 0 ? 'The eggs travelled well. Only a few have gone grey.' : 'The road was hard on them. Many more have gone grey than should have.');
     if (dead) {
       // there is nothing to win here: only a handful left alive, found one by one
       sh.say('Tap each egg to hold it to the light.');

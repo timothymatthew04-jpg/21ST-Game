@@ -309,6 +309,12 @@ label start
   set found_hairpin = false
   set wounded = 0
   set truth_seen = ""
+  # the Road East (story/journeys.js)
+  set days = 0
+  set fever = 0
+  set eggs_care = 0
+  set road = ""
+  set chase_how = ""
   scene black with none
   # the opening plays on its own, straight into the story (click to hurry it, Esc to skip)
   play music japan fadein 3
@@ -522,7 +528,7 @@ label chapter2
   gain item handkerchief
   tint none
   play music departure fadein 3
-  cutscene journey_one
+  journey first
   scene road_east with slow
   split joncour_home road_east helene herve "Lavilledieu" "The road east"
   "I crossed France by train, then the Alps. Austria. Hungary. Then Russia, where the roads stopped being roads."
@@ -562,6 +568,9 @@ label chapter3
   play music japan fadein 3
   cutscene arrival
   "I came ashore on the west coast, the unofficial way, where foreigners were not supposed to come ashore at all."
+  if fever >= 1
+    inner "I came ashore thinner than I had set out, with a cough the steppe had given me and the sea had kept."
+  endif
   scene japan_path with dissolve
   "Men I never saw clearly led me inland for days, blindfolded for part of the way. Nobody explained anything. I learned very quickly not to ask."
   "On the last night they took the blindfold off at the edge of a village, and left me to walk the rest of the way."
@@ -695,7 +704,7 @@ label chapter4
 label chapter5
   chapter "Chapter 5" "Return to France" seal 帰
   play music journey fadein 2
-  cutscene return_home
+  journey home
   scene road_east with fade
   "Hara Kei sold me the eggs: thousands of them, pressed onto sheets of paper and packed in wooden boxes lined with mulberry leaves."
   gain item egg_box
@@ -833,13 +842,15 @@ label our_house
 label chapter6
   chapter "Chapter 6" "The Second Journey" seal 再
   play music journey fadein 2
-  cutscene journey_two
+  journey second
   scene road_winter with fade
   "Baldabiou sent me back to Japan for more eggs."
   "The same trains. The same steppe. The same boat without lights."
   "It was easier the second time. That frightened me a little. It meant I was getting used to it."
-  play music pursuit fadein 1
-  walk chase into chase_how
+  if road == "north"
+    play music pursuit fadein 1
+    walk chase into chase_how
+  endif
   if chase_how == "caught"
     if francs >= 60
       lose francs 60
@@ -1056,6 +1067,9 @@ label chapter9
   "I spent my days with Hélène. We walked in the garden in the evenings, and the trees were a little taller every time. But my thoughts kept drifting toward Japan."
   show helene soft
   helene soft "You're quiet since you came back. Quieter than the first time."
+  if days >= 10
+    helene sad "I counted the days, you know. Every time. You were gone longer than you said."
+  endif
   clue paper 0.37 0.6 "Rice paper in her sewing basket" "Thin sheets of it, the kind the eggs came wrapped in from Japan. I thought she was cutting patterns."
   if not has("handkerchief")
     helene neutral "The handkerchief I gave you. I haven't seen it since you came back."
@@ -1161,7 +1175,7 @@ label chapter10
   camera wide
   hide helene
   play music storm fadein 2
-  cutscene journey_three
+  journey third
   scene road_rain with fade
   if obsession >= 8
     "I told Baldabiou it was for the eggs. I told Hélène it was for the eggs. I stopped believing it somewhere in Russia."

@@ -343,6 +343,22 @@ is kept in saves and rollback, and reduced motion turns the camera moves off.
 The **flowchart** also lets the player play any chapter they have reached again from its
 beginning, as it was the last time the story arrived there.
 
+## The Road East (journeys)
+
+```text
+journey first              # or: journey second into how   ("done", or "skipped" if the player skipped it)
+```
+
+A journey is Hervé's route drawn across the old map of Eurasia, like the journey cutscenes, but the
+ride stops at some towns for something to happen: a card with what is going on and two or three
+things to do (keys 1–3 or a click). Options can cost francs or a keepsake (they can't be chosen
+without it), can need a keepsake to be offered at all, and can add to or set story variables; then
+Hervé says what came of it and the ride goes on. The journeys are written in `story/journeys.js`:
+`first`, `second` and `third` out to Japan, and `home`, back with the eggs, where how well the eggs
+are kept (`eggs_care`) decides how many have gone grey in the egg-sorting minigame. Other variables
+the road changes: `days` (Hélène counts them), `fever`, `danger`, and `road` (the second journey's
+northern road is the one with riders on it).
+
 ## Clues
 
 ```text

@@ -83,17 +83,18 @@
       this.caption = h('div.cs-caption');
       this.flashEl = h('div.cs-flash');
       const skip = h('button.cs-skip', { type: 'button' }, 'Skip', h('span', '▸▸'));
-      skip.addEventListener('click', (e) => { e.stopPropagation(); this.finish(); });
+      skip.addEventListener('click', (e) => { e.stopPropagation(); this.skipped = true; this.finish(); });
       // flourishes laid over every shot: a drifting light leak, a flare streak, sparks
       this.leak = h('div.cs-leak');
       this.streak = h('div.cs-streak');
       this.sparkCv = h('canvas.cs-sparks');
       this.el = h('div.overlay.cutscene', this.view, this.leak, this.sparkCv, this.flashEl, this.streak, h('div.cs-bar.top'), h('div.cs-bar.bottom', this.caption), skip);
-      this.el.addEventListener('click', () => this.next());
+      if (!this.def.interactive) this.el.addEventListener('click', () => this.next());
       this.entry = this.ui.open(this.el, {
         onKey: (e) => {
-          if (e.key === ' ' || e.key === 'Enter') this.next();
-          else if (e.key === 'Escape') this.finish();
+          if (this.keyHandler && this.keyHandler(e)) return true;
+          if (e.key === 'Escape') { this.skipped = true; this.finish(); }
+          else if ((e.key === ' ' || e.key === 'Enter') && !this.def.interactive) this.next();
           return true;
         },
         onBack: () => this.finish(),
@@ -231,7 +232,7 @@
           this.later(420, () => this.view.classList.remove('chroma'));
           this.view.animate([{ transform: 'none' }, { transform: `translate(${6 * amt}px, ${3 * amt}px)` }, { transform: `translate(${-5 * amt}px, ${-2 * amt}px)` }, { transform: `translate(${3 * amt}px, ${1 * amt}px)` }, { transform: 'none' }], { duration: 420, easing: 'ease-out' }); });
       }
-      at(dur, () => this.next());
+      if (!shot.hold) at(dur, () => this.next());
     }
 
     flash(color, seconds) {
@@ -282,7 +283,8 @@
         return el;
       });
       const zoom = M.zoom || 2.1;
-      const t0 = performance.now();
+      // a clock that stops while an event is being played out at a stop along the way
+      let elapsed = 0, lastNow = null, paused = false, ended = false;
       const travel = (M.travel || dur - 1.6) * 1000;
       const delay = (M.delay || 0.6) * 1000;
       // the camera follows the head of the route, smoothly (measured once the shot is on screen)
@@ -302,7 +304,10 @@
         if (this.done) return;
         if (!cv.isConnected || !(geo || (geo = measure()))) { this.rafs.add(requestAnimationFrame(draw)); return; }
         if (!camPos) camPos = toView(path[0].x, path[0].y);
-        const k = Math.max(0, Math.min(1, (now - t0 - delay) / travel));
+        if (!paused && lastNow != null) elapsed += now - lastNow;
+        lastNow = now;
+        const k = Math.max(0, Math.min(1, (elapsed - delay) / travel));
+        if (k >= 1 && !ended && M.onEnd) { ended = true; this.later(1400, () => M.onEnd()); }
         const e = k < 0.5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2;
         const head = e * total;
         c.clearRect(0, 0, MAP.w, MAP.h);
@@ -314,6 +319,12 @@
             lastStop = p.stop;
             labels[p.stop].classList.add('on');
             if (stops[p.stop].sound) this.audio.fx(stops[p.stop].sound, { volume: 0.7 });
+            if (M.onStop && M.events && M.events[stops[p.stop].key]) {
+              paused = true;
+              labels[p.stop].classList.add('event');
+              Promise.resolve(M.onStop(stops[p.stop])).then(() => { paused = false; lastNow = null; labels[p.stop].classList.remove('event'); });
+              break;
+            }
           }
           const dash = p.sea ? Math.floor(p.s / 2) % 3 === 0 : Math.floor(p.s / 3) % 3 !== 2;
           if (!dash) continue;
@@ -369,4 +380,5 @@
     return new Promise((resolve) => new Player(ctx, def, { onDone: resolve }).start());
   };
   VN.CUTSCENE_MAP = { MAP, mapXY };
+  VN.CutscenePlayer = Player;
 })();

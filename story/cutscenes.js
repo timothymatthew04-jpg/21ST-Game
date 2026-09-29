@@ -49,13 +49,16 @@
     shirakawa: { lon: 140.2, lat: 37.1, label: 'Shirakawa', big: true, side: 'below' },
   };
   const OUT = ['lavilledieu', 'metz', 'bavaria', 'vienna', 'budapest', 'kiev', 'steppe', 'urals', 'omsk', 'siberia', 'baikal', 'chita', 'amur', 'khabarovsk', 'sabirk', 'strait', 'teraya', 'shirakawa'];
-  const out = () => OUT.map((k) => ({ ...P[k] }));
+  const out = () => OUT.map((k) => ({ ...P[k], key: k }));
   // the way home: the same stops backwards, the sea crossing now at the start
   const home = () => {
-    const back = OUT.slice().reverse().map((k) => ({ ...P[k], sea: false }));
+    const back = OUT.slice().reverse().map((k) => ({ ...P[k], sea: false, key: k }));
     back[2].sea = true; back[3].sea = true; // on to the strait and Sabirk by sea
     return back;
   };
+
+  // the route out and the route home, for the journeys (story/journeys.js)
+  window.VN_ROUTE = { out, home };
 
   window.VN_CUTSCENES = {
     // ---------------------------------------------------------------- Prologue

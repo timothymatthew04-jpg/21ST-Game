@@ -534,6 +534,12 @@
           need(5, 'clue <id> <x> <y> "What it is" ["What Hervé notices"]');
           emit(L, { op: 'clue', id: tk[1].v, x: parseFloat(tk[2].v), y: parseFloat(tk[3].v), label: str(tk[4], 'clue label'), detail: tk[5] ? tk[5].v : '' });
           return;
+        case 'journey': {
+          // journey first [into how] — the Road East, with events along the way (story/journeys.js)
+          need(2, 'journey <name> [into variable]');
+          emit(L, { op: 'journey', name: tk[1].v, into: tk[2] && tk[2].v === 'into' && tk[3] ? tk[3].v : null });
+          return;
+        }
         case 'clueboard':
           // clueboard into truth_seen — what has Hervé not wanted to see? (story/clues.js); all, some, none
           need(3, 'clueboard into <variable>');

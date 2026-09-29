@@ -97,6 +97,22 @@ On a phone, tap to advance and use the buttons under the text box.
   *Utsusemi — The Life He Left Behind* and *Kikyō — Home*. Each is revealed with its own seal, colours
   and music, followed by end credits that roll over every place you saw, then a last screen to go
   back to the title, open the flowchart, or quit the game. Endings not yet found show a hint.
+* **The Road East.** Each journey is played on the old map of Eurasia: the ride stops for a border
+  guard at Metz, a storm on the steppe, the ice of Lake Baikal, two roads past the Urals (one with
+  riders on it), a river in flood, the smugglers of Sabirk. Pay, give up a keepsake, lose days, or
+  risk fever and danger. On the way home the eggs must be kept cool, dry and warm, and how well they
+  were kept shows when they are sorted.
+* **Action in the walks**: hiding from soldiers' lanterns in the burned village (crouch behind walls
+  while their light sweeps past), outriding bandits across the steppe (jump the logs, duck the
+  branches), and crossing a road under shellfire. Getting caught changes the story, never ends it.
+* **Clues to the letter.** Seven small things can be noticed along the way, if the player looks.
+  Before the truth, a board asks who wrote the letter, who helped, and why; seeing it first gives the
+  Home ending a scene of its own.
+* **A camera in dialogue**: close-ups, a slow push in, a cut-in on the eyes, and a split screen with
+  Hélène in France and Hervé on the road at once.
+* **A cinematic opening** that plays by itself (a sea of clouds, silver grass in the wind, a gate in
+  the sea at sunset, the logo painting itself in), and **a war** that looks like one: a castle
+  burning, armies marching, rockets, guns, warships firing broadsides.
 * **Flowchart** of every chapter, choice and option (on the title screen and in the game menu):
   the options you chose on this journey are lit, ones taken on earlier journeys are marked, and
   where an untried option leads stays "???" until you take it.
@@ -175,6 +191,7 @@ js/                   the engine
   minigames.js        the minigames (tea, eggs, bargain, hide, letter)
   walk.js             the walking areas: scrolling, water, people, weather, things to take
   flowchart.js        the flowchart of choices, worked out from the script
+  journey.js          the Road East: the route across the map, and the events along it
   strand.js           the press-start screen: a glowing thread of silk
   audio.js            music, sounds, menu beeps
   synth.js            the music, ambience and sound effects, composed in code
@@ -182,6 +199,8 @@ js/                   the engine
 story/script.js       THE STORY: edit this to change the game
 story/cutscenes.js    the cutscenes (shots, camera moves, captions)
 story/walks.js        the walking areas: what is where, and what Hervé and others say
+story/journeys.js     the journeys east and home, and what happens along the way
+story/clues.js        the clue board: the questions, and what the answers mean
 story/walkscenery.js  the walking areas' painted layers (generated)
 story/scenery.js      how each painted background's layers move (generated)
 story/blinks.js       where each character's eyes are, for blinking (generated)

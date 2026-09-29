@@ -786,6 +786,19 @@
       this.state.pc++;
     }
 
+    /** The Road East: the route across the map, stopping for what happens along the way. */
+    async op_journey(ins) {
+      this.checkpoint();
+      if (!this.isSkipping() && VN.playJourney) {
+        this.ui.textbox.hideBox();
+        this.ui.textbox.hideCentered();
+        this.stage.setSpeaker(null);
+        const res = await this.guard(VN.playJourney({ ui: this.ui, stage: this.stage, audio: this.audio, settings: this.settings, story: this.story, engine: this }, ins.name));
+        if (ins.into) this.setVar(ins.into, res);
+      }
+      this.state.pc++;
+    }
+
     /** A glint in the scene: something to notice, if the player looks. It stays until the next scene. */
     op_clue(ins) {
       const sc = this.state.scene;
