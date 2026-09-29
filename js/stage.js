@@ -374,6 +374,7 @@
       this.fader.getAnimations().forEach((a) => a.cancel());
       this.fader.style.opacity = 0;
       this.scene.getAnimations().forEach((a) => a.cancel());
+      if (this.eyesEl) { this.eyesEl.remove(); this.eyesEl = null; }
       this.sync(scene, { instant: true });
     }
 
@@ -458,6 +459,7 @@
       }
 
       this.applyLook(scene, instant);
+      this.applySplit(scene, instant);
       return longest;
     }
 
@@ -488,10 +490,92 @@
         this.tintEl.style.background = preset ? preset[0] : tint.color;
         this.tintEl.style.opacity = String(tint.opacity != null ? tint.opacity : preset ? preset[1] : 0.3);
       } else this.tintEl.style.opacity = '0';
-      this.content.style.transitionDuration = t;
       this.content.style.filter = (scene.filter && FILTERS[scene.filter]) || 'none';
       this.vignetteEl.style.transitionDuration = t;
       this.vignetteEl.style.opacity = scene.vignette ? '1' : '0';
+      // the camera: close on a character (following them if they move), or a slow push in
+      const cam = this.settings.reduceMotion ? null : scene.cam;
+      let scale = 1, origin = '50% 45%', move = '1.2s';
+      if (cam && cam.mode === 'close') {
+        const el = cam.id && this.spriteEls[cam.id];
+        scale = cam.zoom || 1.42;
+        origin = `${el ? parseFloat(el.style.left) || 50 : 50}% 26%`;
+        move = '1.1s';
+      } else if (cam && cam.mode === 'push') {
+        scale = cam.zoom || 1.14;
+        origin = '50% 42%';
+        move = '9s';
+      }
+      this.content.style.transitionDuration = instant ? '0ms' : `0.8s, ${move}, ${move}`;
+      this.content.style.transformOrigin = origin;
+      this.content.style.transform = scale === 1 ? 'none' : `scale(${scale})`;
+    }
+
+    /** Two places side by side, split on a slant: scene.split = { a, b, ida, idb, la, lb }. */
+    applySplit(scene, instant) {
+      const sp = scene.split || null;
+      const key = sp ? JSON.stringify(sp) : null;
+      if (key === this.splitKey) return;
+      this.splitKey = key;
+      const old = this.splitEl;
+      this.splitEl = null;
+      if (old) {
+        if (instant) old.remove();
+        else { old.classList.add('leaving'); setTimeout(() => old.remove(), 800); }
+      }
+      if (!sp) return;
+      const pane = (bg, id, label, side) => {
+        const inner = h('div.split-inner', this.makeBg(bg));
+        if (id) {
+          const s = this.makeSprite(id, ((scene.sprites || {})[id] || {}).expr || 'neutral');
+          s.style.left = side === 'left' ? '27%' : '73%';
+          inner.append(h('div.split-sprites', s));
+        }
+        return h(`div.split-pane.${side}`, inner, label ? h('div.split-label', label) : null);
+      };
+      const el = h(`div.split-view${instant ? '.instant' : ''}`, pane(sp.a, sp.ida, sp.la, 'left'), pane(sp.b, sp.idb, sp.lb, 'right'), h('div.split-seam'));
+      this.scene.insertBefore(el, this.tintEl);
+      this.splitEl = el;
+    }
+
+    /** A letterboxed band across the screen with a close-up of a character's eyes. Returns { done, close } or null. */
+    eyesCut(id, expr) {
+      const ch = this.story.characters[id] || {};
+      const folder = ch.sprite || id;
+      const onStage = this.spriteEls[id] && this.spriteEls[id].querySelector('.sprite-img');
+      const found = spriteLookup(folder, expr || 'neutral');
+      const url = (onStage && onStage.getAttribute('src')) || (found && found.url);
+      const eye = (globalThis.VN_BLINKS || {})[folder];
+      if (!url || !eye) return null;
+      this.closeEyes();
+      const pic = h('div.eyes-pic');
+      const band = h('div.eyes-band', pic, h('i.eyes-streak'));
+      const el = h(`div.eyes-cut${this.settings.reduceMotion ? '.still' : ''}`, band);
+      this.root.insertBefore(el, this.fxCanvas);
+      this.eyesEl = el;
+      const img = new Image();
+      img.onload = () => {
+        // show about twice the width of the eyes, centred on them
+        const bw = band.clientWidth || 1280, bh = band.clientHeight || 160;
+        const iw = bw / (eye.w * 2.3), ih = iw * (img.naturalHeight / img.naturalWidth);
+        const cx = (eye.x + eye.w / 2) * iw, cy = (eye.y + eye.h / 2) * ih;
+        Object.assign(pic.style, { backgroundImage: `url("${url}")`, backgroundSize: `${iw}px ${ih}px`, backgroundPosition: `${bw / 2 - cx}px ${bh / 2 - cy}px` });
+      };
+      img.src = url;
+      let timer = 0;
+      const done = new Promise((resolve) => { timer = setTimeout(resolve, 2600); });
+      return {
+        done,
+        close: () => { clearTimeout(timer); this.closeEyes(); },
+      };
+    }
+
+    closeEyes() {
+      const el = this.eyesEl;
+      if (!el) return;
+      this.eyesEl = null;
+      el.classList.add('closing');
+      setTimeout(() => el.remove(), 450);
     }
 
     setSpeaker(id) {

@@ -103,6 +103,13 @@
       m.context ? h('div.fc-context', `“${m.context.length > 90 ? `${m.context.slice(0, 88)}…` : m.context}”`) : null,
       h('div.fc-opts', m.options.map((o) => optionPill(m, o))));
 
+    // any chapter the story has reached can be played again from its beginning
+    const starts = eng.persistent.chapterStarts || {};
+    const playFrom = (c) => async () => {
+      if (eng.inGame && !(await ui.confirm(`Play ${c.title}${c.subtitle ? `, “${c.subtitle}”,` : ''} again from its beginning? Anything since your last save will be lost.`, { yes: 'Play from here', no: 'Stay' }))) return;
+      ui.closeAll();
+      eng.playChapter(c.title);
+    };
     const nodes = flow.chapters.map((c, i) => {
       const was = reached[c.title] || (hereTitle && hereTitle === c.title);
       const here = hereTitle === c.title;
@@ -110,7 +117,8 @@
         h('div.fc-head',
           h('span.fc-seal', c.seal || '章'),
           h('div.fc-names', h('span.fc-num', c.title.toUpperCase()), h('b', c.subtitle || c.title)),
-          here ? h('span.fc-here', 'YOU ARE HERE') : null),
+          here ? h('span.fc-here', 'YOU ARE HERE') : null,
+          starts[c.title] ? ui.button('▶ Play from here', playFrom(c), '.fc-play') : null),
         c.choices.length ? h('div.fc-choices', c.choices.map((m) => choiceRow(m))) : null);
     });
     const endingsRow = h('section.fc-endings',

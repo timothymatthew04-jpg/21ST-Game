@@ -325,6 +325,24 @@ The chapter card turns the title into a kanji chapter number by itself ("Prologu
 "Chapter 12" → 第十二章, "Final Chapter" → 終章). `seal` is the character (or two) stamped on the
 card; `kanji 第三章` overrides the number.
 
+## The camera in dialogue
+
+```text
+camera close helene        # move in on a character's face (it follows them if they move)
+camera push                # a slow push in on the whole scene, for a moment that matters
+camera wide                # back to the whole view (a new scene does this by itself)
+eyes woman heartbeat       # a letterboxed cut-in on a character's eyes, with an optional sound
+split joncour_home road_east helene herve "Lavilledieu" "The road east"
+split off                  # two places side by side on a slant, with a character in each
+```
+
+`camera close` takes an optional zoom (1.42 by default), and so does `camera push` (1.14). The
+split screen stays through the lines that follow until `split off` or the next `scene`. All of it
+is kept in saves and rollback, and reduced motion turns the camera moves off.
+
+The **flowchart** also lets the player play any chapter they have reached again from its
+beginning, as it was the last time the story arrived there.
+
 ## Cutscenes
 
 `cutscene name` plays one of the cutscenes defined in `story/cutscenes.js`. A cutscene is a list of

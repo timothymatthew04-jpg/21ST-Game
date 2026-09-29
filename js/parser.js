@@ -506,6 +506,32 @@
           return;
         }
         case 'window': emit(L, { op: 'window', show: tk[1] && tk[1].v === 'show' }); return;
+        case 'camera': {
+          // camera close helene [zoom] | camera push [zoom] | camera wide — the camera during dialogue
+          need(2, 'camera close <character> | camera push | camera wide');
+          const mode = tk[1].v;
+          if (!['close', 'push', 'wide'].includes(mode)) throw new Error(`Unknown camera move "${mode}" (close, push or wide)`);
+          if (mode === 'close') {
+            need(3, 'camera close <character> [zoom]');
+            emit(L, { op: 'camera', mode, id: tk[2].v, zoom: tk[3] ? parseFloat(tk[3].v) : null });
+          } else emit(L, { op: 'camera', mode, zoom: tk[2] ? parseFloat(tk[2].v) : null });
+          return;
+        }
+        case 'split': {
+          // split helene_garden estate_room [helene|-] [herve|-] ["Left caption" "Right caption"] | split off
+          need(2, 'split <background> <background> [character|-] [character|-] ["caption" "caption"] | split off');
+          if (tk[1].v === 'off') { emit(L, { op: 'split', off: true }); return; }
+          need(3, 'split <background> <background>');
+          const words = tk.slice(3).filter((t) => t.t !== 'str').map((t) => (t.v === '-' ? null : t.v));
+          const caps = tk.slice(3).filter((t) => t.t === 'str').map((t) => t.v);
+          emit(L, { op: 'split', a: tk[1].v, b: tk[2].v, ida: words[0] || null, idb: words[1] || null, la: caps[0] || null, lb: caps[1] || null });
+          return;
+        }
+        case 'eyes':
+          // eyes woman [sound] — a moment's cut-in on a character's eyes
+          need(2, 'eyes <character> [sound]');
+          emit(L, { op: 'eyes', id: tk[1].v, sound: tk[2] ? tk[2].v : null });
+          return;
 
         // ---- text ----
         case 'centered': emit(L, { op: 'say', who: null, centered: true, text: str(tk[1], 'centered "text"'), key: `${currentLabel}:${sayCount++}` }); return;

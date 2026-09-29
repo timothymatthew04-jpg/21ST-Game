@@ -140,7 +140,7 @@ html, body {
 .overlays > * { pointer-events: auto; }
 
 .scene { overflow: hidden; }
-.scene-content { transition: filter 0.8s ease; }
+.scene-content { transition: filter 0.8s ease, transform 1.2s cubic-bezier(0.3, 0.1, 0.25, 1), transform-origin 1.2s cubic-bezier(0.3, 0.1, 0.25, 1); }
 .tint { opacity: 0; mix-blend-mode: multiply; transition: opacity 0.8s ease, background 0.8s ease; pointer-events: none; }
 .vignette {
   opacity: 0;
@@ -3019,6 +3019,13 @@ input[type='range']::-moz-range-thumb { width: 18px; height: 24px; background: v
 .fc-chapter.unreached .fc-names b { color: #8a7e70; }
 .fc-here { margin-left: 8px; padding: 3px 10px; font-family: var(--display); font-size: 11px; letter-spacing: 0.2em; color: #1a1008; background: #f3d58e; border-radius: 3px; box-shadow: 0 0 14px rgba(243, 213, 142, 0.8); animation: blink 2s ease-in-out infinite; }
 .fc-chapter.here .fc-seal { box-shadow: inset 0 0 0 2px #a8241a, inset 0 0 0 4px #f6d9c8, 0 0 22px rgba(243, 213, 142, 0.9); }
+.fc-head .btn.fc-play {
+  margin-left: auto; padding: 5px 14px; min-width: 0;
+  font-family: var(--display); font-size: 12px; letter-spacing: 0.14em; color: #f6e2b8;
+  background: rgba(20, 12, 10, 0.6); border: 1px solid rgba(201, 162, 77, 0.55); border-radius: 999px; box-shadow: none; clip-path: none;
+  opacity: 0.8; transition: opacity 0.2s, background 0.2s, color 0.2s, box-shadow 0.2s;
+}
+.fc-head .btn.fc-play:hover, .fc-head .btn.fc-play:focus-visible { opacity: 1; color: #1a1008; background: #f3d58e; box-shadow: 0 0 16px rgba(243, 213, 142, 0.7); }
 .fc-choices { display: flex; flex-direction: column; gap: 10px; }
 .fc-choice { display: flex; flex-direction: column; gap: 6px; }
 .fc-choice.nested { margin: 8px 0 2px 18px; padding-left: 12px; border-left: 1px dashed rgba(243, 213, 142, 0.35); }
@@ -3423,3 +3430,52 @@ input[type='range']::-moz-range-thumb { width: 18px; height: 24px; background: v
 .cs-logo { position: absolute; left: 50%; top: 44%; width: 600px; transform: translate(-50%, -50%); z-index: 3; pointer-events: none; animation: cs-logo-in 1.6s ease both; }
 .cs-logo .brush-logo { width: 100%; }
 @keyframes cs-logo-in { from { opacity: 0; transform: translate(-50%, -46%) scale(0.96); filter: blur(6px); } to { opacity: 1; transform: translate(-50%, -50%); filter: none; } }
+
+/* ---- the dialogue camera's companions: a split screen, and a cut-in on the eyes ------------ */
+.split-view { position: absolute; inset: 0; z-index: 1; pointer-events: none; }
+.split-pane { position: absolute; inset: 0; overflow: hidden; }
+.split-pane.left { clip-path: polygon(0 0, 54% 0, 46% 100%, 0 100%); animation: split-in-l 0.9s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+.split-pane.right { clip-path: polygon(54% 0, 100% 0, 100% 100%, 46% 100%); animation: split-in-r 0.9s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+.split-inner { position: absolute; inset: 0; }
+.split-inner > .bg { position: absolute; inset: 0; }
+.split-sprites { position: absolute; inset: 0; }
+.split-pane.left .split-inner { translate: -23% 0; }
+.split-pane.right .split-inner { translate: 23% 0; }
+.split-pane.left .split-sprites .sprite { left: 50% !important; }
+.split-pane.right .split-sprites .sprite { left: 50% !important; }
+.split-label {
+  position: absolute; top: 34px; padding: 6px 16px; font-family: var(--name-font); font-weight: 700; font-size: 18px; letter-spacing: 0.08em;
+  color: #fff6e4; background: linear-gradient(90deg, rgba(12, 8, 10, 0.72), rgba(12, 8, 10, 0)); border-left: 3px solid var(--shu);
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8); animation: wk-in 0.8s 0.6s ease both;
+}
+.split-pane.left .split-label { left: 32px; }
+.split-pane.right .split-label { right: 32px; border-left: none; border-right: 3px solid var(--shu); background: linear-gradient(270deg, rgba(12, 8, 10, 0.72), rgba(12, 8, 10, 0)); }
+.split-seam {
+  position: absolute; left: 50%; top: -5%; width: 3px; height: 110%; margin-left: -1.5px; rotate: 4.6deg;
+  background: linear-gradient(180deg, transparent, #fff4d8 20%, #ffd890 50%, #fff4d8 80%, transparent);
+  box-shadow: 0 0 12px rgba(255, 220, 160, 0.9), 0 0 36px rgba(255, 180, 90, 0.5); animation: split-seam 0.9s ease both;
+}
+@keyframes split-in-l { from { translate: -60% 0; opacity: 0; } to { translate: 0 0; opacity: 1; } }
+@keyframes split-in-r { from { translate: 60% 0; opacity: 0; } to { translate: 0 0; opacity: 1; } }
+@keyframes split-seam { from { scale: 1 0; opacity: 0; } to { scale: 1 1; opacity: 1; } }
+.split-view.leaving { opacity: 0; transition: opacity 0.7s ease; }
+.split-view.instant .split-pane, .split-view.instant .split-seam, .split-view.instant .split-label { animation: none; }
+
+.eyes-cut { position: absolute; inset: 0; z-index: 3; pointer-events: none; background: rgba(4, 2, 6, 0.55); animation: eyes-dim 0.35s ease both; }
+.eyes-band {
+  position: absolute; left: 0; right: 0; top: 30%; height: 22%; overflow: hidden;
+  box-shadow: 0 -2px 0 rgba(255, 220, 160, 0.8), 0 2px 0 rgba(255, 220, 160, 0.8), 0 0 40px rgba(0, 0, 0, 0.9);
+  animation: eyes-open 0.4s cubic-bezier(0.2, 0.9, 0.2, 1) both;
+}
+.eyes-pic { position: absolute; inset: -4% -6%; background-repeat: no-repeat; animation: eyes-drift 3s ease-out both; }
+.eyes-streak {
+  position: absolute; top: 0; bottom: 0; width: 30%; left: -30%; opacity: 0.8;
+  background: linear-gradient(100deg, transparent, rgba(255, 255, 255, 0.55), transparent); mix-blend-mode: screen;
+  animation: eyes-streak 0.9s 0.15s ease-out both;
+}
+@keyframes eyes-dim { from { opacity: 0; } }
+@keyframes eyes-open { from { scale: 1 0; } to { scale: 1 1; } }
+@keyframes eyes-drift { from { translate: 2% 0; scale: 1.06; } to { translate: -1% 0; scale: 1; } }
+@keyframes eyes-streak { to { left: 110%; } }
+.eyes-cut.closing { opacity: 0; transition: opacity 0.4s ease; }
+.eyes-cut.still .eyes-pic, .eyes-cut.still .eyes-streak { animation: none; }

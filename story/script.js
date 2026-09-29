@@ -425,6 +425,7 @@ label wedding
   helene smile "You're home early. Did the army finally throw you out?"
   herve "I left. Baldabiou has work for me."
   helene neutral "Baldabiou always has work for someone."
+  camera close helene
   herve "It means I don't have to wait five years to marry you."
   menu
     - "Ask her properly, on one knee." tone=tender [helene_trust += 1]
@@ -441,6 +442,7 @@ label wedding
         helene soft "Are you trying to ask me something?"
         "In the end, she asked me. I said yes before she had finished the question."
         set proposal = "her"
+  camera wide
   cutscene wedding
   "We were married in the spring, in the little church at Lavilledieu. The whole town came. Baldabiou cried more than anyone."
   "One week later, I had to leave for Japan."
@@ -520,7 +522,9 @@ label chapter2
   play music departure fadein 3
   cutscene journey_one
   scene road_east with slow
+  split joncour_home road_east helene herve "Lavilledieu" "The road east"
   "I crossed France by train, then the Alps. Austria. Hungary. Then Russia, where the roads stopped being roads."
+  split off
   "I bought a horse at the edge of the steppe, and rode east."
   walk steppe
   "Weeks of steppe. Lake Baikal, which the people there call the sea. Rivers I crossed on rafts, and villages that had never seen a Frenchman and saw no reason to start."
@@ -575,6 +579,8 @@ label chapter3
   show harakei neutral at left
   show woman neutral at right
   "Among the people around Hara Kei, I noticed a young woman. Her eyes were not Asian — that was the first strange thing. The second was that she did not lower them."
+  eyes woman heartbeat
+  camera close woman
   "She watched me without saying anything."
   introduce woman
   inner "She was not beautiful in the way people usually mean beautiful. She simply looked at me."
@@ -607,6 +613,7 @@ label chapter3
         "I meant to look away. I didn't. I didn't do anything at all."
         "At last it was she who lowered her eyes, and I understood that she had decided when it would end, not me."
         set ch3_choice = "frozen"
+  camera wide
   jump chapter4
 
 
@@ -637,6 +644,7 @@ label chapter4
   "She lifted a small cup and drank from it."
   cutscene the_cup
   "Then, silently, she offered it to me."
+  camera push
   show woman gaze at right
   "I looked at it. Then at her."
   menu time 10
@@ -672,6 +680,7 @@ label chapter4
         show woman neutral at right
         "Her hand came back for it, unhurried. She drank what was left herself, and did not look at me again that evening."
         set ch4_choice = "ignore"
+  camera wide
   if ch4_choice != "ignore"
     "Hara Kei did not seem to notice. Or he noticed everything, and chose to say nothing. With him, it was the same thing."
   endif
@@ -1132,8 +1141,10 @@ label chapter10
   "She nodded."
   helene sad "You never do."
   "I looked at her."
+  camera close helene
   helene soft "Come home, Hervé."
   "I said nothing."
+  camera wide
   hide helene
   play music storm fadein 2
   cutscene journey_three

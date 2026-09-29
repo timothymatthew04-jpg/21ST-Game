@@ -671,6 +671,9 @@
       if (ins.bg !== 'black' && !seen.includes(ins.bg)) seen.push(ins.bg);
       sc.sprites = {};
       sc.cg = null;
+      // a new place: the camera goes back to the whole view, and a split screen closes
+      sc.cam = null;
+      sc.split = null;
       this.stage.setSpeaker(null);
       this.ui.textbox.hideBox();
       this.ui.textbox.hideCentered();
@@ -766,12 +769,47 @@
       this.state.pc++;
     }
 
+    /** The camera during dialogue: close on a character, a slow push in, or the whole view again. */
+    op_camera(ins) {
+      const sc = this.state.scene;
+      sc.cam = ins.mode === 'wide' ? null : { mode: ins.mode, id: ins.id || null, zoom: ins.zoom || null };
+      this.stage.applyLook(sc, this.isSkipping());
+      this.state.pc++;
+    }
+
+    /** Two places side by side (it stays through the lines that follow, until "split off" or a new scene). */
+    op_split(ins) {
+      const sc = this.state.scene;
+      sc.split = ins.off ? null : { a: ins.a, b: ins.b, ida: ins.ida, idb: ins.idb, la: ins.la, lb: ins.lb };
+      this.stage.applySplit(sc, this.isSkipping());
+      this.state.pc++;
+    }
+
+    /** A moment's cut-in on a character's eyes; a click moves on. */
+    async op_eyes(ins) {
+      const sprite = this.state.scene.sprites[ins.id];
+      const cut = this.isSkipping() ? null : this.stage.eyesCut(ins.id, sprite ? sprite.expr : 'neutral');
+      if (cut) {
+        if (ins.sound) this.audio.fx(ins.sound, { volume: 0.55 });
+        try {
+          await this.guard(new Promise((resolve) => {
+            this.waiter = resolve;
+            cut.done.then(() => { if (this.waiter === resolve) { this.waiter = null; resolve(); } });
+          }));
+        } finally { cut.close(); }
+      }
+      this.state.pc++;
+    }
+
     op_window(ins) {
       if (ins.show) this.ui.textbox.showBox(); else this.ui.textbox.hideBox();
       this.state.pc++;
     }
 
     async op_chapter(ins) {
+      // remember how this chapter began, so the flowchart can play it again from here
+      const starts = this.persistent.chapterStarts || (this.persistent.chapterStarts = {});
+      starts[ins.title] = { state: VN.clone(this.state), time: Date.now() };
       this.state.chapter = ins.subtitle ? `${ins.title} · ${ins.subtitle}` : ins.title;
       this.state.chaptersSeen = (this.state.chaptersSeen || 0) + 1;
       (this.persistent.chapters || (this.persistent.chapters = {}))[ins.title] = 1;
@@ -977,6 +1015,25 @@
       const st = this.freshState();
       if (label && label in this.story.labels) { st.pc = this.story.labels[label]; st.label = label; }
       this.restore(st, { instant: false });
+    }
+
+    /** Play a chapter again from its beginning, as it was the last time the story reached it. */
+    playChapter(title) {
+      const data = (this.persistent.chapterStarts || {})[title];
+      const pc = this.program.findIndex((i) => i.op === 'chapter' && i.title === title);
+      if (!data || pc < 0) return false;
+      const state = VN.clone(data.state);
+      // find the chapter by its title, so this still works after the script has been edited
+      state.pc = pc;
+      for (let p = pc; p >= 0; p--) if (this.program[p].op === 'label') { state.label = this.program[p].name; break; }
+      this.abort();
+      this.enterGame();
+      this.history = [];
+      this.rollbackStack = [];
+      this.current = null;
+      this.audio.stopAll(0.6);
+      this.restore(state, { instant: false });
+      return true;
     }
 
     continueGame() {
