@@ -165,7 +165,7 @@ bgsound estate_unrest     unrest
 bgsound estate_tearoom    temple 0.7
 bgsound estate_room       night 0.7
 bgsound aviary            aviary
-bgsound burned_village    ruins
+bgsound burned_village    battle_far
 bgsound forest_camp_night camp
 bgsound blanche_salon     city 0.8
 
@@ -362,7 +362,7 @@ label chapter1
   endif
   gain item handkerchief
   tint none
-  play music journey fadein 3
+  play music departure fadein 3
   cutscene journey_one
   scene road_east with slow
   "I crossed France by train, then the Alps. Austria. Hungary. Then Russia, where the roads stopped being roads."
@@ -454,6 +454,7 @@ label chapter3
   show harakei neutral at left
   show woman neutral at right
   "Later, tea was served. The young woman prepared it herself, and I watched her hands."
+  play sound pour volume 0.8
   minigame tea into tea_result
   if tea_result == "win"
     "When the bowl came to me, I did as she had done, in the same order, turning it the same way."
@@ -714,7 +715,7 @@ label chapter6
 label chapter7
   chapter "Chapter 7" "The Note" seal 文
   scene estate_day with fade
-  play music her_theme fadein 3
+  play music reverie fadein 3
   if glove == "left"
     "On the last morning, I found my glove on my travel chest. Neatly folded. Inside it, a tiny piece of paper."
   elif glove == "handkerchief"
@@ -827,7 +828,7 @@ label chapter8
 # ============================================================================
 label chapter9
   chapter "Chapter 9" "The Third Journey" seal 雨
-  play music journey fadein 2
+  play music storm fadein 2
   cutscene journey_three
   scene road_rain with fade
   "I went back to Japan a third time."
@@ -849,7 +850,7 @@ label chapter9
         "I stood in the rain with nothing to say. He searched my bags and kept what he liked."
         lose francs 30
   scene estate_unrest with fade
-  play music japan fadein 2
+  play music tension fadein 2
   cutscene warships
   "The country had changed. Foreign ships had come into the ports with their guns, and the old order was cracking. There were soldiers on the roads. People looked at me differently now — a white face had become a political problem."
   show harakei stern
@@ -885,9 +886,11 @@ label chapter9
 # ============================================================================
 label chapter10
   chapter "Chapter 10" "War" seal 戦
-  play music war fadein 2
+  play music battle fadein 1
+  play ambience battle
   cutscene war
   scene balbadiou_office with fade
+  play music war fadein 3 volume 0.8
   show balbadiou worried
   "The next year, the news from Japan was all bad. Civil war. Foreigners attacked. Ports closed. Nobody knew who was in charge."
   balbadiou worried "You can't go this time. Nobody can."
@@ -945,9 +948,13 @@ label chapter11
     "I kept thinking: if I die here, nobody at home will ever know where."
   endif
   "On the second night, lanterns came up the road. Soldiers, going from ruin to ruin."
+  play sound shouts volume 0.6
+  play music pursuit fadein 1
   minigame hide into hide_result
   if hide_result == "caught"
-    play sound heartbeat
+    play sound sting
+    play music tension fadein 1
+    play sound heartbeat_fast
     "A soldier dragged me into the light. He shouted a question I didn't understand, and put his hand on his sword."
     menu time 8
       - "Show him Hara Kei's pass." tone=honest cost=item:pass
@@ -958,14 +965,17 @@ label chapter11
           "He held the watch to his ear, listening to it tick, and smiled like a child."
           inner "I watched my father's watch go into a stranger's pocket, and I was grateful. That was the worst of it."
       - "Run." tone=danger [danger += 3]
+          play sound running
+          play sound musket
           "I ran. A shot cracked past me into the dark, then another. I did not stop until the trees."
+          play sound musket volume 0.6
       - hesitate [danger += 2]
           "I froze. He struck me once, hard, and left me in the ashes. When I could stand again, my purse was lighter."
           lose francs 40
   else
     "I pressed myself into the shadow of a burned wall, and the lanterns passed."
   endif
-  play music sorrow fadein 8
+  play music lament fadein 6
   "I searched for days. For Hara Kei. For her. For anyone."
   if went_china
     inner "In China I had been sensible. Here, in the ashes, sensible was a word from another language."
@@ -1137,7 +1147,7 @@ label chapter15
   "We lived quietly. The trees in the garden grew tall. I learned the names of the birds that came to the pond."
   "Then, one winter, Hélène fell ill."
   scene helene_sickroom with fade
-  play music sorrow fadein 4
+  play music farewell fadein 4
   filter faded
   show helene tired
   "She was ill for a long time, and then, very quickly, she was not going to get better."
@@ -1204,6 +1214,7 @@ label final
     "I laid the seven sheets out on Madame Blanche's table. They had fallen out of order in the drawer, the way paper does over the years."
   endif
   minigame letter
+  play music revelation fadein 2
   cutscene truth
   cg the_letter with dissolve
   effect glitch 0.9
@@ -1262,6 +1273,7 @@ label ending
   "The person who had loved me most had been beside me all along."
   if final_choice == "silent"
     scene cemetery_grey with slow
+    play music sorrow fadein 4
     "I stood there a long time and said nothing, the way she had said nothing, for years, for my sake."
     "Some things are told best in silence. She taught me that. I learned it too late, and I learned it completely."
     cutscene end_silence
@@ -1270,11 +1282,13 @@ label ending
     "I told her about my day. About the birds at the pond. About the letter, which I had finally read the right way."
     helene soft "{i}Look at whoever is beside you.{/i}"
     play sound wind_gust volume 0.6
+    play sound swell
     "The wind moved through the trees she had watched me plant. For the first time in many years, I was exactly where I was."
     cutscene end_beside
     ending home_beside "Home — Beside Me All Along" true
   else
     scene cemetery_night with slow
+    play music lament fadein 4
     "I tried to speak to her, and found I had forgotten how. I had spent too many years talking to someone who wasn't there."
     "Some evenings I still look east. Now I know what I am looking for is behind me."
     cutscene end_distance

@@ -135,15 +135,16 @@
     },
     warships: {
       shots: [
-        { bg: 'cs_warships', dur: 7, cam: [[1.35, 0.25, 0.6], [1.08, 0.62, 0.5]], fx: 'smoke=0.39,0.66,1,#2a1a1a smoke=0.72,0.62,0.6,#2a1a1a glints=0,0.66,1,0.3,30,#ffb070', kanji: '黒船', flash: [2.4, 4.8], shake: [[2.4, 1], [4.8, 0.7]], sound: [['cannon', 2.4, 0.8], ['cannon', 4.8, 0.6]] },
+        { bg: 'cs_warships', dur: 7, cam: [[1.35, 0.25, 0.6], [1.08, 0.62, 0.5]], fx: 'smoke=0.39,0.66,1,#2a1a1a smoke=0.72,0.62,0.6,#2a1a1a glints=0,0.66,1,0.3,30,#ffb070', kanji: '黒船', flash: [2.4, 4.8], shake: [[2.4, 1], [4.8, 0.7]], sound: [['horn', 0.4, 0.45], ['cannon', 2.4, 0.8], ['cannon', 4.8, 0.6]] },
       ],
     },
 
     // ---------------------------------------------------------------- Chapter 10: war
     war: {
       shots: [
-        { bg: 'cs_warships', dur: 5, cam: [[1.15, 0.4, 0.55], [1.3, 0.5, 0.6]], tint: 'rgba(10,6,30,0.45)', fx: 'embers=0.39,0.7,1 smoke=0.39,0.66,1,#1a1010', flash: [1.2, 2.6, 3.4], shake: [[1.2, 1.2], [2.6, 0.8]], sound: [['cannon', 1.2, 0.9], ['cannon', 2.6, 0.7], ['cannon', 3.4, 0.5]], text: 'In Japan, the war had come.', textAt: 1.6 },
-        { bg: 'estate_unrest', dur: 4.5, cam: [[1.1, 0.5, 0.5], [1.3, 0.6, 0.6]], fx: 'embers=0.5,0.8,1.2 ash=0.8', trans: 'white', sound: [['wind_gust', 0.2, 0.6]] },
+        { bg: 'cs_warships', dur: 6, cam: [[1.15, 0.4, 0.55], [1.3, 0.5, 0.6]], tint: 'rgba(10,6,30,0.45)', fx: 'embers=0.39,0.7,1 smoke=0.39,0.66,1,#1a1010', flash: [1.2, 2.6, 3.4, 4.7], shake: [[1.2, 1.2], [2.6, 0.8], [4.7, 1.3]], sound: [['horn', 0.1, 0.8], ['cannon', 1.2, 0.9], ['cannon', 2.6, 0.7], ['volley', 3, 0.6], ['cannon', 3.4, 0.5], ['explosion', 4.7, 0.8]], text: 'In Japan, the war had come.', textAt: 1.6 },
+        { bg: 'estate_unrest', dur: 5, cam: [[1.3, 0.35, 0.5], [1.1, 0.55, 0.55]], tint: 'rgba(70,14,0,0.3)', fx: 'embers=0.5,0.8,1.6 smoke=0.5,0.7,1,#1a1010', flash: [1.9], shake: [[1.9, 1.3]], sound: [['shouts', 0.1, 0.9], ['shell', 0.6, 0.9], ['volley', 2.7, 0.8], ['drumroll', 3.2, 0.5]], text: 'Villages burned. Foreigners were hunted on the roads.', textAt: 0.6 },
+        { bg: 'estate_unrest', dur: 4.5, cam: [[1.1, 0.5, 0.5], [1.3, 0.6, 0.6]], fx: 'embers=0.5,0.8,1.2 ash=0.8', trans: 'white', sound: [['wind_gust', 0.2, 0.6], ['musket', 1.4, 0.5], ['musket', 2.3, 0.35]] },
       ],
     },
 
