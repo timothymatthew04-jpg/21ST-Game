@@ -97,6 +97,34 @@ function paintAll() {
       circ(x, 15, 17, 3.5, '#c2476a'); circ(x, 14, 16, 1.5, '#f4a7b9');
       for (let k = 0; k < 3; k++) rect(x, 7 + k * 5, 21, 3, 1, '#b89a8a');
     },
+    feather(x) {
+      // a white feather, curving, with a pale quill
+      x.save(); x.translate(16, 16); x.rotate(-0.75);
+      for (let k = -11; k <= 9; k++) {
+        const w = 5.5 * Math.sin(((k + 11) / 21) * Math.PI) + 0.5;
+        rect(x, -w, k, w, 1, k % 4 === 0 ? '#d8dce8' : '#f4f6fb');
+        rect(x, 0, k, w * 0.85, 1, k % 3 === 0 ? '#cfd4e2' : '#ffffff');
+      }
+      line(x, 0.5, -12, 0.5, 14, '#b8a88a', 1.2);
+      x.restore();
+      rect(x, 11, 10, 1, 1, '#ffffff');
+    },
+    hairpin(x) {
+      // a lacquered kanzashi: two gold prongs and a red flower at the top
+      line(x, 9, 27, 21, 9, '#8a6a1c', 2.4); line(x, 13, 28, 23, 12, '#8a6a1c', 2.4);
+      line(x, 9, 27, 21, 9, '#f0c85a', 1.2); line(x, 13, 28, 23, 12, '#f0c85a', 1.2);
+      for (let k = 0; k < 5; k++) { const a = (k / 5) * Math.PI * 2 - 0.4; circ(x, 23 + Math.cos(a) * 3.6, 9 + Math.sin(a) * 3.6, 2.8, '#b8232e'); }
+      circ(x, 23, 9, 2.2, '#f4c542'); rect(x, 21, 6, 2, 1, '#ff8a8a');
+      line(x, 19, 13, 17, 21, '#f4c542', 1); circ(x, 17, 22, 1.4, '#f4c542');
+    },
+    flowers(x) {
+      // wildflowers: poppies, cornflowers and small white ones, tied together
+      for (const [ex, ey] of [[9, 8], [14, 5], [20, 7], [24, 11], [7, 14]]) line(x, 16, 27, ex, ey + 2, '#4a7a34', 1.2);
+      for (const [cx, cy] of [[9, 8], [20, 7]]) { circ(x, cx, cy, 3.4, '#d8322a'); circ(x, cx - 1, cy - 1, 1.6, '#f06048'); circ(x, cx, cy, 1, '#1a1010'); }
+      for (const [cx, cy] of [[14, 5], [24, 11]]) { for (let k = 0; k < 6; k++) { const a = (k / 6) * Math.PI * 2; circ(x, cx + Math.cos(a) * 2.2, cy + Math.sin(a) * 2.2, 1.3, '#4a7ad8'); } circ(x, cx, cy, 1, '#1a2a60'); }
+      circ(x, 7, 14, 2.4, '#ffffff'); circ(x, 7, 14, 0.9, '#f4d040'); circ(x, 12, 12, 1.8, '#ffffff');
+      rect(x, 14, 20, 5, 3, '#c8a878'); rect(x, 14, 21, 5, 1, '#8a6a40');
+    },
     journal(x) {
       rect(x, 6, 4, 20, 25, '#3a2014'); rect(x, 7, 5, 18, 23, '#6a2a2a'); rect(x, 7, 5, 3, 23, '#4a1a1a');
       rect(x, 12, 10, 10, 6, '#e8d8b0'); line(x, 13, 12, 21, 12, '#8a6a4a', 1); line(x, 13, 14, 19, 14, '#8a6a4a', 1);

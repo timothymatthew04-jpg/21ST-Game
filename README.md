@@ -5,8 +5,9 @@ A branching visual novel adapted from Alessandro Baricco's *Silk*, built on a sm
 logo, and Japanese visual-novel dialogue on washi paper with lacquer and gold.
 
 You play Hervé Joncour. Your choices shape his marriage to Hélène, his commitment to the silk trade,
-and his obsession with a woman in Japan. The great events of the novel stay the same; what changes
-is the dialogue, Hervé's inner voice, several scenes only some players see, and the ending.
+and his obsession with a woman in Japan. From the very first choice (stay in the army, or follow
+Baldabiou into the silk trade) the story branches across seventeen chapters and an interlude into
+six endings, and a flowchart shows where you have been and which roads are still unexplored.
 
 ## Play it
 
@@ -38,6 +39,9 @@ branch, root folder.
 | F | Fullscreen |
 | `` ` `` | Show story variables (for testing) |
 
+In the walking areas: ← → or A/D to walk (or hold a side of the screen), Shift to run, and E, Space,
+Enter or a click to look, take or talk. Esc opens the game menu, and Skip moves straight on.
+
 On a phone, tap to advance and use the buttons under the text box.
 
 ## Mechanics
@@ -59,7 +63,7 @@ On a phone, tap to advance and use the buttons under the text box.
   feeling (tender, warm, honest, cold, dutiful, obsessive, dangerous, curious, quiet), and
   considering one previews how it would be said: the words tremble, shimmer or fade, and the text
   box takes on its colour. Settings can relax or switch off the timer.
-* **Francs and keepsakes.** Balbadiou's purse, a father's watch, Hélène's handkerchief, a pressed
+* **Francs and keepsakes.** Baldabiou's purse, a father's watch, Hélène's handkerchief, a pressed
   blossom, Hara Kei's pass… The kinder choice often costs something real: paying instead of
   threatening, giving up the watch, sending for the doctor from Nîmes. What Hervé gives away is
   noticed later.
@@ -67,18 +71,35 @@ On a phone, tap to advance and use the buttons under the text box.
   in the burned village, and mending the torn letter (four strips, each matched to the faint trace
   of its words on the page). Short and forgiving, and none can stop the story.
 * **Voices.** Characters murmur as they talk: a muffled, wordless voice of their own (Hara Kei low,
-  slow and firm, Balbadiou quick and loud, Hélène gentle, the woman barely above a whisper), so you
+  slow and firm, Baldabiou quick and loud, Hélène gentle, the woman barely above a whisper), so you
   hear that someone is speaking without hearing words. Narration and Hervé's thoughts come with a
   soft tap as the words appear, like a nib touching paper. Both can be turned off in Settings.
-* **First meetings.** The first time we meet each character, the scene dims and a band of their
-  colour sweeps across with a streak of light and silk threads; their portrait slides in, their
-  name rises letter by letter, and a seal is stamped beside a line about who they are.
+* **First meetings.** The first time we meet each character, the screen shakes, speed lines and a
+  band of their colour sweep across with a streak of light, sparks and silk threads; their portrait
+  slides in, their name rises letter by letter, a seal is stamped beside a line about who they are,
+  and their own theme plays (Hervé's marching drum, Hélène's music box, Baldabiou's brass, Hara Kei's
+  temple bell and koto, a lone flute for the woman). The woman in Japan is only "???" until a letter
+  gives her name away; then her card plays again and the name is brushed in.
+* **Walking areas**, in the style of *Kingdom Two Crowns*: at the army camp, across the steppe on
+  horseback, through Hara Kei's village at night, the aviary, the burned village and the cemetery,
+  Hervé walks through a wide painted place that scrolls in layers and is mirrored in the water
+  below, with snow, ash, petals or fireflies drifting through. Pick up francs and keepsakes (a white
+  feather, a hairpin in the ashes, wildflowers for a grave), look at things, and talk to the people
+  on the way; what you find can change a line later. Choices, cutscenes and minigames all stay: the
+  walks are short passages between them, and each can be skipped.
 * **Routes you can feel.** At every chapter the story works out where Hervé's heart is heading:
   devoted, torn or lost. The chapter card turns to dawn rose and petals or to crimson, ash and a
   crack; the text box warms or darkens; and characters speak to him differently.
 * **Scenes only some players see.** Many choices open a short scene of their own, and later
   chapters change their dialogue based on the variables and on earlier choices.
-* **Three endings**, variations of the novel's ending "Home", tracked on an Endings screen.
+* **Six endings**, each with a Japanese name: *Hidamari — A Quiet Life*, *Wagaya — A House of Our
+  Own*, *Yukue Shirezu — Lost Without Goodbye*, *Owaranu Tabi — The Journey That Never Ended*,
+  *Utsusemi — The Life He Left Behind* and *Kikyō — Home*. Each is revealed with its own seal, colours
+  and music, followed by end credits that roll over every place you saw, then a last screen to go
+  back to the title, open the flowchart, or quit the game. Endings not yet found show a hint.
+* **Flowchart** of every chapter, choice and option (on the title screen and in the game menu):
+  the options you chose on this journey are lit, ones taken on earlier journeys are marked, and
+  where an untried option leads stays "???" until you take it.
 * **Hervé's Journal**, a word-picking minigame in the style of DDLC's poem game. The words he
   chooses pull him toward Hélène, toward Japan, or toward the business.
 * **Memory across playthroughs.** After you learn the truth once, the next playthrough reveals a
@@ -96,6 +117,8 @@ On a phone, tap to advance and use the buttons under the text box.
   burned village, the candle going out at dawn, and the truth in Hélène's own handwriting. Click to
   move on, Esc to skip.
 * Scene transitions (dissolve, fade, flash), tints, filters and screen effects.
+* **Game menu** in the title screen's style: lacquer, gold and a vermilion seal, with Resume and
+  Exit to Title, the save and load screens, settings, history and the flowchart.
 * **Settings** for text speed, auto speed, the choice timer, music, sound and voice volume, the
   character voices, the typing sound, speaker highlight and reduced motion.
 * **A thread of silk to begin.** Before the menu, a single glowing strand flows across the dark;
@@ -124,7 +147,7 @@ On a phone, tap to advance and use the buttons under the text box.
   sea, the mill, a ticking clock, crickets, a fire, the harbour, rain and thunder), the war is heard
   all around (cannon, volleys, falling shells, shouting, drums and horns), and effects mark the key
   moments. A recording with the same name in `assets/` always takes over.
-* **Characters who feel alive**: Hélène, Balbadiou, Hara Kei, the woman and Madame Blanche breathe,
+* **Characters who feel alive**: Hélène, Baldabiou, Hara Kei, the woman and Madame Blanche breathe,
   sway a little, blink now and then, nod while they talk, react to their mood, and take on the light
   of the place they stand in (firelight, dusk, moonlight, grey rain). Hervé's face is in the text box.
 * **Painted close-ups** of the cup, the glove and the letter.
@@ -150,12 +173,16 @@ js/                   the engine
   scenery.js          the painted backgrounds' moving layers
   cutscene.js         cutscenes: camera moves, captions, the journey map, letters
   minigames.js        the minigames (tea, eggs, bargain, hide, letter)
+  walk.js             the walking areas: scrolling, water, people, weather, things to take
+  flowchart.js        the flowchart of choices, worked out from the script
   strand.js           the press-start screen: a glowing thread of silk
   audio.js            music, sounds, menu beeps
   synth.js            the music, ambience and sound effects, composed in code
   main.js             start-up, keyboard/mouse input, screen scaling
 story/script.js       THE STORY: edit this to change the game
 story/cutscenes.js    the cutscenes (shots, camera moves, captions)
+story/walks.js        the walking areas: what is where, and what Hervé and others say
+story/walkscenery.js  the walking areas' painted layers (generated)
 story/scenery.js      how each painted background's layers move (generated)
 story/blinks.js       where each character's eyes are, for blinking (generated)
 docs/SCRIPTING.md     how to write the story script
@@ -163,6 +190,8 @@ docs/ASSETS.md        every background, sprite, CG and track the story uses
 assets/               drop art and audio here (see docs/ASSETS.md)
 tools/check-script.js checks the story for mistakes:  node tools/check-script.js
 tools/paint-backgrounds.js  paints the pixel-art scenes in tools/paint/ into assets/scenes/
+tools/paint-walks.js        paints the wide walking-area scenes into assets/walks/
+tools/paint-items.js        paints the keepsake icons into assets/ui/items/
 tools/paint-blinks.js       paints the characters' blinking eyelids
 tools/extract-map.js        extracts the journey map's coastlines from Natural Earth data
 ```

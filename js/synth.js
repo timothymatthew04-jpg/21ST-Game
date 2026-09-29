@@ -1295,6 +1295,8 @@
     dread: (S, o, t) => { S.pad(o, [28, 29], t, 3, 0.12, { cutoff: 220, attack: 1.2 }); S.bowed(o, 88, t, 3, 0.03, { vib: 0.03, attack: 1.5, bright: 0.9 }); S.bowed(o, 89, t, 3, 0.03, { vib: 0.03, attack: 1.5, bright: 0.9 }); },
     heartbeat_fast: (S, o, t) => { for (let i = 0; i < 4; i++) { S.taiko(o, t + i * 0.5, 0.5, 0.7); S.taiko(o, t + i * 0.5 + 0.2, 0.32, 0.65); } },
     // the everyday
+    step: (S, o, t) => S.noise(o, t, 0.07, { type: 'lowpass', f: 420 + Math.random() * 120, gain: 0.45, attack: 0.003 }),
+    hoof: (S, o, t) => { S.noise(o, t, 0.06, { type: 'bandpass', f: 520, q: 2, gain: 0.5, attack: 0.002 }); S.noise(o, t + 0.09, 0.05, { type: 'bandpass', f: 460, q: 2, gain: 0.35, attack: 0.002 }); },
     footsteps: (S, o, t) => { for (let i = 0; i < 4; i++) S.noise(o, t + i * 0.42 + Math.random() * 0.04, 0.09, { type: 'lowpass', f: 380, gain: 0.5, attack: 0.004 }); },
     running: (S, o, t) => { for (let i = 0; i < 8; i++) S.noise(o, t + i * 0.2 + Math.random() * 0.03, 0.07, { type: 'lowpass', f: 450, gain: 0.45, attack: 0.003 }); },
     gallop: (S, o, t) => { for (let i = 0; i < 12; i++) S.noise(o, t + Math.floor(i / 3) * 0.42 + (i % 3) * 0.09, 0.06, { type: 'bandpass', f: 500, q: 2, gain: 0.5, attack: 0.002 }); },

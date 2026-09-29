@@ -536,6 +536,13 @@
           need(2, 'introduce character');
           emit(L, { op: 'introduce', id: tk[1].v });
           return;
+        case 'walk': {
+          // walk camp [into how] — a walking area from story/walks.js; "how" is arrived or skipped
+          need(2, 'walk area [into variable]');
+          const into = tk[2] && tk[2].v === 'into' && tk[3] ? tk[3].v : null;
+          emit(L, { op: 'walk', area: tk[1].v, into });
+          return;
+        }
         case 'cutscene':
           // cutscene name — plays a cinematic sequence from story/cutscenes.js
           need(2, 'cutscene name');

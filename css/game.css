@@ -3287,3 +3287,128 @@ input[type='range']::-moz-range-thumb { width: 18px; height: 24px; background: v
 }
 @keyframes cs-shine { to { background-position: -40% 0; } }
 .cutscene.still .cs-leak, .cutscene.still .cs-streak { display: none; }
+
+/* ---- walking areas (js/walk.js): a wide painted place, Hervé walks through it -------------- */
+.overlay.walk { background: #07060a; overflow: hidden; cursor: default; }
+.overlay.walk .wk-canvas { position: absolute; inset: 0; width: 100%; height: 100%; image-rendering: pixelated; }
+.wk-vignette {
+  position: absolute; inset: 0; pointer-events: none;
+  background:
+    radial-gradient(ellipse 80% 75% at 50% 48%, transparent 58%, rgba(6, 4, 10, 0.55) 100%),
+    linear-gradient(180deg, rgba(6, 4, 10, 0.35), transparent 16%, transparent 84%, rgba(6, 4, 10, 0.45));
+}
+/* the place's name, brushed in at the start and then gone */
+.wk-title {
+  position: absolute; left: 0; right: 0; top: 17%; text-align: center; pointer-events: none;
+  display: flex; flex-direction: column; align-items: center; gap: 8px;
+  animation: wk-title 4.2s 0.35s ease both;
+}
+.wk-title b {
+  font-family: var(--name-font); font-weight: 700; font-size: 46px; letter-spacing: 0.14em; color: #fff6e4;
+  text-shadow: 0 0 18px rgba(255, 210, 150, 0.7), 0 0 44px rgba(255, 170, 90, 0.35), 0 3px 8px rgba(0, 0, 0, 0.8);
+}
+.wk-title span {
+  font-family: 'Julius Sans One', var(--text-font); font-size: 14px; letter-spacing: 0.38em; text-transform: uppercase;
+  color: rgba(255, 230, 190, 0.85); text-shadow: 0 2px 6px rgba(0, 0, 0, 0.9);
+  padding-top: 8px; border-top: 1px solid rgba(255, 220, 160, 0.45);
+}
+@keyframes wk-title {
+  0% { opacity: 0; transform: translateY(10px); letter-spacing: 0.3em; filter: blur(6px); }
+  18% { opacity: 1; transform: none; filter: none; }
+  75% { opacity: 1; }
+  100% { opacity: 0; transform: translateY(-6px); }
+}
+/* where to go, top left */
+.wk-hint {
+  position: absolute; left: 34px; top: 28px; pointer-events: none;
+  font-family: var(--name-font); font-weight: 600; font-size: 18px; color: #fff3dc;
+  padding: 8px 18px 8px 14px; border-left: 3px solid var(--shu);
+  background: linear-gradient(90deg, rgba(14, 10, 12, 0.72), rgba(14, 10, 12, 0));
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
+  animation: wk-in 0.8s 4s ease both;
+}
+@keyframes wk-in { from { opacity: 0; transform: translateX(-12px); } to { opacity: 1; transform: none; } }
+/* the purse, top right */
+.wk-purse {
+  position: absolute; right: 34px; top: 26px; pointer-events: none;
+  display: flex; align-items: center; gap: 10px; padding: 7px 16px 7px 10px; border-radius: 999px;
+  background: rgba(14, 10, 12, 0.66); border: 1px solid rgba(244, 197, 66, 0.45);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4), inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+  font-family: var(--text-font); color: #ffe9b0; font-size: 18px;
+  animation: wk-in 0.8s 4s ease both;
+}
+.wk-purse b { font-weight: 700; min-width: 2ch; }
+.wk-purse b::after { content: ' francs'; font-weight: 400; font-size: 13px; color: rgba(255, 233, 176, 0.7); }
+.wk-coin {
+  width: 18px; height: 18px; border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #fff6c0, #f4c542 45%, #a87516);
+  box-shadow: 0 0 10px rgba(244, 197, 66, 0.6), inset 0 0 0 2px rgba(120, 80, 10, 0.45);
+}
+.wk-purse.pop { animation: wk-pop 0.55s ease; }
+.wk-purse.pop .wk-coin { animation: wk-spin 0.55s ease; }
+@keyframes wk-pop { 30% { transform: scale(1.18); box-shadow: 0 0 26px rgba(244, 197, 66, 0.7); } }
+@keyframes wk-spin { to { transform: rotateY(360deg); } }
+/* the controls, fading after a while */
+.wk-help {
+  position: absolute; left: 50%; bottom: 30px; transform: translateX(-50%); pointer-events: none;
+  display: flex; gap: 26px; white-space: nowrap;
+  font-family: var(--text-font); font-size: 15px; color: rgba(255, 244, 222, 0.92); text-shadow: 0 2px 4px rgba(0, 0, 0, 0.9);
+  animation: wk-help 9s 1.2s ease both;
+}
+@keyframes wk-help { 0% { opacity: 0; } 8%, 80% { opacity: 1; } 100% { opacity: 0; } }
+.overlay.walk kbd {
+  display: inline-block; min-width: 24px; padding: 2px 7px; margin-right: 4px; border-radius: 5px; text-align: center;
+  font-family: var(--text-font); font-size: 13px; font-weight: 700; color: #2c1f19;
+  background: linear-gradient(#fffaf0, #eadfc6); box-shadow: 0 2px 0 #8a6e48, 0 3px 6px rgba(0, 0, 0, 0.4);
+}
+/* the little bubble over whatever is near */
+.wk-prompt {
+  position: absolute; left: 0; top: 0; pointer-events: none; opacity: 0;
+  display: flex; align-items: center; gap: 6px; white-space: nowrap; padding: 6px 12px 6px 7px; border-radius: 8px;
+  font-family: var(--name-font); font-weight: 600; font-size: 16px; color: #fff4dc;
+  background: rgba(16, 11, 14, 0.8); border: 1px solid rgba(var(--wk-accent, 255, 214, 140), 0.6);
+  box-shadow: 0 0 18px rgba(var(--wk-accent, 255, 214, 140), 0.3), 0 4px 10px rgba(0, 0, 0, 0.5);
+  transition: opacity 0.18s ease;
+}
+.wk-prompt::after {
+  content: ''; position: absolute; left: 50%; bottom: -6px; width: 10px; height: 10px; margin-left: -5px; transform: rotate(45deg);
+  background: rgba(16, 11, 14, 0.8); border-right: 1px solid rgba(var(--wk-accent, 255, 214, 140), 0.6); border-bottom: 1px solid rgba(var(--wk-accent, 255, 214, 140), 0.6);
+}
+.wk-prompt.on { opacity: 1; animation: wk-bob 1.6s ease-in-out infinite; }
+.wk-prompt kbd { margin-right: 2px; }
+@keyframes wk-bob { 50% { margin-top: -4px; } }
+/* words, in a lacquer box at the bottom */
+.wk-say {
+  position: absolute; left: max(80px, calc(50% - 450px)); right: max(80px, calc(50% - 450px)); top: 92px;
+  min-height: 96px; padding: 22px 34px 20px; border-radius: 6px; pointer-events: none;
+  background: linear-gradient(180deg, rgba(24, 16, 20, 0.92), rgba(12, 8, 12, 0.94));
+  border: 1px solid rgba(244, 197, 66, 0.35);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.55), inset 0 0 0 4px rgba(12, 8, 12, 0.9), inset 0 0 0 5px rgba(244, 197, 66, 0.2);
+  opacity: 0; transform: translateY(-14px); transition: opacity 0.25s ease, transform 0.25s ease;
+}
+.wk-say.on { opacity: 1; transform: none; pointer-events: auto; cursor: pointer; }
+.wk-say-name {
+  position: absolute; left: 26px; top: -18px; display: none; padding: 4px 18px; border-radius: 3px;
+  font-family: var(--name-font); font-weight: 700; font-size: 19px; letter-spacing: 0.06em;
+  background: linear-gradient(180deg, #2a1a1e, #160e12); border: 1px solid rgba(244, 197, 66, 0.5);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+}
+.wk-say-name.on { display: block; }
+.wk-say-text { font-family: var(--text-font); font-size: 22px; line-height: 1.55; color: #fbf1de; }
+.wk-say-text.thought { font-family: var(--name-font); font-style: italic; color: #e9dcc2; }
+.wk-say-next { position: absolute; right: 22px; bottom: 12px; font-size: 13px; color: var(--gold); animation: wk-bob 1.1s ease-in-out infinite; }
+/* skip the walk */
+.wk-skip {
+  position: absolute; right: 30px; bottom: 26px; z-index: 2;
+  font-family: var(--text-font); font-size: 14px; letter-spacing: 0.08em; color: rgba(255, 240, 210, 0.75);
+  background: rgba(14, 10, 12, 0.5); border: 1px solid rgba(255, 240, 210, 0.25); border-radius: 999px; padding: 6px 16px;
+  cursor: pointer; transition: color 0.2s, background 0.2s, border-color 0.2s;
+}
+.wk-skip:hover { color: #fff; background: rgba(168, 50, 58, 0.75); border-color: rgba(255, 200, 190, 0.6); }
+.wk-say.on ~ .wk-skip { opacity: 0; pointer-events: none; }
+.overlay.walk:has(.wk-say.on) .wk-title { opacity: 0; transition: opacity 0.2s; animation: none; }
+/* in from black, and out to black at the end */
+.wk-fade { position: absolute; inset: 0; background: #000; pointer-events: none; animation: wk-fade-in 1.1s ease both; }
+@keyframes wk-fade-in { from { opacity: 1; } to { opacity: 0; } }
+.overlay.walk.leaving .wk-fade { animation: wk-fade-out 0.7s ease both; }
+@keyframes wk-fade-out { from { opacity: 0; } to { opacity: 1; } }

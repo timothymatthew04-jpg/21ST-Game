@@ -14,7 +14,7 @@ const root = path.join(__dirname, '..');
 const ctx = { console, window: {} };
 ctx.globalThis = ctx;
 vm.createContext(ctx);
-for (const f of ['js/expr.js', 'js/parser.js', 'js/synth.js', 'story/script.js']) {
+for (const f of ['js/expr.js', 'js/parser.js', 'js/synth.js', 'story/walks.js', 'story/walkscenery.js', 'story/script.js']) {
   vm.runInContext(fs.readFileSync(path.join(root, f), 'utf8'), ctx, { filename: f });
 }
 const source = ctx.window.STORY_SCRIPT;
@@ -52,6 +52,25 @@ for (const i of lines) {
 for (const [id, it] of Object.entries(story.intros || {})) {
   if (!story.characters[id]) story.warnings.push({ line: `intro ${id}`, msg: `intro for unknown character "${id}"` });
   if (it.sound && !ctx.VN.SYNTH_SOUNDS[it.sound]) story.warnings.push({ line: `intro ${id}`, msg: `no synthesized sound "${it.sound}"` });
+}
+
+// Walking areas: defined in story/walks.js and painted; their keepsakes, people and sounds exist.
+const walks = ctx.window.VN_WALKS || {};
+const walkScenery = ctx.window.VN_WALKSCENERY || {};
+for (const i of lines) {
+  if (i.op !== 'walk') continue;
+  const def = walks[i.area];
+  if (!def) { story.warnings.push({ line: i.line, msg: `walk: no area "${i.area}" in story/walks.js` }); continue; }
+  if (!walkScenery[def.scene || i.area]) story.warnings.push({ line: i.line, msg: `walk: "${i.area}" is not painted yet (node tools/paint-walks.js ${i.area})` });
+}
+for (const [name, def] of Object.entries(walks)) {
+  for (const th of def.things || []) {
+    const where = `walk ${name} x=${th.x}`;
+    if (th.kind === 'item' && !(story.items || {})[th.item]) story.warnings.push({ line: where, msg: `no item "${th.item}" at the top of the script` });
+    if (th.sound && !ctx.VN.SYNTH_SOUNDS[th.sound] && !hasFile('sfx', th.sound)) story.warnings.push({ line: where, msg: `no sound "${th.sound}"` });
+    for (const l of th.lines || []) if (Array.isArray(l) && story.characters[l[0]] === undefined && /^[a-z_]+$/.test(l[0])) story.warnings.push({ line: where, msg: `no character "${l[0]}"` });
+    if (!def.things.some((t) => t.kind === 'goal')) { story.warnings.push({ line: `walk ${name}`, msg: 'no goal: the walk can only be skipped' }); break; }
+  }
 }
 
 // Every timed choice should say what happens when the player hesitates.

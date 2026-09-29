@@ -862,6 +862,19 @@
       this.state.pc++;
     }
 
+    /** A walking area (js/walk.js): Hervé walks through a place, then the story goes on. */
+    async op_walk(ins) {
+      this.checkpoint();
+      if (!this.isSkipping() && VN.playWalk) {
+        this.ui.textbox.hideBox();
+        this.ui.textbox.hideCentered();
+        this.stage.setSpeaker(null);
+        const res = await this.guard(VN.playWalk({ ui: this.ui, engine: this, audio: this.audio, settings: this.settings, story: this.story }, ins.area));
+        if (ins.into) this.setVar(ins.into, res.how);
+      }
+      this.state.pc++;
+    }
+
     op_notify(ins) {
       this.ui.whisper(this.interp(ins.text), '#e9c46a', { quiet: this.isSkipping() });
       this.state.pc++;

@@ -53,6 +53,17 @@ full resolution, so they stay sharp at any size.
 The story uses `artstyle smooth`: the backgrounds are pixel art drawn at high resolution, so they
 are scaled smoothly and stay sharp at any window size (see docs/SCRIPTING.md).
 
+## Walking areas: painted in code, `assets/walks/<area>/`
+
+The six walking areas (`camp`, `steppe`, `village`, `aviary`, `ruins`, `cemetery`) are painted by
+`tools/paint-walks.js` from `tools/paint/walks.js`, with the same toolkit and style as the
+backgrounds but two to five screens wide. Each is saved as layers: the sky (one screen, it never
+scrolls), drifting clouds, far and middle distance (scrolling slower than Hervé walks), the ground
+he walks on, and plants in front that sway. `story/walkscenery.js` says how they stack. The people,
+the horse, the water's reflection and the weather are drawn by the game itself (js/walk.js). To
+change a place, edit it in `tools/paint/walks.js` and run `node tools/paint-walks.js <area>`; what
+is where along the way is in `story/walks.js`.
+
 ## Character sprites: `assets/sprites/<character>/<expression>.png`
 
 Transparent PNG, about 720–1000 px tall, feet touching the bottom edge. All six characters are in
@@ -74,7 +85,7 @@ sprites. A hand-drawn portrait can simply replace any of them.
 | --- | --- | --- |
 | Hervé | `herve/` | `neutral` (used for his text-box face) |
 | Hélène | `helene/` | `neutral`, `soft`, `smile`, `sad`, `hurt`, `tired` |
-| Balbadiou | `balbadiou/` | `neutral`, `serious`, `happy`, `worried` |
+| Baldabiou | `balbadiou/` | `neutral`, `serious`, `happy`, `worried` |
 | Hara Kei | `harakei/` | `neutral`, `stern`, `cold` |
 | The woman | `woman/` | `neutral`, `gaze`, `smile`, `soft` |
 | Madame Blanche | `blanche/` | `neutral`, `serious`, `soft` |
@@ -94,7 +105,8 @@ is used only for a CG that has no painted version.
 
 32×32 pixel-art icons for the Keepsakes page and the cards that slide in when Hervé gains or parts
 with something, painted by `tools/paint-items.js`: `francs`, `watch`, `handkerchief`, `journal`,
-`egg_box`, `blossom`, `pass`, `note`, `letter`. A new keepsake needs an `item` line at the top of
+`egg_box`, `blossom`, `pass`, `note`, `letter`, `helene_letter`, and the three found on walks:
+`feather`, `hairpin` and `flowers`. A new keepsake needs an `item` line at the top of
 the story script and, ideally, an icon here (until then it shows a small knot).
 
 ## Word-game chibis: `assets/chibi/<character>.png`
@@ -110,7 +122,7 @@ To use a recording instead, save it under the same name and it takes over: music
 | Music | Mood / where |
 | --- | --- |
 | `title` | Title screen (a recording). Plays on the menu only and stops when a game starts |
-| `town_theme` | The town, the mill, Balbadiou: a waltz for guitar and music box |
+| `town_theme` | The town, the mill, Baldabiou: a waltz for guitar and music box |
 | `helene_theme` | Scenes with Hélène: piano over strings |
 | `journey` | The long journeys: a steady pulse, a flute looking ahead |
 | `japan` | Japan: koto and bamboo flute over a drone, a far temple bell |

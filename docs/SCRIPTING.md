@@ -63,7 +63,23 @@ introduce helene
 
 `intro` (at the top) says how a character is presented: a line about who they are, a seal of one or
 two kanji, and a sound. `introduce` plays the first-meeting animation at that moment, once per
-playthrough; it is skipped while skipping, and a click moves on.
+playthrough; it is skipped while skipping, and a click moves on. Each of the main characters has a
+short theme of their own that plays over their card (`theme_<id>` in js/synth.js).
+
+### Names that are not known yet
+
+A name can come from a variable, so a character can stay "???" until the story tells us who they are:
+
+```text
+character woman "[woman_name]"
+...
+set woman_name = "???"          # at the start
+...
+set woman_name = "Yukimura"     # when the letter gives her name away
+reveal woman                    # her card plays again: "???" is brushed away and the name written in
+```
+
+`reveal woman "a line"` can also replace the card's usual line for that moment.
 
 ## Choices
 
@@ -284,12 +300,26 @@ chapter "Chapter 3" "The Cup" seal 杯   # title card; also names the save file
 pause 1.5                       # wait (a click skips it); "pause" alone waits for a click
 notify "Hélène will remember that."    # a line at the top of the screen, like a karma line
 call some_label / return        # run a shared scene and come back
-ending home_beside "Home — Beside Me All Along" true    # true | good | bad | neutral
+ending home "Kikyō — Home" true kanji 帰 music farewell hint "What if he came home, and stayed?"
 end                             # back to the title without an ending screen
 rollback off / rollback on      # stop players from going back (e.g. after a big reveal)
 ```
 
 Every `ending` in the script is listed on the Endings screen automatically, locked until found.
+An ending's title is its Japanese name and its English one, split by ` — `. Its kind (`true`, `good`,
+`neutral`, `tragic` or `bad`) sets its colours and the style of its reveal; `kanji` is the seal
+stamped on it, `music` what plays over it and the credits, and `hint` the clue shown on the Endings
+screen and the flowchart before it has been found. After the ending: its reveal, the end credits
+(everything the player saw, rolling by; hold to speed up), and a last screen that goes back to the
+title, opens the flowchart or quits the game.
+
+The **flowchart** (on the title screen and in the game menu) is worked out from the script by itself:
+every chapter, every choice and every option. Options the player has never taken show "???" where
+their outcome would be; the options taken on this journey are highlighted.
+
+`edition 2` (at the top of the script) is the story's edition: when the story changes so much that
+old saves would land in the wrong place, raise it, and saves from the older edition are cleared the
+first time the new one is opened (endings found and settings are kept).
 
 The chapter card turns the title into a kanji chapter number by itself ("Prologue" → 序章,
 "Chapter 12" → 第十二章, "Final Chapter" → 終章). `seal` is the character (or two) stamped on the
@@ -319,6 +349,38 @@ handwriting). Every option is described at the top of `story/cutscenes.js`.
 
 Players click to move to the next shot and press Esc (or Skip) to end the cutscene; skip mode passes
 cutscenes by.
+
+## Walking areas
+
+A few places are walked through instead of read: a wide painted scene that scrolls as Hervé walks,
+in the style of Kingdom Two Crowns, with everything mirrored in water along the bottom.
+
+```text
+walk camp                 # Hervé walks through the army camp; the story goes on when he arrives
+walk ruins into how       # "how" is set to arrived, or skipped if the player pressed Skip
+if found_hairpin
+  "The hairpin was still in my pocket."
+```
+
+The player walks with ← → (or A/D, or by holding a side of the screen), runs with Shift, and uses
+E / Space / Enter (or a click) to look at things, take them, or talk. Each area is defined in
+`story/walks.js`: its title and region, the weather (snow, ash, petals, embers, fireflies, motes),
+and the things along the way, each at an x position in the painting:
+
+* `coin`: francs lying about; taking them adds to the purse.
+* `item`: a keepsake (any `item` from the top of the script), added to the inventory.
+* `look`: something to look at, with Hervé's thoughts.
+* `talk`: someone to talk to (`look: 'soldier'` etc. draws them); `["helene", "..."]` lines use a
+  story character's name and voice, `["Sentry", "..."]` any other name.
+* `goal`: where the walk ends (`verb` is the word on its prompt, e.g. Enter, Board, Kneel).
+
+Any thing can `set: { variable: value }` when it is used, so the script can react afterwards, and
+play a `sound`. The pictures are painted by `node tools/paint-walks.js` from `tools/paint/walks.js`
+into `assets/walks/<area>/`.
+
+Walks never replace the rest: choices, cutscenes and minigames happen around them as before. The
+game menu (Esc) pauses a walk, saving during one saves just before it, and a walk is passed over
+while skipping. Every walk has a Skip button for players who would rather read on.
 
 ## The word game (DDLC's poem game)
 
@@ -364,7 +426,9 @@ music and sounds, composed in code (js/synth.js):
   `page`, `paper`, `knock`, `cup`, `gong`, `wind_gust`, `breath`, `ink`, `whoosh`, `stamp`,
   `sparkle`, `candle_out`; war: `musket`, `volley`, `explosion`, `shell`, `horn`, `drumroll`,
   `shouts`, `sword`; drama: `sting` (an orchestral hit), `swell`, `dread`; everyday: `footsteps`,
-  `running`, `gallop`, `door`, `creak`, `pour`, `rustle`, `shatter`, `splash`.
+  `running`, `gallop`, `door`, `creak`, `pour`, `rustle`, `shatter`, `splash`; walking: `step`, `hoof`;
+  the characters' themes (for `intro ... sound`): `theme_herve`, `theme_helene`, `theme_balbadiou`,
+  `theme_harakei`, `theme_woman`, `theme_blanche`.
 
 Music and ambience loop seamlessly: recordings crossfade the last few seconds of each pass into the
 next, and the composed pieces never repeat exactly. `titlemusic` plays only on the title screen;

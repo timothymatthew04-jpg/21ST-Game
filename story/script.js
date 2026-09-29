@@ -220,6 +220,9 @@ item pass         "Hara Kei's pass"       "A wooden tag with his red seal. His m
 item note         "The note"              "A few lines of Japanese in black ink. He cannot read a single character."
 item letter       "The seven sheets"      "A long letter in Japanese, seven sheets of black ink."
 item helene_letter "A letter from Hélène" "Folded small, in her handwriting, tucked into his coat. He has not opened it."
+item feather      "A white feather"       "From the one bird that sat still in Hara Kei's aviary."
+item hairpin      "A lacquered hairpin"   "Red and gold, found in the ashes of the burned village. He has seen it before, in her hair."
+item flowers      "Wildflowers"           "Picked by the cemetery wall: poppies, cornflowers, and the small white ones."
 
 # ---------------------------------------------------------------- karma
 # Choices are felt, never shown as numbers. When a choice (or a "set" line) moves one
@@ -282,6 +285,8 @@ label start
   set mystery = 0
   set francs = 0
   set woman_name = "???"
+  # found_hairpin is set by the walk through the burned village (story/walks.js)
+  set found_hairpin = false
   scene black with none
   centered "THE SOUTH OF FRANCE, 1861"
 
@@ -298,7 +303,10 @@ label chapter1
   introduce herve
   "I was a soldier then. Young enough to believe that following orders was the same thing as having a life."
   "Every morning, the same drum. The same drill. The same road out of camp — the road that led, if you followed it far enough, back to Lavilledieu. Back to Hélène."
-  "The morning Baldabiou came, I was cleaning a rifle I had never fired at anyone."
+  "That morning, the sentries said a rider was asking for me."
+  walk camp
+  scene army_camp with fade
+  "The morning Baldabiou came, I had never fired my rifle at anyone."
   play sound gallop volume 0.5
   show balbadiou neutral
   introduce balbadiou
@@ -491,6 +499,8 @@ label chapter2
   cutscene journey_one
   scene road_east with slow
   "I crossed France by train, then the Alps. Austria. Hungary. Then Russia, where the roads stopped being roads."
+  "I bought a horse at the edge of the steppe, and rode east."
+  walk steppe
   "Weeks of steppe. Lake Baikal, which the people there call the sea. Rivers I crossed on rafts, and villages that had never seen a Frenchman and saw no reason to start."
   scene smuggler_boat with dissolve
   "At the edge of the continent, a man who asked no questions and wanted a great deal of money put me on a smuggler's boat."
@@ -526,6 +536,8 @@ label chapter3
   "I came ashore on the west coast, the unofficial way, where foreigners were not supposed to come ashore at all."
   scene japan_path with dissolve
   "Men I never saw clearly led me inland for days, blindfolded for part of the way. Nobody explained anything. I learned very quickly not to ask."
+  "On the last night they took the blindfold off at the edge of a village, and left me to walk the rest of the way."
+  walk village
   scene hara_kei_estate with fade
   play sound temple_bell volume 0.6
   "At last I was brought to a village in the hills, and before the man who controlled everything there: Hara Kei."
@@ -867,8 +879,8 @@ label chapter7
   scene aviary with fade
   play music her_theme fadein 3
   "Behind Hara Kei's house there was an aviary: a great cage of wood and paper, taller than a house, full of birds from every corner of Asia."
-  "Hundreds of wings, all moving, going nowhere."
   "My thoughts returned to her. About how you can keep something beautiful by never letting it leave."
+  walk aviary
   scene estate_room with dissolve
   "On the way back, I passed the room where she had been sitting that first day. Her belongings were there — a shawl, a small lacquered box, nobody watching."
   "I removed one of my gloves."
@@ -1253,8 +1265,13 @@ label chapter12
   herve "Hara Kei?"
   "No answer."
   "I continued searching."
+  walk ruins
+  scene burned_village with fade
   inner "I had crossed an ocean for a place that no longer seemed to exist."
-  "On the second night, lanterns came up the road. Soldiers, going from ruin to ruin."
+  if found_hairpin
+    inner "Her hairpin was in my pocket. It was warm from the ashes, or from my hand."
+  endif
+  "The lanterns came up the road. Soldiers, going from ruin to ruin."
   play sound shouts volume 0.6
   play music pursuit fadein 1
   minigame hide into hide_result
@@ -1667,7 +1684,13 @@ label ending
   scene cemetery with slow
   play music home fadein 4
   "I returned to Hélène's grave."
+  walk cemetery
+  scene cemetery with fade
   "I stood quietly beside it."
+  if has("flowers")
+    "I laid the wildflowers down on the stone. The small white ones. She never did learn their name. Neither did I."
+    lose item flowers
+  endif
   if has("blossom")
     "In my journal, pressed between two pages, was the blossom I had brought back from Japan for her and never given."
     menu
