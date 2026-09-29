@@ -182,6 +182,7 @@
     await ui.splash();
     // "Before you begin" greets the player every time the game starts
     if (story.warning) await ui.warning(story.warning);
+    if (engine.editionReset) ui.toast('A new edition of the story: your old saves have been cleared');
     const jump = decodeURIComponent((location.hash || '').slice(1));
     if (jump && jump in story.labels) engine.newGame(jump);
     else engine.returnToTitle();

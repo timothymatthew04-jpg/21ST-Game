@@ -200,19 +200,75 @@
     },
 
     // ---------------------------------------------------------------- the endings
-    end_beside: {
+    // ---------------------------------------------------------------- Chapter 1: the army camp
+    camp: {
       shots: [
-        { bg: 'cemetery', dur: 7, cam: [[1.25, 0.5, 0.72], [1.08, 0.5, 0.28]], fx: 'petals=0.5 birds=3,0.08,0.3', text: 'Beside me, all along.', textAt: 2.5, sound: [['chime', 3, 0.5]] },
+        { bg: 'army_camp', dur: 6, cam: [[1.5, 0.2, 0.3], [1.08, 0.45, 0.55]], title: 'THE ARMY', titleAt: 0.8, kanji: '兵', text: 'The south of France, 1861.', textAt: 2.2, fx: 'motes=0.1,0.5,0.8,0.4,30,#fff0c8 birds=5,0.06,0.3', sound: [['horn', 0.3, 0.6], ['drumroll', 2.6, 0.5]] },
+        { bg: 'army_camp', dur: 5.5, cam: [[1.9, 0.46, 0.84], [1.3, 0.68, 0.7]], fx: 'embers=0.4625,0.86,1.4 smoke=0.4625,0.84,1.2,#9a8a8a', text: 'One road led out of camp. It led home.', textAt: 1, sound: [['gallop', 2.8, 0.6]] },
+        { bg: 'army_camp', dur: 3.5, cam: [[1.4, 0.72, 0.62], [2.1, 0.66, 0.6]], trans: 'white', flash: [0.2], fx: 'motes=0.5,0.5,0.4,0.4,40,#fff6d8', text: 'A rider, coming up the road at a gallop.', textAt: 0.6, sound: [['whoosh', 0, 0.6]] },
       ],
     },
-    end_silence: {
+
+    // ---------------------------------------------------------------- the wedding
+    wedding: {
       shots: [
-        { bg: 'cemetery_grey', dur: 7, cam: [[1.45, 0.5, 0.58], [1.0, 0.5, 0.5]], text: 'Some things are told best in silence.', textAt: 2.5 },
+        { bg: 'lavilledieu', dur: 5.5, cam: [[1.45, 0.72, 0.28], [1.08, 0.5, 0.5]], fx: 'petals=1.4 birds=7,0.05,0.35 motes=0.1,0.3,0.8,0.5,30,#fff6d8', title: 'SPRING', titleAt: 0.6, kanji: '結', text: 'The bells of Lavilledieu.', textAt: 1.8, sound: [['bell', 0.2, 0.7], ['bell', 1.6, 0.6], ['bell', 3, 0.5]] },
+        { bg: 'joncour_home', dur: 5, cam: [[1.3, 0.4, 0.45], [1.12, 0.5, 0.5]], fx: 'petals=1', sprites: [{ id: 'helene', x: 0.5, y: 0.02, h: 0.72, expr: 'smile' }], text: 'The whole town came.', textAt: 1, flash: [0.3], sound: [['chime', 0.3, 0.6], ['sparkle', 1.5, 0.7]] },
+        { bg: 'helene_garden', dur: 5, cam: [[1.08, 0.5, 0.5], [1.3, 0.5, 0.4]], fx: 'petals=1.6 fireflies=0.05,0.45,0.9,0.4,20', sprites: [{ id: 'helene', x: 0.35, y: 0.02, h: 0.6, expr: 'soft' }], text: 'One week of being married.', textAt: 1.2, trans: 'white', sound: [['swell', 0, 0.6]] },
       ],
     },
-    end_distance: {
+
+    // ---------------------------------------------------------------- endings
+    end_quiet_life: {
       shots: [
-        { bg: 'cemetery_night', dur: 7, cam: [[1.2, 0.3, 0.55], [1.35, 0.78, 0.3]], text: 'Some evenings I still look east.', textAt: 2.5, sound: [['wind_gust', 1, 0.5]] },
+        { bg: 'helene_garden', dur: 5.5, cam: [[1.4, 0.3, 0.45], [1.1, 0.5, 0.5]], fx: 'petals=1.8 birds=4,0.06,0.3', sprites: [{ id: 'helene', x: 0.72, y: 0.02, h: 0.56, expr: 'smile' }], title: 'SPRING', titleAt: 0.6, text: 'The cherry tree flowered for one week. The best week of the year.', textAt: 1.6, sound: [['chime', 0.4, 0.5]] },
+        { bg: 'helene_garden', dur: 5, cam: [[1.1, 0.5, 0.55], [1.35, 0.7, 0.55]], fx: 'fireflies=0.05,0.4,0.9,0.5,40 glints=0.3,0.6,0.5,0.2,30', tint: 'rgba(40,20,70,0.35)', title: 'SUMMER', titleAt: 0.5, text: 'Two children, and a pond full of frogs with names.', textAt: 1.4, sound: [['sparkle', 0.5, 0.6]] },
+        { bg: 'garden_winter', dur: 5, cam: [[1.3, 0.25, 0.4], [1.06, 0.5, 0.5]], fx: 'snow=1.6', title: 'WINTER', titleAt: 0.5, text: 'Muddy boots at the door. Laughter upstairs.', textAt: 1.4, trans: 'white' },
+        { bg: 'joncour_home', dur: 5, cam: [[1.15, 0.5, 0.5], [1.4, 0.8, 0.62]], fx: 'embers=0.856,0.63,1.2', text: 'A whole life, one ordinary day at a time.', textAt: 1, sound: [['page', 0.4, 0.4]] },
+        { bg: 'cemetery_two', dur: 7, cam: [[1.05, 0.5, 0.35], [1.7, 0.5, 0.82]], fx: 'petals=1.2 motes=0.2,0.5,0.6,0.4,40,#ffe0a0', kanji: '陽', text: 'Buried beside each other, the way they had lived.', textAt: 2, trans: 'black', sound: [['bell', 1.2, 0.6], ['swell', 4.4, 0.6]] },
+      ],
+    },
+    end_our_house: {
+      shots: [
+        { bg: 'helene_garden', dur: 5.5, cam: [[1.5, 0.82, 0.4], [1.1, 0.5, 0.5]], fx: 'petals=1.2 glints=0.49,0.67,0.33,0.12,30', sprites: [{ id: 'helene', x: 0.3, y: 0.02, h: 0.58, expr: 'smile' }], title: 'OUR HOUSE', titleAt: 0.6, text: 'A small yellow house at the edge of town.', textAt: 1.6, sound: [['chime', 0.3, 0.5]] },
+        { bg: 'silk_mill', dur: 4.5, cam: [[1.3, 0.35, 0.45], [1.08, 0.6, 0.5]], fx: 'motes=0.15,0.25,0.55,0.7,70', text: 'The mill hummed. The town lived.', textAt: 0.8, sound: [['sparkle', 0.8, 0.5]] },
+        { bg: 'estate_tearoom', dur: 5, cam: [[1.5, 0.5, 0.75], [1.2, 0.5, 0.6]], tint: 'rgba(40,20,40,0.45)', fx: 'steam=0.4917,0.785,1.3 petals=0.6', text: 'Sometimes, at the bottom of a teacup, a pair of eyes...', textAt: 0.8, trans: 'black', sound: [['cup', 0.4, 0.6]] },
+        { bg: 'joncour_home', dur: 4.5, cam: [[1.4, 0.3, 0.55], [1.1, 0.5, 0.5]], fx: 'embers=0.856,0.63,1', sprites: [{ id: 'helene', x: 0.4, y: 0.02, h: 0.62, expr: 'smile' }], text: '...and then her laugh from the next room, and it was gone.', textAt: 0.6, trans: 'white', flash: [0.1] },
+        { bg: 'cemetery_two', dur: 7, cam: [[1.05, 0.5, 0.35], [1.7, 0.5, 0.82]], fx: 'petals=1 fireflies=0.05,0.62,0.9,0.3,20', kanji: '家', text: 'Grown old together. Side by side.', textAt: 2, trans: 'black', sound: [['bell', 1.2, 0.6], ['swell', 4.4, 0.6]] },
+      ],
+    },
+    end_no_goodbye: {
+      shots: [
+        { bg: 'china_dock', dur: 5, cam: [[1.1, 0.5, 0.5], [1.5, 0.3, 0.7]], fx: 'embers=0.3,0.8,0.6', tint: 'rgba(20,10,40,0.35)', title: 'NO NEWS', titleAt: 0.6, text: 'A harbour at the far side of the world. He never came back from it.', textAt: 1.4, sound: [['gong', 0.3, 0.5]] },
+        { bg: 'joncour_home', dur: 5.5, cam: [[1.1, 0.5, 0.5], [1.6, 0.5, 0.4]], tint: 'rgba(10,14,40,0.5)', fx: 'stars=0.37,0.21,0.26,0.14,30', sprites: [{ id: 'helene', x: 0.5, y: 0.02, h: 0.64, expr: 'sad', filter: 'brightness(0.75) saturate(0.7)' }], text: 'She waited at the window.', textAt: 1 },
+        { bg: 'garden_winter', dur: 4.5, cam: [[1.3, 0.3, 0.45], [1.05, 0.5, 0.5]], fx: 'snow=2', text: 'Weeks became months.', textAt: 0.6, trans: 'black' },
+        { bg: 'helene_garden', dur: 4.5, cam: [[1.05, 0.5, 0.5], [1.25, 0.2, 0.5]], tint: 'rgba(60,40,20,0.4)', fx: 'leaves=1.8', text: 'Months became years.', textAt: 0.6, trans: 'black' },
+        { bg: 'cemetery_grey', dur: 7, cam: [[1.45, 0.5, 0.58], [1.0, 0.5, 0.5]], fx: 'rain=1.6', kanji: '消', text: 'She died believing he had chosen another life.', textAt: 1.8, trans: 'black', sound: [['thunder', 3.2, 0.5], ['bell', 5, 0.4]] },
+      ],
+    },
+    end_endless_journey: {
+      shots: [
+        { bg: 'forest_camp_night', dur: 4.5, cam: [[1.1, 0.43, 0.7], [1.8, 0.43, 0.75]], fx: 'embers=0.429,0.8,2 ash=1', tint: 'rgba(80,0,0,0.3)', flash: [0.5, 1.4, 2.2], shake: [[0.5, 1.4], [1.4, 1], [2.2, 1.2]], text: 'The forest kept him.', textAt: 2.6, sound: [['sword', 0.2, 0.8], ['sting', 0.5, 0.8], ['shouts', 0.9, 0.7], ['heartbeat_fast', 2, 0.6]] },
+        { bg: 'japan_path', dur: 5, cam: [[1.4, 0.5, 0.3], [1.05, 0.5, 0.55]], tint: 'rgba(20,20,40,0.45)', fx: 'mist=0.55,0.3,0.4,#c8d0e0 fireflies=0,0.6,1,0.3,20', text: 'His journey never ended. It only stopped.', textAt: 1, trans: 'black', sound: [['wind_gust', 0.3, 0.6]] },
+        { bg: 'joncour_home', dur: 5, cam: [[1.1, 0.5, 0.5], [1.5, 0.5, 0.38]], tint: 'rgba(10,14,40,0.5)', sprites: [{ id: 'helene', x: 0.5, y: 0.02, h: 0.64, expr: 'sad', filter: 'brightness(0.72) saturate(0.7)' }], text: 'In France, a lamp burned at a window for years.', textAt: 1 },
+        { bg: 'cemetery_night', dur: 7, cam: [[1.2, 0.3, 0.55], [1.35, 0.78, 0.3]], fx: 'fireflies=0.05,0.6,0.9,0.3,30', kanji: '旅', text: 'She never learned the truth.', textAt: 2, trans: 'black', sound: [['gong', 1.4, 0.5]] },
+      ],
+    },
+    end_left_behind: {
+      shots: [
+        { bg: 'yuki_house', dur: 5.5, cam: [[1.08, 0.5, 0.5], [1.5, 0.5, 0.6]], fx: 'rain=1.6,0.208,0.14,0.583,0.585', text: 'The rain sounded like someone whispering.', textAt: 1.2, sound: [['thunder', 3, 0.4]] },
+        { bg: 'yuki_house', dur: 5, cam: [[1.6, 0.14, 0.72], [1.2, 0.3, 0.7]], tint: 'rgba(10,14,30,0.5)', fx: 'mist=0.62,0.2,0.4,#b8c4c8', text: 'She did not come back.', textAt: 1, trans: 'black', sound: [['door', 0.4, 0.6]] },
+        { bg: 'joncour_home', dur: 5, cam: [[1.4, 0.5, 0.45], [1.1, 0.5, 0.5]], tint: 'rgba(90,60,20,0.35)', sprites: [{ id: 'helene', x: 0.3, y: 0.02, h: 0.6, expr: 'soft', filter: 'sepia(0.7) brightness(0.9)', opacity: 0.8 }], text: 'He thought of France. Of Hélène. Of the home he abandoned.', textAt: 0.8, trans: 'white', flash: [0.1], sound: [['heartbeat', 1.4, 0.5]] },
+        { bg: 'garden_winter', dur: 5, cam: [[1.05, 0.5, 0.5], [1.4, 0.2, 0.4]], fx: 'snow=1.6', tint: 'rgba(40,40,60,0.3)', text: 'A garden he would never see grow.', textAt: 0.8, trans: 'black' },
+        { bg: 'yuki_house', dur: 7, cam: [[1.5, 0.5, 0.6], [1.0, 0.5, 0.5]], tint: 'rgba(0,0,10,0.6)', fx: 'rain=1,0.208,0.14,0.583,0.585', kanji: '空', text: 'He had crossed the world for a woman who never asked him to come.', textAt: 1.6, trans: 'black', sound: [['candle_out', 4.6, 0.6], ['gong', 5.2, 0.4]] },
+      ],
+    },
+    end_home: {
+      shots: [
+        { bg: 'cemetery', dur: 6, cam: [[1.7, 0.5, 0.85], [1.15, 0.5, 0.6]], fx: 'petals=1.4 birds=4,0.08,0.3 motes=0.2,0.5,0.6,0.4,40,#ffe0a0', title: 'HOME', titleAt: 0.8, text: 'The journey was finally over.', textAt: 2, sound: [['wind_gust', 0.3, 0.5], ['chime', 2, 0.5]] },
+        { bg: 'helene_garden', dur: 6, cam: [[1.08, 0.5, 0.5], [1.35, 0.55, 0.45]], fx: 'petals=1.8 fireflies=0.05,0.45,0.9,0.4,30 glints=0.49,0.67,0.33,0.12,30', sprites: [{ id: 'helene', x: 0.52, y: 0.02, h: 0.62, expr: 'smile', filter: 'brightness(1.1) sepia(0.15)', opacity: 0.9 }], text: 'Look at whoever is beside you.', textAt: 1.4, trans: 'white', flash: [0.1], sound: [['swell', 0.2, 0.7], ['sparkle', 1.4, 0.7]] },
+        { bg: 'garden_winter', dur: 4.5, cam: [[1.3, 0.2, 0.4], [1.06, 0.5, 0.5]], fx: 'snow=1.2', tint: 'rgba(255,220,180,0.15)', text: 'The trees she watched him plant.', textAt: 0.8 },
+        { bg: 'cemetery', dur: 7, cam: [[1.1, 0.5, 0.45], [1.0, 0.5, 0.5]], fx: 'petals=1 rays=0.3,0.2,1.2,0.6,#ffe0b0 motes=0.1,0.3,0.8,0.5,50,#fff0c8', kanji: '帰', text: 'For the first time in many years, he was exactly where he was.', textAt: 1.6, trans: 'white', sound: [['temple_bell', 1, 0.6], ['swell', 4, 0.6]] },
       ],
     },
   };

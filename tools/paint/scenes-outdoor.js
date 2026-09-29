@@ -217,7 +217,7 @@ SCENES.japan_coast = (c, L) => {
 };
 
 // ---------------------------------------------------------------- the cemetery at Lavilledieu, in three moods
-function cemeteryScene(c, L, mood) {
+function cemeteryScene(c, L, mood, opt = {}) {
   const r = rng(41);
   const dusk = mood === 'dusk', night = mood === 'night';
   const P = {
@@ -288,11 +288,16 @@ function cemeteryScene(c, L, mood) {
       grave(x, y + r.r(-2, 2), s, r.i(0, 2));
     }
   }
-  grave(240, 238, 12, 0);
-  for (let i = 0; i < 34; i++) px(g, 226 + r() * 28, 236 + r() * 5, r.pick(night ? ['#c8a0d0', '#e0e0f0', '#a07ab0'] : ['#f4a7b9', '#ffffff', '#e27a9a', '#ffd0dc']));
-  for (let i = 0; i < 16; i++) px(g, 226 + r() * 28, 238 + r() * 4, '#4e6b35');
-  rect(g, 256, 230, 5, 7, '#3a3036'); rect(g, 257, 231, 3, 4, mood === 'grey' ? '#8a8078' : '#ffcf80'); rect(g, 255, 229, 7, 1, '#5a4c52');
-  if (mood !== 'grey') glow(g, 258, 233, 10, 'rgba(255,190,110,0.6)');
+  // the grave at the heart of the picture (two side by side, many years later)
+  const hearts = opt.two ? [222, 260] : [240];
+  for (const hx of hearts) {
+    grave(hx, 238, 12, 0);
+    for (let i = 0; i < 34; i++) px(g, hx - 14 + r() * 28, 236 + r() * 5, r.pick(night ? ['#c8a0d0', '#e0e0f0', '#a07ab0'] : ['#f4a7b9', '#ffffff', '#e27a9a', '#ffd0dc']));
+    for (let i = 0; i < 16; i++) px(g, hx - 14 + r() * 28, 238 + r() * 4, '#4e6b35');
+  }
+  const lx = opt.two ? 239 : 256;
+  rect(g, lx, 230, 5, 7, '#3a3036'); rect(g, lx + 1, 231, 3, 4, mood === 'grey' ? '#8a8078' : '#ffcf80'); rect(g, lx - 1, 229, 7, 1, '#5a4c52');
+  if (mood !== 'grey') glow(g, lx + 2, 233, 10, 'rgba(255,190,110,0.6)');
   for (const [i, [x, yb, hh]] of [[22, 192, 134], [44, 188, 98], [452, 194, 142], [426, 188, 92]].entries()) cypress(L(`cypress${i}`, { depth: 0.35, anim: sway(0.9, r.r(6, 9)) }), r, x, yb, hh, P.cyp);
   const pl = L('plane', { depth: 0.45, anim: sway(0.7, 8, { ox: 0.7 }) });
   trunk(pl, 468, 250, 120, 16, 9, '#5b4a3e', '#3f332c');

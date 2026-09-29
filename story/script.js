@@ -32,6 +32,8 @@ splash strand
 # Every choice waits this many seconds; if the player takes longer, Hervé hesitates
 # (a menu's "- hesitate" option says what happens then). "menu time 8" changes one menu.
 choicetime 14
+# The story's edition: saves made with another edition are cleared when the game opens.
+edition 2
 # Where Hervé's heart is heading, worked out at every chapter: toward Hélène ("devoted"),
 # pulled east ("lost"), or in between ("torn"). The chapter card and the text box take on
 # that mood, and scenes can ask:  if route() == "lost"
@@ -41,26 +43,29 @@ routes -4 3
 artstyle smooth
 credits "Adapted from Silk by Alessandro Baricco"
 titlemusic title
-warning "SILK is a branching story adapted from Alessandro Baricco's novel.\n\nYour choices shape Hervé's relationships, his obsession and his memories — the great events of his life stay the same.\n\nChoices wait only so long. If you take too long, Hervé hesitates, and silence is a choice too."
+warning "SILK is a branching story adapted from Alessandro Baricco's novel.\n\nYour choices shape Hervé's life: whom he loves, how far he travels, and how his story ends. There are six endings, and some of them come sooner than you think.\n\nChoices wait only so long. If you take too long, Hervé hesitates, and silence is a choice too."
 
 # ---------------------------------------------------------------- characters
 # Hervé is the player. His spoken lines use "herve"; his inner thoughts use "inner".
 character herve     "Hervé"          color=#e9c46a voice=112 pace=125 muffle=1500
 character inner     ""               color=#cbbef0 italic face=none
 character helene    "Hélène"         color=#f4a7b9 voice=215 pace=120 muffle=1700 breath=0.2 volume=0.9
-character balbadiou "Balbadiou"      color=#9ccf9f voice=98 pace=100 muffle=1700 volume=1.15
+character balbadiou "Baldabiou"      color=#9ccf9f voice=98 pace=100 muffle=1700 volume=1.15
 character harakei   "Hara Kei"       color=#e0503c voice=86 pace=165 muffle=1300 volume=1.05
-character woman     "???"            color=#f6ecdb voice=240 pace=150 muffle=1400 breath=0.45 volume=0.8
+character woman     "[woman_name]"   color=#f6ecdb voice=240 pace=150 muffle=1400 breath=0.45 volume=0.8
 character blanche   "Madame Blanche" color=#b7c4ff voice=185 pace=135 muffle=1600 breath=0.15 volume=0.95
+# Hélène's own thoughts, in the chapters seen through her eyes
+character hinner    "Hélène"         color=#f4a7b9 italic face=helene
+# The woman in Japan is "???" until her name is revealed (set woman_name, then "reveal woman").
 
 # Characters murmur while they talk, a muffled voice with no words: voice= is the pitch in Hz,
 # pace= the milliseconds between syllables, muffle= how clear it is (lower is more muffled),
 # breath= how breathy (0-1) and volume= how loud next to the others (1 is normal).
 
 # The first time we meet each character, "introduce <id>" presents them with these words.
-intro herve     "A silk merchant of Lavilledieu. This is his story, and every choice in it is yours." kanji 旅 sound chime
-intro balbadiou "The man who built the town's silk trade with his own two hands." kanji 商 sound bell
-intro helene    "Hervé's wife. Her voice is the thing people remember about her." kanji 妻 sound chime
+intro herve     "A young soldier from Lavilledieu. This is his story, and every choice in it is yours." kanji 旅 sound chime
+intro balbadiou "Silk merchant of Lavilledieu. He built the town's trade with his own two hands, and he never takes no for an answer." kanji 商 sound bell
+intro helene    "The woman waiting for Hervé in Lavilledieu. Her voice is the thing people remember about her." kanji 妻 sound chime
 intro harakei   "Master of a village in the hills. Nothing moves on his roads without his knowing." kanji 主 sound gong
 intro woman     "The young woman at Hara Kei's side. No one ever says her name." kanji 謎 sound temple_bell
 intro blanche   "The one person in France who can read Japanese, and who keeps what she reads to herself." kanji 文 sound bell
@@ -76,7 +81,7 @@ intro blanche   "The one person in France who can read Japanese, and who keeps w
 place lavilledieu       "Lavilledieu"            "The south of France · 1861"
 place silk_mill         "The Silk Mill"          "Lavilledieu · France"
 place silk_mill_empty   "The Silk Mill"          "Lavilledieu · France"
-place balbadiou_office  "Balbadiou's Office"     "Lavilledieu · France"
+place balbadiou_office  "Baldabiou's Office"     "Lavilledieu · France"
 place joncour_home      "The Joncour House"      "Lavilledieu · France"
 place helene_garden     "Hélène's Garden"        "Lavilledieu · France"
 place garden_winter     "Hélène's Garden"        "Lavilledieu · Winter"
@@ -98,6 +103,10 @@ place aviary            "The Aviary"             "Behind Hara Kei's house"
 place burned_village    "The Burned Village"     "The hills of Japan"
 place forest_camp_night "Hara Kei's Camp"        "The forest, at night"
 place blanche_salon     "Madame Blanche's House" "In the city"
+place army_camp         "The Army Camp"          "The south of France · 1861"
+place joncour_bedroom   "The Joncour House"      "Lavilledieu · Night"
+place cemetery_two      "The Cemetery"           "Lavilledieu · Many years later"
+place yuki_house        "A House in the Hills"   "Japan · Years later"
 
 bgfx lavilledieu smoke=0.752,0.574,0.6 glints=0.52,0.56,0.19,0.44,16 birds=4,0.06,0.3 motes=0.1,0.4,0.8,0.4,20,#fff6d8
 bgfx silk_mill glow=0.36,0.38,0.08,#fff4d0 glow=0.498,0.38,0.08,#fff4d0 glow=0.635,0.38,0.08,#fff4d0 motes=0.15,0.25,0.55,0.7,45
@@ -126,6 +135,10 @@ bgfx estate_tearoom petals=1.2 glow=0.6875,0.163,0.07,#cfe0ff steam=0.4917,0.785
 bgfx estate_room glow=0.2167,0.244,0.035,#cfe0ff glints=0.17,0.56,0.12,0.13,10 fireflies=0.27,0.15,0.15,0.5,8 fireflies=0.696,0.16,0.2,0.5,10 motes=0.25,0.74,0.46,0.13,20
 bgfx aviary flutter=0.365,0.25,0.33,0.38,18 leaves=0.8 rays=0.19,0.15,0.8,0.8,#fff2c4 motes=0.3,0.3,0.4,0.5,25,#fff0c8
 bgfx burned_village smoke=0.167,0.65,1.3,#2e2020 smoke=0.7,0.64,1,#2e2020 smoke=0.906,0.67,1.2,#2e2020 smoke=0.41,0.62,0.7,#3a2a28 embers=0.167,0.7,1 embers=0.906,0.726,1 embers=0.406,0.63,0.6 ash=1 flame=0.167,0.71,0.08,#ff7a30 flame=0.7,0.69,0.07,#ff7a30 flame=0.906,0.75,0.08,#ff7a30
+bgfx army_camp flame=0.4625,0.87,0.06,#ff9a40 embers=0.4625,0.86,0.8 smoke=0.4625,0.84,0.9,#9a8a8a birds=4,0.06,0.3 motes=0.1,0.5,0.8,0.4,24,#fff0c8
+bgfx joncour_bedroom flame=0.842,0.695,0.018,#ffc070 glow=0.545,0.285,0.04,#cfe0ff motes=0.42,0.55,0.3,0.35,18,#dde6ff fireflies=0.4,0.25,0.2,0.2,4
+bgfx cemetery_two glow=0.275,0.607,0.09,#ffc07a flame=0.817,0.422,0.02 flame=0.502,0.863,0.025 birds=3,0.08,0.3 motes=0.1,0.5,0.8,0.4,30,#ffe0a0 fireflies=0.05,0.62,0.9,0.3,10 petals=0.5 foliage=0.4
+bgfx yuki_house rain=1.1,0.208,0.14,0.583,0.585 mist=0.62,0.15,0.3,#b8c4c8 glow=0.144,0.748,0.05,#ffd08a
 # the painted close-ups shown with "cg"
 bgfx the_cup steam=0.52,0.54,0.9 glow=0.19,0.385,0.06,#ffc070 petals=0.3,0.62,0.07,0.25,0.25
 bgfx the_glove motes=0.1,0,0.7,0.8,22,#fff0c8 rays=0.3,0,1.2,0.5,#fff0c0
@@ -162,6 +175,10 @@ bgsound aviary            aviary
 bgsound burned_village    battle_far
 bgsound forest_camp_night camp
 bgsound blanche_salon     city 0.8
+bgsound army_camp         camp
+bgsound joncour_bedroom   crickets 0.6
+bgsound cemetery_two      birds 0.8
+bgsound yuki_house        rain 0.7
 
 # How the light of each place falls on the characters: "bglight background look",
 # where look is day, warm, fire, dusk, night, moon, grey, dim or ash.
@@ -185,6 +202,10 @@ bglight cemetery          dusk
 bglight cemetery_grey     grey
 bglight cemetery_night    moon
 bglight garden_winter     grey
+bglight army_camp         day
+bglight joncour_bedroom   moon
+bglight cemetery_two      dusk
+bglight yuki_house        dim
 
 # ---------------------------------------------------------------- keepsakes and money
 # What Hervé can carry. "gain item watch" gives him one and "lose item watch" takes it
@@ -198,6 +219,7 @@ item blossom      "A pressed blossom"     "A cherry blossom from the hills of Ja
 item pass         "Hara Kei's pass"       "A wooden tag with his red seal. His men let its bearer through."
 item note         "The note"              "A few lines of Japanese in black ink. He cannot read a single character."
 item letter       "The seven sheets"      "A long letter in Japanese, seven sheets of black ink."
+item helene_letter "A letter from Hélène" "Folded small, in her handwriting, tucked into his coat. He has not opened it."
 
 # ---------------------------------------------------------------- karma
 # Choices are felt, never shown as numbers. When a choice (or a "set" line) moves one
@@ -209,11 +231,11 @@ karma obsession    color=#e2553f heavy=up   up="Japan pulls at you a little hard
 karma danger       color=#b02a2a heavy=up   up="Somewhere, Hara Kei takes note." down="You step back from the edge."
 karma intimacy     color=#c9a0ff up="Something unspoken passed between you."
 karma fascination  color=#f2d492 up="She will stay in your thoughts."
-karma business     color=#9ccf9f up="Balbadiou would be pleased."
+karma business     color=#9ccf9f up="Baldabiou would be pleased."
 karma mystery      color=#9fb4ff up="The mystery deepens." down="A little of the mystery fades."
 
 # ---------------------------------------------------------------- journal words
-# The DDLC-style word game in Chapter 4. Each word pulls Hervé's heart toward
+# The DDLC-style word game in Chapter 5. Each word pulls Hervé's heart toward
 # Hélène, toward the woman in Japan, or toward the silk business.
 poemwords
   garden       helene=3 woman=1
@@ -259,101 +281,210 @@ label start
   set danger = 0
   set mystery = 0
   set francs = 0
+  set woman_name = "???"
   scene black with none
-  centered "EUROPE, 1861"
+  centered "THE SOUTH OF FRANCE, 1861"
 
 
 # ============================================================================
-#  INTRO — THE SILK DISEASE
-# ============================================================================
-label intro
-  chapter "Prologue" "The Silk Disease" seal 絹
-  scene lavilledieu with fade
-  play music town_theme fadein 3
-  cutscene prologue
-  introduce herve
-  "That year, the silkworms began to die."
-  "First in one village, then in the next. The eggs turned grey before they could hatch, and the worms that did hatch stopped eating and lay still on the mulberry leaves."
-  "It spread across Europe. Then, they said, it reached Africa."
-  "Our whole town lived on silk. The mill, the weavers, the merchants, the bakers who fed them. If the worms died, so did we — only more slowly."
-  scene balbadiou_office with dissolve
-  show balbadiou serious
-  introduce balbadiou
-  "Balbadiou had built the town's silk trade with his own two hands. He was the one who had talked me into it, years ago."
-  "When he called me to his office, I knew he had already decided something."
-  balbadiou "Japan."
-  herve "Japan?"
-  balbadiou serious "The disease hasn't reached them yet. You need to go."
-  "He said it the way other men say it's raining."
-  "Japan. The end of the world. A country that, officially, did not sell its silkworms to anyone."
-  "He put a heavy purse on the desk between us: money for the road, for the smugglers, and for whatever else the road would ask."
-  gain francs 200
-  balbadiou "Spend it well, Hervé. Every franc that comes back is the town's."
-  jump chapter1
-
-
-# ============================================================================
-#  CHAPTER 1 — THE JOURNEY
+#  CHAPTER 1 — THE CHOICE
 # ============================================================================
 label chapter1
-  chapter "Chapter 1" "The Journey" seal 旅
+  chapter "Chapter 1" "The Choice" seal 選
+  scene army_camp with fade
+  play music war fadein 3 volume 0.45
+  play sound horn volume 0.4
+  cutscene camp
+  introduce herve
+  "I was a soldier then. Young enough to believe that following orders was the same thing as having a life."
+  "Every morning, the same drum. The same drill. The same road out of camp — the road that led, if you followed it far enough, back to Lavilledieu. Back to Hélène."
+  "The morning Baldabiou came, I was cleaning a rifle I had never fired at anyone."
+  play sound gallop volume 0.5
+  show balbadiou neutral
+  introduce balbadiou
+  "He had ridden two days to find me, and he did not waste a word of the journey on small talk."
+  balbadiou "You've spent enough time following orders, Hervé. I have another kind of work for you."
+  herve "What kind of work?"
+  balbadiou serious "Silk. Japan. Eggs. A journey most men would never dare to make."
+  "Then he told me why."
+  cutscene prologue
+  show balbadiou serious
+  "The silkworms were dying. First in one village, then in the next — all over Europe. The eggs turned grey before they could hatch."
+  "Our whole town lived on silk. If the worms died, so would Lavilledieu — only more slowly."
+  balbadiou serious "Japan is the one place the sickness hasn't reached. Somebody has to go to the end of the world and bring the eggs back."
+  "I looked toward the road leading back to my home."
+  balbadiou "You can stay in the army. Or you can come work for me."
+  menu time 20
+    - "Stay in the army." tone=duty
+        set ch1_choice = "army"
+        jump quiet_life
+    - "Join Baldabiou." tone=curious [business += 1]
+        herve "When do we leave?"
+        balbadiou happy "You don't. Not yet. First, go home."
+        herve "To Hélène?"
+        balbadiou happy "To the woman you're going to marry."
+        set ch1_choice = "join"
+        jump wedding
+    - hesitate [business += 1]
+        "I said nothing. I looked at the road for so long that Baldabiou started to laugh."
+        balbadiou happy "A man who wanted to stay would have said so by now. Pack your things, soldier."
+        balbadiou "Not for Japan. Not yet. First, go home — to the woman you're going to marry."
+        set ch1_choice = "join"
+        jump wedding
+
+
+# ---- ENDING: A QUIET LIFE ----------------------------------------------------
+label quiet_life
+  herve "I think I'll stay, Baldabiou. I know this life."
+  balbadiou neutral "..."
+  balbadiou "Then I'll find another man for Japan. I hope he's half as lucky as you're going to be."
+  hide balbadiou
+  "I chose the familiar life. When my years of service were done, I walked that road all the way home."
   scene joncour_home with fade
   play music helene_theme fadein 2
-  "Hélène was reading by the window when I came home. She put the book face-down on her lap. She always knew before I said anything."
-  show helene neutral
+  show helene soft
   introduce helene
-  herve "I have to go to secure the silkworms."
-  helene sad "You're leaving again."
-  herve "Only for a few months."
-  helene "Japan."
-  herve "Yes."
-  helene "You've never even seen it."
+  helene soft "You're home."
+  herve "I promised I would come back."
+  helene smile "I know. I was only waiting."
+  cutscene wedding
+  "We married that spring and began building our life together, one ordinary day at a time."
+  "I studied at night and worked by day. It took years, but I became a designer: of houses, and of the rooms other people would live their lives inside."
+  scene helene_garden with fade
+  "Years later, we bought our first house, with a strip of wild land behind it."
+  show helene neutral
+  helene neutral "It still doesn't feel like ours."
+  herve "Give it time."
+  helene soft "And the garden?"
+  herve "I'll design it myself."
+  menu
+    - "Plant a cherry tree by the window." tone=tender [helene_trust += 1]
+        "I planted a cherry tree where she could see it from the window. Every spring it flowered for exactly one week, and every spring she said it was the best week of the year."
+        set garden = "cherry"
+    - "Dig a pond, with a bench beside it." tone=warm [helene_trust += 1]
+        "I dug a pond and set a bench beside it. By the second summer there were frogs, and she named every one of them."
+        set garden = "pond"
+    - "Plant a row of mulberry trees." tone=duty [business += 1]
+        helene smile "Mulberries? For silkworms?"
+        herve "For shade. And in case the town ever needs them."
+        "The town never did. The children climbed them instead."
+        set garden = "mulberry"
+    - hesitate
+        "I couldn't decide, so she decided for me: roses, everywhere, far too many roses."
+        set garden = "roses"
+  hide helene
+  "We had two children. The house filled up with memories, laughter, muddy boots, and the garden I had designed."
+  "I never went to Japan. Some other man carried the eggs across the world, and I never learned his name."
+  "Many years later, Hélène and I died of old age, a winter apart, and were buried beside each other."
+  cutscene end_quiet_life
+  ending quiet_life "Hidamari — A Quiet Life" good kanji 陽 music home hint "What if he never left the army?"
+
+
+# ---- THE WEDDING ----------------------------------------------------------
+label wedding
+  hide balbadiou
+  scene lavilledieu with fade
+  play music town_theme fadein 3
+  "So I went home. Not to Japan — home, to Lavilledieu, with my discharge papers in one pocket of my coat and Baldabiou's purse in the other."
+  gain francs 200
+  "Money for the road, he had said. For the smugglers, and for whatever else the road would ask. Every franc that comes back is the town's."
+  scene joncour_home with fade
+  play music helene_theme fadein 2
+  show helene smile
+  introduce helene
+  helene smile "You're home early. Did the army finally throw you out?"
+  herve "I left. Baldabiou has work for me."
+  helene neutral "Baldabiou always has work for someone."
+  herve "It means I don't have to wait five years to marry you."
+  menu
+    - "Ask her properly, on one knee." tone=tender [helene_trust += 1]
+        "I went down on one knee on her mother's kitchen floor. She laughed so hard she had to sit down, and then she said yes, and then she cried."
+        set proposal = "knee"
+    - "Ask her plainly: “Marry me.”" tone=warm
+        herve "Marry me."
+        helene soft "That's not a question, Hervé."
+        herve "Will you marry me?"
+        helene smile "That's better. Yes."
+        set proposal = "plain"
+    - hesitate [helene_trust -= 1]
+        "I had the words ready, and they would not come out."
+        helene soft "Are you trying to ask me something?"
+        "In the end, she asked me. I said yes before she had finished the question."
+        set proposal = "her"
+  cutscene wedding
+  "We were married in the spring, in the little church at Lavilledieu. The whole town came. Baldabiou cried more than anyone."
+  "One week later, I had to leave for Japan."
+  jump chapter2
+
+
+# ============================================================================
+#  CHAPTER 2 — THE FIRST JOURNEY
+# ============================================================================
+label chapter2
+  chapter "Chapter 2" "The First Journey" seal 旅
+  scene joncour_home with fade
+  tint dawn
+  play music helene_theme fadein 2
+  "Morning. The house still smelled of wedding flowers."
+  "Hélène and I sat together at breakfast."
+  show helene neutral
+  helene "You're quiet."
+  herve "I have to leave this afternoon."
+  "She stopped eating."
+  helene sad "Leave?"
+  herve "Japan. Baldabiou needs me to bring back silk eggs."
+  helene hurt "You've only been home a week."
+  herve "I know."
   menu
     - "I'll be back before you know it." tone=warm [helene_trust += 1]
+        herve "I'll be back before you know it."
+        "She gave me a small smile."
         helene soft "You always say that."
         herve "And I always come back."
-        helene sad "That's not what I meant."
-        set ch1_choice = "promise"
+        "She looked down at her breakfast."
+        helene sad "That’s not what I meant."
+        set ch2_choice = "promise"
     - "It's necessary for the business." tone=duty [business += 1, helene_trust -= 1]
+        herve "It's necessary for the business."
         helene hurt "Everything is always about the silk."
-        herve "It's how we live."
+        herve "It’s how we live."
         helene sad "I know."
-        set ch1_choice = "business"
-    - "Do you want me to stay?" tone=tender [helene_trust += 2]
+        "She became quiet."
+        set ch2_choice = "business"
+    - "Do you want me to stay?" tone=tender [helene_trust += 1]
+        "I studied her face."
+        herve "Do you want me to stay?"
+        "She looked at me."
         helene neutral "No."
         herve "No?"
         helene soft "I want you to want to stay."
-        set ch1_choice = "stay"
+        "I had no answer."
+        set ch2_choice = "stay"
     - hesitate [helene_trust -= 1]
         "I opened my mouth, and nothing came out. Japan, the eggs, the town: none of it sounded like an answer."
         helene sad "{speed=0.6}You don't know either, do you.{/speed}"
-        "She picked up her book again. She didn't turn a single page."
-        set ch1_choice = "silent"
-
-  scene joncour_home with fade
-  tint dawn
-  "The next morning, I left before the sun was over the hills."
-  "I wound my father's watch, the way I did before every journey. It had crossed half of Europe in his pocket. Now it would cross the rest in mine."
+        "She went back to her breakfast. She didn't eat any of it."
+        set ch2_choice = "silent"
+  "That afternoon, I wound my father's watch, the way he had before every march. It had crossed half of Europe in his pocket. Now it would cross the rest in mine."
   gain item watch
-  if ch1_choice == "stay"
+  if ch2_choice == "stay"
     show helene soft
-    "Hélène walked with me to the end of the garden. She didn't say anything. She held my hand until the gate, and then she let go of it very carefully, the way you set down something that might break."
+    "Hélène walked with me to the end of the road. She didn't say anything. She held my hand until the last house, and then she let go of it very carefully, the way you set down something that might break."
     "In my palm she had left a handkerchief. White silk. She had sewn my initials in the corner."
     helene soft "So you have something of home to hold."
-    hide helene
-  elif ch1_choice == "business"
-    "Hélène didn't come down. I saw her shape at the upstairs window, and then I didn't."
+  elif ch2_choice == "business"
+    "Hélène didn't come down to see me off. I saw her shape at the upstairs window, and then I didn't."
     "In my coat I found a handkerchief I had not packed: white silk, my initials sewn in the corner. She had come down in the night after all."
-  elif ch1_choice == "silent"
-    "Hélène was asleep when I left, or pretending to be. On the table by the door she had left a handkerchief, white silk, my initials sewn in the corner. No note."
+  elif ch2_choice == "silent"
+    "Hélène was in the garden when I left, and did not turn around. On my bag she had left a handkerchief, white silk, my initials sewn in the corner. No note."
   else
     show helene neutral
     helene "Write to me."
     herve "I will."
     "We both knew there would be nowhere to post a letter from where I was going."
     "She tucked a handkerchief into my breast pocket, white silk with my initials sewn in the corner, and patted it flat, the way you close a book."
-    hide helene
   endif
+  hide helene
   gain item handkerchief
   tint none
   play music departure fadein 3
@@ -381,14 +512,14 @@ label chapter1
         lose francs 50
         set smuggler = "robbed"
   "It sailed at night, with no lights, toward a country that did not want me."
-  jump chapter2
+  jump chapter3
 
 
 # ============================================================================
-#  CHAPTER 2 — JAPAN
+#  CHAPTER 3 — JAPAN
 # ============================================================================
-label chapter2
-  chapter "Chapter 2" "Japan" seal 日本
+label chapter3
+  chapter "Chapter 3" "Japan" seal 日本
   scene japan_coast with fade
   play music japan fadein 3
   cutscene arrival
@@ -397,7 +528,7 @@ label chapter2
   "Men I never saw clearly led me inland for days, blindfolded for part of the way. Nobody explained anything. I learned very quickly not to ask."
   scene hara_kei_estate with fade
   play sound temple_bell volume 0.6
-  "At last I was brought to a village in the hills, and to the house of the man who controlled everything there: Hara Kei."
+  "At last I was brought to a village in the hills, and before the man who controlled everything there: Hara Kei."
   show harakei neutral at center
   introduce harakei
   "He sat perfectly still. He was younger than I had imagined, and he looked at me as if I were a piece of weather he was waiting to pass."
@@ -409,40 +540,47 @@ label chapter2
   endif
   show harakei neutral at left
   show woman neutral at right
-  "Beside him sat a young woman. Her eyes were not Asian — that was the first strange thing. The second was that she did not lower them."
-  "She looked directly at me."
+  "Among the people around Hara Kei, I noticed a young woman. Her eyes were not Asian — that was the first strange thing. The second was that she did not lower them."
+  "She watched me without saying anything."
   introduce woman
   inner "She was not beautiful in the way people usually mean beautiful. She simply looked at me."
   menu
     - "Look away." tone=quiet [danger -= 1]
-        "I looked down at the mat between us."
+        "I lowered my eyes."
+        "Hara Kei noticed."
         harakei "You are a respectful man."
-        "When I raised my eyes again, she was still watching me."
-        set ch2_choice = "away"
+        "I said nothing."
+        "The woman continued watching me."
+        inner "I wondered why she continued looking at me when I had already looked away."
+        set ch3_choice = "away"
     - "Continue looking at her." tone=obsession [fascination += 2]
-        "I didn't look away. Neither did she."
-        "Hara Kei went on speaking about prices and seasons. I have no idea what he said."
+        "I continued looking."
+        "Neither of us looked away."
+        "Hara Kei noticed the exchange, but said nothing."
         inner "I did not know her name. But I remembered her eyes."
-        set ch2_choice = "look"
-    - "Ask Hara Kei who she is." tone=danger [danger += 2]
+        set ch3_choice = "look"
+    - "Ask Hara Kei who she is." tone=danger [danger += 2, mystery += 1]
+        "I looked toward Hara Kei."
         herve "Who is she?"
-        show harakei stern
-        "Hara Kei turned his head, slowly, the way a door opens in an empty house."
+        show harakei stern at left
+        "Hara Kei slowly turned toward me, the way a door opens in an empty house."
         harakei stern "That is not a question you should ask."
+        "I understood immediately that I had crossed a boundary."
+        "The woman continued staring at me."
         set asked_who = true
-        set ch2_choice = "ask"
+        set ch3_choice = "ask"
     - hesitate [fascination += 1]
         "I meant to look away. I didn't. I didn't do anything at all."
         "At last it was she who lowered her eyes, and I understood that she had decided when it would end, not me."
-        set ch2_choice = "frozen"
-  jump chapter3
+        set ch3_choice = "frozen"
+  jump chapter4
 
 
 # ============================================================================
-#  CHAPTER 3 — THE CUP
+#  CHAPTER 4 — THE CUP
 # ============================================================================
-label chapter3
-  chapter "Chapter 3" "The Cup" seal 杯
+label chapter4
+  chapter "Chapter 4" "The Cup" seal 杯
   scene estate_tearoom with dissolve
   play music her_theme fadein 4
   show harakei neutral at left
@@ -461,49 +599,56 @@ label chapter3
     set danger += 1
   endif
   "Hara Kei was talking, and for a moment no one was looking at anyone."
-  "The young woman lifted a small teacup and drank from it."
+  "I found myself near her."
+  "She lifted a small cup and drank from it."
   cutscene the_cup
-  "Then she set it down in front of me."
+  "Then, silently, she offered it to me."
   show woman gaze at right
-  "She looked at me. Then at the cup. Then at me again."
+  "I looked at it. Then at her."
   menu time 10
     - "Drink it." tone=obsession [fascination += 2, intimacy += 1]
         cg the_cup with dissolve
-        "I picked up the cup and drank. Our eyes met over its rim."
+        "I picked up the cup and drank."
+        "Our eyes met."
+        "Neither of us spoke."
         cg hide with dissolve
         inner "I didn't know what she wanted. But I wanted to understand."
-        set ch3_choice = "drink"
+        set ch4_choice = "drink"
     - "Ignore it." tone=cold [mystery += 2]
-        "I looked at the cup. Then at her."
+        "I looked at the cup."
+        "Then at her."
         herve "I don't understand."
         show woman neutral at right
-        "She took the cup back without a word, and the moment closed over like water."
-        set ch3_choice = "ignore"
+        "She took the cup back without a word."
+        "Her expression remained unreadable."
+        inner "Perhaps it was nothing. Perhaps it was everything."
+        set ch4_choice = "ignore"
     - "Drink from a different side." tone=tender [fascination += 1, intimacy += 2]
         cg the_cup with dissolve
-        "I noticed where her lips had touched the porcelain."
-        "I turned the cup slightly, and drank from the other side."
+        "I noticed where she had drunk."
+        "I slowly turned the cup, and drank from another side."
         cg hide with dissolve
         show woman smile at right
         "She smiled."
-        "It lasted less than a second. I would think about it for years."
-        set ch3_choice = "turn"
+        "It was the first clear expression I had seen from her."
+        inner "For the first time, I thought she had understood me."
+        set ch4_choice = "turn"
     - hesitate [mystery += 1]
         "I sat there looking at the cup for too long."
         show woman neutral at right
         "Her hand came back for it, unhurried. She drank what was left herself, and did not look at me again that evening."
-        set ch3_choice = "ignore"
-  if ch3_choice != "ignore"
+        set ch4_choice = "ignore"
+  if ch4_choice != "ignore"
     "Hara Kei did not seem to notice. Or he noticed everything, and chose to say nothing. With him, it was the same thing."
   endif
-  jump chapter4
+  jump chapter5
 
 
 # ============================================================================
-#  CHAPTER 4 — THE FIRST RETURN
+#  CHAPTER 5 — RETURN TO FRANCE
 # ============================================================================
-label chapter4
-  chapter "Chapter 4" "The First Return" seal 帰
+label chapter5
+  chapter "Chapter 5" "Return to France" seal 帰
   play music journey fadein 2
   cutscene return_home
   scene road_east with fade
@@ -518,48 +663,27 @@ label chapter4
   else
     "Some of the grey ones stayed on the cards. I told myself it would not matter."
   endif
-  scene silk_mill with fade
-  play music town_theme fadein 2
-  show balbadiou happy
-  lose item egg_box
-  if eggs_result == "win"
-    "In spring, the eggs hatched. They were healthy. Every one of them."
-  else
-    "In spring, the eggs hatched. Nearly all of them. Enough."
-  endif
-  balbadiou happy "You did it. You did it, Hervé! The whole town will eat this year."
-  if eggs_result == "win"
-    balbadiou happy "And not one bad card in the lot. Here, your share. You earned it twice."
-    gain francs 80
-  else
-    balbadiou "Here, your share. A few more like this and we'll all be rich."
-    gain francs 40
-  endif
-  "The journey was called a success. For a while, everyone in town wanted to shake my hand."
-  hide balbadiou
-  scene helene_garden with dissolve
+  scene joncour_home with fade
   play music helene_theme fadein 2
-  "I spent the money on the life I had with Hélène. I bought the land behind the house and made a garden for her, with paths and a pond and trees that would take years to grow."
   show helene soft
   if helene_trust >= 2
     helene smile "You came back."
     herve "I told you I would."
     helene soft "You did."
-    "She took my arm and we walked the new paths together, as if we had always walked them."
   elif helene_trust < 0
-    helene neutral "It's a beautiful garden."
-    "She said it politely, the way you thank a stranger."
+    helene neutral "You're back."
+    "She said it politely, the way you greet a guest."
   else
-    helene soft "It's a strange thing, a garden. You plant it for a future you can't see yet."
+    helene soft "You're thinner. And you smell of the sea."
   endif
   if has("handkerchief")
     helene soft "You kept it. The handkerchief. I thought you might lose it at the first border."
   endif
-  "And yet. At night, when the house was quiet, my thoughts went back across the world, to a room in the hills and a cup set down in front of me."
+  hide helene
+  "At night, when the house was quiet, my thoughts went back across the world, to a room in the hills and a cup held out to me."
   if fascination >= 2
     inner "Her eyes. I could still see them if I closed mine."
   endif
-  hide helene
   "One evening I sat down with my journal to write about the journey."
   gain item journal
   "The words did not go where I meant them to."
@@ -575,55 +699,130 @@ label chapter4
     set business += 1
     inner "When I read it back, it read like a ledger. Safer that way."
   endif
-  jump chapter5
-
-
-# ============================================================================
-#  CHAPTER 5 — THE SECOND JOURNEY
-# ============================================================================
-label chapter5
-  chapter "Chapter 5" "The Second Journey" seal 再
-  scene balbadiou_office with fade
+  scene silk_mill with fade
   play music town_theme fadein 2
-  show balbadiou neutral
-  balbadiou "The whole valley wants to buy eggs from us now. Everyone who lost their worms, everyone who heard what we did."
-  balbadiou serious "One journey was a miracle. We need a second one."
-  if route() == "devoted"
-    balbadiou happy "You look well, Hervé. Married life agrees with you, when you let it."
-  elif route() == "lost"
-    balbadiou worried "You look like a man who hasn't slept since spring."
-    inner "{shake}I hadn't.{/shake}"
+  lose item egg_box
+  if eggs_result == "win"
+    "In spring, the eggs hatched. They were healthy. Every one of them."
+  else
+    "In spring, the eggs hatched. Nearly all of them. Enough."
   endif
-  "He didn't ask if I wanted to go. He didn't need to."
+  "The town came out into the streets. For a while, everyone in Lavilledieu wanted to shake my hand."
+  show balbadiou happy
+  "Baldabiou congratulated me."
+  balbadiou happy "You did well."
+  herve "Was it enough?"
+  balbadiou happy "Enough to make me another offer."
+  "I looked at him."
+  balbadiou serious "You can stay here and work in the factory. Or you can continue making the journeys."
+  if eggs_result == "win"
+    balbadiou "Either way — here's your share. Not one bad card in the lot. You earned it twice."
+    gain francs 80
+  else
+    balbadiou "Either way — here's your share. A few more like this and we'll all be rich."
+    gain francs 40
+  endif
+  if route() == "devoted"
+    balbadiou happy "Though I know which one your wife would pick."
+  elif route() == "lost"
+    balbadiou worried "Though I think you've already picked, haven't you? You've been looking east since you got back."
+  endif
+  menu time 20
+    - "Stay in France." tone=tender
+        set ch5_choice = "stay"
+        jump our_house
+    - "Continue the journeys." tone=obsession [obsession += 1, business += 1]
+        herve "I'll go again."
+        balbadiou happy "I thought you might say that."
+        set ch5_choice = "continue"
+    - hesitate [obsession += 1]
+        "I turned the glass in my hand and didn't answer."
+        balbadiou "I'll take that as a yes. You always did say yes by saying nothing."
+        set ch5_choice = "continue"
+  "I began to prepare for another journey."
+  balbadiou "Japan is becoming familiar to you."
+  "I paused."
+  herve "Perhaps."
+  hide balbadiou
+  jump chapter6
+
+
+# ---- ENDING: A HOUSE OF OUR OWN ---------------------------------------------
+label our_house
+  herve "I think I've travelled enough."
+  balbadiou neutral "And Hélène?"
+  herve "She deserves to have me home."
+  balbadiou happy "Then go home to her. I'll find someone else to break his back on the steppe."
+  hide balbadiou
+  "I returned to Hélène."
+  "With my share of the eggs, I bought a house for us: small and yellow, at the edge of town, with a garden that ran down to the river."
+  scene helene_garden with fade
+  play music home fadein 3
+  show helene soft
+  helene neutral "You bought a house?"
+  herve "Our house."
+  helene soft "You really are staying?"
+  herve "Yes."
+  menu
+    - "“I'm staying.”" tone=tender [helene_trust += 1]
+        herve "I'm staying. Every morning. For the rest of it."
+        helene smile "Say that again in ten years, and I'll believe you."
+        "Ten years later, I said it again. She believed me."
+    - "Show her the garden." tone=warm [helene_trust += 1]
+        "I took her hand and walked her down to the river, and showed her where the pond would go, and the cherry trees, and the bench."
+        helene smile "You've thought about this."
+        herve "The whole way home."
+    - hesitate
+        "I didn't say anything. I just stood there beside her, in our own garden, and she leaned her head on my shoulder, and that was the answer."
+  hide helene
+  "We lived happily together, and in time we had two children."
+  "Sometimes, at the bottom of a teacup, I remembered a pair of eyes in a room in the hills. Then Hélène would laugh in the next room, and it was gone."
+  "We grew old together, and we were buried beside each other."
+  cutscene end_our_house
+  ending our_house "Wagaya — A House of Our Own" good kanji 家 music home hint "What if one journey had been enough?"
+
+
+# ============================================================================
+#  CHAPTER 6 — THE SECOND JOURNEY
+# ============================================================================
+label chapter6
+  chapter "Chapter 6" "The Second Journey" seal 再
   play music journey fadein 2
   cutscene journey_two
   scene road_winter with fade
+  "Baldabiou sent me back to Japan for more eggs."
   "The same trains. The same steppe. The same boat without lights."
   "It was easier the second time. That frightened me a little. It meant I was getting used to it."
   scene estate_day with fade
   play music japan fadein 2
   show harakei neutral
-  harakei "You came back."
-  harakei "Why?"
+  "I saw Hara Kei again."
+  harakei "You have returned."
+  herve "I have."
+  harakei "For the eggs?"
+  "I looked toward the aviary."
   menu
-    - "For the eggs." tone=duty [business += 1]
-        harakei neutral "Eggs. Yes. That is a good reason."
-        "He said it as if he were agreeing with a child."
-        set ch5_choice = "eggs"
-    - "For business." tone=cold [business += 2]
-        harakei "Business is a good reason. Business does not lie awake at night."
-        "He poured tea for both of us. Only for both of us."
-        set ch5_choice = "business"
-    - "I wanted to return." tone=obsession [obsession += 2, danger += 1]
-        harakei stern "..."
-        "He looked at me for a long time."
-        harakei stern "Men who want to return to a place usually want something in it."
-        "He did not say anything else. He did not have to."
-        set ch5_choice = "return"
+    - "“For the eggs.”" tone=duty [business += 1]
+        herve "For the eggs."
+        "Hara Kei studied me."
+        harakei "Then you have come for business."
+        herve "Yes."
+        "Hara Kei gave a faint smile."
+        harakei "Good."
+        set ch6_choice = "eggs"
+    - "“I wanted to return.”" tone=obsession [obsession += 2, danger += 1]
+        "I looked toward the place where I had last seen her."
+        herve "I wanted to return."
+        show harakei stern
+        "Hara Kei's expression changed."
+        harakei stern "Japan is not a place to return to without reason."
+        herve "Perhaps I have a reason."
+        "Hara Kei said nothing."
+        set ch6_choice = "return"
     - hesitate [obsession += 1]
         "I didn't answer. I didn't know which answer was true."
         harakei neutral "A man who does not know why he travels should travel less, Monsieur Joncour."
-        set ch5_choice = "silent"
+        set ch6_choice = "silent"
   "Then we came to the price."
   minigame bargain into price
   if price == "good"
@@ -640,11 +839,12 @@ label chapter5
     harakei cold "In my country, a man who haggles like that is telling you something else."
     set danger += 2
   else
-    "I paid too much. Balbadiou would have wept."
+    "I paid too much. Baldabiou would have wept."
     lose francs 40
   endif
+  hide harakei
   "The eggs would be ready in a few days."
-  "I did not see her that first day. I looked for her in every doorway."
+  "I did not see her those first days. I looked for her in every doorway."
   "On the last evening, the cherry trees along the estate wall came into flower."
   menu
     - "Press a blossom in your journal, for Hélène." tone=tender gain=item:blossom [helene_trust += 1]
@@ -656,178 +856,256 @@ label chapter5
         "I spent the evening with the eggs, as I should have. It was easier than the blossoms."
     - hesitate
         "I stood under the trees until the light was gone, and did nothing at all."
-  jump chapter6
-
-
-# ============================================================================
-#  CHAPTER 6 — THE GLOVE
-# ============================================================================
-label chapter6
-  chapter "Chapter 6" "The Glove" seal 手袋
-  scene aviary with fade
-  "Behind Hara Kei's house there was an aviary: a great cage of wood and paper, taller than a house, full of birds from every corner of Asia."
-  "Hundreds of wings, all moving, going nowhere."
-  "I stood there longer than I should have. I thought about her. About how you can keep something beautiful by never letting it leave."
-  scene estate_room with dissolve
-  "On the way back, I passed the room where she had been sitting that first day. Her things were there — a shawl, a small lacquered box, nobody watching."
-  "Before I knew I had decided anything, I had taken off one of my gloves and laid it among her belongings."
-  cutscene the_glove
-  cg the_glove with dissolve
-  "A glove. A stupid, ordinary thing. A message with no words in it."
-  menu time 10
-    - "Leave it." tone=obsession [intimacy += 1, obsession += 1]
-        cg hide with dissolve
-        "I left it there and walked away without turning around."
-        "That night, I couldn't sleep. I kept imagining her hand finding it."
-        set glove = "left"
-    - "Take it back." tone=quiet [danger -= 1, mystery += 1]
-        cg hide with dissolve
-        "I picked it up again. My heart was beating as if I had stolen something."
-        "Some things you should not say, even without words."
-        "But she was standing in the doorway. I don't know how long she had been there."
-        show woman gaze
-        "She had seen me put it down. She had seen me take it back."
-        hide woman
-        set glove = "taken"
-    - "Leave something else." tone=tender cost=item:handkerchief [fascination += 1, intimacy += 1, mystery += 1]
-        cg hide with dissolve
-        "I took the glove back and left my handkerchief instead — white silk, with my initials sewn in the corner by Hélène."
-        "Something that had touched my hands every day for years."
-        "I only thought, much later, about whose needle had made those letters."
-        set glove = "handkerchief"
-    - hesitate [intimacy += 1]
-        cg hide with dissolve
-        "Footsteps in the corridor. I walked away without deciding, and without my glove."
-        "That night I understood that I had decided after all."
-        set glove = "left"
   jump chapter7
 
 
 # ============================================================================
-#  CHAPTER 7 — THE NOTE
+#  CHAPTER 7 — THE GLOVE
 # ============================================================================
 label chapter7
-  chapter "Chapter 7" "The Note" seal 文
-  scene estate_day with fade
+  chapter "Chapter 7" "The Glove" seal 手袋
+  scene aviary with fade
+  play music her_theme fadein 3
+  "Behind Hara Kei's house there was an aviary: a great cage of wood and paper, taller than a house, full of birds from every corner of Asia."
+  "Hundreds of wings, all moving, going nowhere."
+  "My thoughts returned to her. About how you can keep something beautiful by never letting it leave."
+  scene estate_room with dissolve
+  "On the way back, I passed the room where she had been sitting that first day. Her belongings were there — a shawl, a small lacquered box, nobody watching."
+  "I removed one of my gloves."
+  cutscene the_glove
+  cg the_glove with dissolve
+  "A glove. A stupid, ordinary thing. A message with no words in it."
+  menu time 12
+    - "Leave it." tone=obsession [intimacy += 1, obsession += 1]
+        cg hide with dissolve
+        "I quietly placed the glove among her belongings."
+        "I looked back once."
+        inner "I did not know what I expected. I only knew I wanted her to know I had been there."
+        "I left."
+        set glove = "left"
+    - "Take it back." tone=quiet [danger -= 1, mystery += 1]
+        cg hide with dissolve
+        "I reached toward the glove."
+        "I hesitated."
+        "Then I took it back."
+        inner "This was foolish. Whatever I had imagined, it had to end here."
+        "I left."
+        set glove = "taken"
+    - hesitate [intimacy += 1]
+        cg hide with dissolve
+        "Footsteps in the corridor. I walked away without deciding — and without my glove."
+        "That night I understood that I had decided after all."
+        set glove = "left"
+  jump interlude
+
+
+# ============================================================================
+#  INTERLUDE — THE LETTER
+# ============================================================================
+label interlude
+  chapter "Interlude" "The Letter" seal 便
   play music reverie fadein 3
+  scene joncour_home with fade
+  "I returned to France with the eggs at the end of the summer."
   if glove == "left"
-    "On the last morning, I found my glove on my travel chest. Neatly folded. Inside it, a tiny piece of paper."
-  elif glove == "handkerchief"
-    "On the last morning, my handkerchief was back among my things, folded into a perfect square. Inside it, a tiny piece of paper."
-    gain item handkerchief
+    "When I arrived home, there was a letter waiting for me on the hall table."
+    "No stamp I recognised. And on the envelope, in careful Western letters, as if someone had copied them out of a book, a single word."
+    play sound paper
+    set woman_name = "Yukimura"
+    reveal woman
+    "It was from Yukimura."
+    "I held it carefully, the way you hold something that might fly away."
+    herve "Who are you?"
+    "I could not stop myself from wondering whether she had written it."
   else
-    "On the last morning, as I packed, a tiny piece of paper fell out from between the pages of my notebook. I had not put it there."
-  endif
-  play sound paper
-  "A few lines of Japanese, in black ink. I couldn't read a single character."
-  gain item note
-  set mystery += 1
-  "I carried it back across the world, next to the eggs. I did not show it to anyone."
-  scene blanche_salon with fade
-  "In France there was only one person I knew who could read Japanese: Madame Blanche, who kept a fine house in the city and asked very few questions."
-  show blanche neutral
-  introduce blanche
-  "She unfolded the paper. She read it once. Then she looked at me for a long time before she spoke."
-  cutscene the_note
-  blanche serious "Come back."
-  herve "That's all?"
-  blanche soft "That's enough."
-  set obsession += 5
-  play sound heartbeat
-  effect pulse 1.4
-  inner "{shake}Come back, or I will die.{/shake} That's what I heard, although she hadn't said it."
-  if route() == "devoted"
-    blanche soft "Whoever wrote this doesn't know there is someone waiting for you at home, Monsieur. Or perhaps she does."
-  elif route() == "lost"
-    blanche serious "Be careful, Monsieur Joncour. Some words are not written to be read. They are written to be followed."
+    "Later, unpacking, I discovered a folded letter inside the pocket of my coat — a pocket I never used."
+    "I recognised the handwriting."
+    "It was from Hélène."
+    gain item helene_letter
+    "I stared at it."
+    herve "Hélène...?"
+    "I did not open it. Not yet. I put it back in the pocket, and buttoned the pocket, as if it might get out."
   endif
   jump chapter8
 
 
 # ============================================================================
-#  CHAPTER 8 — HÉLÈNE
+#  CHAPTER 8 — THE NOTE
 # ============================================================================
 label chapter8
-  chapter "Chapter 8" "Hélène" seal 庭
+  chapter "Chapter 8" "The Note" seal 文
+  if glove == "left"
+    "Inside the envelope there was only a note: a few lines of Japanese, in black ink. I couldn't read a single character."
+  else
+    "Weeks later, sorting the boxes that had come back from Japan, a tiny folded paper fell out from between the pages of my journal. I had not put it there."
+    "A few lines of Japanese, in black ink. I couldn't read a single character."
+  endif
+  play sound paper
+  gain item note
+  set mystery += 1
+  "I was unable to understand it. So I went to the one person in France I knew who could."
+  scene blanche_salon with fade
+  play music reverie fadein 3
+  show blanche neutral
+  introduce blanche
+  "Madame Blanche kept a fine house in the city and asked very few questions. She took the note and studied it carefully."
+  cutscene the_note
+  herve "What does it say?"
+  "Madame Blanche looked at me."
+  blanche serious "It speaks of desire."
+  herve "Desire?"
+  blanche serious "Something wanted but forbidden."
+  "I became uneasy."
+  herve "Who wrote it?"
+  blanche neutral "That is not something the words can tell you."
+  "She returned the note."
+  blanche serious "Lust is a forbidden fruit. You must remind yourself of your true intentions in Japan."
+  herve "What do you mean?"
+  blanche soft "You have a home here in France."
+  "I looked at the note."
+  blanche soft "That should be enough."
+  menu
+    - "“It is enough.”" tone=honest [helene_trust += 1, obsession -= 1]
+        herve "It is enough."
+        blanche soft "Then say it again on the way home, Monsieur. Say it until it's true."
+    - "“Then why doesn't it feel like enough?”" tone=obsession [obsession += 2]
+        herve "Then why doesn't it feel like enough?"
+        blanche serious "Because you are a man, Monsieur Joncour, and the thing in your hand is a door."
+    - "Fold the note away without a word." tone=quiet [mystery += 1]
+        "I folded the note very small, and put it in my waistcoat pocket, next to my heart. Madame Blanche watched me do it."
+    - hesitate [obsession += 1]
+        "I didn't answer her. I was reading the note again, as if the characters might rearrange themselves into French."
+  set obsession += 2
+  hide blanche
+  play sound heartbeat
+  effect pulse 1.2
+  "I left confused."
+  "But instead of letting go of the note, I became more eager than ever to return to Japan."
+  if woman_name == "Yukimura"
+    inner "If it was from Yukimura, then perhaps she was waiting for me."
+  else
+    inner "If it was from her, then perhaps she was waiting for me."
+  endif
+  jump chapter9
+
+
+# ============================================================================
+#  CHAPTER 9 — HÉLÈNE
+# ============================================================================
+label chapter9
+  chapter "Chapter 9" "Hélène" seal 夜
   scene helene_garden with fade
   play music helene_theme fadein 2
   cutscene garden
-  "The eggs hatched again. The town celebrated again. I walked in the garden with Hélène in the evenings, and the trees were a little taller every time."
+  "I stayed in France for a while."
+  "I spent my days with Hélène. We walked in the garden in the evenings, and the trees were a little taller every time. But my thoughts kept drifting toward Japan."
   show helene soft
-  helene soft "You're quiet since you came back."
-  helene "Quieter than the first time."
-  if route() == "lost"
-    helene sad "{speed=0.7}Sometimes I think you only come back so that you can leave again.{/speed}"
-  elif route() == "devoted"
-    helene smile "But you're here. I can tell the difference, you know. When you're here."
-  endif
-  if glove == "handkerchief"
-    helene neutral "Your handkerchief smells of something. Incense, I think. Like a temple."
-    "I said it must have been the ship. She folded it very small, and gave it back to me."
-    set helene_trust -= 1
-  elif not has("handkerchief")
+  helene soft "You're quiet since you came back. Quieter than the first time."
+  if not has("handkerchief")
     helene neutral "The handkerchief I gave you. I haven't seen it since you came back."
     herve "I must have lost it on the road."
     helene soft "{speed=0.6}On the road.{/speed}"
-    "She didn't ask again. She didn't need to."
     set helene_trust -= 1
   endif
-  "I was a hundred steps from her and a whole world away. She could tell. She could always tell."
   menu
-    - "Stay with her — really stay." tone=tender [helene_trust += 2, obsession -= 1]
-        "I took her hand, and I made myself be where I was."
-        "The smell of the cut grass. The pond. The way she laughed when a frog jumped. The weight of her head on my shoulder."
-        helene smile "There you are."
-        helene soft "I missed you, you know. Even when you were here."
-        set ch8_choice = "present"
     - "Give her the blossom you pressed in Japan." tone=warm cost=item:blossom [helene_trust += 2, obsession -= 1]
         "I took the journal from my coat and opened it at the page. The blossom had gone thin and pale, like paper."
         helene smile "Oh."
         helene soft "Where did it grow?"
         herve "On a wall, in the hills. I thought it looked like here."
         "She pressed it into her own book, the one she was always reading, and for the rest of her life I never once saw her lose that page."
-        set ch8_choice = "present"
-    - "Think about the woman." tone=obsession [obsession += 2, fascination += 1, helene_trust -= 1]
-        "She was talking about the garden. I nodded in the right places."
-        "I was thinking about a cup of tea. About a glove. About three words on a piece of paper."
-        show helene sad
-        helene sad "..."
-        helene sad "Where do you go, Hervé? When you look like that?"
-        herve "Nowhere."
-        "She let me lie. That was the worst part."
-        set ch8_choice = "absent"
-    - "Tell Hélène about what happened." tone=honest [helene_trust += 1, mystery -= 1]
+    - "Tell her about the woman in Japan." tone=honest [helene_trust += 1, mystery -= 1]
         "I don't know why I told her. Maybe because keeping it was heavier than the journey."
-        "I told her about the woman beside Hara Kei. About her eyes. I told her about the note."
+        "I told her about the woman beside Hara Kei. About her eyes. About the note."
         "I did not tell her about the cup."
         show helene hurt
-        helene hurt "..."
         "She was quiet for a long time. Then she asked only one thing."
         helene neutral "Who translated it for you?"
         herve "Madame Blanche."
         helene soft "I see."
-        "She squeezed my hand, and let it go, and we walked home."
         set told_helene = true
-        set ch8_choice = "told"
+    - "Take her hand, and try to be here." tone=tender [helene_trust += 1]
+        "I took her hand, and made myself notice things: the cut grass, the pond, the weight of her head on my shoulder."
+        helene smile "There you are."
     - hesitate [helene_trust -= 1]
-        "She waited for me to say something. I let the silence go on too long."
-        helene sad "Never mind. Look, the roses have come back."
+        helene sad "Never mind. Look — the roses have come back."
         "She talked about the roses. I let her."
-        set ch8_choice = "absent"
-  jump chapter9
+  hide helene
+  scene joncour_bedroom with fade
+  play music sorrow fadein 3
+  "At night, we lay together in bed."
+  show helene sad
+  "Hélène looked at me."
+  helene sad "You're somewhere else again."
+  herve "I'm here."
+  helene hurt "Your body is."
+  "I remained silent."
+  "Hélène turned toward me."
+  helene soft "I don't need you to explain everything."
+  "A pause."
+  helene sad "Just don't disappear while you're still beside me."
+  menu time 12
+    - "Space out." tone=obsession [obsession += 2, helene_trust -= 1]
+        "I stared into the darkness."
+        "My thoughts returned to Japan: a cup, a glove, a few lines of ink."
+        hinner "And if Hélène mentally notes all the time Hervé spaces out in bed, nobody has to know."
+        "She closed her eyes."
+        set ch9_choice = "space"
+    - "Sleep it off, facing your back to Hélène." tone=cold [helene_trust -= 2]
+        "I turned away."
+        helene sad "Good night."
+        herve "Good night."
+        "Neither of us spoke again."
+        hide helene
+        scene joncour_bedroom with slow
+        tint dawn
+        play music lament fadein 3
+        "..."
+        hinner "The next morning, I woke to an empty bed."
+        hinner "I reached across the sheets."
+        hinner "Nothing."
+        effect pulse 0.8
+        "A tear fell from her eye."
+        hinner "I closed my eyes again, and imagined him coming home to me."
+        tint none
+        set ch9_choice = "turn"
+    - "Pull her close." tone=tender [helene_trust += 2, obsession -= 1]
+        "I didn't say anything. I pulled her close, and held on, and stayed awake until her breathing slowed."
+        helene soft "{speed=0.7}There you are.{/speed}"
+        inner "For one night, Japan was very far away."
+        set ch9_choice = "hold"
+    - hesitate [obsession += 1]
+        "I meant to answer her. The silence answered first."
+        hinner "And if Hélène mentally notes all the time Hervé spaces out in bed, nobody has to know."
+        set ch9_choice = "space"
+  jump chapter10
 
 
 # ============================================================================
-#  CHAPTER 9 — THE THIRD JOURNEY
+#  CHAPTER 10 — THE THIRD JOURNEY
 # ============================================================================
-label chapter9
-  chapter "Chapter 9" "The Third Journey" seal 雨
+label chapter10
+  chapter "Chapter 10" "The Third Journey" seal 雨
+  scene joncour_home with fade
+  play music helene_theme fadein 2
+  "I decided to return to Japan."
+  "Before I left, Hélène watched me prepare."
+  show helene neutral
+  helene neutral "Another journey?"
+  herve "Yes."
+  helene sad "And how long will you be gone?"
+  herve "I don't know."
+  "She nodded."
+  helene sad "You never do."
+  "I looked at her."
+  helene soft "Come home, Hervé."
+  "I said nothing."
+  hide helene
   play music storm fadein 2
   cutscene journey_three
   scene road_rain with fade
-  "I went back to Japan a third time."
   if obsession >= 8
-    "I told Balbadiou it was for the eggs. I told Hélène it was for the eggs. I stopped believing it somewhere in Russia."
+    "I told Baldabiou it was for the eggs. I told Hélène it was for the eggs. I stopped believing it somewhere in Russia."
   else
     "It was for the eggs. I told myself that every morning, like a prayer."
   endif
@@ -846,7 +1124,7 @@ label chapter9
   scene estate_unrest with fade
   play music tension fadein 2
   cutscene warships
-  "The country had changed. Foreign ships had come into the ports with their guns, and the old order was cracking. There were soldiers on the roads. People looked at me differently now — a white face had become a political problem."
+  "The country had changed. Foreign ships had come into the ports with their guns, and the old order was cracking. There were soldiers on the roads."
   show harakei stern
   harakei stern "It is not a good time to be a foreigner here."
   if danger >= 2
@@ -860,87 +1138,122 @@ label chapter9
   "He sold me the eggs anyway. But he did not invite me to stay."
   hide harakei
   "I saw her once. Across a courtyard, for the length of a breath."
-  if intimacy >= 3
+  if woman_name == "???"
+    show woman gaze
+    "Someone called to her from the house. Her name. The first time I had ever heard it."
+    set woman_name = "Yukimura"
+    reveal woman
+    "Yukimura."
+    hide woman
+  elif intimacy >= 3
     show woman soft
     "She stopped when she saw me. She pressed one hand flat against her own chest — just once, very lightly — and then she was gone."
     hide woman
-  elif fascination >= 3
-    show woman gaze
-    "She looked at me the way she had the first day. Then someone called her name, a name I didn't catch, and she turned away."
-    hide woman
   else
-    "She didn't see me. Or she pretended not to. I will never know which."
+    show woman gaze
+    "She looked at me the way she had the first day. Then she turned away."
+    hide woman
   endif
   "I had crossed the world to look at a woman for one second. And the practical reason for all of it — the eggs, the trade, the town — suddenly felt like an excuse I had invented for myself."
-  jump chapter10
+  jump chapter11
 
 
 # ============================================================================
-#  CHAPTER 10 — WAR
+#  CHAPTER 11 — WAR
 # ============================================================================
-label chapter10
-  chapter "Chapter 10" "War" seal 戦
+label chapter11
+  chapter "Chapter 11" "War" seal 戦
   play music battle fadein 1
   play ambience battle
   cutscene war
   scene balbadiou_office with fade
   play music war fadein 3 volume 0.8
   show balbadiou worried
-  "The next year, the news from Japan was all bad. Civil war. Foreigners attacked. Ports closed. Nobody knew who was in charge."
-  balbadiou worried "You can't go this time. Nobody can."
-  balbadiou serious "China. The eggs aren't as good, but they're alive, and nobody will shoot you for buying them."
-  balbadiou "Go to China, Hervé. Be sensible for once."
-  menu
+  "The next year, war had changed everything. Japan was no longer the safe destination it had once been."
+  "Baldabiou spoke to me in his office, with the door closed."
+  balbadiou worried "The routes are dangerous now."
+  herve "I can still go."
+  balbadiou serious "You don't have to."
+  herve "What is the alternative?"
+  balbadiou serious "China."
+  "I hesitated."
+  menu time 20
     - "Go to China." tone=duty [obsession -= 1]
-        balbadiou happy "Thank God."
-        jump china_trip
+        herve "China, then."
+        balbadiou happy "It's safer."
+        herve "And Japan?"
+        balbadiou serious "Forget Japan."
+        set ch11_choice = "china"
+        jump lost_without_goodbye
     - "Go to Japan anyway." tone=danger [obsession += 3, danger += 3]
-        balbadiou worried "..."
-        show balbadiou serious
-        balbadiou serious "You'll get yourself killed. For what? For worms?"
-        herve "For the town."
-        balbadiou serious "Don't lie to me, Hervé. I've known you too long. Lie to Hélène if you have to. Not to me."
-        "I didn't answer. He didn't wait for me to."
-        hide balbadiou
-    - hesitate [obsession += 1]
-        "I didn't answer. Balbadiou took it for weakness, which it was."
-        balbadiou serious "Then I'll decide for you. China. I'm booking your passage tonight."
-        jump china_trip
-  jump chapter11
+        herve "I have to go."
+        balbadiou worried "You don't understand what you're risking."
+        herve "I understand."
+        balbadiou serious "Then why?"
+        "I looked toward Japan."
+        herve "Because I need to know."
+        set ch11_choice = "japan"
+    - hesitate [obsession += 2, danger += 2]
+        "I didn't answer. Baldabiou read the answer in my face anyway."
+        balbadiou worried "God help you, then. Go. I won't pretend I didn't see it coming."
+        set ch11_choice = "japan"
+  hide balbadiou
+  jump chapter12
 
-label china_trip
-  set went_china = true
+
+# ---- ENDING: LOST WITHOUT GOODBYE -------------------------------------------
+label lost_without_goodbye
+  hide balbadiou
   scene china_dock with fade
-  play music journey fadein 3
-  "I went to China. I bought eggs from traders who laughed at my French and cheated me politely."
-  lose francs 40
-  "The eggs were sickly. Half the boxes were dead before I reached the coast."
-  "I stood on a dock looking at the sea, with a ticket home in my pocket."
-  inner "{shake}Japan was only a few days away. A few days.{/shake}"
-  effect pulse 1.2
-  play sound paper
-  "I tore up the ticket."
-  "Being sensible had brought me halfway round the world. The rest of the way, I went by myself."
-  jump chapter11
+  play music tension fadein 3
+  "I travelled toward China."
+  "At the harbour, two traders met me off the boat. Good coats, good French, good papers with red stamps. They knew Baldabiou's name. They knew mine."
+  "They took me inland to see their eggs, they said. The finest in the province."
+  play sound footsteps
+  "The road got narrower. The traders stopped talking."
+  play sound sword volume 0.8
+  play music battle fadein 0.5
+  effect shake 0.8
+  "I understood too late what they were."
+  play sound sting
+  scene black with flash
+  stop music fadeout 2
+  "..."
+  scene joncour_home with slow
+  play music sorrow fadein 4
+  "Back in France, Hélène received no news."
+  show helene neutral
+  hinner "He stayed in Japan. That's what they'll say. That he found something there, and stayed."
+  "She waited."
+  show helene sad
+  "Weeks became months."
+  hinner "Every carriage on the road. Every knock at the door."
+  "Eventually, her hope disappeared."
+  show helene hurt
+  helene hurt "He didn't even say goodbye."
+  hide helene with slow
+  "Her grief consumed her, and she died believing I had chosen another life."
+  cutscene end_no_goodbye
+  ending no_goodbye "Yukue Shirezu — Lost Without Goodbye" tragic kanji 消 music lament hint "What if he took the safer road?"
 
 
 # ============================================================================
-#  CHAPTER 11 — THE ABANDONED VILLAGE
+#  CHAPTER 12 — THE ABANDONED VILLAGE
 # ============================================================================
-label chapter11
-  chapter "Chapter 11" "The Abandoned Village" seal 灰
+label chapter12
+  chapter "Chapter 12" "The Abandoned Village" seal 灰
   scene burned_village with fade
   stop music fadeout 3
   cutscene ashes
-  "I reached the hills after weeks of hiding, bribing, waiting."
-  "The village was gone."
+  "I arrived in Japan."
+  "The places I once knew had changed. The village was nearly abandoned."
   play sound wind_gust
   effect shake 0.6
   "Burned houses. Black beams against the sky. No birds. The great aviary was empty, its door hanging open."
-  if danger >= 4
-    "Twice I had to lie flat in a ditch while soldiers passed on the road. Once they came so close I could hear them breathing."
-    "I kept thinking: if I die here, nobody at home will ever know where."
-  endif
+  herve "Hara Kei?"
+  "No answer."
+  "I continued searching."
+  inner "I had crossed an ocean for a place that no longer seemed to exist."
   "On the second night, lanterns came up the road. Soldiers, going from ruin to ruin."
   play sound shouts volume 0.6
   play music pursuit fadein 1
@@ -971,58 +1284,74 @@ label chapter11
   endif
   play music lament fadein 6
   "I searched for days. For Hara Kei. For her. For anyone."
-  if went_china
-    inner "In China I had been sensible. Here, in the ashes, sensible was a word from another language."
-  endif
   "Then, on the fourth day, a boy found me and led me into the forest, without a word."
-  jump chapter12
+  jump chapter13
 
 
 # ============================================================================
-#  CHAPTER 12 — HARA KEI'S WARNING
+#  CHAPTER 13 — HARA KEI'S WARNING
 # ============================================================================
-label chapter12
-  chapter "Chapter 12" "Hara Kei's Warning" seal 森
+label chapter13
+  chapter "Chapter 13" "Hara Kei's Warning" seal 森
   scene forest_camp_night with fade
   play music japan fadein 3
   cutscene forest
+  "I finally found Hara Kei, camped in the forest with what was left of his people."
   show harakei cold
-  "Hara Kei was camped in the forest with what was left of his people. He did not seem surprised to see me."
+  "He looked at me with anger."
   harakei cold "You should not have come."
+  herve "I need the eggs."
+  harakei cold "You need to leave."
+  herve "I came for the eggs."
+  harakei stern "No. You came for something else."
+  "I remained silent."
   if route() == "lost"
     harakei cold "{shake}Every time you come, something burns.{/shake}"
-    inner "It was not true. It was not entirely untrue."
   endif
-  harakei cold "Leave. Tomorrow. There is nothing here for you anymore."
-  menu
+  menu time 16
     - "Leave." tone=quiet [danger -= 2, obsession -= 1]
-        herve "I'll go."
-        harakei neutral "Good. You have a wife. Go home to her."
-        "It was the only personal thing he ever said to me."
-        set ch12_choice = "leave"
-    - "Stay." tone=danger [danger += 2, obsession += 1]
-        herve "I'm not leaving yet."
-        harakei stern "Then you will stay alone. And when they find you, I will not know your name."
-        "He meant it. I could see that he meant it, and that it cost him nothing."
-        set ch12_choice = "stay"
-    - "Ask about the woman." tone=obsession [danger += 1, obsession += 2, mystery += 1]
-        herve "Where is she?"
-        if asked_who
-          harakei stern "You asked me once who she was. I told you it was not a question you should ask."
-          harakei cold "That has not changed. Only now it is too late to ask."
+        herve "Give me the eggs."
+        "Hara Kei handed them to me."
+        gain item egg_box
+        harakei neutral "Then go."
+        set ch13_choice = "leave"
+    - "Stay." tone=danger [danger += 3, obsession += 2]
+        set ch13_choice = "stay"
+        jump endless_journey
+    - "Ask about the woman." tone=obsession [obsession += 2, mystery += 1]
+        herve "What happened to her?"
+        "Hara Kei looked at me coldly."
+        if woman_name == "Yukimura"
+          herve "Yukimura. Where is she?"
         else
-          harakei cold "Some doors, once they close, do not have another side."
+          herve "The woman who sat beside you. Where is she?"
         endif
-        "That was his whole answer. I have turned it over for the rest of my life."
-        set ch12_choice = "ask"
+        "Hara Kei did not answer."
+        herve "Please."
+        "Hara Kei turned away."
+        harakei cold "Take the eggs."
+        gain item egg_box
+        "His men pushed me out of the camp."
+        set ch13_choice = "ask"
     - hesitate [obsession += 1]
         "I didn't answer. The fire cracked between us."
-        harakei neutral "Silence. You were always better at looking than at speaking. Go home, Monsieur Joncour."
-        set ch12_choice = "leave"
-  "In the end, it didn't matter what I said. Everything I had come for was already gone."
-  "Japan was finished with me."
+        harakei neutral "Silence. You were always better at looking than at speaking. Take the eggs, and go home, Monsieur Joncour."
+        gain item egg_box
+        set ch13_choice = "leave"
   hide harakei
-  "At dawn, the boy who had found me walked me to the edge of the forest. He had not said a word in four days."
+  if ch13_choice == "ask"
+    "I left Japan with the eggs, but without the answer I wanted."
+  else
+    "I left with the eggs."
+    "I searched for another route to find her — every road, every village that would still open its door to a foreigner. I could not find her."
+    if woman_name == "Yukimura"
+      herve "Where did you go, Yukimura?"
+    else
+      herve "Where did you go?"
+    endif
+    "After searching without success, I finally gave up, and began my journey home."
+  endif
+  "At the edge of the forest, the boy who had found me in the ruins was waiting. He had not said a word in four days."
   menu
     - "Give him your father's watch." tone=warm cost=item:watch [danger -= 1]
         "He held it to his ear the way children do. For the first time, he smiled."
@@ -1033,65 +1362,96 @@ label chapter12
         "I nodded to him. He nodded back. It seemed to be enough for both of us."
     - hesitate
         "By the time I had decided what to give him, he was gone."
-  jump chapter13
+  jump chapter14
+
+
+# ---- ENDING: THE JOURNEY THAT NEVER ENDED -----------------------------------
+label endless_journey
+  herve "I am not leaving."
+  "Hara Kei looked at his men."
+  harakei cold "Then you have chosen."
+  play music battle fadein 0.5
+  play sound sword
+  "I realised too late what I had done."
+  play sound sting
+  effect shake 1
+  "Hara Kei and his men came for me."
+  scene black with flash
+  stop music fadeout 3
+  "I died in Japan, in a forest whose name I never learned."
+  scene joncour_home with slow
+  play music sorrow fadein 4
+  show helene sad
+  "Hélène never learned the truth."
+  hinner "He's with her. Whoever she is. He chose her, and he didn't have the courage to write and tell me so."
+  "She believed I had abandoned her."
+  hide helene with slow
+  "She eventually died, consumed by sadness."
+  cutscene end_endless_journey
+  ending endless_journey "Owaranu Tabi — The Journey That Never Ended" tragic kanji 旅 music lament hint "What if he refused to leave the forest?"
 
 
 # ============================================================================
-#  CHAPTER 13 — THE LAST EGGS
+#  CHAPTER 14 — THE LAST EGGS
 # ============================================================================
-label chapter13
-  chapter "Chapter 13" "The Last Eggs" seal 卵
+label chapter14
+  chapter "Chapter 14" "The Last Eggs" seal 卵
   play music journey fadein 2
   cutscene last_eggs
   scene road_winter with fade
-  "I came home with eggs — bought at a terrible price from whoever would sell them in the chaos."
-  gain item egg_box
-  lose francs 60
-  "They had travelled too far, too slowly, through too much."
+  "I returned to France."
+  "The eggs had travelled too far, too slowly, through too much."
   scene silk_mill_empty with fade
   play music sorrow fadein 3
   cutscene no_hatch
   "In spring, I held every card up to the window, one by one, looking for a single living egg."
   minigame eggs dead into last_eggs
   lose item egg_box
-  "In spring, they didn't hatch."
-  "Almost none of them. A handful of worms, sickly and slow, that died on the leaves within a week."
+  "The eggs failed."
+  "The silk trade in our town went on declining, a little more every month."
   show balbadiou worried
-  if business >= 3
-    "I stood in the mill with Balbadiou and did the arithmetic in my head again and again, as if the numbers might change."
-    balbadiou worried "It's over, isn't it. The trade."
-    herve "Not yet."
-    "It was. I had been good at the business once. It had been the one honest part of my journeys."
-  else
-    balbadiou worried "It's over, Hervé. The trade. The town will find another way to live, or it won't."
-    "I nodded. I was ashamed of how little I felt. The eggs had been an excuse for so long, I had forgotten they were ever the reason."
-  endif
+  "Baldabiou looked at the failed eggs."
+  balbadiou worried "It's over."
+  herve "What?"
+  balbadiou worried "The silk."
   if route() == "lost"
     balbadiou serious "You weren't even looking for eggs any more, were you. Not really."
     "I didn't answer. He was the only one who ever asked me straight out."
   endif
   hide balbadiou
-  "The practical purpose of my journeys had collapsed."
-  "What I felt for Japan had not. That was the part that frightened me."
-  jump chapter14
+  "I looked down."
+  "The journeys, the danger, and everything I had sacrificed had produced nothing."
+  "And yet I still thought about Japan."
+  jump chapter15
 
 
 # ============================================================================
-#  CHAPTER 14 — THE FINAL LETTER
+#  CHAPTER 15 — THE FINAL LETTER
 # ============================================================================
-label chapter14
-  chapter "Chapter 14" "The Final Letter" seal 手紙
+label chapter15
+  chapter "Chapter 15" "The Final Letter" seal 手紙
   scene joncour_home with fade
   play music her_theme fadein 3
   play sound paper
-  "It came in the autumn, months after I had stopped hoping for anything: a thick envelope, with Japanese stamps, seven sheets covered in black ink."
+  "One day, I received another letter: a thick envelope with Japanese stamps, seven sheets covered in black ink."
   gain item letter
-  "I didn't open it at home. I took it to Madame Blanche."
+  "I immediately brought it to Madame Blanche."
   scene blanche_salon with fade
   show blanche neutral
-  blanche "Sit down, Monsieur Joncour."
-  blanche serious "It's long. And it's not the kind of letter one reads quickly."
-  "She read it aloud, in French, slowly, without looking up."
+  herve "Please translate it."
+  "Madame Blanche read silently."
+  show blanche serious
+  "Her expression changed."
+  herve "What does it say?"
+  blanche serious "Are you certain you want to know?"
+  herve "Yes."
+  "She looked at me."
+  blanche soft "It is a farewell."
+  "I took the letter."
+  herve "From her?"
+  "Madame Blanche did not answer directly."
+  blanche soft "Some things are easier to desire when they remain impossible."
+  "Then she read it to me, in French, slowly, without looking up."
   hide blanche
   cutscene final_letter
   cg the_letter with dissolve
@@ -1110,41 +1470,93 @@ label chapter14
     woman "Goodbye, my love. We will not see each other again."
   endif
   cg hide with slow
-  show blanche soft
-  "Madame Blanche folded the pages and gave them back to me."
-  blanche soft "Go home, Monsieur Joncour."
-  "I did."
-  menu
-    - "Put the letter away, and go home to Hélène." tone=tender [helene_trust += 1]
-        "I put the letter in a drawer, and for a long time I didn't open the drawer."
-        set letter_fate = "kept"
-    - "Read it again, every night." tone=obsession [obsession += 2]
-        "I put the letter in a drawer. I opened the drawer every night, when Hélène was asleep."
-        set letter_fate = "reread"
-    - "Tear it up." tone=danger [obsession -= 1, mystery += 1]
-        "I tore the seven sheets into strips. Then I found I could not throw them away. I put the pieces in a drawer."
-        set letter_fate = "torn"
-    - hesitate
-        "I put the letter in a drawer, and did not decide anything about it for a long time."
-        set letter_fate = "kept"
-  jump chapter15
+  "I read the letter."
+  "For the first time, I understood that my longing for Japan had consumed years of my life."
+  "I now faced one final decision."
+  menu time 20
+    - "Give up, and stay with Hélène." tone=tender [helene_trust += 1, obsession -= 2]
+        herve "I have to go home."
+        set ch15_choice = "stay"
+    - "Go to Japan, and stay." tone=obsession [obsession += 3]
+        set ch15_choice = "japan"
+        jump left_behind
+    - hesitate [helene_trust += 1]
+        "I sat with the seven sheets in my hands until Madame Blanche took them gently away, folded them, and gave them back."
+        blanche soft "Go home, Monsieur Joncour."
+        "I did."
+        set ch15_choice = "stay"
+  scene joncour_home with fade
+  play music helene_theme fadein 3
+  "I returned to Hélène."
+  "We remained together, but something between us had changed. Something had been said, although neither of us had said it."
+  "I retired from the silk trade, and built a quiet life."
+  "I put the letter in a drawer."
+  jump chapter16
+
+
+# ---- ENDING: THE LIFE HE LEFT BEHIND ----------------------------------------
+label left_behind
+  "I looked at the letter again."
+  herve "I have to see her."
+  "I left France."
+  "This time, I did not plan to return."
+  play music storm fadein 2
+  cutscene journey_three
+  scene yuki_house with fade
+  play music japan fadein 3
+  "I learned Japanese in secret, word by word, so that I could avoid Hara Kei's men and survive in a country at war."
+  "And eventually, I found her."
+  show woman soft
+  if woman_name == "???"
+    set woman_name = "Yukimura"
+    reveal woman
+    "Her name was Yukimura."
+  endif
+  "I believed I had finally found the life I wanted."
+  "For a while, we lived together, in a house in the hills with paper walls, where the rain sounded like someone whispering."
+  hide woman
+  scene yuki_house with slow
+  filter faded
+  play music lament fadein 4
+  "But years later, I became sick."
+  show woman neutral
+  "Yukimura sat beside me."
+  herve "Will you stay?"
+  "Yukimura looked away."
+  woman neutral "I’m sorry, Hervé. I cannot stay and take care of you."
+  "I struggled to sit up."
+  herve "After everything I left behind for you?"
+  show woman gaze
+  "Yukimura looked at me sadly."
+  woman gaze "You chose to leave your life behind."
+  "A pause."
+  woman neutral "I never asked you to."
+  hide woman with slow
+  "She left."
+  "I was left alone."
+  "I thought of France. Of Hélène. Of the home I had abandoned."
+  "Of all the years I had spent chasing something I could never truly possess."
+  inner "I had crossed the world for a woman who had never asked me to come."
+  "The room became silent."
+  filter none
+  cutscene end_left_behind
+  ending left_behind "Utsusemi — The Life He Left Behind" bad kanji 空 music sorrow hint "What if he followed the last letter east?"
 
 
 # ============================================================================
-#  CHAPTER 15 — HÉLÈNE'S DEATH
+#  CHAPTER 16 — HÉLÈNE'S DEATH
 # ============================================================================
-label chapter15
-  chapter "Chapter 15" "Hélène's Death" seal 別
+label chapter16
+  chapter "Chapter 16" "Hélène's Death" seal 別
   scene garden_winter with fade
   play music helene_theme fadein 3
-  "I gave up the silk trade. There was almost nothing left of it to give up."
-  "We lived quietly. The trees in the garden grew tall. I learned the names of the birds that came to the pond."
-  "Then, one winter, Hélène fell ill."
+  "Years passed. The trees in the garden grew tall. I learned the names of the birds that came to the pond."
+  "Then, one winter, Hélène became ill."
   scene helene_sickroom with fade
   play music farewell fadein 4
   filter faded
   show helene tired
-  "She was ill for a long time, and then, very quickly, she was not going to get better."
+  "I stayed beside her."
   "The town doctor shook his head. There was a physician in Nîmes, people said, who had saved patients the town had given up on. He was not cheap."
   menu time 12
     - "Send for him, whatever it costs." tone=tender cost=francs:150 [helene_trust += 2]
@@ -1160,56 +1572,44 @@ label chapter15
     - hesitate [helene_trust -= 1]
         "I kept meaning to write to Nîmes. By the time I did, it no longer mattered."
         set doctor = "late"
+  helene tired "You're here."
+  herve "I'm not going anywhere."
+  "She smiled weakly."
+  helene soft "You used to say that."
+  "I took her hand."
+  herve "I mean it now."
   if helene_trust >= 3
-    helene tired "Hervé. Did you find it? What you went looking for?"
-    herve "I think I found it a long time ago. I just didn't know where I'd put it."
-    helene soft "That's a very French answer."
-    "She laughed, and it made her cough, and she held my hand until she fell asleep."
-  elif helene_trust >= 1
-    helene tired "Hervé. Did you find it? What you went looking for?"
-    herve "I don't know."
-    helene soft "That's all right. Neither did I, at first."
-  else
-    helene tired "You were always somewhere else, Hervé. I got used to talking to you there."
-    "I wanted to tell her I was here. I had waited too long to say it, and now it wasn't true enough to say."
+    helene soft "I know. I can tell the difference, you know. When you're here."
+  elif helene_trust < 0
+    helene tired "{speed=0.7}I know. I got used to talking to you when you were somewhere else.{/speed}"
   endif
   cutscene candle
-  "Hélène died at the beginning of September, on a morning with a clear sky."
+  "Hélène died peacefully, at the beginning of September, on a morning with a clear sky."
   filter none
   hide helene with slow
   scene black with slow
   stop music fadeout 4
-  centered "I buried her in the town cemetery.\nAfterwards, I didn't know what to do with my hands."
-  jump final
+  centered "I buried her in the town cemetery.\nAfterwards, I was left alone with the memories of our life together."
+  jump chapter17
 
 
 # ============================================================================
-#  FINAL CHAPTER — THE TRUTH
+#  CHAPTER 17 — THE TRUTH
 # ============================================================================
-label final
-  chapter "Final Chapter" "The Truth" seal 真
-  scene blanche_salon with fade
+label chapter17
+  chapter "Chapter 17" "The Truth" seal 真
+  scene joncour_home with fade
   play music letter fadein 4
-  "A few weeks after the funeral, Madame Blanche sent for me."
-  "I brought the letter with me. I don't know why. I had carried it for weeks without knowing why."
-  show blanche serious
-  blanche serious "I made a promise, Monsieur Joncour. To keep a secret while she was alive. She is not alive anymore."
-  herve "Who?"
+  "After Hélène's death, I went through her belongings."
+  "In the bottom of her sewing box, under the silk thread, there were sheets of paper, torn into strips."
+  "Japanese characters. The same few lines, copied again and again, in a careful, unsteady hand that was learning as it went."
   play sound heartbeat
-  blanche soft "Your wife."
-  "She told me everything. Hélène had come to her, years ago. With a letter she had written herself, in French. She had asked Madame Blanche to copy it into Japanese — and to read it back to me when I came."
-  if told_helene
-    inner "Who translated it for you? — she had asked me, in the garden. And I had told her."
-  endif
-  hide blanche
-  if letter_fate == "torn"
-    "I laid the torn strips out on Madame Blanche's table. My hands would not stop shaking."
-  else
-    "I laid the seven sheets out on Madame Blanche's table. They had fallen out of order in the drawer, the way paper does over the years."
-  endif
-  minigame letter
+  "I knew those characters. I had carried them across the world."
+  minigame letter into letter_result
   play music revelation fadein 2
   cutscene truth
+  "It was the letter."
+  "I recognised the words. The handwriting. The message."
   cg the_letter with dissolve
   effect glitch 0.9
   filter sepia
@@ -1219,29 +1619,43 @@ label final
   filter none
   cg hide with slow
   set persistent.knows_truth = true
-  show blanche soft
-  blanche soft "She wanted so much to be her. That woman in Japan. She wanted it more than anything."
-  "I sat there for a long time. The seven sheets were in front of me. They had been in a drawer in my own house for years, in her handwriting, and I had never once recognised it."
+  "The letter I had believed came from her was written by Hélène."
+  "The woman I had spent years longing for had never written it."
+  "Hélène had."
+  "She had understood me. She had understood my longing."
+  "And despite everything, she had still loved me."
+  if has("helene_letter")
+    "My hand went to the inside pocket of my coat. Her other letter was still there, unopened after all these years."
+    lose item helene_letter
+    helene soft "{speed=0.8}Whatever you find there, I will be here when you come home. I will always be here. — H.{/speed}"
+  endif
+  if told_helene
+    inner "Who translated it for you? — she had asked me, in the garden. And I had told her."
+  endif
+  "I sat silently."
   menu time 16
     - "“Why didn't she tell me?”" tone=honest
         herve "Why didn't she tell me?"
-        blanche serious "Because then it would have been a letter from your wife, Monsieur. And you would have read it like one."
-        "She was right. That was the cruellest thing: she was right."
+        "I looked at the letter."
+        herve "Why did you let me believe it was her?"
+        effect pulse 1
+        "I began to cry."
         set final_choice = "tell"
     - "“Why did she help me?”" tone=warm
-        herve "Why did she help me? Why would she give me that?"
-        blanche soft "She didn't give it to you. She gave you back to yourself, and hoped you would bring it home."
-        "Madame Blanche looked at me with something that was almost pity, and almost envy."
+        herve "Why did she help me?"
+        "I realised that Hélène had given me something I had spent years searching for elsewhere."
+        "Understanding."
+        "Love."
+        "Forgiveness."
         set final_choice = "help"
     - "Say nothing." tone=quiet
-        "I said nothing. There was nothing I could say that Hélène had not already said better, in a language I couldn't read."
-        blanche soft "..."
-        "Madame Blanche didn't speak either. We sat together in the silence until the light changed."
+        "I said nothing."
+        "I simply held the letter."
+        "For once, there was nothing left to say."
         set final_choice = "silent"
     - hesitate
-        "I meant to ask something. The question never came."
-        blanche soft "..."
-        "Madame Blanche didn't speak either. We sat together in the silence until the light changed."
+        "I meant to say something. The words never came."
+        "I simply held the letter. For once, there was nothing left to say."
         set final_choice = "silent"
   jump ending
 
@@ -1252,7 +1666,8 @@ label final
 label ending
   scene cemetery with slow
   play music home fadein 4
-  "I went back to Hélène's grave."
+  "I returned to Hélène's grave."
+  "I stood quietly beside it."
   if has("blossom")
     "In my journal, pressed between two pages, was the blossom I had brought back from Japan for her and never given."
     menu
@@ -1263,29 +1678,25 @@ label ending
       - hesitate
           "I held it for a long time, and then put it back between the pages."
   endif
-  "I had spent years searching for an impossible love at the other end of the world."
-  "The person who had loved me most had been beside me all along."
-  if final_choice == "silent"
-    scene cemetery_grey with slow
-    play music sorrow fadein 4
-    "I stood there a long time and said nothing, the way she had said nothing, for years, for my sake."
-    "Some things are told best in silence. She taught me that. I learned it too late, and I learned it completely."
-    cutscene end_silence
-    ending home_silence "Home — Unsaid" neutral
-  elif helene_trust >= 3
-    "I told her about my day. About the birds at the pond. About the letter, which I had finally read the right way."
-    helene soft "{i}Look at whoever is beside you.{/i}"
-    play sound wind_gust volume 0.6
-    play sound swell
-    "The wind moved through the trees she had watched me plant. For the first time in many years, I was exactly where I was."
-    cutscene end_beside
-    ending home_beside "Home — Beside Me All Along" true
+  herve "I spent so many years looking for something I couldn't have."
+  "I placed the letter beside the grave."
+  herve "And you were here the whole time."
+  play sound wind_gust volume 0.6
+  "The wind moved through the trees."
+  if final_choice == "tell"
+    inner "I asked her again why she hadn't told me. The wind didn't answer. It didn't need to. She had told me, in the only way I would ever have listened."
+  elif final_choice == "help"
+    inner "She had given me back to myself, and hoped I would bring it home. It took me a lifetime. I brought it home."
   else
-    scene cemetery_night with slow
-    play music lament fadein 4
-    "I tried to speak to her, and found I had forgotten how. I had spent too many years talking to someone who wasn't there."
-    "Some evenings I still look east. Now I know what I am looking for is behind me."
-    cutscene end_distance
-    ending home_distance "Home — The Far Shore" bad
+    inner "I didn't say anything more. She had said it all already, better, in a language I couldn't read."
   endif
+  if helene_trust >= 3
+    play sound swell
+    helene soft "{i}Look at whoever is beside you.{/i}"
+    "For the first time in many years, I was exactly where I was."
+  endif
+  "I remained there."
+  "The journey was finally over."
+  cutscene end_home
+  ending home "Kikyō — Home" true kanji 帰 music farewell hint "What if he came home, stayed, and learned the truth?"
 `;

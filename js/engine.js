@@ -65,6 +65,17 @@
       this.settings = settings;
       this.persistent = Object.assign({ vars: {}, seen: {}, endings: {}, warned: false, autoIndex: 0 }, VN.store.get('persistent', {}));
 
+      // A new edition of the story (different chapters and endings): old saves can't be followed
+      // into it, so they are cleared once, along with the old endings; settings are kept.
+      const edition = story.edition || 1;
+      if ((this.persistent.edition || 1) !== edition) {
+        const hadAny = Object.keys(this.persistent.endings).length > 0 || Object.keys(this.persistent.seen).length > 0;
+        VN.store.clearStarting('save.');
+        this.persistent = { vars: {}, seen: {}, endings: {}, warned: this.persistent.warned, autoIndex: 0, edition };
+        VN.store.set('persistent', this.persistent);
+        this.editionReset = hadAny;
+      }
+      this.persistent.edition = edition;
       this.gen = 0;
       this.newAbortSignal();
       this.state = this.freshState();
@@ -614,6 +625,11 @@
       if (!felt.length) this.ui.settleChoice();
       this.state.choices = [...(this.state.choices || []), { chapter: this.state.chapter, text: picked, felt, tone: hesitated ? 'quiet' : shown[idx].tone }];
       this.state.lastTone = hesitated ? 'hesitate' : shown[idx].tone;
+      // the flowchart: what was taken in this journey, and in every journey so far
+      const taken = hesitated ? 'h' : ins.options.indexOf(opt);
+      this.state.picks = { ...(this.state.picks || {}), [ins.key]: taken };
+      const flow = this.persistent.flow || (this.persistent.flow = {});
+      if (!(flow[ins.key] || []).includes(taken)) flow[ins.key] = [...(flow[ins.key] || []), taken];
       this.persistent.seen[ins.key] = 1;
       this.state.pc = opt.target;
       if (this.onStep) this.onStep();
@@ -650,6 +666,9 @@
     async op_scene(ins) {
       const sc = this.state.scene;
       sc.bg = ins.bg;
+      // the places this playthrough has passed through (the end credits show them again)
+      const seen = this.state.seenBgs || (this.state.seenBgs = []);
+      if (ins.bg !== 'black' && !seen.includes(ins.bg)) seen.push(ins.bg);
       sc.sprites = {};
       sc.cg = null;
       this.stage.setSpeaker(null);
@@ -754,6 +773,9 @@
 
     async op_chapter(ins) {
       this.state.chapter = ins.subtitle ? `${ins.title} · ${ins.subtitle}` : ins.title;
+      this.state.chaptersSeen = (this.state.chaptersSeen || 0) + 1;
+      (this.persistent.chapters || (this.persistent.chapters = {}))[ins.title] = 1;
+      this.savePersistent();
       this.ui.textbox.hideBox();
       this.ui.textbox.hideCentered();
       this.autosavePending = true;
@@ -819,6 +841,27 @@
       this.state.pc++;
     }
 
+    /** A name at last: the character's card again, the old name giving way to the new one. */
+    async op_reveal(ins) {
+      const ch = this.story.characters[ins.id];
+      if (ch && !this.isSkipping()) {
+        const intro = this.story.intros[ins.id] || {};
+        this.ui.textbox.hideBox();
+        this.ui.textbox.hideCentered();
+        await this.guard(this.ui.introCard({
+          id: ins.id,
+          name: VN.plainName(this.interp(ch.name)),
+          color: ch.color,
+          subtitle: ins.text ? this.interp(ins.text) : 'A name, at last.',
+          kanji: intro.kanji,
+          sound: 'temple_bell',
+          face: ch.face ? VN.assets.lookup('face', ch.face) : null,
+          reveal: '???',
+        }));
+      }
+      this.state.pc++;
+    }
+
     op_notify(ins) {
       this.ui.whisper(this.interp(ins.text), '#e9c46a', { quiet: this.isSkipping() });
       this.state.pc++;
@@ -864,10 +907,32 @@
       this.persistent.endings[ins.id] = { time: Date.now(), title: ins.title };
       VN.store.set('persistent', this.persistent);
       this.ui.textbox.hideBox();
-      this.audio.stopAll(2.5);
+      this.ui.textbox.hideCentered();
+      this.stage.setSpeaker(null);
+      // each ending has its own music: the kind of ending decides, unless the script names one
+      const music = ins.music || { good: 'home', true: 'revelation', tragic: 'lament', bad: 'sorrow' }[ins.kind] || 'home';
+      this.audio.ambience.stop(2);
+      this.audio.music.play(music, 3, 1);
+      this.state.music = { name: music, volume: 1 };
       await this.sleep(this.stage.fadeTo(1, 1400));
-      const found = this.story.endings.filter((e) => this.persistent.endings[e.id]).length;
-      await this.guard(this.ui.endingScreen(ins, found, this.story.endings.length, this.state.choices || []));
+      const endings = this.story.endings;
+      const found = endings.filter((e) => this.persistent.endings[e.id]).length;
+      const index = Math.max(0, endings.findIndex((e) => e.id === ins.id));
+      await this.guard(this.ui.endingReveal(ins, { index, total: endings.length, found }));
+      const st = this.state;
+      const items = (st.items || []).map((id) => this.itemInfo(id)).filter(Boolean).map((it) => it.name);
+      const cast = ['herve', 'helene', 'balbadiou', 'harakei', 'woman', 'blanche']
+        .map((id) => this.story.characters[id]).filter(Boolean).map((ch) => VN.plainName(this.interp(ch.name)));
+      await this.guard(this.ui.credits(ins, {
+        scenes: (st.seenBgs || []).slice(),
+        chapters: st.chaptersSeen || 0,
+        choices: (st.choices || []).length,
+        items,
+        francs: this.getVar('francs') || 0,
+        cast,
+      }));
+      const next = await this.guard(this.ui.endingScreen(ins, found, endings.length, st.choices || []));
+      if (next === 'exit') await this.guard(this.ui.farewell());
       this.returnToTitle();
     }
 
@@ -1025,7 +1090,7 @@
 
     wipeAll() {
       VN.store.clearAll();
-      this.persistent = { vars: {}, seen: {}, endings: {}, warned: true, autoIndex: 0 };
+      this.persistent = { vars: {}, seen: {}, endings: {}, warned: true, autoIndex: 0, edition: this.story.edition || 1 };
       VN.store.set('persistent', this.persistent);
       Object.assign(this.settings, VN.DEFAULT_SETTINGS);
       this.saveSettings();

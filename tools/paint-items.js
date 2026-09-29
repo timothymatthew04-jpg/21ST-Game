@@ -88,6 +88,15 @@ function paintAll() {
       }
       rect(x, 3, 22, 12, 7, '#c8b88e'); poly(x, [[3, 22], [9, 26], [15, 22]], '#b8a87e'); rect(x, 12, 23, 2, 3, '#a83a2a');
     },
+    helene_letter(x) {
+      // a small folded letter in cream paper, sealed with a pink wax heart
+      poly(x, [[5, 9], [27, 8], [28, 25], [4, 26]], '#c8b8a0');
+      poly(x, [[4, 8], [26, 7], [27, 24], [3, 25]], '#fbf2e2');
+      poly(x, [[4, 8], [15, 17], [26, 7]], '#eadcc4');
+      line(x, 4, 8, 15, 17, '#c8b8a0', 1); line(x, 26, 7, 15, 17, '#c8b8a0', 1);
+      circ(x, 15, 17, 3.5, '#c2476a'); circ(x, 14, 16, 1.5, '#f4a7b9');
+      for (let k = 0; k < 3; k++) rect(x, 7 + k * 5, 21, 3, 1, '#b89a8a');
+    },
     journal(x) {
       rect(x, 6, 4, 20, 25, '#3a2014'); rect(x, 7, 5, 18, 23, '#6a2a2a'); rect(x, 7, 5, 3, 23, '#4a1a1a');
       rect(x, 12, 10, 10, 6, '#e8d8b0'); line(x, 13, 12, 21, 12, '#8a6a4a', 1); line(x, 13, 14, 19, 14, '#8a6a4a', 1);

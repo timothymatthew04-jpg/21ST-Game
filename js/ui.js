@@ -68,6 +68,7 @@
   /** "Chapter 12" → 第十二章, "Prologue" → 序章, "Final Chapter" → 終章. */
   function chapterKanji(title) {
     if (/prologue/i.test(title)) return '序章';
+    if (/interlude/i.test(title)) return '間章';
     if (/final|epilogue|last/i.test(title)) return '終章';
     const m = title.match(/\d+/);
     if (!m) return '章';
@@ -155,6 +156,7 @@
       ash: ['rgba(255,190,160,0.9)', 'rgba(200,60,50,0.7)', 'rgba(90,20,20,0.3)', 'rgba(60,10,10,0)'],
       // sparks in a character's own colour ("r,g,b")
       tinted: ['rgba(255,255,250,1)', `rgba(${tint},0.9)`, `rgba(${tint},0.28)`, `rgba(${tint},0)`],
+      snow: ['rgba(255,255,255,1)', 'rgba(226,236,255,0.9)', 'rgba(180,200,240,0.3)', 'rgba(160,180,235,0)'],
     }[kind];
     g.addColorStop(0, stops[0]);
     g.addColorStop(0.25, stops[1]);
@@ -163,7 +165,7 @@
     d.fillStyle = g;
     if (kind === 'petals') { d.translate(16, 16); d.scale(1, 0.55); d.translate(-16, -16); }
     d.fillRect(0, 0, 32, 32);
-    const fall = kind !== 'sparks'; // petals and ash drift down instead of rising
+    const fall = kind !== 'sparks' && kind !== 'tinted'; // petals, ash and snow drift down instead of rising
     const parts = [];
     let last = 0;
     let acc = 0;
@@ -207,6 +209,20 @@
       },
     };
   }
+
+  // How each ending looks: its colour, a second colour, its weather of particles, its sky.
+  const ENDING_LOOKS = {
+    quiet_life: { c: '#ffd68a', c2: '#f4a7b9', fx: 'petals', bg: ['#2e1c12', '#8a4a2a'] },
+    our_house: { c: '#ffc0a8', c2: '#ffe6b0', fx: 'petals', bg: ['#2c1822', '#8a4a4a'] },
+    no_goodbye: { c: '#a8bce0', c2: '#e6eeff', fx: 'snow', bg: ['#080e1a', '#2a3a5a'] },
+    endless_journey: { c: '#e8603e', c2: '#ffb070', fx: 'ash', bg: ['#140604', '#5a1a10'] },
+    left_behind: { c: '#c0b0d4', c2: '#ece6f4', fx: 'snow', bg: ['#100c16', '#3a3048'] },
+    home: { c: '#f3d58e', c2: '#fff6d8', fx: 'sparks', bg: ['#1a1008', '#6a4a1e'] },
+  };
+  const LOOK_BY_KIND = { good: 'quiet_life', true: 'home', tragic: 'endless_journey', bad: 'left_behind' };
+  function endingLook(e) { return ENDING_LOOKS[e.id] || ENDING_LOOKS[LOOK_BY_KIND[e.kind]] || ENDING_LOOKS.home; }
+  /** "Hidamari — A Quiet Life" → ["Hidamari", "A Quiet Life"] */
+  function splitTitle(t) { const m = String(t).split(/\s+—\s+/); return m.length > 1 ? [m[0], m.slice(1).join(' — ')] : [t, '']; }
 
   /** "#e0503c" -> "224,80,60" */
   function hexRgb(hex) {
@@ -531,6 +547,8 @@
         this.story.endings.length && this.button(`Endings  ${endingsFound}/${this.story.endings.length}`, () => this.openMenu('endings', { fromTitle: true }), '.title-item'),
         this.button('Settings', () => this.openMenu('settings', { fromTitle: true }), '.title-item'),
         this.button('Help', () => this.openMenu('help', { fromTitle: true }), '.title-item'),
+        this.button('Flowchart', () => this.openMenu('flowchart', { fromTitle: true }), '.title-item'),
+        this.button('Quit', async () => { await this.farewell(); }, '.title-item'),
       ].filter(Boolean);
 
       // Cover art, slowly drifting, with the animated light / leaves layer on top.
@@ -861,14 +879,16 @@
      * streak of light and silk threads, their portrait slides in, their name rises letter by letter
      * and a seal is stamped beside who they are. Click to move on; it also ends by itself.
      */
-    introCard({ id, name, color = '#f4c542', subtitle = '', kanji = null, sound = null, face = null }) {
+    introCard({ id, name, color = '#f4c542', subtitle = '', kanji = null, sound = null, face = null, reveal = null }) {
       return new Promise((resolve) => {
         const reduce = this.settings.reduceMotion;
         const rgb = hexRgb(color);
         const title = name || '???';
         const size = Math.round(Math.min(96, 1100 / (Math.max(title.length, 5) * 0.72)));
         const nameEl = h('div.in-name', { style: { fontSize: `${size}px` } },
-          [...title].map((c, i) => h('span', { style: { animationDelay: `${620 + i * 55}ms` } }, c === ' ' ? '\u00a0' : c)));
+          [...title].map((c, i) => h('span', { style: { animationDelay: `${(reveal ? 1500 : 620) + i * 55}ms` } }, c === ' ' ? '\u00a0' : c)));
+        // a revealed name: the old one ("???") shows first, then scatters as the true name rises
+        const oldName = reveal ? h('div.in-old', { style: { fontSize: `${size}px` } }, reveal) : null;
         const threads = VN.h('div.in-threads', {
           html: `<svg viewBox="0 0 1280 300" preserveAspectRatio="none" aria-hidden="true">${[0, 1, 2, 3, 4].map((i) => {
             const y = 60 + i * 45, a = 18 + i * 7;
@@ -883,8 +903,8 @@
           sparks,
           face ? h('div.in-portrait', h('div.in-portrait-img', { style: { backgroundImage: `url("${face}")` } }), h('i.in-portrait-shine')) : null,
           h('div.in-text',
-            h('div.in-eyebrow', h('span.in-deai', '出会い'), h('span', 'A FIRST MEETING')),
-            nameEl,
+            reveal ? h('div.in-eyebrow', h('span.in-deai', '名前'), h('span', 'A NAME, AT LAST')) : h('div.in-eyebrow', h('span.in-deai', '出会い'), h('span', 'A FIRST MEETING')),
+            h('div.in-names', oldName, nameEl),
             h('div.in-rule'),
             h('div.in-sub', subtitle),
             sealEl),
@@ -923,17 +943,168 @@
           const r = node.getBoundingClientRect(), c = sparks.getBoundingClientRect();
           if (c.width && r.width) field.burst((r.left + r.width / 2 - c.left) / c.width, (r.top + r.height / 2 - c.top) / c.height);
         }, when));
-        burstAt(nameEl, 380);
+        burstAt(nameEl, reveal ? 1500 : 380);
         if (sealEl) burstAt(sealEl, 1780);
       });
     }
 
+    /**
+     * The ending itself, announced: a burst of light, the ending's kanji stamped in a seal with a
+     * shockwave, its Japanese name rising letter by letter, then its English name. Each ending
+     * has its own colour and its own weather of particles.
+     */
+    endingReveal(ending, { index = 0, total = 1, found = 1 } = {}) {
+      return new Promise((resolve) => {
+        const reduce = this.settings.reduceMotion;
+        const look = endingLook(ending);
+        const [jp, en] = splitTitle(ending.title);
+        const letters = (text, cls, step, from) => h(cls, [...text].map((c, i) => h('span', { style: { animationDelay: `${from + i * step}ms` } }, c === ' ' ? ' ' : c)));
+        const seal = h('div.er-seal', h('span', ending.kanji || '終'));
+        const sparks = h('canvas.er-sparks');
+        const el = h(`div.overlay.ending-reveal.kind-${ending.kind || 'neutral'}${reduce ? '.still' : ''}`,
+          { style: { '--c': look.c, '--c2': look.c2, '--bg0': look.bg[0], '--bg1': look.bg[1] } },
+          h('div.er-bg'), h('div.er-rays'), h('div.er-ring'), h('div.er-ring.two'), sparks,
+          h('div.er-center',
+            h('div.er-eyebrow', h('span', '終'), `ENDING ${index + 1} OF ${total}`),
+            seal,
+            letters(jp.toUpperCase(), 'div.er-jp', 75, 1500),
+            h('div.er-en', en),
+            h('div.er-rule'),
+            h('div.er-count', `${found} of ${total} endings found`)),
+          h('div.er-flash'),
+          h('div.er-hint', 'Click to continue'));
+        let entry, raf = 0;
+        const born = performance.now();
+        const timers = [];
+        const finish = () => {
+          if (!entry || performance.now() - born < 2600) return;
+          const e = entry;
+          entry = null;
+          timers.forEach(clearTimeout);
+          e.removeAfter = 900;
+          this.close(e);
+          setTimeout(() => cancelAnimationFrame(raf), 900);
+          resolve();
+        };
+        el.addEventListener('click', finish);
+        entry = this.open(el, { onKey: (e) => { if ([' ', 'Enter', 'Escape'].includes(e.key)) finish(); return true; }, onBack: finish, focus: false });
+        entry.cleanup = () => { timers.forEach(clearTimeout); cancelAnimationFrame(raf); };
+        this.cardEntry = entry;
+        timers.push(setTimeout(finish, 14000));
+        const tragic = ending.kind === 'tragic' || ending.kind === 'bad';
+        this.audio.fx('whoosh', { volume: 1 });
+        this.audio.fx('swell', { volume: 0.9, delay: 0.1 });
+        this.audio.fx('stamp', { volume: 1, delay: 1.05 });
+        this.audio.fx(tragic ? 'gong' : 'temple_bell', { volume: 0.8, delay: 1.1 });
+        this.audio.fx(tragic ? 'dread' : 'chime', { volume: 0.7, delay: 1.5 });
+        if (!tragic) this.audio.fx('sparkle', { volume: 0.8, delay: 1.9 });
+        if (reduce) return;
+        const rgb = hexRgb(look.c);
+        const field = sparkField(sparks, look.fx, rgb);
+        const loop = (t) => { field.step(t); raf = requestAnimationFrame(loop); };
+        raf = requestAnimationFrame(loop);
+        timers.push(setTimeout(() => {
+          const r = seal.getBoundingClientRect(), c = sparks.getBoundingClientRect();
+          if (c.width && r.width) { const fx = (r.left + r.width / 2 - c.left) / c.width, fy = (r.top + r.height / 2 - c.top) / c.height; field.burst(fx, fy); field.burst(fx, fy); }
+        }, 1080));
+      });
+    }
+
+    /**
+     * The end credits: they roll over the places this playthrough passed through, with a short
+     * account of the journey. Hold the mouse (or a key) to hurry them; Skip ends them.
+     */
+    credits(ending, { scenes = [], chapters = 0, choices = 0, items = [], francs = 0, cast = [] } = {}) {
+      return new Promise((resolve) => {
+        const reduce = this.settings.reduceMotion;
+        const look = endingLook(ending);
+        const [jp, en] = splitTitle(ending.title);
+        const pics = scenes.filter((n) => VN.Scenery && VN.Scenery.has(n)).map((n) => VN.Scenery.flatUrl(n));
+        const slides = h('div.cr-slides');
+        const block = (title, lines) => h('div.cr-block', h('div.cr-head', title), ...lines.map((l) => h('div.cr-line', l)));
+        const roll = h('div.cr-roll',
+          h('div.cr-kanji', '絹'),
+          h('div.cr-logo', 'SILK'),
+          h('div.cr-sub', 'A Choice Simulation'),
+          block('Based on the novel', ['Silk (Seta), by Alessandro Baricco']),
+          block('Your ending', [jp, en]),
+          block('Your journey', [
+            `${chapters} chapter${chapters === 1 ? '' : 's'} travelled`,
+            `${choices} choice${choices === 1 ? '' : 's'} made`,
+            items.length ? `Carried to the end: ${items.join(', ')}` : 'Carried to the end: nothing but memories',
+            `${francs} franc${francs === 1 ? '' : 's'} left in the purse`]),
+          block('The people', cast),
+          block('Made with', ['A story told in the game\'s own script', 'Pixel-art places painted in code', 'Music, ambience and sound composed in code', 'Characters who breathe, blink and murmur']),
+          ending.id === 'home' ? h('div.cr-quote', '“Look at whoever is beside you.”') : null,
+          h('div.cr-end', h('div.cr-thanks', 'Thank you for playing'), h('div.cr-seal', ending.kanji || '終')));
+        const skip = h('button.cr-skip', { type: 'button' }, 'Skip ▸▸');
+        const sparks = h('canvas.cr-sparks');
+        const el = h(`div.overlay.credits${reduce ? '.still' : ''}`, { style: { '--c': look.c, '--c2': look.c2 } },
+          slides, h('div.cr-shade'), sparks, roll, skip);
+        let entry, raf = 0, slideTimer = 0, last = 0, y = 0, fast = false, done = false;
+        const finish = () => {
+          if (!entry) return;
+          const e = entry;
+          entry = null;
+          cancelAnimationFrame(raf);
+          clearInterval(slideTimer);
+          e.removeAfter = 1200;
+          this.close(e);
+          resolve();
+        };
+        skip.addEventListener('click', (e) => { e.stopPropagation(); finish(); });
+        el.addEventListener('pointerdown', () => { fast = true; });
+        el.addEventListener('pointerup', () => { fast = false; });
+        el.addEventListener('pointerleave', () => { fast = false; });
+        entry = this.open(el, {
+          onKey: (e) => { if (e.key === 'Escape') finish(); else if (e.key === ' ' || e.key === 'Enter') { fast = !fast; } return true; },
+          onBack: finish,
+          focus: false,
+        });
+        entry.cleanup = () => { cancelAnimationFrame(raf); clearInterval(slideTimer); };
+        this.cardEntry = entry;
+        // the places, one after another, drifting slowly
+        let k = 0;
+        const nextSlide = () => {
+          if (!pics.length) return;
+          const img = h('div.cr-slide', { style: { backgroundImage: `url("${pics[k % pics.length]}")`, '--dx': `${(k % 2 ? -1 : 1) * 3}%` } });
+          slides.append(img);
+          requestAnimationFrame(() => img.classList.add('on'));
+          const old = [...slides.children].slice(0, -2);
+          old.forEach((o) => o.remove());
+          k++;
+        };
+        nextSlide();
+        slideTimer = setInterval(nextSlide, 6000);
+        const field = reduce ? null : sparkField(sparks, look.fx, hexRgb(look.c));
+        const stageH = () => el.offsetHeight || 720;
+        y = 760;
+        const step = (t) => {
+          const dt = last ? Math.min(0.05, (t - last) / 1000) : 0.016;
+          last = t;
+          if (field) field.step(t);
+          y -= dt * (fast ? 190 : 42);
+          roll.style.transform = `translate(-50%, ${y.toFixed(1)}px)`;
+          const endY = -roll.offsetHeight + stageH() * 0.5;
+          if (y <= endY && !done) { done = true; setTimeout(finish, 2600); }
+          if (y > endY) raf = requestAnimationFrame(step);
+          else if (field) raf = requestAnimationFrame((tt) => { field.step(tt); step(tt); });
+        };
+        raf = requestAnimationFrame(step);
+      });
+    }
+
+    /** After the credits: see your choices, go back to the title, or leave the game. */
     endingScreen(ending, found, total, choices = []) {
       return new Promise((resolve) => {
         let entry;
-        const finish = () => { this.close(entry); resolve(); };
-        const back = this.button('Return to title', finish, choices.length ? '' : '.primary');
-        const buttons = [back];
+        const finish = (how) => { if (!entry) return; const e = entry; entry = null; this.close(e); resolve(how); };
+        const look = endingLook(ending);
+        const [jp, en] = splitTitle(ending.title);
+        const back = this.button('Return to title', () => finish('title'), choices.length ? '' : '.primary');
+        const exit = this.button('Exit game', () => finish('exit'));
+        const buttons = [back, exit];
+        if (this.openFlowchart) buttons.unshift(this.button('Flowchart', () => this.openFlowchart()));
         // The ending reveals what the story never showed as numbers: each choice, and how it was felt.
         const recap = h('div.recap',
           h('div.recap-eyebrow', 'THE THREADS YOU WOVE'),
@@ -946,21 +1117,60 @@
                 h('div.recap-choice', `“${c.text.replace(/^[“"]|[”"]$/g, '')}”`),
                 felt.length ? h('div.recap-felt', felt.map((f) => h('span', { style: { color: f.color } }, f.text))) : null));
           })),
-          h('div.row', this.button('Return to title', finish, '.primary')));
+          h('div.row', this.button('Back', () => { el.classList.remove('show-recap'); this.audio.ui('back'); }), this.button('Return to title', () => finish('title'), '.primary')));
         if (choices.length) {
           const show = this.button('See your choices', () => { el.classList.add('show-recap'); this.audio.ui('page'); setTimeout(() => this.focusFirst(recap), 60); }, '.primary');
           buttons.unshift(show);
           show.setAttribute('autofocus', '');
         } else back.setAttribute('autofocus', '');
-        const el = h(`div.overlay.ending.kind-${ending.kind || 'neutral'}`,
+        const el = h(`div.overlay.ending.kind-${ending.kind || 'neutral'}`, { style: { '--c': look.c, '--c2': look.c2, '--bg0': look.bg[0], '--bg1': look.bg[1] } },
           h('div.ending-main',
+            h('div.ending-seal', ending.kanji || '終'),
             h('div.ending-eyebrow', 'ENDING'),
-            h('div.ending-title', ending.title),
+            h('div.ending-title', jp),
+            en ? h('div.ending-sub', en) : null,
             h('div.ending-rule'),
             h('div.ending-count', `${found} of ${total} endings found`),
             h('div.row', buttons)),
           choices.length ? recap : null);
         entry = this.open(el, { onBack: () => {} });
+      });
+    }
+
+    /** Leaving the game: a browser page can't close itself, so it says goodbye properly instead. */
+    farewell() {
+      return new Promise((resolve) => {
+        let entry;
+        const eng = this.engine;
+        this.audio.stopAll(2);
+        const finish = () => {
+          if (!entry) return;
+          const e = entry;
+          entry = null;
+          e.removeAfter = 900;
+          this.close(e);
+          if (!eng.inGame && this.story.titleMusic) this.audio.music.play(this.story.titleMusic, 2, 1);
+          resolve();
+        };
+        const back = this.button('Return to the title', finish, '.primary');
+        const sparks = h('canvas.fw-sparks');
+        const el = h('div.overlay.farewell', sparks,
+          h('div.fw-main',
+            h('div.fw-kanji', '絹'),
+            h('div.fw-title', 'Thank you for playing'),
+            h('div.fw-logo', 'SILK'),
+            h('div.fw-sub', 'You can close this tab now. The thread will be here when you come back.'),
+            h('div.row', back)));
+        entry = this.open(el, { onBack: finish });
+        this.audio.fx('temple_bell', { volume: 0.6, delay: 0.3 });
+        // a page opened by a script can close itself; for anything else this does nothing
+        setTimeout(() => { try { window.close(); } catch (e) { /* not allowed here */ } }, 2600);
+        if (!this.settings.reduceMotion) {
+          const field = sparkField(sparks, 'sparks');
+          let raf = 0;
+          const loop = (t) => { if (!entry) { cancelAnimationFrame(raf); return; } field.step(t); raf = requestAnimationFrame(loop); };
+          raf = requestAnimationFrame(loop);
+        }
       });
     }
 
@@ -981,8 +1191,8 @@
       const eng = this.engine;
       const inGame = eng.inGame && !fromTitle;
       const tabs = inGame
-        ? [['keepsakes', 'Keepsakes'], ['history', 'History'], ['save', 'Save'], ['load', 'Load'], ['settings', 'Settings'], ['endings', 'Endings'], ['help', 'Help']]
-        : [['load', 'Load'], ['settings', 'Settings'], ['endings', 'Endings'], ['help', 'Help']];
+        ? [['keepsakes', 'Keepsakes'], ['history', 'History'], ['flowchart', 'Flowchart'], ['save', 'Save'], ['load', 'Load'], ['settings', 'Settings'], ['endings', 'Endings'], ['help', 'Help']]
+        : [['load', 'Load'], ['flowchart', 'Flowchart'], ['settings', 'Settings'], ['endings', 'Endings'], ['help', 'Help']];
       if (!this.story.endings.length) tabs.splice(tabs.findIndex((t) => t[0] === 'endings'), 1);
       this.menuTabs = {};
       const nav = h('nav.menu-nav');
@@ -1025,7 +1235,7 @@
       this.menuTab = tab;
       this.savePageSwitch = null;
       for (const [id, b] of Object.entries(this.menuTabs)) b.classList.toggle('current', id === tab);
-      const titles = { keepsakes: 'Keepsakes', history: 'History', save: 'Save', load: 'Load', settings: 'Settings', endings: 'Endings', help: 'Help' };
+      const titles = { keepsakes: 'Keepsakes', history: 'History', flowchart: 'Flowchart', save: 'Save', load: 'Load', settings: 'Settings', endings: 'Endings', help: 'Help' };
       this.menuTitle.textContent = titles[tab] || '';
       const body = this.menuBody;
       body.scrollTop = 0;
@@ -1034,6 +1244,7 @@
       else if (tab === 'history') this.renderHistory(body);
       else if (tab === 'keepsakes') this.renderKeepsakes(body);
       else if (tab === 'endings') this.renderEndings(body);
+      else if (tab === 'flowchart') VN.Flow.render(this, body, { inGame: this.engine.inGame });
       else if (tab === 'help') this.renderHelp(body);
       setTimeout(() => { if (this.menuTabs[tab]) this.menuTabs[tab].focus({ preventScroll: true }); }, 20);
     }
@@ -1118,10 +1329,15 @@
       const found = this.engine.persistent.endings;
       const cards = this.story.endings.map((e, i) => {
         const got = found[e.id];
-        return h(`div.ending-card${got ? `.got.kind-${e.kind}` : '.locked'}`,
-          h('span.ending-num', String(i + 1).padStart(2, '0')),
-          h('b', got ? e.title : '? ? ?'),
-          h('span', got ? `Found ${formatDate(got.time)}` : 'Not found yet'));
+        const look = endingLook(e);
+        const [jp, en] = splitTitle(e.title);
+        return h(`div.ending-card${got ? `.got.kind-${e.kind}` : '.locked'}`, { style: { '--c': look.c, '--c2': look.c2, '--bg0': look.bg[0], '--bg1': look.bg[1] } },
+          h('span.ec-seal', got ? (e.kanji || '終') : '？'),
+          h('div.ec-text',
+            h('span.ending-num', `ENDING ${String(i + 1).padStart(2, '0')}`),
+            h('b', got ? jp : '? ? ?'),
+            got && en ? h('span.ec-en', en) : null,
+            h('span.ec-note', got ? `Found ${formatDate(got.time)}` : e.hint || 'Not found yet')));
       });
       const count = Object.keys(found).filter((id) => this.story.endings.some((e) => e.id === id)).length;
       body.replaceChildren(h('p.endings-count', `${count} / ${this.story.endings.length} found`), h('div.ending-grid', cards));
@@ -1228,6 +1444,18 @@
       runPreview();
     }
   }
+
+  /** The flowchart on its own, over whatever is showing (the ending screen uses this). */
+  UI.prototype.openFlowchart = function () {
+    let entry;
+    const body = h('div.fc-body');
+    const close = () => { if (entry) { const e = entry; entry = null; this.close(e); } };
+    const el = h('div.overlay.fc-overlay',
+      h('div.fc-top', h('div.fc-title', h('span', '選択'), 'FLOWCHART'), this.button('Close', close, '.fc-close')),
+      body);
+    entry = this.open(el, { onBack: close, onKey: (e) => { if (e.key === 'Escape') { close(); return true; } return false; } });
+    VN.Flow.render(this, body, { inGame: this.engine.inGame });
+  };
 
   /** Settings: the characters' muffled voices. */
   UI.prototype.voiceSettings = function (slider, toggle) {

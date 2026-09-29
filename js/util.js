@@ -87,6 +87,18 @@
       try { if (ls) ls.removeItem(prefix + key); } catch (e) { /* ignore */ }
       memory.delete(prefix + key);
     },
+    /** Remove every key that starts with `start` (e.g. "save."). */
+    clearStarting(start) {
+      const full = prefix + start;
+      try {
+        if (ls) {
+          const doomed = [];
+          for (let i = 0; i < ls.length; i++) { const k = ls.key(i); if (k && k.startsWith(full)) doomed.push(k); }
+          doomed.forEach((k) => ls.removeItem(k));
+        }
+      } catch (e) { /* ignore */ }
+      for (const k of [...memory.keys()]) if (k.startsWith(full)) memory.delete(k);
+    },
     clearAll() {
       try {
         if (ls) {

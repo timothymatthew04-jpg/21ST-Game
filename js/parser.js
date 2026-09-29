@@ -393,6 +393,11 @@
           need(3, 'routes lostAtOrBelow devotedAtOrAbove');
           story.routeBounds = [parseFloat(tk[1].v), parseFloat(tk[2].v)];
           return;
+        case 'edition':
+          // edition 2 — raise it when the story's structure changes; saves from another edition are cleared
+          need(2, 'edition number');
+          story.edition = parseInt(tk[1].v, 10) || 1;
+          return;
         case 'choicetime':
           // choicetime 14 — how many seconds every choice waits before Hervé hesitates (0 = no timer)
           need(2, 'choicetime seconds');
@@ -521,6 +526,11 @@
           story.intros[tk[1].v] = it;
           return;
         }
+        case 'reveal':
+          // reveal woman ["line"] — a character's name is revealed: the card replays, "???" giving way to it
+          need(2, 'reveal character ["line"]');
+          emit(L, { op: 'reveal', id: tk[1].v, text: tk[2] && tk[2].t === 'str' ? tk[2].v : null });
+          return;
         case 'introduce':
           // introduce helene — the first-meeting animation (only once per playthrough)
           need(2, 'introduce character');
@@ -568,12 +578,19 @@
           return;
         }
         case 'ending': {
-          need(3, 'ending id "Ending Title" [good|bad|neutral|true]');
+          // ending home "Kikyō — Home" true kanji 帰 music home hint "What if ...?"
+          need(3, 'ending id "Ending Title" [good|true|neutral|tragic|bad] [kanji 字] [music name] [hint "..."]');
           const id = tk[1].v;
           const title = str(tk[2], 'ending id "Ending Title"');
           const kind = tk[3] ? tk[3].v : 'neutral';
-          if (!story.endings.find((e) => e.id === id)) story.endings.push({ id, title, kind });
-          emit(L, { op: 'ending', id, title, kind });
+          const e = { id, title, kind, kanji: null, music: null, hint: '' };
+          for (let i = 4; i < tk.length - 1; i += 2) {
+            const k = tk[i].v;
+            if (k === 'kanji' || k === 'music' || k === 'hint') e[k] = tk[i + 1].v;
+            else throw new Error(`Unknown ending option "${k}"`);
+          }
+          if (!story.endings.find((x) => x.id === id)) story.endings.push(e);
+          emit(L, { op: 'ending', ...e });
           return;
         }
         case 'rollback': emit(L, { op: 'rollback', on: !tk[1] || tk[1].v !== 'off' }); return;
