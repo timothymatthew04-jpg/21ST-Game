@@ -226,7 +226,8 @@
       this.text = h('div.tb-text');
       this.next = h('div.tb-next', { 'aria-hidden': 'true' });
       // The panel is drawn separately so the portrait and name plate can overhang its frame.
-      const panel = h('div.tb-panel', ...['tl', 'tr', 'bl', 'br'].map((c) => h(`i.tb-corner.${c}`)));
+      this.glint = h('div.tb-glint');
+      const panel = h('div.tb-panel', this.glint, ...['tl', 'tr', 'bl', 'br'].map((c) => h(`i.tb-corner.${c}`)));
       this.box = h('div.textbox.hidden', panel, this.face, this.name, this.text, this.next);
       this.faceKey = null;
       this.faceWho = null;
@@ -254,6 +255,12 @@
       this.showBox();
       this.hideNext();
       this.setFace(face, who);
+      // a glint of light runs along the gold frame with every new line
+      if (!instant && !this.settings.reduceMotion) {
+        this.glint.classList.remove('go');
+        void this.glint.offsetWidth;
+        this.glint.classList.add('go');
+      }
       if (name) {
         this.name.textContent = name;
         this.name.style.setProperty('--name-color', color || '#fff');
