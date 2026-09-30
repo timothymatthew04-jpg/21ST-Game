@@ -96,6 +96,14 @@ morning: a tall window onto the garden's orange and gold trees (leaves drifting 
 plants, a wall of books, a day-bed heaped with knitted throws and cushions, a kilim rug, and her
 basket of silk threads.
 
+Hara Kei's village (`village`), the walk in Japan, is a town of the last years of the shoguns at
+dusk, and it feels wrong to be there: fog lies between everything, over the misty mountains, the
+white castle on its battered stone base (after Hikone), the pagodas and temple roofs, the upper
+town on its terraces and the street itself. The street runs from a torii past thatched farmhouses,
+merchants' stalls and townhouses under their paper lanterns and banners, a stage for the street
+players, an archery butt, the walled samurai quarter and its cherry trees in pink and white, to
+Hara Kei's great gate. It is drawn by `tools/paint/scenes-japan.js`.
+
 The eight walking areas (`camp`, `lavilledieu`, `steppe`, `village`, `aviary`, `ruins`, `crossing`, `cemetery`) are painted by
 `tools/paint-walks.js` from `tools/paint/walks.js`, with the same toolkit and style as the
 backgrounds but two to five screens wide. Each is saved as layers: the sky (one screen, it never

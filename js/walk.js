@@ -68,6 +68,18 @@
     priest: { coat: '#1e1c24', coatDark: '#141218', legs: '#141218', boots: '#101014', skin: '#e8c0a0', hat: 'hat', hatCol: '#1e1c24', robe: 1 },
     oldman: { coat: '#6a5a4a', coatDark: '#50443a', legs: '#4a4038', boots: '#2a2018', skin: '#e0b898', hat: 'beret', hatCol: '#2a2a3a', beard: '#d8d8d8', cane: 1 },
     fiddler: { coat: '#8a3a2a', coatDark: '#6a2a1e', legs: '#3a3440', boots: '#2a2018', skin: '#e8c0a0', hat: 'straw', hatCol: '#e8d090', belt: '#f0c860' },
+    // Hara Kei's town in the last years of the shoguns
+    samurai: { coat: '#2a2a3c', coatDark: '#1c1c2a', legs: '#4a4a5a', wideLegs: 1, boots: '#e8e2d6', skin: '#e0b898', hat: 'topknot', hatCol: '#141418', sword: 1, sash: '#6a2a2a' },
+    samurai2: { coat: '#4a3a2e', coatDark: '#34281e', legs: '#5a5a66', wideLegs: 1, boots: '#e8e2d6', skin: '#dcb090', hat: 'topknot', hatCol: '#141418', sword: 1, sash: '#2a3a5a' },
+    ronin: { coat: '#2e2a2a', coatDark: '#1e1a1a', legs: '#2e2a2a', wideLegs: 1, boots: '#6a5a48', skin: '#d8a888', hat: 'jingasa', hatCol: '#8a7a58', sword: 1, beard: '#2a2020' },
+    archer: { coat: '#eceae4', coatDark: '#c4c0b8', legs: '#22222e', wideLegs: 1, boots: '#eceae4', skin: '#e0b898', hat: 'topknot', hatCol: '#141418' },
+    shonin: { coat: '#6a5a3a', coatDark: '#4a3e28', legs: '#4a3e28', robe: 1, boots: '#6a5040', skin: '#dcb090', hat: 'hachimaki', hatCol: '#f0ece4', apron: '#2a3a6a' },
+    geisha: { coat: '#8a2436', coatDark: '#5a1826', legs: '#5a1826', robe: 1, boots: '#f0ece4', skin: '#f6f2ee', hat: 'shimada', hatCol: '#141418', sash: '#e0b040', parasol: '#d84a4a' },
+    geisha2: { coat: '#3e2a66', coatDark: '#2a1c46', legs: '#2a1c46', robe: 1, boots: '#f0ece4', skin: '#f6f2ee', hat: 'shimada', hatCol: '#141418', sash: '#e8c8d8', parasol: '#f0e0c8' },
+    townswoman: { coat: '#4a5a7a', coatDark: '#34405a', legs: '#34405a', robe: 1, boots: '#e8e2d6', skin: '#e8c4a4', hat: 'bun', hatCol: '#141418', sash: '#c8a060' },
+    taiko: { coat: '#26345e', coatDark: '#1a2444', legs: '#1a1a24', boots: '#e8e2d6', skin: '#dcb090', hat: 'hachimaki', hatCol: '#e8e2d6', belt: '#e8e2d6' },
+    juggler: { coat: '#c8703a', coatDark: '#9a5028', legs: '#3a2a2a', wideLegs: 1, boots: '#e8e2d6', skin: '#dcb090', hat: 'hachimaki', hatCol: '#d83a3a' },
+    dancer: { coat: '#ecd8e8', coatDark: '#c0a8c0', legs: '#c0a8c0', robe: 1, boots: '#f0ece4', skin: '#f6f2ee', hat: 'kitsune', hatCol: '#141418', sash: '#c83a3a' },
     // the Imperial Navy: sailors in the striped marinière and the red-pompom cap, and a captain
     sailor: { coat: '#f0ece4', coatDark: '#c8c2b8', legs: '#2a3a6a', boots: '#1a1412', skin: '#e0b494', hat: 'pompom', hatCol: '#f2eee6', scarf: '#2e4a9a', stripes: '#2e4a9a' },
     captain: { coat: '#1e2a4a', coatDark: '#141c34', legs: '#1e2a4a', boots: '#141010', skin: '#e8c0a0', hat: 'bicorne', hatCol: '#141414', epaulette: '#f0c050', sword: 1, beard: '#6a5a4a' },
@@ -165,6 +177,40 @@
       const pull = Math.sin(t * 5) > 0 ? 0 : 2;
       rect(c, 3, top - 6 + pull, 2, 9, L.coatDark);
       rect(c, 3, top - 8 + pull, 2, 2, L.skin);
+    } else if (pose === 'draw') {
+      // the bow drawn: the bow arm straight out, the string pulled back to the cheek, an arrow nocked
+      rect(c, 1, top + 3, 6, 2, L.coatDark);
+      rect(c, 6, top + 2, 2, 2, L.skin);
+      for (let k = -9; k <= 9; k++) rect(c, 8 + Math.round(2 - Math.abs(k) * 0.22), top + 3 + k, 1, 1, '#5a3a22');
+      for (let k = 0; k <= 9; k++) { rect(c, 8 - Math.round(k * 0.7), top - 6 + k, 1, 1, '#e8e2d6'); rect(c, 8 - Math.round(k * 0.7), top + 12 - k, 1, 1, '#e8e2d6'); }
+      rect(c, 1, top + 3, 12, 1, '#8a6a4a');
+      rect(c, 13, top + 3, 1, 1, '#c8c8d0');
+      rect(c, 1, hy + 3, 2, 2, L.skin);
+    } else if (pose === 'taiko') {
+      // beating the great drum on its stand, the sticks flying
+      const up = Math.sin(t * 9) > 0;
+      rect(c, 6, top + 3, 9, 10, '#8a4a2a'); rect(c, 6, top + 3, 9, 1, '#b86a3a'); rect(c, 14, top + 3, 2, 10, '#e8dcc0');
+      for (let k = 0; k < 3; k++) rect(c, 7 + k * 3, top + 5, 1, 7, '#5a2e1a');
+      rect(c, 8, top + 13, 1, legH, '#3a2a1e'); rect(c, 13, top + 13, 1, legH, '#3a2a1e');
+      rect(c, 2, top + (up ? -2 : 2), 2, 6, L.coatDark); rect(c, 3, top + (up ? -4 : 1), 5, 1, '#c8a060');
+      rect(c, 4, top + (up ? 3 : -1), 2, 5, L.coatDark); rect(c, 5, top + (up ? 1 : -3), 6, 1, '#c8a060');
+    } else if (pose === 'juggle') {
+      // three balls going round over his hands
+      const alt = Math.sin(t * 6) > 0 ? 0 : 1;
+      rect(c, -1, top - 1 + alt, 2, 5, L.coatDark); rect(c, 4, top - alt, 2, 5, L.coatDark);
+      for (let k = 0; k < 3; k++) { const a = t * 5 + k * 2.09; rect(c, Math.round(2 + Math.cos(a) * 4), Math.round(top - 5 - Math.abs(Math.sin(a)) * 9), 2, 2, ['#e83a3a', '#f0c040', '#3a8ae8'][k]); }
+    } else if (pose === 'dance') {
+      // a slow dance with an open fan, the arm raised and falling
+      const sw_ = Math.sin(t * 2.4);
+      rect(c, 2, top - 3 + Math.round(sw_ * 2), 2, 6, L.coatDark);
+      rect(c, 1, top - 8 + Math.round(sw_ * 2), 6, 3, '#e8c040'); rect(c, 2, top - 9 + Math.round(sw_ * 2), 4, 1, '#d83a3a');
+      rect(c, -4, top + 3, 3, 2, L.coatDark);
+    } else if (pose === 'parasol') {
+      // under a paper parasol, its ribs showing
+      const pc = L.parasol || '#d84a4a';
+      rect(c, 1, top + 3, 2, 3, L.coatDark); rect(c, 2, hy - 6, 1, top - hy + 10, '#5a3a22');
+      rect(c, -5, hy - 9, 15, 2, pc); rect(c, -3, hy - 11, 11, 2, pc); rect(c, 0, hy - 12, 5, 1, pc);
+      for (let k = -5; k < 10; k += 3) rect(c, k, hy - 8, 1, 1, '#3a2a22');
     } else if (pose === 'aim') {
       // the rifle levelled, cheek to the stock, sighting down the barrel
       rect(c, 1, top + 3, 3, 2, L.coatDark);
@@ -203,6 +249,9 @@
     else if (L.hat === 'scarf') { rect(c, -3, hy - 2, 6, 3, hc); rect(c, -3, hy, 2, 4, hc); }
     else if (L.hat === 'toque') { rect(c, -2, hy - 6, 5, 6, hc); rect(c, -3, hy - 7, 7, 2, hc); rect(c, -2, hy - 1, 5, 1, '#d8d0c0'); }
     else if (L.hat === 'straw') { rect(c, -5, hy - 1, 11, 1, hc); rect(c, -2, hy - 3, 5, 2, hc); rect(c, -2, hy - 2, 5, 1, '#8a3a2a'); }
+    else if (L.hat === 'hachimaki') { rect(c, -2, hy - 1, 5, 1, '#141418'); rect(c, -2, hy, 5, 1, hc); rect(c, -4, hy, 2, 1, hc); rect(c, -5, hy + 1, 1, 2, hc); }
+    else if (L.hat === 'shimada') { rect(c, -3, hy - 3, 7, 4, hc); rect(c, -4, hy - 2, 2, 4, hc); rect(c, -1, hy - 4, 3, 1, hc); rect(c, -2, hy - 4, 1, 1, '#e8c040'); rect(c, 3, hy - 3, 1, 1, '#d84a4a'); rect(c, 1, hy - 5, 1, 1, '#f0e0e0'); }
+    else if (L.hat === 'kitsune') { rect(c, -3, hy, 2, 6, hc); rect(c, -2, hy - 1, 5, 6, '#f4f0ea'); rect(c, -2, hy - 2, 1, 1, '#f4f0ea'); rect(c, 2, hy - 2, 1, 1, '#f4f0ea'); rect(c, 1, hy + 1, 1, 1, '#d83a3a'); rect(c, 2, hy + 3, 1, 1, '#d83a3a'); rect(c, -1, hy + 1, 1, 1, '#d83a3a'); }
     else if (L.hat === 'pompom') { rect(c, -3, hy - 2, 6, 2, hc); rect(c, -3, hy - 1, 6, 1, '#1e2a50'); rect(c, 0, hy - 3, 2, 1, '#d8303a'); }
     else if (L.hat === 'bicorne') { rect(c, -5, hy - 2, 11, 2, hc); rect(c, -2, hy - 4, 5, 2, hc); rect(c, 1, hy - 3, 2, 1, '#c83a3a'); rect(c, -4, hy - 2, 9, 1, '#3a3a40'); }
     else if (L.hat === 'beret') { rect(c, -3, hy - 2, 6, 2, hc); rect(c, 0, hy - 3, 1, 1, hc); }
@@ -220,6 +269,23 @@
     if (L.cane) rect(c, 4, top + 6, 1, legH + bodyH - 6, '#5a3a24');
     if ((L.bugle && pose !== 'bugle') || L.trumpet) { rect(c, -4, top + 5, 2, 2, '#f0c050'); rect(c, -5, top + 6, 1, 2, '#c8902e'); }
     if (L.lantern) { rect(c, 4, top + 4, 1, 4, '#3a2a22'); rect(c, 3, top + 8, 3, 4, '#ffcf72'); }
+  }
+
+  /** A strip of soft fog that tiles left to right: blobs of mist, thickest along the middle. */
+  function fogTexture(col, th = 40) {
+    const tw = 320;
+    const cv = document.createElement('canvas');
+    cv.width = tw * SS; cv.height = th * SS;
+    const x = cv.getContext('2d');
+    for (let i = 0; i < 90; i++) {
+      const bx = Math.random() * tw, by = th / 2 + (Math.random() - 0.5) * th * 0.5, br = (0.15 + Math.random() * 0.4) * th;
+      for (const ox of [-tw, 0, tw]) {
+        const g = x.createRadialGradient((bx + ox) * SS, by * SS, 0, (bx + ox) * SS, by * SS, br * SS);
+        g.addColorStop(0, `rgba(${col},0.42)`); g.addColorStop(1, `rgba(${col},0)`);
+        x.fillStyle = g; x.fillRect((bx + ox - br) * SS, (by - br) * SS, br * 2 * SS, br * 2 * SS);
+      }
+    }
+    return cv;
   }
 
   // the town's dogs and cats, by their coats
@@ -349,6 +415,7 @@
       else if (wx.kind === 'embers') { p.y -= dt * 14 * p.v; p.x += Math.sin(t + p.p) * dt * 8 - camDx; }
       else if (wx.kind === 'fireflies') { p.x += Math.sin(t * 0.7 + p.p) * dt * 8 - camDx * 0.9; p.y += Math.cos(t * 0.9 + p.p) * dt * 5; }
       else if (wx.kind === 'breeze') { p.x += (14 + Math.sin(t * 0.9 + p.p) * 8) * dt * p.v - camDx * 0.9; p.y += Math.sin(t * 1.3 + p.p * 2) * dt * 8 + dt * 2; }
+      else if (wx.kind === 'sakura') { p.x += (6 + Math.sin(t * 0.6 + p.p) * 9) * dt * p.v - camDx * 0.9; p.y += (5 + Math.sin(t * 1.8 + p.p * 3) * 4) * dt * p.v; }
       else if (wx.kind === 'autumn') { p.x += (12 + Math.sin(t * 0.7 + p.p) * 10) * dt * p.v - camDx * 0.9; p.y += (7 + Math.sin(t * 2.2 + p.p * 3) * 6) * dt * p.v; }
       else { p.y -= dt * 3 * p.v; p.x += Math.sin(t * 0.5 + p.p) * dt * 4 - camDx * 0.6; } // motes
       if (p.y > WY + 4) { p.y = -4; p.x = Math.random() * LW; }
@@ -361,6 +428,12 @@
       else if (wx.kind === 'petals') { c.fillStyle = 'rgba(255,190,210,0.9)'; c.fillRect(p.x * SS, p.y * SS, SS * 2, SS); }
       else if (wx.kind === 'embers') { c.fillStyle = `rgba(255,${130 + tw * 80},60,${0.5 + tw * 0.5})`; c.fillRect(p.x * SS, p.y * SS, SS, SS); }
       else if (wx.kind === 'fireflies') { c.fillStyle = `rgba(220,255,140,${0.25 + tw * 0.75})`; c.fillRect(p.x * SS, p.y * SS, SS, SS); }
+      else if (wx.kind === 'sakura') {
+        // cherry petals, pink and white, turning as they fall
+        c.fillStyle = ['#f4c2d4', '#ffffff', '#e89ab8', '#f8e4ec'][Math.floor(p.p * 10) % 4];
+        const flat = Math.sin(t * 4 + p.p * 7) > 0;
+        c.fillRect(p.x * SS, p.y * SS, flat ? SS * 2 : SS, SS);
+      }
       else if (wx.kind === 'autumn') {
         // leaves coming down, orange, gold and red, turning over as they fall
         c.fillStyle = LEAVES[Math.floor(p.p * 10) % LEAVES.length];
@@ -471,6 +544,8 @@
       this.range = def.range ? { period: [1.1, 1.8], pause: [2.5, 4], ...def.range, k: 0, t: 2, aim: -1, flash: 0, fired: -1 } : null;
       this.windmills = def.windmills || [];
       this.beacons = def.beacons || [];
+      // bands of fog lying between the painted layers (and one low over the street, in front)
+      this.fog = (def.fog || []).map((f) => ({ ...f, tex: fogTexture(f.col || '220,210,224', Math.round(f.h)) }));
       this.sparkles = (def.sparkles || []).map((s) => ({ ...s, ph: s.ph == null ? Math.random() * 6 : s.ph }));
       // children at their games and the town's dogs and cats, running about
       this.runners = (def.runners || []).map((u) => ({ speed: u.kind === 'cat' ? 9 : u.kind === 'dog' ? 40 : 32, ...u, x: u.start != null ? u.start : u.x0 != null ? (u.x0 + u.x1) / 2 : 0, dir: Math.random() < 0.5 ? 1 : -1, face: 1, wait: Math.random() * 2, moving: false, t: Math.random() * 5 }));
@@ -494,6 +569,7 @@
       if (this.train) this.slots.push({ z: this.train.depth + 0.001, draw: (c, cam) => this.drawTrain(c, cam) });
       if (this.flockDef) this.slots.push({ z: 0.09, draw: (c) => this.drawFlocks(c) });
       for (const m of this.windmills) this.slots.push({ z: m.depth + 0.001, draw: (c, cam) => this.drawSails(c, m, cam) });
+      for (const f of this.fog) if (!f.front) this.slots.push({ z: f.z, draw: (c, cam) => this.drawFogBand(c, f, cam) });
       for (const b of this.beacons) this.slots.push({ z: b.depth + 0.002, draw: (c, cam) => this.drawBeacon(c, b, cam) });
       for (const s of this.sparkles) this.slots.push({ z: s.depth + 0.002, draw: (c, cam) => this.drawSparkle(c, s, cam) });
       this.slots.sort((a, b) => a.z - b.z);
@@ -901,6 +977,15 @@
       }
       this.stepRunners(dt);
       this.stepRange(dt);
+      // the drums of the street players and the like, heard when Hervé is near
+      for (const g of this.crowd) {
+        if (!g.sound) continue;
+        g.soundT = (g.soundT == null ? rnd(0.5, 2) : g.soundT) - dt;
+        if (g.soundT > 0) continue;
+        g.soundT = rnd(g.sound.every[0], g.sound.every[1]);
+        const d = Math.abs(this.x - g.x), near = g.sound.near || 180;
+        if (d < near && !this.done && !this.talking) this.audio.fx(g.sound.name, { volume: (g.sound.volume || 0.4) * (1 - d / near) });
+      }
       for (const m of this.marchers) {
         if (m.wait > 0) { m.wait -= dt; continue; }
         m.x += m.dir * (m.speed || 20) * dt;
@@ -1110,6 +1195,7 @@
         c.globalAlpha = 1;
         if (a <= 0) this.fly = null;
       }
+      for (const f of this.fog) if (f.front) this.drawFogBand(c, f, cam);
       // the water: everything above it, upside down, trembling
       this.water(c);
       this.drawWaterLife(c, cam);
@@ -1156,13 +1242,15 @@
           const face = p.face || 1;
           let pose = g.showing === i ? 'talk' : p.pose || null;
           if (rite && p.rite) pose = p.rite === 'present' ? 'present' : rite.stage === 1 ? p.rite : pose;
-          this.figure(c, LOOKS[p.look || 'soldier'], g.x + (p.dx || 0) - cam, p.y || GY, p.turn ? (Math.sin(this.t * 0.4 + i) > 0 ? 1 : -1) : face, this.t + i, false, pose);
+          // the townsfolk who stop to stare at the stranger as he passes
+          const f = p.watch ? (this.x < g.x + (p.dx || 0) ? -1 : 1) : p.turn ? (Math.sin(this.t * 0.4 + i) > 0 ? 1 : -1) : face;
+          this.figure(c, LOOKS[p.look || 'soldier'], g.x + (p.dx || 0) - cam, p.y || GY, f, this.t + i, false, pose);
         });
       });
       this.drawRunners(c, cam);
       this.drawRange(c, cam);
       for (const m of this.marchers) {
-        for (let i = 0; i < (m.n || 2); i++) this.figure(c, m.look, m.x - m.dir * i * (m.gap || 9) - cam, GY, m.dir, this.t, m.wait <= 0, null);
+        for (let i = 0; i < (m.n || 2); i++) this.figure(c, m.look, m.x - m.dir * i * (m.gap || 9) - cam, GY, m.dir, this.t, m.wait <= 0, m.pose || null);
       }
       const d = this.drill;
       if (d) {
@@ -1619,15 +1707,46 @@
       }
     }
 
+    /** A band of fog, drifting on the wind at its own distance. */
+    drawFogBand(c, f, cam) {
+      const tw = 320, off = (((cam * (f.z == null ? 1 : f.z)) + this.t * (this.reduce ? 0 : f.speed || 4)) % tw + tw) % tw;
+      c.save();
+      c.globalAlpha = f.alpha || 0.4;
+      for (let x = -off; x < LW; x += tw) c.drawImage(f.tex, Math.round(x * SS), Math.round((f.y - f.h / 2) * SS));
+      c.restore();
+    }
+
     stepRange(dt) {
       const rg = this.range;
       if (!rg) return;
+      // arrows in flight, and the ones stuck in the targets
+      for (const a of rg.arrows || []) {
+        a.t += dt;
+        if (a.t >= a.dur && !a.hit) {
+          a.hit = true;
+          (rg.stuck || (rg.stuck = [])).push({ x: a.tx, y: a.ty, life: 3 });
+          this.puffs.push({ x: a.tx, y: a.ty, vx: rnd(-2, 2), vy: -rnd(2, 5), r: 0.8, grow: 1.6, age: 0, life: 0.7, col: '200,180,150', a: 0.6 });
+          const d = Math.abs(this.x - a.tx);
+          if (d < 280 && !this.done) this.audio.fx('thud', { volume: 0.2 * (1 - d / 280) });
+        }
+      }
+      if (rg.arrows) rg.arrows = rg.arrows.filter((a) => !a.hit);
+      if (rg.stuck) { for (const s_ of rg.stuck) s_.life -= dt; rg.stuck = rg.stuck.filter((s_) => s_.life > 0); }
       rg.t -= dt;
       rg.flash = Math.max(0, rg.flash - dt);
       if (rg.t > 0) return;
       if (rg.aim < 0) { rg.aim = rg.k % rg.x.length; rg.t = rnd(0.6, 0.9); return; }
-      // bang: a flash at the muzzle, smoke drifting off, dust thrown up at the target
       const sx = rg.x[rg.aim], tx = rg.targets[rg.aim % rg.targets.length], my = rg.y - 14;
+      if (rg.kind === 'bow') {
+        // the string let go: the arrow flies to the target
+        (rg.arrows || (rg.arrows = [])).push({ x: sx + 12, y: my, tx: tx - 3, ty: rg.ty + rnd(-2, 2), t: 0, dur: Math.max(0.2, (tx - sx) / 300) });
+        const d = Math.abs(this.x - sx);
+        if (d < 280 && !this.done) this.audio.fx('whoosh', { volume: 0.12 * (1 - d / 280) });
+        rg.fired = rg.aim; rg.flash = 0; rg.k++; rg.aim = -1;
+        rg.t = rg.k % rg.x.length === 0 ? rnd(rg.pause[0], rg.pause[1]) : rnd(rg.period[0], rg.period[1]);
+        return;
+      }
+      // bang: a flash at the muzzle, smoke drifting off, dust thrown up at the target
       rg.flash = 0.09; rg.fired = rg.aim;
       for (let i = 0; i < 3; i++) this.puffs.push({ x: sx + 16 + i * 2, y: my + rnd(-1, 1), vx: rnd(6, 12), vy: -rnd(1, 4), r: rnd(1.2, 2), grow: rnd(2.5, 4), age: 0, life: rnd(1.4, 2.2), col: '240,232,236', a: 0.7 });
       for (let i = 0; i < 2; i++) this.puffs.push({ x: tx + rnd(-3, 3), y: rg.ty + rnd(-3, 3), vx: rnd(-3, 3), vy: -rnd(3, 7), r: 1, grow: rnd(2, 3), age: 0, life: rnd(0.8, 1.2), col: '176,146,112', a: 0.7 });
@@ -1643,8 +1762,14 @@
       if (!rg) return;
       rg.x.forEach((x, i) => {
         const aiming = rg.aim === i || (rg.fired === i && rg.flash > 0);
-        this.figure(c, LOOKS[rg.look || 'rifleman'], x - cam, rg.y, 1, this.t + i, false, aiming ? 'aim' : null);
+        this.figure(c, LOOKS[rg.look || 'rifleman'], x - cam, rg.y, 1, this.t + i, false, aiming ? (rg.kind === 'bow' ? 'draw' : 'aim') : null);
       });
+      const D = (x, y, col) => { c.fillStyle = col; c.fillRect(Math.round(x * SS), Math.round(y * SS), SS, SS); };
+      for (const a of rg.arrows || []) {
+        const p = Math.min(1, a.t / a.dur), x = a.x + (a.tx - a.x) * p - cam, y = a.y + (a.ty - a.y) * p - Math.sin(Math.PI * p) * 5;
+        for (let k = 0; k < 7; k++) D(x - k, y + (k > 4 ? (k % 2 ? -1 : 1) : 0), k === 0 ? '#d0d0d8' : k > 4 ? '#f0ece4' : '#8a6a4a');
+      }
+      for (const s_ of rg.stuck || []) for (let k = 0; k < 5; k++) D(s_.x - k - cam, s_.y, k > 2 ? '#f0ece4' : '#8a6a4a');
       if (rg.flash > 0 && rg.fired >= 0) {
         const mx = rg.x[rg.fired] + 15 - cam, my = rg.y - 14;
         const D = (dx, dy, col) => { c.fillStyle = col; c.fillRect(Math.round((mx + dx) * SS), Math.round((my + dy) * SS), SS, SS); };

@@ -483,7 +483,11 @@ ducks, flocks of birds, the mill wheel turning, a fountain, windmills turning on
 the sun flashing on the cathedral's spires, children at tag and bowling a hoop with dogs at their
 heels, cats, and autumn leaves coming down (`boats`, `fish`, `glitter`, `ducks`, `flocks`,
 `wheels`, `fountains`, `windmills`, `sparkles`, `runners`, weather `autumn`); it ends with Hélène
-in her garden, and the story goes on from there.
+in her garden, and the story goes on from there. Hara Kei's village in Japan is alive in its own
+way: fog drifting between the layers and low over the street (`fog`), cherry petals falling
+(weather `sakura`), samurai on their rounds and geisha under parasols, archers loosing arrows at
+the butts (`range` of kind `bow`), street players with their drum, and townsfolk who stop and
+stare at the foreigner and whisper in Japanese (a person's `watch`, a crowd's `sound`).
 
 Walks never replace the rest: choices, cutscenes and minigames happen around them as before. The
 game menu (Esc) pauses a walk, and saving during one saves just before it. A quiet walk is passed

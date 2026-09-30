@@ -74,7 +74,15 @@
  *              (a cat sits a good while); `follow` (an index) keeps to its own side of that runner,
  *              `gap` away: children at tag, a dog at their heels. Dogs: spaniel, black, white,
  *              gold; cats: ginger, black, tabby; `hoop` gives a child a hoop to bowl along
- *    weather 'autumn' brings leaves down, orange, gold and red
+ *    weather 'autumn' brings leaves down, orange, gold and red; 'sakura' cherry petals, pink and white
+ *    fog:      [{ z, y, h, alpha, speed, col, front }]  bands of fog drifting at depth z (drawn among the
+ *              layers there), or in front of the people (front: true), e.g. mist over a street
+ *    range:    kind 'bow' makes the range an archery butt: the archers draw and loose, arrows fly
+ *  A crowd's people can stare at Hervé as he passes (watch: true), and a crowd can make a sound now
+ *  and then when he is near (sound: { name, every: [min, max], volume, near }), like a drum.
+ *  Marchers can walk in a pose (pose: 'parasol').
+ *  Looks for Japan: samurai, samurai2, ronin, archer, shonin (a merchant), geisha, geisha2,
+ *  townswoman, taiko, juggler, dancer (poses: draw, taiko, juggle, dance, parasol).
  *  A thing can stand in a pose, and change it when Hervé comes near: { pose, nearPose, nearAt }.
  *  Looks for the French army: soldier, rifleman (a rifle on the shoulder), officer, gunner, zouave,
  *  bugler, and the cavalry's cuirassier, cuirassierOfficer and trumpeter. And the town's: woman,
@@ -245,17 +253,45 @@ window.VN_WALKS = {
   // ---------------------------------------------------------------- Chapter 3: into Hara Kei's village, at night
   village: {
     title: 'Hara Kei\'s Village', region: 'The hills of Japan',
-    hero: 'traveller', start: 40, weather: 'fireflies', accent: '255,200,120',
-    water: ['rgba(40,60,110,0.55)', 'rgba(6,10,26,0.92)'],
+    hero: 'traveller', start: 40, weather: 'sakura', weatherCount: 60, accent: '255,196,210',
+    water: ['rgba(90,80,110,0.55)', 'rgba(14,10,26,0.92)'],
     hint: 'Follow the lanterns to Hara Kei\'s house →',
+    // dusk, and fog lying between everything: over the mountains, the castle, the upper town, the roofs, the street
+    fog: [
+      { z: 0.05, y: 146, h: 80, alpha: 0.85, speed: 2, col: '196,182,200' },
+      { z: 0.1, y: 166, h: 56, alpha: 0.8, speed: 3, col: '196,182,200' },
+      { z: 0.25, y: 172, h: 48, alpha: 0.75, speed: 4.5, col: '200,188,204' },
+      { z: 0.6, y: 184, h: 36, alpha: 0.6, speed: 7, col: '206,196,210' },
+      { front: true, z: 1, y: 202, h: 24, alpha: 0.45, speed: 10, col: '214,204,218' },
+    ],
+    // archers at the butts, each loosing an arrow in turn
+    range: { kind: 'bow', look: 'archer', x: [896, 912, 928], y: 204, targets: [1004, 1018, 1032], ty: 188, period: [1.4, 2.2], pause: [3, 5] },
+    // the townsfolk: they stop and stare at the foreigner, and whisper
+    crowd: [
+      { x: 232, near: 110, people: [{ dx: -8, look: 'townswoman', watch: true }, { dx: 8, look: 'shonin', watch: true }], lines: [[0, '……異人だ。'], [1, '見るな。目を合わせるな。']] },
+      { x: 443, near: 90, people: [{ dx: 0, look: 'shonin', face: 1, pose: 'talk' }], lines: [[0, 'いらっしゃい！ 鮎だよ、鮎！'], [0, '……異人さん？']] },
+      { x: 554, near: 90, people: [{ dx: 0, look: 'shonin', face: -1 }, { dx: 14, look: 'townswoman', watch: true }], lines: [[0, 'お面はいかが？'], [1, '……ハラケイ様のお客だってさ。']] },
+      { x: 730, near: 170, sound: { name: 'stamp', every: [0.38, 0.62], volume: 0.35, near: 220 }, people: [{ dx: -24, y: 194, look: 'taiko', face: 1, pose: 'taiko' }, { dx: 0, y: 194, look: 'juggler', face: 1, pose: 'juggle' }, { dx: 22, y: 194, look: 'dancer', face: -1, pose: 'dance' }, { dx: -30, look: 'townswoman', face: 1 }, { dx: -12, look: 'samurai2', face: 1 }, { dx: 30, look: 'shonin', watch: true }], lines: [[4, 'よっ、見事！'], [3, 'もう一度！'], [5, '……あの男、どこから来た？']] },
+      { x: 882, near: 120, people: [{ dx: 0, look: 'samurai2', face: 1 }], lines: [[0, '射て！'], [0, '心を静めよ。的は逃げぬ。']] },
+      { x: 1186, near: 100, people: [{ dx: 0, look: 'ronin', watch: true }], lines: [[0, '……']] },
+      { x: 1366, near: 110, people: [{ dx: -6, look: 'townswoman', watch: true }, { dx: 8, look: 'boy', watch: true }], lines: [[1, '母ちゃん、あの人、鼻が高い！'], [0, 'しっ！ 中に入りなさい。']] },
+      { x: 1800, near: 130, people: [{ dx: -34, look: 'guard', watch: true }, { dx: 34, look: 'guard', watch: true }], lines: [[0, '……'], [1, '通れ。']] },
+    ],
+    // geisha going by under their parasols, samurai walking their rounds
+    marchers: [
+      { x0: 580, x1: 880, n: 1, speed: 8, look: 'geisha', pose: 'parasol', pause: 3, start: 700 },
+      { x0: 1380, x1: 1690, n: 1, speed: 7, look: 'geisha2', pose: 'parasol', pause: 3.5, start: 1600, dir: -1 },
+      { x0: 1080, x1: 1560, n: 2, gap: 10, speed: 14, look: 'samurai', pause: 2.5, start: 1200 },
+      { x0: 260, x1: 640, n: 1, speed: 12, look: 'samurai2', pause: 2, start: 420, dir: -1 },
+    ],
     things: [
-      { x: 120, kind: 'look', label: 'The torii', lines: ['A red gate at the edge of the village. The men who led me here bowed as they passed under it. I did too, a moment too late.'] },
-      { x: 300, kind: 'talk', look: 'servant', label: 'A servant', lines: [['A servant', '...'], 'She bowed, said something I could not understand, and pointed up the road with her whole arm.'] },
-      { x: 482, kind: 'look', label: 'A stone lantern', lines: ['A stone lantern, its flame steady in the still air. Every house had one. The whole village glowed like a string of beads.'] },
-      { x: 640, kind: 'coin', amount: 5, label: 'A square-holed coin', lines: ['A coin with a square hole, dropped in the dust. I kept it for luck.'] },
-      { x: 800, kind: 'talk', look: 'guard', label: 'Hara Kei\'s guard', lines: [['A guard', '...'], 'He looked at me the way you look at the weather. Then he stepped aside.'] },
-      { x: 1000, kind: 'talk', look: 'boy', label: 'A child', lines: ['A child stared at me from a doorway, then ran inside shouting. By the time I passed the next house, the whole village knew.'] },
-      { x: 1250, kind: 'goal', label: 'Hara Kei\'s house', verb: 'Enter', lines: ['The largest house in the village, lit from inside like a lantern. Someone was waiting for me there.'] },
+      { x: 160, kind: 'look', label: 'The torii', lines: ['A red gate at the edge of the village. The men who led me here bowed as they passed under it. I did too, a moment too late.'] },
+      { x: 400, kind: 'talk', look: 'servant', label: 'A servant', lines: [['A servant', '...'], 'She bowed, said something I could not understand, and pointed up the road with her whole arm.'] },
+      { x: 646, kind: 'look', label: 'A stone lantern', lines: ['A stone lantern, its flame steady in the still air. Every house had one. The whole village glowed like a string of beads.'] },
+      { x: 850, kind: 'coin', amount: 5, label: 'A square-holed coin', lines: ['A coin with a square hole, dropped in the dust. I kept it for luck.'] },
+      { x: 1060, kind: 'talk', look: 'guard', label: 'Hara Kei\'s guard', lines: [['A guard', '...'], 'He looked at me the way you look at the weather. Then he stepped aside.'] },
+      { x: 1330, kind: 'talk', look: 'boy', label: 'A child', lines: ['A child stared at me from a doorway, then ran inside shouting. By the time I passed the next house, the whole village knew.'] },
+      { x: 1800, kind: 'goal', label: 'Hara Kei\'s house', verb: 'Enter', lines: ['The largest house in the village, lit from inside like a lantern. Someone was waiting for me there.'] },
     ],
   },
 

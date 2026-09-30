@@ -468,36 +468,137 @@ WALKS.steppe = (c, L) => {
   return { colors: 64, vignette: [0.35, '30,10,30'] };
 };
 
-// ---------------------------------------------------------------- Hara Kei's village, at night
+// ---------------------------------------------------------------- Hara Kei's village, at dusk in the fog
+// A town of the shoguns' Japan in the hills, and it feels wrong to be here: the white castle above
+// it all in the mist, pagodas and temple roofs, the upper town on its terraces, then the street:
+// a torii, thatched farmhouses, stalls and townhouses under their lanterns, a stage for the street
+// players, an archery butt, the walls of the samurai quarter and, at the end, Hara Kei's gate.
+// The fog, the falling petals, the people, the arrows and the drums are the walk's.
 WALKS.village = (c, L) => {
   const r = rng(421);
-  vgrad(c, 0, 0, 480, WY, [[0, '#070b24'], [0.55, '#18265a'], [1, '#3a4a80']]);
-  stars(c, r, 140, 0, 0, 480, 120);
-  moon(c, 110, 50, 12, { seed: 7 });
-  const cl = L('clouds', { depth: 0.04, anim: { type: 'drift', t: 320 } });
-  for (let x = 0; x < S(0.1); x += 240) cloudBand(cl, r, x + r.r(0, 80), r.r(40, 110), r.r(140, 220), r.r(4, 7), { body: '#1c2654', rim: '#6f8ac2', shadow: '#141c44', hi: '#b9cdf5' });
-  const far = L('far', { depth: 0.14 });
-  ridge(far, r, 170, 50, '#1c2a5a', { x1: S(0.14) });
-  ridge(far, r, 182, 26, '#16224a', { x1: S(0.14) });
-  treeLine(far, r, 186, 0, S(0.14), 6, ['#101a3a', '#16224a']);
+  const FOG = '#a898ac';
+  vgrad(c, 0, 0, 480, WY, [[0, '#1a1830'], [0.35, '#35304e'], [0.62, '#645676'], [0.86, '#9a8a9e'], [1, '#b8a8b4']]);
+  circle(c, 372, 52, 11, '#e6dce4'); glow(c, 372, 52, 60, 'rgba(230,220,235,0.35)');
+  c.clearRect(0, WY, 480, H - WY);
+  const cl = L('clouds', { depth: 0.04, anim: { type: 'drift', t: 360 } });
+  wrapped(cl, 141, (cc, rr) => {
+    for (const [x, y, w, h] of [[30, 30, 170, 7], [240, 64, 190, 6], [380, 20, 120, 5]]) cloudBand(cc, rr, x, y, w, h, { body: '#2e2a44', rim: '#7a6a8c', shadow: '#221f36', hi: '#a896b0', lightFromBelow: true });
+  });
+  // mountains behind mountains, fading into the mist
+  const pk = L('peaks', { depth: 0.03 });
+  const px1 = S(0.03);
+  ridge(pk, r, 150, 70, '#6a5e7c', { x1: px1, peak: [180, 60, 26] });
+  ridge(pk, r, 162, 50, '#7c7090', { x1: px1 });
+  pk.save(); pk.globalCompositeOperation = 'source-atop'; vgrad(pk, 0, 90, px1, 90, [[0, 'rgba(168,152,172,0)'], [1, 'rgba(168,152,172,0.85)']]); pk.restore();
+  // the castle hill, dark with pines, the white keep on its stone base at the top, a pagoda
+  const ca = L('castle', { depth: 0.08 });
+  const cx1 = S(0.08);
+  const fnK = vProfile([[-10, 186], [80, 168], [150, 150], [240, 124], [300, 108], [370, 108], [440, 130], [520, 150], [cx1 + 10, 170]]);
+  vLand(ca, fnK, -10, cx1 + 10, 200, '#3e3a50');
+  for (let i = 0; i < 90; i++) { const x = r.r(0, cx1), y = fnK(x) + r.r(2, 40); pine(ca, r, x, y, r.r(12, 22), { trunk: '#2a2634', leaves: ['#2a2a3c', '#343448', '#484a5e'] }, r() < 0.5 ? 1 : -1); }
+  const CP = { stone: '#8a8694', stoneLit: '#aaa6b2', stoneDark: '#66626e', wall: '#e2dee4', wallLit: '#f4f0f4', wallShade: '#b8b2c0', board: '#2e2c3a', window: '#4a4658', lit: '#ffd08a', roof: '#3a3c50', roofLit: '#6a6e84', gold: '#e0b850' };
+  const ct = jpCastle(ca, r, 336, 110, 0.95, CP);
+  for (const [yx, yy] of [[268, 118], [410, 118]]) { rect(ca, yx - 8, yy - 12, 16, 12, CP.wall); rect(ca, yx - 8, yy - 4, 16, 4, CP.board); poly(ca, [[yx - 11, yy - 12], [yx + 11, yy - 12], [yx + 6, yy - 17], [yx - 6, yy - 17]], CP.roof); }
+  rect(ca, 276, 112, 126, 3, CP.wall); rect(ca, 276, 110, 126, 2, CP.roof);
+  pagoda(ca, 112, fnK(112) + 2, 3.2, '#3e3a50', '#7a7090');
+  for (let k = 0; k < 6; k++) px(ca, 112 + r.r(-8, 8), fnK(112) - r.r(10, 60), '#ffc870');
+  ca.save(); ca.globalCompositeOperation = 'source-atop'; vgrad(ca, 0, 110, cx1, 90, [[0, 'rgba(168,152,172,0.1)'], [1, 'rgba(168,152,172,0.8)']]); ca.restore();
+  // the upper town on its terraces, lights in the windows, cherry blossom between the roofs
+  const up = L('uptown', { depth: 0.2 });
+  const ux1 = S(0.2);
+  const fnU = vProfile([[-10, 176], [120, 160], [260, 150], [400, 156], [560, 146], [700, 158], [ux1 + 10, 164]]);
+  vLand(up, fnU, -10, ux1 + 10, 205, '#4a4458');
+  for (let x = 0; x < ux1; x += 50) { rect(up, x, fnU(x) + 6, 46, 2, '#6a6678'); }
+  const roofs = [];
+  for (let i = 0; i < 70; i++) { const w = r.i(12, 22), x = r.r(-10, ux1), yb = Math.max(fnU(x), fnU(x + w)) + r.r(4, 34); roofs.push([x, w, yb]); }
+  roofs.sort((p, q) => p[2] - q[2]);
+  for (const [x, w, yb] of roofs) {
+    const hh = r.i(7, 11);
+    rect(up, x, yb - hh, w, hh, '#8a8494');
+    if (r() < 0.6) rect(up, x + 2, yb - hh + 2, r.i(3, 6), 3, r() < 0.7 ? '#ffc070' : '#4a4658');
+    poly(up, [[x - 3, yb - hh], [x + w + 3, yb - hh], [x + w - 2, yb - hh - 5], [x + 2, yb - hh - 5]], '#363448');
+    if (r() < 0.2) crown(up, r, x + w + 4, yb - 8, r.r(5, 9), r.r(4, 6), r() < 0.6 ? JP.sakura : JP.blossomWhite, { x: -0.6, y: -0.8 }, 10);
+  }
+  up.save(); up.globalCompositeOperation = 'source-atop'; vgrad(up, 0, 130, ux1, 80, [[0, 'rgba(168,152,172,0.15)'], [1, 'rgba(168,152,172,0.6)']]); up.restore();
+  // nearer: the town's roofs, the temple and its pagoda, the fire-watch tower, pines and cherries
   const mid = L('mid', { depth: 0.45 });
-  for (let x = 0; x < S(0.45); x += r.r(28, 60)) pine(mid, r, x, 196, r.r(34, 54), { trunk: '#1a1624', leaves: ['#101a2e', '#18263e', '#2a3e5e'] }, r() < 0.5 ? 1 : -1);
+  const mx1 = S(0.45);
+  vgrad(mid, 0, 176, mx1, 20, [[0, '#4e4858'], [1, '#3a3444']]);
+  for (let x = -10; x < mx1; x += r.r(24, 46)) {
+    const w = r.r(22, 44), hh = r.r(16, 26), yb = 190;
+    rect(mid, x, yb - hh, w, hh, '#6a6474');
+    if (r() < 0.7) rect(mid, x + w * 0.3, yb - hh + 4, w * 0.4, 5, r() < 0.7 ? '#ffc070' : '#3e3a4a');
+    poly(mid, [[x - 4, yb - hh], [x + w + 4, yb - hh], [x + w - 3, yb - hh - 8], [x + 3, yb - hh - 8]], '#2e2c3e');
+    rect(mid, x + 2, yb - hh - 9, w - 4, 1, '#56546a');
+  }
+  pagoda(mid, 96, 186, 4, '#2e2c3e', '#6a6680');
+  for (let k = 0; k < 5; k++) rect(mid, 96 - 2, 186 - 12 - k * 22.4, 4, 2, '#ffc070');
+  // the temple hall: a great roof
+  rect(mid, 640, 150, 90, 40, '#5a5464'); for (let k = 650; k < 725; k += 12) rect(mid, k, 162, 6, 20, '#ffb860');
+  poly(mid, [[620, 152], [750, 152], [728, 126], [642, 126]], '#2e2c3e'); rect(mid, 642, 124, 86, 3, '#56546a');
+  poly(mid, [[616, 154], [624, 146], [630, 152]], '#2e2c3e'); poly(mid, [[754, 154], [746, 146], [740, 152]], '#2e2c3e');
+  // the fire-watch tower with its bell
+  for (const k of [-6, 6]) line(mid, 520 + k, 190, 520 + k * 0.4, 110, '#2a2632', 2);
+  for (let y = 120; y < 188; y += 10) line(mid, 514, y, 526, y + 8, '#2a2632', 1);
+  rect(mid, 512, 106, 16, 3, '#2a2632'); poly(mid, [[510, 106], [530, 106], [520, 98]], '#2e2c3e'); ellipse(mid, 520, 103, 2, 2.4, '#b8903a');
+  for (let x = 20; x < mx1; x += r.r(70, 130)) { if (Math.abs(x - 96) < 30 || (x > 600 && x < 760)) continue; if (r() < 0.5) jpSakura(mid, r, x, 192, r.r(40, 56), r() < 0.55 ? JP.sakura : JP.blossomWhite); else pine(mid, r, x, 192, r.r(36, 50), { trunk: '#221c26', leaves: ['#1e2430', '#28303a', '#3a4450'] }, r() < 0.5 ? 1 : -1); }
+  mid.save(); mid.globalCompositeOperation = 'source-atop'; vgrad(mid, 0, 100, mx1, 96, [[0, 'rgba(168,152,172,0.08)'], [1, 'rgba(168,152,172,0.35)']]); mid.restore();
+  // the street itself
   const g = L('ground', { depth: 1 });
-  vgrad(g, 0, 190, W, 14, [[0, '#2a3440'], [1, '#1c2430']]);
-  bank(g, r, 0, W, { grass0: '#2a3a3a', grass1: '#1e2a2e', tip: '#3a5050', earth: '#2a2220', dark: '#14100e', stone: '#4a4e5a' });
-  // a torii at the entrance to the village
-  const torii = (x) => { rect(g, x - 20, GY - 44, 4, 42, '#b83a2a'); rect(g, x + 16, GY - 44, 4, 42, '#b83a2a'); rect(g, x - 28, GY - 48, 56, 4, '#b83a2a'); rect(g, x - 30, GY - 52, 60, 3, '#2a1a1a'); rect(g, x - 22, GY - 38, 44, 3, '#b83a2a'); };
-  torii(120);
-  // houses with lit windows, stone lanterns between them, and Hara Kei's house at the end
-  for (const [x, w, hh] of [[260, 50, 22], [380, 40, 20], [540, 56, 24], [700, 44, 20], [860, 50, 22]]) jpHouse(g, r, x, GY - 2, w, hh, { windows: [[w * 0.3, hh * 0.35, w * 0.4, hh * 0.35, true]], roofH: hh * 0.8 });
-  const lantern = (x) => { rect(g, x - 2, GY - 12, 4, 10, '#6a6a70'); rect(g, x - 5, GY - 18, 10, 6, '#7a7a80'); rect(g, x - 3, GY - 17, 6, 4, '#ffcf72'); poly(g, [[x - 7, GY - 18], [x + 7, GY - 18], [x, GY - 24]], '#5a5a60'); glow(g, x, GY - 15, 18, 'rgba(255,190,90,0.55)'); };
-  for (const x of [200, 340, 480, 640, 800, 960, 1060]) lantern(x);
-  jpHouse(g, r, 1150, GY - 2, 200, 44, { windows: [[30, 14, 40, 16, true], [90, 14, 40, 16, true], [150, 14, 30, 16, true]], roofH: 34, over: 30 });
-  rect(g, 1236, GY - 26, 28, 24, '#2a1e1a'); glow(g, 1250, GY - 14, 40, 'rgba(255,200,110,0.45)');
-  for (const x of [1180, 1320]) { rect(g, x, GY - 40, 3, 38, '#3a2a22'); ellipse(g, x + 1, GY - 40, 5, 7, '#d8402a'); glow(g, x + 1, GY - 40, 16, 'rgba(255,120,70,0.55)'); }
+  vgrad(g, 0, 186, W, 20, [[0, '#4a4046'], [1, '#342c32']]);
+  bank(g, r, 0, W, { grass0: '#4a4a44', grass1: '#34342e', tip: '#6a6a5a', earth: '#3a2e2a', dark: '#1a1414', stone: '#6a6670' });
+  // the road, packed earth, then stones set in it through the town
+  rect(g, 0, GY - 4, W, 5, '#6a5c56');
+  for (let x = 200; x < 1700; x += r.r(7, 12)) { rect(g, x, GY - 4 + r.i(0, 2), r.r(5, 9), 3, r.pick(['#7a7280', '#6a6470', '#8a8290'])); }
+  // the outskirts: a Jizo with his red bib, a stone lantern, pines, bamboo
+  for (let x = 0; x < 140; x += 5) { rect(g, x, GY - r.r(40, 70), 2, 70, r.pick(['#3a5a3a', '#4a6a44', '#2e4a30'])); }
+  rect(g, 40, GY - 12, 8, 10, '#8a8690'); circle(g, 44, GY - 15, 4, '#8a8690'); rect(g, 40, GY - 11, 8, 4, '#c83a3a');
+  jpStoneLantern(g, 110, GY - 2, 1);
+  jpTorii(g, 160, GY - 2, 1.2);
+  // the first houses: thatched farmhouses, sake barrels, a well
+  jpMinka(g, r, 196, GY - 2, 70, 24);
+  jpBarrels(g, 272, GY - 2, 3);
+  jpMinka(g, r, 310, GY - 2, 60, 22);
+  rect(g, 382, GY - 12, 14, 10, JP.stone); for (const k of [382, 394]) rect(g, k, GY - 30, 2, 18, JP.wood); rect(g, 380, GY - 32, 18, 2, JP.wood); circle(g, 389, GY - 27, 2, JP.woodLit);
+  // the merchants' street: townhouses behind, stalls before them, banners
+  let hx = 420;
+  for (const [w, hh, o] of [[56, 46, { shop: true, sign: true }], [48, 42, { shop: true, noren: '#6a2430' }], [60, 48, { shop: true, sign: true, noren: '#2e5044' }], [52, 44, { shop: true }]]) { jpMachiya(g, r, hx, GY - 2, w, hh, o); hx += w + 2; }
+  jpStall(g, r, 428, GY - 2, 30, 'fish'); jpStall(g, r, 484, GY - 2, 30, 'cloth'); jpStall(g, r, 540, GY - 2, 28, 'masks'); jpStall(g, r, 594, GY - 2, 28, 'food');
+  for (const [x, col] of [[418, '#26345e'], [526, '#6a2430'], [634, '#e8e0d0']]) jpNobori(g, r, x, GY - 2, 50, col, col === '#e8e0d0' ? '#26345e' : '#f4ecd8');
+  jpStoneLantern(g, 646, GY - 2, 1.1);
+  // the square where the street players perform, lanterns strung over it
+  jpStage(g, 690, GY - 2, 80);
+  for (const x of [668, 792]) jpNobori(g, r, x, GY - 2, 56, x < 700 ? '#c8303a' : '#26345e');
+  jpLanternString(g, 660, GY - 62, 730, GY - 64, 6, ['#d8402e', '#f4ecd8']);
+  jpLanternString(g, 730, GY - 64, 800, GY - 62, 6, ['#f4ecd8', '#d8402e']);
+  hx = 806;
+  for (const [w, hh] of [[44, 42], [52, 46]]) { jpMachiya(g, r, hx, GY - 2, w, hh, { shop: r() < 0.5 }); hx += w + 2; }
+  // the archery butt (the archers and their arrows are the walk's)
+  jpAzuchi(g, 990, GY - 2, 56, [1004, 1018, 1032]);
+  rect(g, 890, GY - 3, 50, 2, JP.woodLit);
+  jpNobori(g, r, 950, GY - 2, 46, '#e8e0d0', '#6a2430');
+  // the samurai quarter: cherries over a walled lane, then more townhouses and a little shrine
+  for (const x of [1100, 1170, 1240]) jpSakura(g, r, x, GY - 30, 62, x === 1170 ? JP.blossomWhite : JP.sakura);
+  jpWall(g, r, 1070, 1300, GY - 2, 12, 22);
+  jpStoneLantern(g, 1310, GY - 2, 1);
+  rect(g, 1322, GY - 14, 14, 12, JP.wood); poly(g, [[1319, GY - 14], [1339, GY - 14], [1329, GY - 22]], JP.roof); rect(g, 1326, GY - 11, 6, 5, JP.lit);
+  hx = 1350;
+  for (const [w, hh, o] of [[50, 44, { shop: true }], [46, 40, {}], [58, 48, { sign: true }], [48, 42, { shop: true }], [52, 44, {}], [46, 40, { shop: true }]]) { jpMachiya(g, r, hx, GY - 2, w, hh, o); hx += w + 2; }
+  jpSakura(g, r, 1500, GY - 2, 70, JP.blossomWhite);
+  jpSakura(g, r, 1640, GY - 2, 64, JP.sakura);
+  // Hara Kei's estate: the long wall, the great gate, the house's roof above the wall, lanterns
+  poly(g, [[1720, GY - 36], [1920, GY - 36], [1900, GY - 62], [1740, GY - 62]], JP.roof);
+  rect(g, 1740, GY - 64, 160, 3, JP.roofLit);
+  for (let k = 1750; k < 1890; k += 3) px(g, k, GY - 50, JP.roofDark);
+  jpWall(g, r, 1700, 1774, GY - 2, 10, 24);
+  jpWall(g, r, 1826, 1920, GY - 2, 10, 24);
+  jpGate(g, r, 1800, GY - 2);
+  for (const x of [1760, 1840]) { rect(g, x, GY - 40, 3, 38, '#3a2a22'); jpChochin(g, x + 1, GY - 40, '#d8402e', 1.2); }
+  jpSakura(g, r, 1690, GY - 30, 56, JP.sakura);
+  // dark grasses at the water's edge, nearest of all
   const fr = L('front', { depth: 1.3, anim: sway(3, 3.8) });
-  reeds(fr, r, ['#141e28', '#1e2c36', '#2a3a44'], 110);
-  return { colors: 64, vignette: [0.45, '0,4,20'] };
+  reeds(fr, r, ['#1a1a22', '#262632', '#343444'], 110);
+  return { colors: 150, vignette: [0.42, '10,6,20'], anchors: { castle: ct } };
 };
 
 // ---------------------------------------------------------------- the aviary behind Hara Kei's house, by day

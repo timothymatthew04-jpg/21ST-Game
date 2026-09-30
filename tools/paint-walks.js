@@ -17,7 +17,7 @@ const zlib = require('zlib');
 const { chromium } = require('playwright');
 
 // how wide each area is, in pixels at the scenes' 270-pixel height (one screen is 480)
-const WIDTHS = { camp: 1920, lavilledieu: 1920, steppe: 2400, village: 1440, aviary: 960, ruins: 1440, cemetery: 960, crossing: 1440 };
+const WIDTHS = { camp: 1920, lavilledieu: 1920, steppe: 2400, village: 1920, aviary: 960, ruins: 1440, cemetery: 960, crossing: 1440 };
 
 // ---- the same small palette-PNG writer the backgrounds use
 const CRC = new Int32Array(256).map((_, n) => { let c = n; for (let k = 0; k < 8; k++) c = c & 1 ? 0xedb88320 ^ (c >>> 1) : c >>> 1; return c; });
