@@ -114,11 +114,11 @@ place cemetery_two      "The Cemetery"           "Lavilledieu · Many years late
 place yuki_house        "A House in the Hills"   "Japan · Years later"
 
 bgfx lavilledieu smoke=0.06,0.34,0.6,#f4f4f8 glints=0.04,0.74,0.3,0.16,26,#ffffff flock=10,0.04,0.3 fish=0.25,0.76,0.7,0.12,0.7 leaves=0.3 motes=0.1,0.3,0.8,0.5,14,#fff6d8
-bgfx lavilledieu glints=0.694,0.045,0.01,0.04,2,#fffbe8 glints=0.736,0.045,0.01,0.04,2,#fffbe8 glints=0.705,0.25,0.025,0.06,2,#fff4c8
+bgfx lavilledieu glow=0.9375,0.481,0.05,#fff4c8 glints=0.694,0.045,0.01,0.04,2,#fffbe8 glints=0.736,0.045,0.01,0.04,2,#fffbe8 glints=0.705,0.25,0.025,0.06,2,#fff4c8
 bgfx silk_mill glow=0.36,0.38,0.08,#fff4d0 glow=0.498,0.38,0.08,#fff4d0 glow=0.635,0.38,0.08,#fff4d0 motes=0.15,0.25,0.55,0.7,45
 bgfx silk_mill_empty motes=0.15,0.25,0.55,0.7,20,#c8d4e6 rain=0.5,0.308,0.215,0.105,0.34 rain=0.5,0.446,0.215,0.105,0.34 rain=0.5,0.583,0.215,0.105,0.34
 bgfx balbadiou_office flame=0.6375,0.648,0.05,#ffc070 glow=0.87,0.35,0.1,#fff0d0 motes=0.5,0.3,0.45,0.6,30
-bgfx joncour_home flame=0.856,0.642,0.07,#ff9a40 embers=0.856,0.63,0.4 flame=0.825,0.393,0.014 flame=0.887,0.393,0.014 stars=0.37,0.21,0.26,0.14,10 fireflies=0.37,0.47,0.26,0.1,5
+bgfx joncour_home leaves=0.9,0.29,0.155,0.2,0.45 motes=0.3,0.3,0.45,0.6,26,#fff2c8 glow=0.385,0.4,0.16,#fff4d8
 bgfx helene_sickroom snow=1,0.3125,0.207,0.1875,0.37 flame=0.45,0.622,0.03,#ffc070 motes=0.3,0.25,0.4,0.7,18,#dde6ff
 bgfx blanche_salon flame=0.231,0.415,0.07,#ffb070 flame=0.094,0.414,0.013 flame=0.115,0.41,0.013 flame=0.133,0.406,0.013 steam=0.796,0.83,0.8 steam=0.6875,0.84,0.6 glow=0.9125,0.148,0.03 stars=0.8,0.04,0.12,0.4,8
 bgfx helene_garden glow=0.817,0.415,0.09,#ffd08a glow=0.065,0.485,0.03,#ffc070 glow=0.131,0.485,0.03,#ffc070 glow=0.181,0.574,0.03,#ffc070 glints=0.49,0.67,0.33,0.12 fireflies=0.05,0.45,0.9,0.4,14 petals=0.35 birds=3,0.05,0.25
@@ -181,7 +181,7 @@ bgsound lavilledieu       stream
 bgsound silk_mill         mill
 bgsound silk_mill_empty   rain 0.6
 bgsound balbadiou_office  clock
-bgsound joncour_home      fire 0.8
+bgsound joncour_home      birds 0.5
 bgsound helene_garden     birds
 bgsound garden_winter     wind 0.7
 bgsound helene_sickroom   room
@@ -212,7 +212,7 @@ bgsound yuki_house        rain 0.7
 # How the light of each place falls on the characters: "bglight background look",
 # where look is day, warm, fire, dusk, night, moon, grey, dim or ash.
 bglight balbadiou_office  warm
-bglight joncour_home      fire
+bglight joncour_home      warm
 bglight helene_sickroom   dim
 bglight blanche_salon     warm
 bglight road_east         dusk

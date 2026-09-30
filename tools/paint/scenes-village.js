@@ -550,6 +550,44 @@ function vPeak(c, r, px_, yb, h, w, P) {
   c.save(); clip(outline); poly(c, snow, P.snowShade); clip(lit); poly(c, snow, P.snow); c.restore();
 }
 
+/** A lighthouse on a sea-worn pillar of rock: the rock overhanging, lit on its left, weed and moss
+ *  on its crown, steps cut up its side; the stone tower, its gallery and railing, the glazed lantern
+ *  and its dome. x is the centre, yb the rock's foot in the water. Returns the lamp. */
+function vLighthouse(c, r, x, yb, s, P) {
+  const u = (v) => v * s, X = (v) => x + u(v), Y = (v) => yb - u(v);
+  // the rock: narrow at the waterline, swelling out under the crown like a mushroom
+  const rock = [[X(-16), yb], [X(-19), Y(10)], [X(-16), Y(22)], [X(-23), Y(34)], [X(-25), Y(42)], [X(-18), Y(47)], [X(20), Y(48)], [X(28), Y(40)], [X(24), Y(28)], [X(17), Y(16)], [X(20), Y(4)], [X(14), yb]];
+  poly(c, rock, P.rock);
+  poly(c, [[X(-16), yb], [X(-19), Y(10)], [X(-16), Y(22)], [X(-23), Y(34)], [X(-25), Y(42)], [X(-18), Y(47)], [X(-6), Y(47)], [X(-10), Y(30)], [X(-6), yb]], P.rockLit);
+  poly(c, [[X(10), Y(48)], [X(20), Y(48)], [X(28), Y(40)], [X(24), Y(28)], [X(17), Y(16)], [X(20), Y(4)], [X(14), yb], [X(8), yb]], P.rockDark);
+  for (let k = 0; k < 9; k++) { const yy = Y(r.r(4, 44)); line(c, X(r.r(-20, 0)), yy, X(r.r(4, 22)), yy + r.r(-1, 1), P.rockDark, 1); }
+  for (let i = 0; i < 40; i++) px(c, X(r.r(-22, 24)), Y(r.r(38, 48)), r.pick(VIL.moss));
+  for (let k = 0; k < 6; k++) rect(c, X(-12 + k * 3), Y(6 + k * 7), u(4), u(1.5), P.rockLit);
+  // the tower, tapering a little, in courses of dressed stone
+  const tb = 48, tt = 104;
+  poly(c, [[X(-11), Y(tb)], [X(11), Y(tb)], [X(9), Y(tt)], [X(-9), Y(tt)]], P.wall);
+  c.save(); c.beginPath(); c.moveTo(X(-11), Y(tb)); c.lineTo(X(11), Y(tb)); c.lineTo(X(9), Y(tt)); c.lineTo(X(-9), Y(tt)); c.closePath(); c.clip();
+  for (let y = tb + 3; y < tt; y += 3) { line(c, X(-12), Y(y), X(12), Y(y), P.wallDark, 1); for (let xx = -11 + ((y / 3) % 2) * 2; xx < 12; xx += 4) px(c, X(xx), Y(y - 1.5), P.wallDark); }
+  rect(c, X(-12), Y(tt), u(8), u(tt - tb), P.wallLit);
+  rect(c, X(5), Y(tt), u(7), u(tt - tb), P.wallDark);
+  c.restore();
+  ellipse(c, X(0), Y(tb + 9), u(3), u(3), '#2a2226'); rect(c, X(-3), Y(tb + 9), u(6), u(9), '#2a2226');
+  for (const wy of [70, 88]) { rect(c, X(-1.5), Y(wy + 5), u(3), u(5), '#2a2a3a'); px(c, X(-1), Y(wy + 4), P.glass); }
+  // the gallery and its railing, the lantern, its dome and vane
+  rect(c, X(-14), Y(tt + 2), u(28), u(3), P.wallDark);
+  rect(c, X(-14), Y(tt + 2), u(28), 1, P.wallLit);
+  for (let k = -13; k <= 13; k += 3) rect(c, X(k), Y(tt + 8), 1, u(6), '#3a3440');
+  rect(c, X(-14), Y(tt + 8), u(28), 1, '#3a3440');
+  rect(c, X(-7), Y(tt + 20), u(14), u(12), P.glass);
+  rect(c, X(-7), Y(tt + 20), u(4), u(12), P.glassLit);
+  for (const k of [-7, -2, 3, 7]) rect(c, X(k), Y(tt + 20), 1, u(12), '#3a3440');
+  poly(c, [[X(-9), Y(tt + 20)], [X(9), Y(tt + 20)], [X(5), Y(tt + 26)], [X(-5), Y(tt + 26)]], P.dome);
+  poly(c, [[X(-9), Y(tt + 20)], [X(-5), Y(tt + 26)], [X(0), Y(tt + 26)], [X(-2), Y(tt + 20)]], vShade(P.dome, 0.3));
+  circle(c, X(0), Y(tt + 28), u(1.6), P.dome);
+  rect(c, X(0) - 0.5, Y(tt + 34), 1, u(5), '#3a3440');
+  return [X(0), Y(tt + 14)];
+}
+
 /** The silk mill: a long stone building of three storeys, rows of tall windows, a chimney. */
 function vMill(c, r, x, yb, w, hh) {
   const wall = '#b4aea0';
@@ -775,8 +813,12 @@ SCENES.lavilledieu = (c, L) => {
   river.globalAlpha = 1;
   for (let y = 198; y < 244; y += 1) { const hw = 3 + (y - 198) * 0.8; for (let k = 0; k < 2; k++) rect(river, 64 + r.r(-hw, hw), y, r.r(2, 6), 1, r.pick(['#ffffff', '#fff6d8'])); }
   for (let i = 0; i < 40; i++) { const lx = r() * W, ly = r.r(200, 244); px(river, lx, ly, r.pick(VIL.leaf.slice(1))); px(river, lx + 1, ly, r.pick(VIL.leaf.slice(1))); }
+  // the lighthouse on its rock where the river widens toward the sea, the water breaking round it
+  const lh = L('lighthouse', { depth: 0.31 });
+  vLighthouse(lh, r, 450, 236, 0.9, { rock: '#8a7a6a', rockLit: '#b8a488', rockDark: '#5e5048', wall: '#d8c09a', wallLit: '#f0dcb8', wallDark: '#a88c6a', glass: '#fff0c0', glassLit: '#ffffff', dome: '#6a6e7e' });
+  for (let i = 0; i < 40; i++) { const a = r.r(-1, 1); ellipse(lh, 450 + a * 26 + r.r(-3, 3), 236 - r.r(0, 4), r.r(2, 5), r.r(1, 2), r.pick(['#ffffff', '#eef6fc', '#cfe4f4'])); }
   // boats on the water, rocking
-  for (const [bx, by, s, sail, t] of [[250, 214, 1, true, 4.4], [400, 226, 0.8, false, 5.2]]) {
+  for (const [bx, by, s, sail, t] of [[250, 214, 1, true, 4.4], [380, 226, 0.8, false, 5.2]]) {
     const b = L(`boat${bx}`, { depth: 0.32, anim: { type: 'bob', a: 0.8, t } });
     vGabare(b, bx, by, s, sail);
   }

@@ -470,6 +470,7 @@
       // a shooting range: riflemen on the firing step, each in turn taking aim and firing at the targets
       this.range = def.range ? { period: [1.1, 1.8], pause: [2.5, 4], ...def.range, k: 0, t: 2, aim: -1, flash: 0, fired: -1 } : null;
       this.windmills = def.windmills || [];
+      this.beacons = def.beacons || [];
       this.sparkles = (def.sparkles || []).map((s) => ({ ...s, ph: s.ph == null ? Math.random() * 6 : s.ph }));
       // children at their games and the town's dogs and cats, running about
       this.runners = (def.runners || []).map((u) => ({ speed: u.kind === 'cat' ? 9 : u.kind === 'dog' ? 40 : 32, ...u, x: u.start != null ? u.start : u.x0 != null ? (u.x0 + u.x1) / 2 : 0, dir: Math.random() < 0.5 ? 1 : -1, face: 1, wait: Math.random() * 2, moving: false, t: Math.random() * 5 }));
@@ -493,6 +494,7 @@
       if (this.train) this.slots.push({ z: this.train.depth + 0.001, draw: (c, cam) => this.drawTrain(c, cam) });
       if (this.flockDef) this.slots.push({ z: 0.09, draw: (c) => this.drawFlocks(c) });
       for (const m of this.windmills) this.slots.push({ z: m.depth + 0.001, draw: (c, cam) => this.drawSails(c, m, cam) });
+      for (const b of this.beacons) this.slots.push({ z: b.depth + 0.002, draw: (c, cam) => this.drawBeacon(c, b, cam) });
       for (const s of this.sparkles) this.slots.push({ z: s.depth + 0.002, draw: (c, cam) => this.drawSparkle(c, s, cam) });
       this.slots.sort((a, b) => a.z - b.z);
       // the band above the waterline, flipped, for the reflection
@@ -633,10 +635,7 @@
       } else if (th.kind === 'item') {
         th.used = true;
         // the keepsake's card slides in here, over the walk (the usual place is underneath it)
-        if (!this.engine.hasItem(th.item)) {
-          this.engine.gainItem(th.item, { quiet: true });
-          this.ui.itemNotice(this.engine.itemInfo(th.item), 'gain', this.notices);
-        }
+        if (!this.engine.hasItem(th.item)) this.engine.gainItem(th.item, { into: this.notices });
         this.fly = { x: th.x, y: GY - 10, t: 0, label: th.label || '' };
         this.picked.push(th.item);
       } else if (th.kind === 'look' || th.kind === 'talk') {
@@ -1670,6 +1669,31 @@
       D(x - 0.5, m.y - 0.5, '#2a1e14');
     }
 
+    /** A lighthouse's lamp turning: its beam swings out to one side and back, foreshortening as it
+     *  comes round, and the lamp flares when the beam faces us. */
+    drawBeacon(c, b, cam) {
+      const x = b.x - cam * b.depth, y = b.y;
+      if (x < -140 || x > LW + 140) return;
+      const a = this.t * (b.speed || 0.8) + (b.ph || 0), side = Math.cos(a), face = Math.sin(a);
+      const len = (b.reach || 120) * Math.abs(side), dir = Math.sign(side);
+      c.save();
+      c.globalCompositeOperation = 'lighter';
+      if (len > 6) {
+        const g = c.createLinearGradient(x * SS, 0, (x + dir * len) * SS, 0);
+        g.addColorStop(0, `rgba(255,242,200,${(b.strength || 0.3).toFixed(2)})`);
+        g.addColorStop(1, 'rgba(255,242,200,0)');
+        c.fillStyle = g;
+        c.beginPath();
+        c.moveTo(x * SS, (y - 1.5) * SS); c.lineTo((x + dir * len) * SS, (y - 9) * SS); c.lineTo((x + dir * len) * SS, (y + 9) * SS); c.lineTo(x * SS, (y + 1.5) * SS);
+        c.closePath(); c.fill();
+      }
+      const k = Math.pow(Math.max(0, face), 5);
+      const D = (dx, dy, al) => { c.fillStyle = `rgba(255,246,210,${al.toFixed(2)})`; c.fillRect(Math.round((x + dx) * SS), Math.round((y + dy) * SS), SS, SS); };
+      D(0, 0, 0.5 + 0.5 * k);
+      if (k > 0.05) { const n = Math.round(2 + k * 6); for (let i = 1; i <= n; i++) { const al = k * (1 - i / (n + 1)); D(i, 0, al); D(-i, 0, al); D(0, i * 0.6, al * 0.7); D(0, -i * 0.6, al * 0.7); } }
+      c.restore();
+    }
+
     /** A glint of sun on a spire or a gilded finial: a little star that flares and fades. */
     drawSparkle(c, s, cam) {
       const x = s.x - cam * s.depth;
@@ -1821,11 +1845,13 @@
       }
       if (l.anim && l.anim.type === 'sway' && !this.reduce) x += Math.sin(this.t * (6.28 / (l.anim.t || 4))) * 0.8;
       if (x > LW || x + l.w < 0) return;
+      // something afloat rides the water, rising and settling
+      const dy = l.anim && l.anim.type === 'bob' && !this.reduce ? Math.round(Math.sin(this.t * (6.28 / (l.anim.t || 5))) * (l.anim.a || 1) * SS) : 0;
       // only the part on screen
       const dx = Math.round(x * SS);
       const sx = Math.max(0, -dx);
       const sw = Math.min(l.img.width - sx, LW * SS - Math.max(0, dx));
-      if (sw > 0) c.drawImage(l.img, sx, 0, sw, l.img.height, Math.max(0, dx), l.y * SS, sw, l.img.height);
+      if (sw > 0) c.drawImage(l.img, sx, 0, sw, l.img.height, Math.max(0, dx), l.y * SS + dy, sw, l.img.height);
     }
 
     thing(c, th, cam) {

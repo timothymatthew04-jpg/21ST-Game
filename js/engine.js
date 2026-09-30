@@ -148,11 +148,20 @@
 
     itemInfo(id) { return (this.story.items && this.story.items[id]) || { id, name: id.replace(/_/g, ' '), desc: '' }; }
 
-    gainItem(id, { quiet = false } = {}) {
+    /** Gains a keepsake. The first time one is ever found it is shown off (the promise waits for
+     *  that); after that a small notice slides in (into `into`, if given). */
+    gainItem(id, { quiet = false, into = null } = {}) {
       if (!this.state.items) this.state.items = [];
-      if (this.hasItem(id)) return;
+      if (this.hasItem(id)) return Promise.resolve();
       this.state.items.push(id);
-      if (!quiet) this.ui.itemNotice(this.itemInfo(id), 'gain');
+      if (quiet) return Promise.resolve();
+      const seen = this.state.itemsShown || (this.state.itemsShown = []);
+      if (!seen.includes(id)) {
+        seen.push(id);
+        return this.ui.itemShowcase(this.itemInfo(id));
+      }
+      this.ui.itemNotice(this.itemInfo(id), 'gain', into || undefined);
+      return Promise.resolve();
     }
 
     loseItem(id, { quiet = false } = {}) {
@@ -625,7 +634,7 @@
       if (!hesitated) {
         const s = shown[idx];
         if (s.cost && s.cost.ok) this.payCost(s.cost);
-        if (s.gain) { if (s.gain.kind === 'francs') this.changeFrancs(s.gain.n); else this.gainItem(s.gain.id); }
+        if (s.gain) { if (s.gain.kind === 'francs') this.changeFrancs(s.gain.n); else await this.guard(this.gainItem(s.gain.id)); }
       }
       for (const a of opt.effects) this.assign(a);
       const felt = this.karmaFelt(before);
@@ -916,8 +925,8 @@
       this.state.pc++;
     }
 
-    op_item(ins) {
-      if (ins.gain) this.gainItem(ins.id, { quiet: this.isSkipping() }); else this.loseItem(ins.id, { quiet: this.isSkipping() });
+    async op_item(ins) {
+      if (ins.gain) await this.guard(this.gainItem(ins.id, { quiet: this.isSkipping() })); else this.loseItem(ins.id, { quiet: this.isSkipping() });
       this.state.pc++;
     }
 

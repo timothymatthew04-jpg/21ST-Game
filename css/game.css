@@ -3752,3 +3752,42 @@ input[type='range']::-moz-range-thumb { width: 18px; height: 24px; background: v
 .overlay.walk:has(.wk-goal:not(.gone)) .wk-help { opacity: 0; animation: none; }
 /* a sunny place: the edges barely darken */
 .overlay.walk.wk-bright .wk-vignette { opacity: 0.35; }
+
+/* the first time a keepsake is found: shown off on a burst of gold, then flown away to be kept */
+.item-show { display: grid; place-items: center; z-index: 60; cursor: pointer; background: none; }
+.item-show .is-veil { position: absolute; inset: 0; background: radial-gradient(ellipse 60% 55% at 50% 40%, rgba(40, 24, 10, 0.6), rgba(6, 4, 2, 0.92)); animation: is-fade 0.5s ease both; }
+.item-show .is-rays { position: absolute; left: 50%; top: 36%; width: 1100px; height: 1100px; margin: -550px 0 0 -550px; border-radius: 50%;
+  background: repeating-conic-gradient(from 0deg, rgba(255, 214, 130, 0.22) 0deg 6deg, rgba(255, 214, 130, 0) 6deg 18deg);
+  -webkit-mask: radial-gradient(circle, #000 8%, rgba(0, 0, 0, 0.6) 26%, transparent 60%); mask: radial-gradient(circle, #000 8%, rgba(0, 0, 0, 0.6) 26%, transparent 60%);
+  animation: is-rays-in 0.9s ease-out both, is-spin 24s linear infinite; }
+.item-show .is-ring { position: absolute; left: 50%; top: 31%; width: 40px; height: 40px; margin: -20px 0 0 -20px; border-radius: 50%; border: 3px solid rgba(255, 226, 150, 0.9);
+  box-shadow: 0 0 30px rgba(255, 200, 100, 0.9), inset 0 0 20px rgba(255, 220, 140, 0.8); animation: is-ring 0.9s cubic-bezier(0.1, 0.7, 0.3, 1) 0.2s both; }
+.item-show .is-card { position: relative; display: flex; flex-direction: column; align-items: center; gap: 12px; text-align: center; max-width: 640px; padding: 0 30px; margin-top: -90px; }
+.item-show .is-tag { font: 700 13px/1 var(--display); letter-spacing: 0.34em; text-transform: uppercase; color: #3a2408; padding: 7px 16px 6px; border-radius: 3px;
+  background: linear-gradient(180deg, #ffe8a8, #e0a84a); box-shadow: 0 0 0 1px #fff2c8 inset, 0 4px 14px rgba(0, 0, 0, 0.5), 0 0 22px rgba(255, 190, 90, 0.6); animation: is-drop 0.5s cubic-bezier(0.2, 1.4, 0.4, 1) 0.15s both; }
+.item-show .is-iconwrap { position: relative; width: 150px; height: 150px; display: grid; place-items: center; margin: 6px 0; }
+.item-show .is-glow { position: absolute; inset: -30px; border-radius: 50%; background: radial-gradient(circle, rgba(255, 236, 170, 0.85), rgba(255, 180, 80, 0.35) 40%, rgba(255, 160, 60, 0) 70%); animation: is-fade 0.6s ease 0.2s both, is-breathe 2.4s ease-in-out 0.8s infinite; }
+.item-show .is-icon { position: relative; width: 130px; height: 130px; display: grid; place-items: center; animation: is-turn 1s cubic-bezier(0.2, 0.8, 0.25, 1) 0.2s both; filter: drop-shadow(0 0 12px rgba(255, 210, 120, 0.9)) drop-shadow(0 6px 10px rgba(0, 0, 0, 0.6)); }
+.item-show .is-icon .item-icon { width: 130px; height: 130px; line-height: 130px; font-size: 80px; }
+.item-show .is-spark { position: absolute; left: 50%; top: 50%; width: 6px; height: 6px; margin: -3px; background: #fff6d0; border-radius: 50%; box-shadow: 0 0 10px #ffd070, 0 0 20px rgba(255, 180, 60, 0.8); opacity: 0; animation: is-spark 1.1s ease-out both; }
+.item-show .is-name { font: 700 46px/1.1 var(--name-font); color: #ffe6a8; letter-spacing: 0.02em;
+  background: linear-gradient(180deg, #fff8e0 10%, #ffd27a 55%, #d8962e 90%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 2px 0 rgba(60, 30, 0, 0.9)) drop-shadow(0 0 16px rgba(255, 190, 90, 0.45)); animation: is-rise 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) 0.7s both; }
+.item-show .is-desc { font: 21px/1.45 var(--text-font); color: #f6e8cc; text-shadow: 0 2px 6px rgba(0, 0, 0, 0.85); max-width: 560px; animation: is-rise 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) 0.95s both; }
+.item-show .is-hint { margin-top: 10px; font: 13px/1 var(--display); letter-spacing: 0.24em; text-transform: uppercase; color: rgba(255, 230, 180, 0.75); animation: is-fade 0.6s ease 1.6s both, is-blink 1.6s ease-in-out 2.2s infinite; }
+.item-show.out { pointer-events: none; }
+.item-show.out .is-veil, .item-show.out .is-rays, .item-show.out .is-ring, .item-show.out .is-tag, .item-show.out .is-name, .item-show.out .is-desc, .item-show.out .is-hint, .item-show.out .is-glow { transition: opacity 0.45s ease; opacity: 0; animation: none; }
+.item-show.out .is-icon { animation: is-away 0.75s cubic-bezier(0.5, 0, 0.8, 0.4) forwards; }
+.item-show.still .is-rays, .item-show.still .is-ring, .item-show.still .is-spark { display: none; }
+.item-show.still .is-icon, .item-show.still .is-name, .item-show.still .is-desc, .item-show.still .is-tag { animation: is-fade 0.4s ease both; }
+@keyframes is-fade { from { opacity: 0; } }
+@keyframes is-rays-in { from { opacity: 0; transform: scale(0.3); } }
+@keyframes is-spin { to { rotate: 360deg; } }
+@keyframes is-ring { from { opacity: 1; transform: scale(0.2); } to { opacity: 0; transform: scale(14); } }
+@keyframes is-drop { from { opacity: 0; transform: translateY(-16px) scale(0.8); } }
+@keyframes is-turn { 0% { opacity: 0; transform: scale(0.1) rotateY(540deg) rotate(-20deg); } 60% { opacity: 1; transform: scale(1.18) rotateY(40deg) rotate(3deg); } 100% { transform: scale(1) rotateY(0) rotate(0); } }
+@keyframes is-breathe { 50% { transform: scale(1.12); opacity: 0.8; } }
+@keyframes is-spark { 0% { opacity: 0; transform: translate(0, 0) scale(0.4); } 15% { opacity: 1; } 100% { opacity: 0; transform: translate(var(--dx), var(--dy)) scale(1.2); } }
+@keyframes is-rise { from { opacity: 0; transform: translateY(18px); } }
+@keyframes is-blink { 50% { opacity: 0.35; } }
+@keyframes is-away { to { transform: translate(520px, -300px) scale(0.18) rotate(20deg); opacity: 0; } }

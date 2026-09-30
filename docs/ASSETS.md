@@ -66,7 +66,8 @@ the nation's military power: the regiment's headquarters (mansard roofs, a clock
 pediment, a square dome and the flag), ramparts topped with barbed wire and lined with lamps, iron
 gun turrets, bell tents, the armoury, a shooting range with its firing step and earth butt, an
 artillery park with field guns and a great mortar, and a harbour where a steam ship of the line of
-the Imperial Navy lies moored (two white-banded gun decks, three masts, a funnel, a carved stern).
+the Imperial Navy lies moored, riding on the water of the basin (two white-banded gun decks, three
+masts, a funnel, a carved stern), the naval arsenal's warehouses, clock tower and slipway beyond.
 At the end is the great gate, two towers and a portcullis, with Czech hedgehogs along the road
 north. Behind the camp a railway viaduct crosses the valley; beyond it stand citadels with siege
 guns and mortars on raised batteries, the keep of Vincennes, barracks and the arsenals' stacks.
@@ -86,7 +87,14 @@ Above the town, stone houses climb a hill in terraces to a twin-spired Gothic ca
 platform (after Cologne's); beyond are windmills on the ridges (their sails turned by the walk),
 a château on its rock and an abbey in the autumn woods of the foothills, and snowy mountains
 behind it all. Every house and the cathedral sit on an explicit ground line (`vProfile`), so none
-floats. It is drawn by `tools/paint/scenes-village.js`, shared with the Lavilledieu backdrop.
+floats. Where the river opens toward the sea, a lighthouse stands on a sea-worn pillar of rock
+(its lamp turning, its beam sweeping in the walk). It is drawn by `tools/paint/scenes-village.js`,
+shared with the Lavilledieu backdrop.
+
+The Joncour house (`joncour_home`), where Hélène is first met, is her sunlit corner on an autumn
+morning: a tall window onto the garden's orange and gold trees (leaves drifting past it), trailing
+plants, a wall of books, a day-bed heaped with knitted throws and cushions, a kilim rug, and her
+basket of silk threads.
 
 The eight walking areas (`camp`, `lavilledieu`, `steppe`, `village`, `aviary`, `ruins`, `crossing`, `cemetery`) are painted by
 `tools/paint-walks.js` from `tools/paint/walks.js`, with the same toolkit and style as the

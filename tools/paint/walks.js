@@ -143,6 +143,42 @@ WALKS.camp = (c, L) => {
     frHouse(mid, r, x, 190, 28, 14, { wall: '#d8bcb4', wallDark: '#b09098', roof: '#6e6c8e', roofDark: '#4e4c6e', roofH: 8, windows: [[6, 4, 3, 4, { lit: true }], [18, 4, 3, 4]] });
     frHouse(mid, r, x + 30, 190, 22, 12, { wall: '#e0c4b4', wallDark: '#b89a98', roof: '#a8583e', roofDark: '#7a3e2c', roofH: 7, windows: [[8, 4, 3, 4]] });
   }
+  // the harbour basin behind the quay: the naval arsenal along the far side, the water, the crane
+  const hb = L('harbour', { depth: 1 });
+  const arsenal = [[642, 58, 22, 'store'], [700, 64, 16, 'rope'], [764, 46, 30, 'clock'], [810, 82, 24, 'store'], [892, 70, 30, 'slip'], [962, 80, 20, 'store'], [1042, 62, 24, 'store']];
+  for (const [ax, aw, ah, kind] of arsenal) {
+    const top = 167 - ah;
+    vgrad(hb, ax, top, aw, ah, [[0, FR.stone.lit], [1, FR.stone.mid]]);
+    rect(hb, ax, top, 2, ah, FR.stone.hi); rect(hb, ax + aw - 2, top, 2, ah, FR.stone.shade);
+    if (kind === 'slip') {
+      hb.fillStyle = FR.slate.mid; hb.beginPath(); hb.moveTo(ax - 2, top); hb.quadraticCurveTo(ax + aw / 2, top - 22, ax + aw + 2, top); hb.closePath(); hb.fill();
+      for (let k = 4; k < aw; k += 6) line(hb, ax + k, top, ax + aw / 2, top - 14, FR.slate.dark, 1);
+      ellipse(hb, ax + aw / 2, 167, aw * 0.36, ah * 0.7, '#3a2e3a'); rect(hb, ax + aw * 0.14, 150, aw * 0.72, 17, '#3a2e3a');
+    } else {
+      poly(hb, [[ax - 2, top], [ax + aw + 2, top], [ax + aw - 4, top - 7], [ax + 4, top - 7]], FR.slate.mid);
+      rect(hb, ax + 4, top - 7, aw - 8, 1, FR.slate.hi);
+      for (let k = ax + 6; k < ax + aw - 6; k += 9) { ellipse(hb, k + 2, 167 - 8, 2.5, 2.5, '#3a2e3a'); rect(hb, k - 0.5, 167 - 8, 5, 8, '#3a2e3a'); if (ah > 18) { rect(hb, k, top + 4, 4, 5, r() < 0.3 ? FR.lit : FR.glass); } }
+      if (kind === 'rope') for (let k = ax + 4; k < ax + aw - 4; k += 4) px(hb, k, top + 3, FR.stone.deep);
+    }
+    if (kind === 'clock') {
+      rect(hb, ax + aw / 2 - 7, top - 26, 14, 26, FR.stone.lit); rect(hb, ax + aw / 2 - 7, top - 26, 3, 26, FR.stone.hi);
+      circle(hb, ax + aw / 2, top - 18, 4, '#f4ecd8'); line(hb, ax + aw / 2, top - 18, ax + aw / 2, top - 21, '#2e2830', 1); line(hb, ax + aw / 2, top - 18, ax + aw / 2 + 2, top - 18, '#2e2830', 1);
+      poly(hb, [[ax + aw / 2 - 9, top - 26], [ax + aw / 2 + 9, top - 26], [ax + aw / 2, top - 38]], FR.slate.mid);
+      rect(hb, ax + aw / 2, top - 46, 1, 9, '#3a2e2a');
+    }
+  }
+  rect(hb, 642, 166, 462, 5, FR.stone.mid); rect(hb, 642, 166, 462, 1, FR.stone.hi);
+  for (let x = 650; x < 1100; x += 34) { rect(hb, x, 163, 3, 4, '#3a3440'); rect(hb, x - 1, 163, 5, 1, '#5a5460'); }
+  vgrad(hb, 642, 171, 462, 25, [[0, '#caa0b8'], [0.5, '#a07a98'], [1, '#7a5a7a']]);
+  for (let i = 0; i < 170; i++) rect(hb, r.r(642, 1100), r.r(172, 195), r.r(3, 10), 1, r.pick(['#e8c0cc', '#f4d0c4', '#8a6a8a', '#b890a8']));
+  // the ship's dark reflection trembling under her hull
+  for (let y = 187; y < 196; y++) for (let x = 690; x < 990; x += r.r(3, 7)) if (r() < 0.75 - (y - 187) * 0.06) rect(hb, x, y, r.r(2, 6), 1, r() < 0.8 ? '#3a2e3e' : '#e8dcd0');
+  // the dock crane on the far quay, a crate on its hook
+  line(hb, 1050, 166, 1050, 118, FR.wood.mid, 3); line(hb, 1050, 122, 1010, 132, FR.wood.mid, 2); line(hb, 1050, 140, 1030, 128, FR.wood.dark, 1);
+  line(hb, 1012, 132, 1012, 148, '#3a3030', 1); rect(hb, 1007, 148, 10, 7, FR.wood.lit); rect(hb, 1007, 148, 10, 1, FR.wood.hi);
+  // the ship of the line herself, afloat, riding a little on the water (the layer bobs)
+  const sh = L('ship', { depth: 1, anim: { type: 'bob', a: 0.6, t: 5.5 } });
+  const ship = frWarship(sh, r, 700, 186, 0.9);
   // the camp itself
   const g = L('ground', { depth: 1 });
   vgrad(g, 0, 184, W, 22, [[0, '#b89478'], [1, '#8e6c52']]);
@@ -179,23 +215,18 @@ WALKS.camp = (c, L) => {
     for (let xx = bx - 1; xx < bx + 21; xx += 4) rect(g, xx, 145, 3, 5, FR.stone.mid);
     frLampPost(g, bx + 9, 146, 8);
   }
-  vgrad(g, 642, 170, 462, 26, [[0, '#caa0b8'], [0.5, '#a07a98'], [1, '#7a5a7a']]);
-  for (let i = 0; i < 160; i++) rect(g, r.r(642, 1100), r.r(172, 195), r.r(3, 10), 1, r.pick(['#e8c0cc', '#f4d0c4', '#8a6a8a', '#b890a8']));
-  rect(g, 642, 166, 462, 5, FR.stone.mid); rect(g, 642, 166, 462, 1, FR.stone.hi);
-  for (let x = 650; x < 1100; x += 34) { rect(g, x, 163, 3, 4, '#3a3440'); rect(g, x - 1, 163, 5, 1, '#5a5460'); }
-  // the dock crane on the far quay, a crate on its hook
-  line(g, 1050, 166, 1050, 118, FR.wood.mid, 3); line(g, 1050, 122, 1010, 132, FR.wood.mid, 2); line(g, 1050, 140, 1030, 128, FR.wood.dark, 1);
-  line(g, 1012, 132, 1012, 148, '#3a3030', 1); rect(g, 1007, 148, 10, 7, FR.wood.lit); rect(g, 1007, 148, 10, 1, FR.wood.hi);
-  const ship = frWarship(g, r, 700, 194, 0.9);
-  for (let i = 0; i < 90; i++) rect(g, r.r(646, 1000), r.r(190, 196), r.r(3, 9), 1, r.pick(['#c8a0b8', '#e8c4cc', '#8a6a8a']));
+  // (the ground opens here onto the basin and the ship, which are layers of their own, behind)
+  g.clearRect(642, 0, 462, 195);
+  // the water lapping at her waterline
+  for (let i = 0; i < 110; i++) rect(g, r.r(646, 1000), r.r(185, 189), r.r(2, 7), 1, r.pick(['#e8c4cc', '#f4dcd4', '#b890a8']));
   // the near quay the camp walks along: paving, bollards, mooring lines, the gangplank, stores
   rect(g, 630, 195, 480, 11, '#b8a0a4');
   rect(g, 630, 195, 480, 2, '#dcc4c4');
   for (let x = 632; x < 1110; x += 9) rect(g, x, 197 + ((x / 9) % 2) * 4, 1, 4, '#9a8290');
   rect(g, 630, 201, 480, 1, '#9a8290');
   for (const bx of [668, 760, 880, 1000, 1080]) { rect(g, bx, 191, 4, 5, '#2e2a34'); rect(g, bx - 1, 191, 6, 1, '#5a5460'); }
-  line(g, 670, 192, 690, 176, '#6a5a4a', 1); line(g, 1002, 192, 985, 176, '#6a5a4a', 1);
-  line(g, 902, 196, 936, 163, FR.wood.lit, 2); line(g, 902, 193, 936, 160, FR.wood.dark, 1);
+  line(g, 670, 192, 690, 170, '#6a5a4a', 1); line(g, 1002, 192, 985, 170, '#6a5a4a', 1);
+  line(g, 902, 196, 936, 156, FR.wood.lit, 2); line(g, 902, 193, 936, 153, FR.wood.dark, 1);
   for (const [x, w, hh] of [[640, 12, 9], [652, 9, 6], [1022, 14, 10], [1038, 10, 7]]) { rect(g, x, 195 - hh, w, hh, FR.wood.lit); rect(g, x, 195 - hh, w, 1, FR.wood.hi); line(g, x, 195 - hh, x + w, 195, FR.wood.dark, 1); }
   frShot(g, 1060, 195); frShot(g, 700, 195);
   for (const x of [718, 734]) { ellipse(g, x, 190, 4, 6, '#6a4a2e'); rect(g, x - 4, 188, 8, 1, '#3a2a1e'); }
@@ -318,7 +349,15 @@ WALKS.lavilledieu = (c, L) => {
   const mid = L('mid', { depth: 0.5 });
   const mx1 = S(0.5);
   hill(mid, r, -40, 420, 196, 22, '#a8903e');
-  for (let x = 10; x < 300; x += r.r(22, 40)) poplar(mid, r, x, 192, r.r(40, 56), { trunk: '#5a4a3a', leaves: ['#a86a1e', '#e0a030', '#f8d468'] }, -1);
+  // where the river opens toward the sea: the lighthouse on its pillar of rock, the water breaking round it
+  const inlet = [[-40, 196], [-26, 164], [8, 158], [70, 158], [96, 170], [108, 196]];
+  mid.save(); mid.beginPath(); mid.moveTo(inlet[0][0], inlet[0][1]); for (const p of inlet) mid.lineTo(p[0], p[1]); mid.closePath(); mid.clip();
+  vgrad(mid, -40, 158, 150, 38, [[0, '#8ab8dc'], [1, '#5a8ec0']]);
+  for (let i = 0; i < 60; i++) rect(mid, r.r(-30, 100), r.r(159, 195), r.r(3, 9), 1, r.pick(['#ffffff', '#cfe4f4', '#4a7aa8']));
+  mid.restore();
+  const lamp = vLighthouse(mid, r, 32, 180, 0.95, { rock: '#8a7a6a', rockLit: '#b8a488', rockDark: '#5e5048', wall: '#d8c09a', wallLit: '#f0dcb8', wallDark: '#a88c6a', glass: '#fff0c0', glassLit: '#ffffff', dome: '#6a6e7e' });
+  for (let i = 0; i < 50; i++) { const a = r.r(-1, 1); ellipse(mid, 32 + a * 30 + r.r(-3, 3), 179 - r.r(0, 5), r.r(2, 5), r.r(1, 2.2), r.pick(['#ffffff', '#eef6fc', '#cfe4f4'])); }
+  for (let x = 150; x < 300; x += r.r(22, 40)) poplar(mid, r, x, 192, r.r(40, 56), { trunk: '#5a4a3a', leaves: ['#a86a1e', '#e0a030', '#f8d468'] }, -1);
   frHouse(mid, r, 150, 190, 40, 20, { wall: '#b8b2a4', wallDark: '#948e80', wallLight: '#d0cabc', roof: '#a8583a', roofDark: '#7a3e28', windows: [[8, 5, 5, 7, { frame: '#8a8478' }], [26, 5, 5, 7, { frame: '#8a8478' }]], chimney: 0.7 });
   moss(mid, r, 150, 180, 40, 10, 14);
   for (const x of [120, 206, 236]) mulberry(mid, r, x, 194, r.r(20, 28));
@@ -388,7 +427,7 @@ WALKS.lavilledieu = (c, L) => {
       px(fr, x, H - hh, '#3a2a1e');
     } else line(fr, x, H, x + r.r(-4, 4), H - hh, r.pick(['#8a7a3a', '#a8904a', '#c8a85a']), 1);
   }
-  return { colors: 150, vignette: [0.16, '40,30,20'], anchors: { spires } };
+  return { colors: 150, vignette: [0.16, '40,30,20'], anchors: { spires, lamp } };
 };
 
 // ---------------------------------------------------------------- across the steppe, at sunset

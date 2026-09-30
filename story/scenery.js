@@ -2301,8 +2301,8 @@ window.VN_SCENERY = {
  "joncour_home": {
   "flat": "assets/scenes/joncour_home/flat.png",
   "vignette": [
-   0.5,
-   "20,8,10"
+   0.3,
+   "60,34,14"
   ],
   "layers": [
    {
@@ -2314,36 +2314,6 @@ window.VN_SCENERY = {
     "depth": 0,
     "anim": null,
     "src": "assets/scenes/joncour_home/sky.png"
-   },
-   {
-    "id": "curtain166",
-    "x": 164,
-    "y": 50,
-    "w": 20,
-    "h": 126,
-    "depth": 0.5,
-    "anim": {
-     "type": "sway",
-     "a": 1.1,
-     "t": 6.210412931628525,
-     "oy": 0
-    },
-    "src": "assets/scenes/joncour_home/curtain166.png"
-   },
-   {
-    "id": "curtain314",
-    "x": 296,
-    "y": 50,
-    "w": 20,
-    "h": 126,
-    "depth": 0.5,
-    "anim": {
-     "type": "sway",
-     "a": 1.1,
-     "t": 6.945004762150347,
-     "oy": 0
-    },
-    "src": "assets/scenes/joncour_home/curtain314.png"
    }
   ]
  },
@@ -2515,6 +2485,16 @@ window.VN_SCENERY = {
     "src": "assets/scenes/lavilledieu/river.png"
    },
    {
+    "id": "lighthouse",
+    "x": 423,
+    "y": 112,
+    "w": 56,
+    "h": 126,
+    "depth": 0.31,
+    "anim": null,
+    "src": "assets/scenes/lavilledieu/lighthouse.png"
+   },
+   {
     "id": "boat250",
     "x": 228,
     "y": 178,
@@ -2529,8 +2509,8 @@ window.VN_SCENERY = {
     "src": "assets/scenes/lavilledieu/boat250.png"
    },
    {
-    "id": "boat400",
-    "x": 383,
+    "id": "boat380",
+    "x": 363,
     "y": 214,
     "w": 36,
     "h": 14,
@@ -2540,14 +2520,14 @@ window.VN_SCENERY = {
      "a": 0.8,
      "t": 5.2
     },
-    "src": "assets/scenes/lavilledieu/boat400.png"
+    "src": "assets/scenes/lavilledieu/boat380.png"
    },
    {
     "id": "bank",
     "x": 0,
-    "y": 231,
+    "y": 230,
     "w": 480,
-    "h": 39,
+    "h": 40,
     "depth": 0.6,
     "anim": {
      "type": "sway",

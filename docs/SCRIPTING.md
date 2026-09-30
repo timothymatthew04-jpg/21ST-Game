@@ -142,7 +142,7 @@ be said (a wave, a tremble, a shimmer, a fade) and the text box glows, shakes, c
 
 ```text
 item watch "Father's pocket watch" "Gold and heavy, never a minute wrong."   # at the top
-gain item watch                # Hervé now carries it (a card slides in at the top right)
+gain item watch                # Hervé now carries it (shown off the first time; a card after)
 lose item watch
 gain francs 300                # money is the variable "francs"
 lose francs 40
@@ -156,7 +156,11 @@ menu
 `cost=` is given up when the option is chosen; `needs=` must be carried but is kept; `gain=` is
 received. Options the player can't afford are shown but locked, with what they lack; a menu never
 locks every option. `has("watch")` tests for a keepsake in conditions, and `francs >= 100` for money.
-The Keepsakes page in the game menu shows everything Hervé carries; icons live in
+The first time a keepsake is found (in the script, from a choice or picked up on a walk), the
+scene dims and it turns in on a burst of gold with its name and description; the story waits until
+the player clicks (or a few seconds pass), then it flies off to be kept. After that, gaining it
+again only slides a small card in at the top right. The Keepsakes page in the game menu shows
+everything Hervé carries; icons live in
 `assets/ui/items/<id>.png` (painted by `tools/paint-items.js`).
 
 ### Minigames

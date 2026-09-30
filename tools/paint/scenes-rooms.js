@@ -251,74 +251,139 @@ SCENES.balbadiou_office = (c, L) => {
 
 // ---------------------------------------------------------------- the Joncour house: the sitting room at dusk
 SCENES.joncour_home = (c, L) => {
+  // Hélène's corner of the Joncour house on an autumn morning: sun pouring in through the tall
+  // window onto the plants, a wall of books, a day-bed heaped with knitted throws and cushions, a
+  // rug, her basket of silk threads. Through the window, the garden's trees in orange and gold (the
+  // leaves falling past it, the dust turning in the sunbeams and the birds are the scene's effects).
   const r = rng(71);
-  const o = { bx0: 110, by0: 42, bx1: 370, by1: 182 };
-  room(c, r, { ...o, ceiling: '#3a2c30', left: '#6e5a66', right: '#665260', back: '#7a6470', floor: '#5a3e30', plankLine: '#453024', seam: '#3a2a2e', skirting: '#4a3430' });
-  texture(c, r, 0, 0, W, 190, 0.04, 3);
-  for (let y = o.by0 + 8; y < o.by1 - 8; y += 12) for (let x = o.bx0 + 6 + ((y / 12) % 2) * 7; x < o.bx1 - 4; x += 14) { px(c, x, y, '#8c7482'); px(c, x + 1, y + 1, '#6a5460'); }
-  // the big window on the back wall: the garden at dusk, the first stars
+  const o = { bx0: 118, by0: 28, bx1: 382, by1: 186 };
+  room(c, r, { ...o, ceiling: '#e6d2b4', left: '#d4b692', right: '#c6a682', back: '#e6ceac', floor: '#b27c4a', plankLine: '#8a5a34', seam: '#c8a882', skirting: '#a07850' });
+  texture(c, r, 0, 0, W, 186, 0.035, 3);
+  for (let i = 0; i < 220; i++) px(c, o.bx0 + r() * (o.bx1 - o.bx0), o.by0 + r() * (o.by1 - o.by0), r.pick(['#ecd6b6', '#dcc29e']));
+  // old oak beams across the ceiling
+  for (const t of [0.35, 0.7]) { const y0 = o.by0 * t, xl = o.bx0 * t, xr = W - (W - o.bx1) * t; poly(c, [[xl, y0 - 3], [xr, y0 - 3], [xr, y0 + 4], [xl, y0 + 4]], '#8a5a34'); rect(c, xl, y0 + 3, xr - xl, 1, '#5a3a20'); }
+  // on the left wall: a painting of the sea in a gilt frame, a little shelf with a candle and a jug of dried flowers
+  wallQuad(c, o, -1, 0.3, 0.62, 0.2, 0.42, '#c9a45a');
+  wallQuad(c, o, -1, 0.33, 0.59, 0.23, 0.39, '#6a9ab8');
+  wallQuad(c, o, -1, 0.33, 0.59, 0.33, 0.39, '#3a6a8a');
+  wallQuad(c, o, -1, 0.66, 0.92, 0.5, 0.52, '#7a4a28');
+  { const [sx, sy] = wallPt(o, -1, 0.72, 0.5); candle(c, sx, sy, false); const [jx, jy] = wallPt(o, -1, 0.84, 0.5); rect(c, jx - 3, jy - 7, 6, 7, '#d8c8a8'); for (let k = 0; k < 7; k++) px(c, jx + r.r(-5, 5), jy - r.r(8, 14), r.pick(['#c8a060', '#b85a3a', '#e8d8b8', '#8a6ad0'])); }
+  // the tall window, and the autumn garden through it
   const view = (x, y, w, h) => {
-    vgrad(c, x, y, w, h, [[0, '#2c2c5e'], [0.5, '#6b4f86'], [0.85, '#d98a7e'], [1, '#f2b082']]);
-    stars(c, r, 30, x, y, w, h * 0.4);
-    hill(c, r, x - 10, x + w + 10, y + h * 0.86, h * 0.18, '#4a3a5e');
-    for (let k = 0; k < 5; k++) crown(c, r, x + 10 + k * (w / 5), y + h * 0.8, 10, 12, ['#2a2440', '#3a3050', '#5a4a6a'], { x: 0.5, y: -0.5 }, 12);
-    rect(c, x, y + h * 0.88, w, h * 0.12, '#2e2a40');
+    vgrad(c, x, y, w, h, [[0, '#8cc0ea'], [0.55, '#cfe4f2'], [1, '#f4ecd8']]);
+    for (let k = 0; k < 3; k++) ellipse(c, x + 14 + k * 26, y + 14 + (k % 2) * 8, 12, 4, '#ffffff');
+    rect(c, x, y + h * 0.62, w, h * 0.4, '#c8b070');
+    for (let k = 0; k < 3; k++) { const hx = x + 8 + k * 30; rect(c, hx, y + h * 0.5, 20, 16, '#bab4a6'); poly(c, [[hx - 2, y + h * 0.5], [hx + 22, y + h * 0.5], [hx + 10, y + h * 0.5 - 8]], '#a8583a'); rect(c, hx + 4, y + h * 0.5 + 5, 3, 4, '#3a4a62'); }
+    for (let k = 0; k < 6; k++) { const tx = x + r.r(0, w), ty = y + h * r.r(0.3, 0.62); branch(c, tx, ty + 30, tx + r.r(-3, 3), ty, 2, '#5a4030'); crown(c, r, tx, ty, r.r(12, 20), r.r(10, 15), r.pick([VIL.gold, VIL.leaf, VIL.red]), { x: -0.7, y: -0.7 }, 26); }
+    for (let k = 0; k < 40; k++) px(c, x + r() * w, y + h * r.r(0.7, 1), r.pick(VIL.leaf.slice(1)));
+    for (let xx = x; xx < x + w; xx += 5) rect(c, xx, y + h * 0.8, 2, 12, '#f0ece2');
+    rect(c, x, y + h * 0.83, w, 2, '#e0dacc');
   };
-  viewWindow(c, 176, 56, 128, 104, view, { frame: '#e6d6c2', sill: '#cdb9a0', bars: 3 });
-  // curtains
-  for (const [x, s] of [[166, 1], [314, -1]]) {
-    const cu = L(`curtain${x}`, { depth: 0.5, anim: sway(1.1, r.r(5, 7), { oy: 0 }) });
-    poly(cu, [[x, 50], [x + s * 18, 50], [x + s * 14, 170], [x - s * 2, 176]], '#7a2e3e');
-    for (let k = 0; k < 4; k++) line(cu, x + s * (3 + k * 4), 52, x + s * (2 + k * 3.5), 172, '#5e2232', 1);
+  const WX = 138, WY_ = 42, WW = 96, WH = 124;
+  rect(c, WX - 6, WY_ - 6, WW + 12, WH + 10, '#f2e6d2');
+  viewWindow(c, WX, WY_, WW, WH, view, { frame: '#f6f0e4', sill: '#e8dcc6', bars: 4 });
+  rect(c, WX - 8, WY_ + WH, WW + 16, 4, '#f2e8d6');
+  rect(c, WX - 8, WY_ + WH + 4, WW + 16, 2, '#c8b494');
+  // the sun on the sill and pots of herbs and a small fern on it
+  for (const [px_, col] of [[WX + 6, '#c06a3a'], [WX + 30, '#d88a58'], [WX + 70, '#b8603a']]) {
+    rect(c, px_, WY_ + WH - 8, 10, 8, col); rect(c, px_ - 1, WY_ + WH - 9, 12, 2, vShade(col, 0.2));
+    crown(c, r, px_ + 5, WY_ + WH - 14, 8, 7, ['#2e5a26', '#4a7a32', '#6aa04a', '#a8d070'], { x: -0.8, y: -0.6 }, 18);
   }
-  rect(c, 160, 48, 160, 3, '#c9a45a');
-  // her reading chair by the window, turned toward the room, a book left open on the seat
-  ellipse(c, 152, 222, 36, 7, 'rgba(30,20,20,0.45)');
-  poly(c, [[128, 140], [170, 136], [174, 196], [130, 200]], '#7a3e3a');
-  ellipse(c, 149, 140, 22, 8, '#7a3e3a');
-  poly(c, [[134, 146], [164, 143], [166, 186], [136, 188]], '#8f4a44');
-  for (let k = 0; k < 3; k++) px(c, 142 + k * 8, 160, '#5e2c2a');
-  poly(c, [[122, 176], [180, 172], [186, 206], [118, 210]], '#8f4a44');
-  poly(c, [[122, 176], [180, 172], [182, 180], [121, 184]], '#b0625a');
-  ellipse(c, 124, 184, 7, 16, '#7a3e3a'); ellipse(c, 182, 180, 7, 16, '#6e3834');
-  ellipse(c, 124, 172, 7, 4, '#a85a52'); ellipse(c, 182, 168, 7, 4, '#9a5049');
-  rect(c, 124, 208, 3, 10, '#3a2418'); rect(c, 178, 204, 3, 10, '#3a2418');
-  poly(c, [[142, 176], [152, 173], [162, 176], [152, 179]], '#efe6d2'); line(c, 152, 173, 152, 179, '#b0a080', 1);
-  glow(c, 150, 150, 40, 'rgba(170,140,220,0.18)');
-  // the fireplace on the right wall, burning
-  const fp = [wallPt(o, 1, 0.45, 0.5), wallPt(o, 1, 0.8, 0.5), wallPt(o, 1, 0.8, 1), wallPt(o, 1, 0.45, 1)];
-  poly(c, fp, '#9c8a82');
-  const fi = [wallPt(o, 1, 0.52, 0.62), wallPt(o, 1, 0.74, 0.62), wallPt(o, 1, 0.74, 0.97), wallPt(o, 1, 0.52, 0.97)];
-  poly(c, fi, '#1c1210');
-  const fc = [(fi[0][0] + fi[1][0]) / 2, (fi[2][1] + fi[1][1]) / 2 + 4];
-  ellipse(c, fc[0], fc[1] + 6, 12, 3, '#3a2218');
-  for (let k = 0; k < 7; k++) ellipse(c, fc[0] + r.r(-8, 8), fc[1] + r.r(-6, 2), r.r(2, 4), r.r(4, 8), r.pick(['#ffb040', '#ff7a2a', '#ffd070']));
-  ellipse(c, fc[0], fc[1], 4, 6, '#fff0b0');
-  glow(c, fc[0], fc[1], 120, 'rgba(255,140,60,0.5)');
-  glow(c, fc[0], fc[1], 30, 'rgba(255,200,100,0.7)');
-  const mt = [wallPt(o, 1, 0.42, 0.48), wallPt(o, 1, 0.83, 0.48), wallPt(o, 1, 0.83, 0.52), wallPt(o, 1, 0.42, 0.52)];
-  poly(c, mt, '#5a3c2c');
-  const [mx, my] = wallPt(o, 1, 0.62, 0.47);
-  rect(c, mx - 4, my - 12, 8, 12, '#c9a45a'); circle(c, mx, my - 8, 3, '#f4ecd6');
-  candle(c, mx - 16, my, true); candle(c, mx + 14, my, true);
-  // a painting and a bookcase on the left wall
-  wallQuad(c, o, -1, 0.35, 0.7, 0.2, 0.42, '#c9a45a');
-  wallQuad(c, o, -1, 0.38, 0.67, 0.23, 0.39, '#4a6a7a');
-  for (let s = 0; s < 4; s++) {
-    const v = 0.5 + s * 0.1;
-    wallQuad(c, o, -1, 0.72, 0.98, v, v + 0.09, '#2e2018');
-    const [x0, y0] = wallPt(o, -1, 0.75, v + 0.01), [x1] = wallPt(o, -1, 0.96, v);
-    books(c, r, x0, y0, x1 - x0, 8, 1);
+  // trailing plants hanging down over the top of the window from the rail
+  rect(c, WX - 14, WY_ - 12, WW + 28, 3, '#8a5a34');
+  const vine = (x0, y0, len, sway_) => {
+    let x = x0, y = y0;
+    for (let k = 0; k < len; k++) {
+      x += Math.sin(k * 0.5 + sway_) * 0.8; y += 1.6;
+      px(c, x, y, '#4a6a2a');
+      if (k % 3 === 0) { const s = k % 2 ? 1 : -1; ellipse(c, x + s * 3, y, 3, 2, r.pick(['#3e6e2a', '#5a8a3a', '#7aaa4a'])); px(c, x + s * 4, y - 1, '#a8d070'); }
+    }
+  };
+  for (const [vx, vl, vs] of [[WX - 10, 44, 0], [WX + 4, 30, 1], [WX + 22, 18, 2], [WX + WW - 18, 26, 3], [WX + WW + 6, 50, 1.4], [WX + WW - 2, 36, 2.2]]) vine(vx, WY_ - 10, vl, vs);
+  crown(c, r, WX + 6, WY_ - 12, 16, 7, ['#2e5a26', '#4a7a32', '#6aa04a', '#a8d070'], { x: -0.8, y: -0.6 }, 30);
+  crown(c, r, WX + WW - 4, WY_ - 12, 18, 7, ['#2e5a26', '#4a7a32', '#6aa04a', '#a8d070'], { x: -0.8, y: -0.6 }, 30);
+  // a macramé hanging between the window and the books
+  rect(c, 242, 50, 14, 2, '#8a5a34');
+  for (let k = 0; k < 5; k++) for (let y = 52; y < 96; y += 3) px(c, 243 + k * 3 + (((y / 3) + k) % 2), y, '#f0e4cc');
+  for (let y = 58; y < 96; y += 9) poly(c, [[243, y], [249, y + 4], [255, y], [249, y + 6]], '#e8d8b8');
+  for (let k = 0; k < 7; k++) line(c, 243 + k * 2, 96, 243 + k * 2, 108 + (k % 3) * 2, '#e8dcc4', 1);
+  // the wall of books on the right of the back wall, in dark oak, with its odds and ends
+  const bx0 = 262, bx1 = 378, by0 = 40;
+  rect(c, bx0 - 4, by0 - 6, bx1 - bx0 + 8, o.by1 - by0 + 6, '#7a4a28');
+  rect(c, bx0 - 4, by0 - 6, 3, o.by1 - by0 + 6, '#9a6438');
+  for (let sy = by0; sy < o.by1 - 20; sy += 27) {
+    rect(c, bx0, sy, bx1 - bx0, 24, '#4a2c18');
+    rect(c, bx0, sy + 24, bx1 - bx0, 3, '#9a6438');
+    let x = bx0 + 1;
+    while (x < bx1 - 4) {
+      if (r() < 0.12) {
+        const kind = r.i(0, 5) % 4 === 3 && r() < 0.4 ? 3 : r.i(0, 2);
+        if (kind === 0) { rect(c, x + 2, sy + 10, 9, 14, '#e8dcc0'); rect(c, x + 3, sy + 11, 7, 12, r.pick(['#6a8aa0', '#a87a5a', '#7a9a6a'])); x += 13; }
+        else if (kind === 1) { ellipse(c, x + 5, sy + 18, 4, 6, r.pick(['#d8e4e8', '#c06a3a', '#e8d0a0'])); crown(c, r, x + 5, sy + 10, 6, 5, ['#2e5a26', '#4a7a32', '#6aa04a', '#a8d070'], { x: -0.8, y: -0.6 }, 12); x += 11; }
+        else if (kind === 2) { for (let k = 0; k < 4; k++) rect(c, x + 1, sy + 20 - k * 3, 12, 3, r.pick(['#8a3a2a', '#2e4a6b', '#c8a060', '#5b6b2e'])); x += 14; }
+        else { circle(c, x + 5, sy + 17, 5, '#c8a050'); circle(c, x + 5, sy + 17, 3.6, '#f4ecd6'); line(c, x + 5, sy + 17, x + 5, sy + 14, '#3a2a1e', 1); x += 11; }
+        continue;
+      }
+      const bw = r.i(2, 5), bh = r.i(15, 23);
+      rect(c, x, sy + 24 - bh, bw, bh, r.pick(['#7a2e2e', '#2e4a6b', '#5b6b2e', '#8a6b2e', '#4a2e5b', '#a0785a', '#2e5b52', '#c8a060', '#b84a3a', '#e8d8b8']));
+      rect(c, x, sy + 26 - bh, bw, 1, 'rgba(255,230,170,0.45)');
+      x += bw + (r() < 0.1 ? 1 : 0);
+    }
   }
-  // a small table with tea things, the rug, warm light on the floor
-  poly(c, [[80, 268], [150, 214], [330, 214], [400, 268]], '#6a3a3a');
-  poly(c, [[96, 262], [156, 218], [324, 218], [384, 262]], '#7e4a44');
-  for (let i = 0; i < 50; i++) px(c, 120 + r() * 240, 222 + r() * 36, '#c99a6a');
-  ellipse(c, 290, 222, 24, 6, '#5a3a28'); rect(c, 288, 222, 4, 24, '#4a301e');
-  ellipse(c, 282, 218, 4, 2, '#f0e8e0'); rect(c, 280, 214, 5, 4, '#f0e8e0'); ellipse(c, 296, 219, 5, 2, '#f0e8e0');
-  shade(c, fc[0], 240, 150, 'rgba(255,150,70,0.18)');
-  shaft(c, [[176, 160], [304, 160], [340, 260], [150, 260]], 'rgba(170,150,220,1)', 0.12);
-  return { colors: 64, vignette: [0.5, '20,8,10'] };
+  // a trailing plant spilling from the top of the shelves
+  crown(c, r, 300, by0 - 8, 14, 6, ['#2e5a26', '#4a7a32', '#6aa04a', '#a8d070'], { x: -0.8, y: -0.6 }, 22);
+  for (const [vx, vl, vs] of [[292, 30, 0.5], [306, 44, 1.7], [318, 22, 2.9]]) vine(vx, by0 - 6, vl, vs);
+  // her day-bed below the books: a round mattress heaped with knitted throws and cushions
+  const DB = { x: 312, y: 214 };
+  ellipse(c, DB.x, DB.y + 12, 96, 16, 'rgba(90,50,24,0.35)');
+  ellipse(c, DB.x, DB.y + 4, 92, 20, '#c89a60');
+  ellipse(c, DB.x, DB.y, 90, 18, '#e0bc84');
+  const knit = (cx, cy, rx, ry, base, alt) => {
+    ellipse(c, cx, cy, rx, ry, base);
+    c.save(); c.beginPath(); c.ellipse(cx, cy, rx, ry, 0, 0, TAU); c.clip();
+    for (let y = cy - ry; y < cy + ry; y += 2) for (let x = cx - rx + ((y / 2) % 2); x < cx + rx; x += 3) px(c, x, y, alt);
+    c.restore();
+  };
+  knit(DB.x + 10, DB.y - 2, 70, 13, '#f2e8d4', '#dcceb2');
+  poly(c, [[DB.x - 40, DB.y + 6], [DB.x + 70, DB.y + 2], [DB.x + 76, DB.y + 18], [DB.x - 30, DB.y + 22]], '#ece0c8');
+  for (let x = DB.x - 36; x < DB.x + 72; x += 4) { px(c, x, DB.y + 20 - (x - DB.x + 36) * 0.02, '#d8c8a8'); px(c, x + 1, DB.y + 21, '#f6eee0'); }
+  knit(DB.x - 50, DB.y - 18, 20, 16, '#f4ecdc', '#ded2ba');
+  knit(DB.x - 20, DB.y - 22, 20, 17, '#b8622e', '#d8864a');
+  for (let k = -14; k < 14; k += 4) { px(c, DB.x - 20 + k, DB.y - 22, '#f0c890'); px(c, DB.x - 20 + k + 1, DB.y - 18, '#7a3a1a'); }
+  knit(DB.x + 14, DB.y - 20, 22, 16, '#efe4cc', '#d8cab0');
+  knit(DB.x + 44, DB.y - 14, 16, 12, '#c8a070', '#e0bc8a');
+  // a stool with her tea, and the basket of silk skeins she embroiders with
+  ellipse(c, 214, 212, 14, 4, '#7a4a28'); rect(c, 212, 212, 4, 20, '#5a341c');
+  rect(c, 206, 206, 7, 6, '#f4ece0'); rect(c, 213, 207, 2, 3, '#f4ece0'); ellipse(c, 222, 209, 5, 2, '#f4ece0');
+  ellipse(c, 400, 238, 20, 7, '#9a6a3a'); rect(c, 380, 226, 40, 12, '#b07a44');
+  for (let k = 0; k < 9; k++) ellipse(c, 386 + k * 4, 226 - (k % 2) * 2, 3, 2.5, r.pick(['#d8304a', '#f0c040', '#3a7ad0', '#f4ecf0', '#8a4ac0', '#40a870', '#f08a3a']));
+  for (let y = 229; y < 238; y += 2) line(c, 380, y, 420, y, '#8a5a30', 1);
+  // the rug: a woven kilim in madder red, indigo and ochre
+  const rug = [[26, 268], [96, 214], [290, 214], [340, 268]];
+  poly(c, rug, '#9a3a2e');
+  poly(c, [[40, 264], [102, 218], [286, 218], [328, 264]], '#2e3e6a');
+  poly(c, [[60, 258], [110, 222], [278, 222], [314, 258]], '#b84a36');
+  c.save(); c.beginPath(); c.moveTo(60, 258); c.lineTo(110, 222); c.lineTo(278, 222); c.lineTo(314, 258); c.closePath(); c.clip();
+  for (let y = 226; y < 260; y += 8) for (let x = 60; x < 320; x += 16) { const k = (x + y) % 32 < 16; poly(c, [[x, y + 4], [x + 6, y], [x + 12, y + 4], [x + 6, y + 8]], k ? '#e0b060' : '#2e3e6a'); px(c, x + 6, y + 4, '#f4ecd8'); }
+  c.restore();
+  for (let x = 28; x < 340; x += 5) { line(c, x, 268, x - 1, 270, '#e8d8b8', 1); }
+  // a big leafy plant in a terracotta pot in the near corner, and a smaller one by the window
+  const pot = (x, yb, w, hh, col) => { poly(c, [[x - w / 2, yb - hh], [x + w / 2, yb - hh], [x + w * 0.38, yb], [x - w * 0.38, yb]], col); rect(c, x - w / 2 - 1, yb - hh - 3, w + 2, 4, vShade(col, 0.15)); poly(c, [[x - w / 2, yb - hh], [x - w * 0.2, yb - hh], [x - w * 0.12, yb], [x - w * 0.38, yb]], vShade(col, 0.12)); };
+  const bigLeaf = (x, y, ang, len, col) => {
+    const dx = Math.cos(ang), dy = Math.sin(ang);
+    line(c, x, y, x + dx * len, y + dy * len, '#4a6a2a', 1);
+    ellipse(c, x + dx * len, y + dy * len, len * 0.42, len * 0.22, col, ang);
+    ellipse(c, x + dx * len - dy, y + dy * len + dx - 1, len * 0.18, len * 0.08, vShade(col, 0.25), ang);
+  };
+  pot(56, 262, 40, 30, '#b8603a');
+  for (let k = 0; k < 22; k++) bigLeaf(56 + r.r(-6, 6), 232, -Math.PI / 2 + r.r(-1.2, 1.2), r.r(22, 44), r.pick(['#2e5a26', '#3e6e2a', '#4a7a32', '#5a8a3a']));
+  pot(112, 188, 22, 18, '#c8784a');
+  for (let k = 0; k < 12; k++) bigLeaf(112, 170, -Math.PI / 2 + r.r(-1.1, 1.1), r.r(10, 22), r.pick(['#3e6e2a', '#5a8a3a', '#6a9a3e']));
+  // the sun: shafts from the window across the floor and onto the day-bed, a warm patch on the rug
+  shaft(c, [[WX, WY_ + 10], [WX + WW, WY_], [360, 250], [150, 270]], 'rgba(255,226,160,1)', 0.16);
+  poly(c, [[150, 214], [230, 212], [300, 250], [190, 256]], 'rgba(255,214,140,0.22)');
+  glow(c, WX + WW / 2, WY_ + WH / 2, 110, 'rgba(255,236,190,0.35)');
+  return { colors: 110, vignette: [0.3, '60,34,14'] };
 };
 
 // ---------------------------------------------------------------- Hélène's room in winter

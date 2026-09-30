@@ -151,20 +151,44 @@ window.VN_WALKSCENERY = {
     "src": "assets/walks/camp/mid.png"
    },
    {
+    "id": "harbour",
+    "x": 640,
+    "y": 91,
+    "w": 466,
+    "h": 105,
+    "depth": 1,
+    "anim": null,
+    "src": "assets/walks/camp/harbour.png"
+   },
+   {
+    "id": "ship",
+    "x": 647,
+    "y": 6,
+    "w": 337,
+    "h": 180,
+    "depth": 1,
+    "anim": {
+     "type": "bob",
+     "a": 0.6,
+     "t": 5.5
+    },
+    "src": "assets/walks/camp/ship.png"
+   },
+   {
     "id": "ground",
     "x": 0,
-    "y": 14,
+    "y": 57,
     "w": 1920,
-    "h": 198,
+    "h": 155,
     "depth": 1,
     "anim": null,
     "src": "assets/walks/camp/ground.png"
    },
    {
     "id": "front",
-    "x": 12,
+    "x": 2,
     "y": 234,
-    "w": 1900,
+    "w": 1903,
     "h": 36,
     "depth": 1.3,
     "anim": {
@@ -405,9 +429,9 @@ window.VN_WALKSCENERY = {
    {
     "id": "mid",
     "x": 0,
-    "y": 134,
-    "w": 1260,
-    "h": 63,
+    "y": 49,
+    "w": 1254,
+    "h": 148,
     "depth": 0.5,
     "anim": null,
     "src": "assets/walks/lavilledieu/mid.png"
@@ -424,10 +448,10 @@ window.VN_WALKSCENERY = {
    },
    {
     "id": "front",
-    "x": 18,
-    "y": 232,
-    "w": 1891,
-    "h": 38,
+    "x": 49,
+    "y": 233,
+    "w": 1815,
+    "h": 37,
     "depth": 1.3,
     "anim": {
      "type": "sway",

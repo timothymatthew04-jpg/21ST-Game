@@ -64,9 +64,11 @@
  *    wheels:   [{ x, y, r, speed }]  a mill wheel turning in the river
  *    fountains: [{ x, y, basin }]  water thrown up and falling back
  *    bright:   true for a sunny place (the edges barely darken)
+ *  A painted layer can also bob (anim { type: 'bob', a, t }), for something afloat, like a ship.
  *    windmills: [{ x, y, r, depth, speed, ph }]  the sails of a windmill painted at `depth`, turning
  *              round its hub (x, y in that layer's own pixels)
  *    sparkles: [{ x, y, depth, speed, size }]  the sun flashing on a spire or a gilded finial
+ *    beacons:  [{ x, y, depth, speed, reach, strength }]  a lighthouse lamp turning, its beam sweeping
  *    runners:  [{ look | kind: 'dog' | 'cat', coat, x0, x1, speed, turn, y, hoop, follow, gap }]
  *              children and animals running to and fro between x0 and x1, stopping now and then
  *              (a cat sits a good while); `follow` (an index) keeps to its own side of that runner,
@@ -103,12 +105,12 @@ window.VN_WALKS = {
       { x: 1128, y: 135, w: 16, h: 10, fringe: true },
       { x: 1340, y: 135, w: 16, h: 10, fringe: true },
       // the warship's ensign at her stern and the tricolour at the main masthead; the great gate's
-      { x: 982, y: 121, w: 16, h: 10 },
-      { x: 841, y: 14, w: 12, h: 7 },
+      { x: 982, y: 113, w: 16, h: 10 },
+      { x: 841, y: 6, w: 12, h: 7 },
       { x: 1717, y: 109, w: 18, h: 11 },
     ],
     fires: [{ x: 1232, y: 203 }],
-    smoke: [{ x: 1232, y: 192, rate: 1.6 }, { x: 1156, y: 124, rate: 0.8 }, { x: 1309, y: 124, rate: 0.8 }, { x: 804, y: 123, rate: 1.4, col: '84,74,86', a: 0.5 }],
+    smoke: [{ x: 1232, y: 192, rate: 1.6 }, { x: 1156, y: 124, rate: 0.8 }, { x: 1309, y: 124, rate: 0.8 }, { x: 804, y: 115, rate: 1.4, col: '84,74,86', a: 0.5 }],
     // the colours go up at dawn: the bugle, the flag hoisted, the guard presenting arms
     colours: { group: 0, flag: 0, from: 176, delay: 1.6, dur: 10.4, hold: 3, call: 'To the colours!', caller: 5 },
     // an army train crossing the viaduct now and then, and cuirassiers riding through the camp
@@ -127,7 +129,7 @@ window.VN_WALKS = {
       { x: 256, people: [{ dx: -8, look: 'soldier', face: 1 }, { dx: 8, look: 'soldier', face: -1 }], lines: [[0, 'Pay\'s late again.'], [1, 'It\'s always late. That\'s how you know it\'s the army.'], [0, 'When I\'m discharged, I\'m opening a café in Marseille.'], [1, 'Last week it was Toulon.'], [0, 'Toulon, Marseille. Somewhere with the sea.']] },
       { x: 492, people: [{ dx: -7, look: 'rifleman', face: 1 }, { dx: 8, look: 'soldier', face: -1, pose: 'sit' }], lines: [[0, 'Polish your buttons, Lefèvre. The colonel counts them.'], [1, 'Then the colonel can count mine himself.'], [1, 'My mother writes that the silkworms are sick again at home.'], [0, 'Tell her the army eats bread, not silk.']] },
       { x: 706, people: [{ dx: -8, look: 'sailor', face: 1 }, { dx: 8, look: 'sailor', face: -1, pose: 'haul' }], lines: [[0, 'Mind the hawser, soldier!'], [1, 'Heave, and heave again!'], [0, 'The Napoléon. Ninety guns and a steam engine. Fastest ship afloat.'], [1, 'And we still scrub her decks by hand.']] },
-      { x: 900, near: 160, people: [{ dx: -40, y: 163, look: 'sailor', turn: true }, { dx: 0, y: 162, look: 'sailor', face: -1 }, { dx: 50, y: 159, look: 'captain', face: -1 }], lines: [[2, 'Stand by to take on powder!'], [0, 'Aye, Captain!'], [2, 'And somebody tell the army to keep its boots off my gangplank.']] },
+      { x: 900, near: 160, people: [{ dx: -40, y: 155, look: 'sailor', turn: true }, { dx: 0, y: 154, look: 'sailor', face: -1 }, { dx: 50, y: 151, look: 'captain', face: -1 }], lines: [[2, 'Stand by to take on powder!'], [0, 'Aye, Captain!'], [2, 'And somebody tell the army to keep its boots off my gangplank.']] },
       { x: 1232, near: 170, people: [{ dx: -20, look: 'soldier', face: 1, pose: 'sit' }, { dx: 20, look: 'zouave', face: -1, pose: 'sit' }, { dx: -30, look: 'gunner', face: 1 }], lines: [[0, 'Did you see the airship over the citadel?'], [1, 'Giffard\'s contraption? It flies like a fat pigeon.'], [2, 'A pigeon that can see all the way to Prussia.'], [1, 'Then tell it to look at my mother\'s farm. Tell her I\'m eating.'], [0, 'The Emperor reviewed the Guard in Paris this spring.'], [2, 'And we got soup.']] },
       { x: 1532, people: [{ dx: -12, look: 'gunner', face: 1 }, { dx: 12, look: 'gunner', face: -1 }], lines: [[0, 'New rifled barrels. The La Hitte pattern.'], [1, 'Four thousand yards, the colonel says.'], [0, 'The colonel says a great many things.'], [1, 'He says them very loudly, too.']] },
       { x: 1716, near: 130, people: [{ dx: -22, look: 'rifleman', face: 1, pose: 'present' }, { dx: 22, look: 'rifleman', face: -1, pose: 'present' }, { dx: -30, y: 118, look: 'rifleman', turn: true }, { dx: 30, y: 118, look: 'rifleman', turn: true }], lines: [[2, 'Rider on the north road!'], [3, 'Coming fast. A big man, on a tired horse.'], [0, 'Halt! ...Ah, Joncour. Pass.'], [1, 'Mind the hedgehogs out there. They bite horses.']] },
@@ -177,6 +179,8 @@ window.VN_WALKS = {
       { x: 471.1, y: 121.5, r: 17, depth: 0.13, speed: 0.6, ph: 2 },
       { x: 621.1, y: 127.5, r: 17, depth: 0.13, speed: 0.5, ph: 0.5 },
     ],
+    // the lighthouse's lamp turning, where the river opens toward the sea
+    beacons: [{ x: 32, y: 68, depth: 0.5, speed: 0.8, reach: 130, strength: 0.32 }],
     // the sun catching the cathedral's spires and its great window, and the château's gilding
     sparkles: [
       { x: 561, y: 9, depth: 0.22 }, { x: 583, y: 9, depth: 0.22, speed: 0.9 }, { x: 640, y: 41, depth: 0.22, size: 2 },

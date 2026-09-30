@@ -736,6 +736,42 @@
     }
 
     /** A keepsake or money changing hands: a small card slides in at the top right. */
+    /**
+     * The first time a keepsake is found: the scene dims, light fans out behind it, the keepsake
+     * turns in on a burst of gold with its name and what it is; then it flies off to be kept.
+     */
+    itemShowcase(item) {
+      return new Promise((resolve) => {
+        const sparks = Array.from({ length: 16 }, (_, i) => {
+          const a = (i / 16) * Math.PI * 2 + Math.random() * 0.3, d = 150 + Math.random() * 120;
+          return h('i.is-spark', { style: { '--dx': `${Math.cos(a) * d}px`, '--dy': `${Math.sin(a) * d * 0.7}px`, animationDelay: `${250 + Math.random() * 300}ms` } });
+        });
+        const el = h(`div.overlay.item-show${this.settings.reduceMotion ? '.still' : ''}`, { 'aria-live': 'polite' },
+          h('div.is-veil'), h('div.is-rays'), h('div.is-ring'),
+          h('div.is-card',
+            h('div.is-tag', 'New keepsake'),
+            h('div.is-iconwrap', sparks, h('div.is-glow'), h('div.is-icon', itemIcon(item.id))),
+            h('div.is-name', item.name),
+            item.desc ? h('div.is-desc', item.desc) : null,
+            h('div.is-hint', 'Click to keep it')));
+        let done = false;
+        const finish = () => {
+          if (done) return;
+          done = true;
+          clearTimeout(timer);
+          el.classList.add('out');
+          if (this.audio) this.audio.fx('whoosh', { volume: 0.3 });
+          this.close(entry);
+          resolve();
+        };
+        const entry = this.open(el, { onKey: (e) => { if (e.key === 'Enter' || e.key === ' ' || e.key === 'Escape' || e.key === 'e' || e.key === 'E') finish(); return true; }, onBack: finish, focus: false });
+        entry.removeAfter = 800;
+        setTimeout(() => el.addEventListener('click', finish), 500);
+        if (this.audio) { this.audio.fx('sparkle', { volume: 0.7 }); this.audio.fx('chime', { volume: 0.6, delay: 0.25 }); }
+        const timer = setTimeout(finish, 6500);
+      });
+    }
+
     itemNotice(item, kind, into = this.noticeEl) {
       const money = item.id === 'francs';
       const card = h(`div.item-notice.${kind}${money ? '.money' : ''}`,
