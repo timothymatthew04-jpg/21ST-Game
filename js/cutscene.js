@@ -67,6 +67,12 @@
 
   const SHIP = ['..#....', '.###...', '#####.#', '.#####.'];
 
+  // a ginkgo leaf, gold, for the way out of the opening
+  const LEAF = '<svg viewBox="0 0 100 104" aria-hidden="true"><defs><radialGradient id="cs-leaf-g" cx="50%" cy="88%" r="85%"><stop offset="0" stop-color="#fff6cc"/><stop offset="0.45" stop-color="#f4cc5a"/><stop offset="1" stop-color="#c08a28"/></radialGradient></defs>'
+    + '<path d="M50 92 C44 70 20 58 5 36 C17 18 37 11 48 22 L50 34 L52 22 C63 11 83 18 95 36 C80 58 56 70 50 92 Z" fill="url(#cs-leaf-g)"/>'
+    + '<g stroke="#b07a22" stroke-width="0.7" fill="none" opacity="0.55"><path d="M50 90 L14 38"/><path d="M50 90 L26 26"/><path d="M50 90 L40 20"/><path d="M50 90 L60 20"/><path d="M50 90 L74 26"/><path d="M50 90 L86 38"/></g>'
+    + '<path d="M50 91 Q51 98 49 104" stroke="#a8742a" stroke-width="2.2" fill="none"/></svg>';
+
   class Player {
     constructor({ ui, stage, audio, settings, story }, def, { onDone }) {
       Object.assign(this, { ui, stage, audio, settings, story, def, onDone });
@@ -158,7 +164,12 @@
         cam.append(bg);
         const extra = parseFx(shot.fx);
         const frame = bg.querySelector('.bg-frame');
-        if (extra.length && VN.SceneFx) new VN.SceneFx(bg, extra, this.settings, frame || null);
+        if (extra.length && VN.SceneFx) {
+          const sfx = new VN.SceneFx(bg, extra, this.settings, frame || null);
+          // the shot's effects can go in behind one of the painted layers (a herd behind the rider)
+          const under = shot.fxUnder && frame && frame.querySelector(`.bg-layer[data-id="${shot.fxUnder}"]`);
+          if (under && sfx.canvas) frame.insertBefore(sfx.canvas, under);
+        }
         if (shot.map && frame) this.route(frame, cam, shot.map, dur);
         for (const sp of shot.sprites || []) cam.append(this.sprite(sp, dur));
       }
@@ -207,6 +218,8 @@
         this.later(1700, () => { this.burstAt(logo); this.flare(); });
       });
       if (trans === 'white') at(0.25, () => this.flare());
+      // the way out of the opening: a golden leaf tumbles at the camera until all is gold
+      if (shot.leaf != null && !this.reduce) at(shot.leaf, () => this.leafOut());
       // words, sounds, flashes and shakes
       this.caption.classList.remove('on');
       if (shot.text) {
@@ -233,6 +246,15 @@
           this.view.animate([{ transform: 'none' }, { transform: `translate(${6 * amt}px, ${3 * amt}px)` }, { transform: `translate(${-5 * amt}px, ${-2 * amt}px)` }, { transform: `translate(${3 * amt}px, ${1 * amt}px)` }, { transform: 'none' }], { duration: 420, easing: 'ease-out' }); });
       }
       if (!shot.hold) at(dur, () => this.next());
+    }
+
+    leafOut() {
+      const leaf = h('div.cs-leaf');
+      leaf.innerHTML = LEAF;
+      this.el.append(h('div.cs-leaf-wash'), leaf);
+      this.audio.fx('whoosh', { volume: 0.5 });
+      this.audio.fx('sparkle', { volume: 0.4, delay: 0.9 });
+      this.leafed = true;
     }
 
     flash(color, seconds) {
@@ -366,12 +388,28 @@
 
     finish() {
       if (this.done) return;
+      // the gold the leaf left behind lingers over whatever comes next, then clears
+      if (this.leafed && !this.skipped && VN.goldVeil) VN.goldVeil();
       this.stop();
       if (this.ui.cardEntry === this.entry) this.ui.cardEntry = null;
       this.ui.close(this.entry);
       this.onDone();
     }
   }
+
+  /** A wash of gold over everything, fading away (it carries the opening's last leaf into the story). */
+  VN.goldVeil = function () {
+    // (over the whole window, outside the stage, so nothing the story does next can clear it early)
+    const root = document.getElementById('viewport') || document.body;
+    const veil = h('div.gold-veil');
+    root.append(veil);
+    // the fade waits until the page is drawing again (the next scene may take a moment to set up)
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      veil.classList.add('go');
+      veil.addEventListener('animationend', () => veil.remove(), { once: true });
+      setTimeout(() => veil.remove(), 6000);
+    }));
+  };
 
   /** Play the named cutscene; resolves when it ends or is skipped. */
   VN.playCutscene = function (ctx, name) {

@@ -710,8 +710,9 @@
       // Arriving somewhere new: say where we are.
       const place = this.story.places[ins.bg];
       const key = place ? `${place.name}|${place.region}` : null;
-      if (place && key !== this.shownPlace && !this.isSkipping()) this.ui.placeCaption(place);
+      const arriving = place && key !== this.shownPlace && !this.isSkipping();
       if (place || ins.bg === 'black') this.shownPlace = key;
+      if (arriving) await this.guard(this.ui.placeTitle(place));
       this.state.pc++;
     }
 

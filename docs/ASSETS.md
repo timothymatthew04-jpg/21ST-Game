@@ -42,9 +42,10 @@ no painted version.
 The cutscenes use a few more paintings: `journey_map` (Europe to Japan, drawn from Natural Earth
 coastlines), `cs_worms` (the dying silkworms), `cs_warships` (the black ships), `cs_candle` and
 `cs_candle_dawn`, and the close-ups `the_cup`, `the_glove` and `the_letter`, which are also the
-event pictures (CGs). The opening has three of its own: `op_sky` (a sea of clouds at dawn with the
-mountain rising out of it), `op_grass` (silver grass in the afternoon wind) and `op_sunset` (the
-sea at sunset with a gate standing in the water). The war in Chapter 11 has `war_horizon` (a castle
+event pictures (CGs). The opening has four of its own, a lone rider (Hervé) crossing Japan through its
+seasons: `op_mountain` (a snow-capped peak under a storm, wild horses running across the plain),
+`op_autumn` (a castle on a misty cliff seen through red maples), `op_sakura` (an avenue of cherry
+trees in bloom) and `op_gold` (a field of golden grass under a blazing sun, where the title comes up). The war in Chapter 11 has `war_horizon` (a castle
 burning at dusk, an observation balloon over the lines), `war_field` (the battlefield between the
 two armies' earthworks) and `war_guns` (a battery in the smoke). The armies, guns, shells, rockets
 and gunfire are drawn by the game over them (see the scene effects in docs/SCRIPTING.md).

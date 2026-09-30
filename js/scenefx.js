@@ -1084,6 +1084,113 @@
   }
 
   // ---------------------------------------------------------------- the per-background controller
+  // ---------------------------------------------------------------- horses at the gallop
+  const COATS = [
+    { coat: '#8a5a34', dark: '#5e3a20', mane: '#2a1a12' },
+    { coat: '#5a3a26', dark: '#3a2418', mane: '#1a1210' },
+    { coat: '#e8e0d4', dark: '#b8aea4', mane: '#f4f0e8' },
+    { coat: '#2e2622', dark: '#1c1614', mane: '#0e0a0a' },
+    { coat: '#b8925a', dark: '#8a6a40', mane: '#4a3420' },
+  ];
+  /**
+   * A horse at the gallop, facing `dir`, feet at (x, y), `s` art pixels to its unit, legs at phase
+   * `ph`; with a rider on its back (dark coat, top hat, coat-tails flying) if asked.
+   */
+  function gallop(c, x, y, s, ph, coat, dir, rider) {
+    const P = (dx, dy, w, hh, col) => { c.fillStyle = col; c.fillRect(Math.round((dir > 0 ? x + dx * s : x - (dx + w) * s) * 2) / 2, Math.round((y + dy * s) * 2) / 2, Math.max(0.5, Math.round(w * s * 2) / 2), Math.max(0.5, Math.round(hh * s * 2) / 2)); };
+    const lift = Math.abs(Math.sin(ph)) * 0.8;
+    const by = -lift;
+    // the legs, the far pair darker: each swings about its hip, the lower leg folding back as it lifts
+    const leg = (hx, a, col) => {
+      const kx = hx + Math.sin(a) * 2.6, ky = by - 5 + Math.cos(a) * 2.6;
+      const fold = Math.max(0, -Math.sin(a)) * 1.6 + 0.4;
+      const fx = kx + Math.sin(a - fold) * 2.6, fy = Math.min(0, ky + Math.cos(a - fold) * 2.6);
+      for (let t = 0; t <= 1; t += 0.2) P(hx + (kx - hx) * t - 0.4, by - 5 + (ky - by + 5) * t - 0.4, 1, 1, col);
+      for (let t = 0; t <= 1; t += 0.2) P(kx + (fx - kx) * t - 0.35, ky + (fy - ky) * t - 0.35, 0.8, 0.8, col);
+      P(fx - 0.5, fy - 0.6, 1.1, 0.6, '#1a1210');
+    };
+    leg(-3, Math.sin(ph + 0.6) * 0.9 - 0.2, coat.dark);
+    leg(3.5, Math.sin(ph + Math.PI + 0.6) * 0.9 + 0.2, coat.dark);
+    // the tail streaming out behind, the body, the neck stretched forward, the head
+    const tw = Math.sin(ph * 2) * 0.4;
+    P(-7.5, by - 7.6 + tw, 3, 1, coat.mane); P(-9, by - 7.2 + tw * 1.5, 2, 1, coat.mane);
+    P(-4.5, by - 8.2, 9.5, 3.6, coat.coat);
+    P(-4, by - 8.4, 8, 0.8, coat.coat);
+    P(-4.5, by - 5, 9.5, 0.6, coat.dark);
+    P(4.2, by - 10, 2.2, 3.4, coat.coat);
+    P(5.4, by - 11.2, 2, 2, coat.coat);
+    P(6.6, by - 11.4, 2.8, 1.8, coat.coat);
+    P(8.6, by - 10.6, 1, 1, coat.dark);
+    P(3.8, by - 10.6, 1.4, 2.4, coat.mane);
+    P(5, by - 11.8, 1, 1, coat.mane);
+    P(7.2, by - 11.2, 0.6, 0.6, '#1a1210');
+    leg(-2, Math.sin(ph) * 0.9 - 0.2, coat.coat);
+    leg(4.5, Math.sin(ph + Math.PI) * 0.9 + 0.2, coat.coat);
+    if (rider) {
+      // Hervé, leaning into the ride
+      const flap = Math.sin(ph * 2 + 1) * 0.6;
+      P(-3.6 - flap, by - 10.4, 3, 1.2, '#1e1c26');
+      P(-4.4 - flap, by - 9.8, 1.2, 1, '#1e1c26');
+      P(-0.4, by - 9.6, 1.2, 3, '#141218');
+      P(-1, by - 14.4, 2.6, 5, '#26242e');
+      P(-1, by - 14.4, 0.8, 5, '#3a3844');
+      P(1.2, by - 12.6, 2.4, 0.9, '#26242e');
+      P(3.2, by - 12.4, 0.8, 0.8, '#e8c0a0');
+      P(-0.2, by - 16.2, 1.8, 1.8, '#e8c0a0');
+      P(-0.6, by - 16.6, 2.6, 0.6, '#141218');
+      P(-0.2, by - 19, 1.8, 2.5, '#141218');
+    }
+  }
+
+  /** herd=y,count,speed,scale,dir,spread — wild horses galloping across in a loose group, round and round. */
+  class Herd {
+    constructor(nums) {
+      const [y = 0.7, count = 8, speed = 24, scale = 1, dir = -1, spread = 0.06] = nums;
+      Object.assign(this, { yf: y, count, speed, sc: scale, dir: dir < 0 ? -1 : 1, spread });
+    }
+    resize(W, H) {
+      const first = !this.W;
+      this.W = W;
+      this.H = H;
+      if (!first) return;
+      this.lead = W * (this.dir < 0 ? 0.62 : 0.38);
+      this.p = [];
+      for (let i = 0; i < this.count; i++) this.p.push({ dx: -this.dir * rnd(0, 26 + this.count * 4) * this.sc, dy: rnd(-1, 1) * this.spread * H, ph: rnd(0, TAU), rate: rnd(11, 14), coat: pick(COATS), v: rnd(0.92, 1.08) });
+      this.p.sort((a, b) => a.dy - b.dy);
+    }
+    step(dt) {
+      if (!this.p) return;
+      this.lead += this.dir * this.speed * dt;
+      const tail = Math.max(...this.p.map((h) => Math.abs(h.dx))) + 20 * this.sc;
+      if (this.dir < 0 && this.lead + tail < -10) this.lead = this.W + 20;
+      if (this.dir > 0 && this.lead - tail > this.W + 10) this.lead = -20;
+      for (const h of this.p) { h.ph += h.rate * dt; h.dx += (h.v - 1) * this.speed * dt * 0.3; if (Math.abs(h.dx) > 60 * this.sc) h.v = 0.96; else if (Math.abs(h.dx) < 2) h.v = 1.04; }
+    }
+    draw(c) {
+      if (!this.p) return;
+      c.globalAlpha = 1;
+      for (const h of this.p) gallop(c, this.lead + h.dx, this.yf * this.H + h.dy, this.sc, h.ph, h.coat, this.dir, false);
+    }
+  }
+
+  /** rider=y,x0,x1,dur,scale,delay — Hervé at a gallop, from x0 to x1 (fractions of the picture) in dur seconds. */
+  class Rider {
+    constructor(nums) {
+      const [y = 0.8, x0 = -0.1, x1 = 1.1, dur = 10, scale = 3, delay = 0] = nums;
+      Object.assign(this, { yf: y, x0, x1, dur, sc: scale, delay, t: 0, ph: 0 });
+      this.coat = { coat: '#f2ece2', dark: '#c8bcae', mane: '#fbf6ee' };
+    }
+    resize(W, H) { this.W = W; this.H = H; }
+    step(dt) { this.t += dt; this.ph += dt * 12; }
+    draw(c) {
+      if (!this.W) return;
+      const k = (this.t - this.delay) / this.dur;
+      if (k < 0 || k > 1.2) return;
+      const x = (this.x0 + (this.x1 - this.x0) * k) * this.W;
+      gallop(c, x, this.yf * this.H, this.sc, this.ph, this.coat, this.x1 >= this.x0 ? 1 : -1, true);
+    }
+  }
+
   class SceneFx {
     constructor(bgEl, specs, settings, frame = null) {
       this.bg = bgEl;
@@ -1120,6 +1227,8 @@
           case 'shade': this.systems.push(new Shade(n, s.color)); break;
           case 'lightning': if (!this.reduce) this.systems.push(new Lightning(n)); break;
           case 'splashes': this.systems.push(new Splashes(n, s.color)); break;
+          case 'herd': this.systems.push(new Herd(n)); break;
+          case 'rider': this.systems.push(new Rider(n)); break;
           case 'glow': case 'flame': lights.push(this.light(s)); break;
           case 'rays': lights.push(this.rays(s)); break;
           case 'mist': lights.push(this.mist(s)); break;

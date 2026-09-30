@@ -320,17 +320,37 @@
     }
 
     // ---- karma ------------------------------------------------------------------
-    /** Where the story has arrived: a small caption at the top of the screen. */
-    placeCaption({ name, region }) {
-      if (this.placeEl) this.placeEl.remove();
-      const el = h('div.place', { 'aria-live': 'polite' },
-        region ? h('div.place-region', region) : null,
-        h('div.place-rule'),
-        h('div.place-name', name));
-      this.placeEl = el;
-      this.uiLayer.append(el);
-      setTimeout(() => el.classList.add('out'), 3800);
-      setTimeout(() => { el.remove(); if (this.placeEl === el) this.placeEl = null; }, 4700);
+    /**
+     * Arriving somewhere new, announced like a film: black bars sweep in, a line of light crosses
+     * the screen, and the name of the place rises letter by letter in gold with its region above.
+     * Resolves when it has gone (a click, Enter or Space hurries it).
+     */
+    placeTitle({ name, region }, { fast = false } = {}) {
+      return new Promise((resolve) => {
+        if (this.placeEl) { this.placeEl.remove(); this.placeEl = null; }
+        const letters = [...name].map((ch, i) => h('span.pg-l', { style: { animationDelay: `${480 + i * 50}ms` } }, ch === ' ' ? '\u00a0' : ch));
+        const size = Math.round(Math.min(92, 1100 / Math.max(8, name.length * 0.72)));
+        const el = h(`div.overlay.place-grand${this.settings.reduceMotion ? '.still' : ''}`, { 'aria-live': 'polite' },
+          h('div.pg-bar.top'), h('div.pg-bar.bottom'), h('div.pg-glow'), h('div.pg-sweep'),
+          h('div.pg-center',
+            region ? h('div.pg-region', region) : null,
+            h('div.pg-orn', h('i'), h('b'), h('i')),
+            h('div.pg-name', { style: { fontSize: `${size}px` } }, letters, h('span.pg-shine', { 'aria-hidden': 'true' }, name)),
+            h('div.pg-orn.low', h('i'), h('b'), h('i'))));
+        let done = false;
+        const finish = () => {
+          if (done) return;
+          done = true;
+          clearTimeout(timer);
+          this.close(entry);
+          resolve();
+        };
+        const entry = this.open(el, { onKey: (e) => { if (e.key === 'Enter' || e.key === ' ' || e.key === 'Escape') finish(); return true; }, onBack: finish, focus: false });
+        entry.removeAfter = 700;
+        el.addEventListener('click', finish);
+        if (this.audio) { this.audio.fx('whoosh', { volume: 0.35 }); this.audio.fx('sparkle', { volume: 0.4, delay: 0.7 }); }
+        const timer = setTimeout(finish, fast ? 900 : 3600);
+      });
     }
 
     /** A short line that says a choice mattered, drawn in along a thread of its colour. */

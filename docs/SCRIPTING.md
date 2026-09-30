@@ -416,7 +416,15 @@ them make a move. A shot can also have `text` (a caption), `title` (big words ac
 `flash`, `shake`, `tint`, `sprites` (characters standing in the shot), `trans` (`fade`, `cut`,
 `white`, `black`), a `map` (Hervé's route drawn across the journey map, the camera following it) or
 a `letter` (a sheet of paper whose words are written out, in Japanese columns or French
-handwriting). Every option is described at the top of `story/cutscenes.js`.
+handwriting). `fxUnder` puts the shot's `fx` behind one of the picture's layers (the opening's
+herd runs behind the rider), `logo` brings in the game's glowing title, and `leaf` (seconds) sends
+a golden leaf tumbling at the camera until the screen is gold, which then fades into whatever
+comes next. Every option is described at the top of `story/cutscenes.js`.
+
+Arriving at a new place (see `place` above) plays a title like a film's: black bars, a line of
+light, and the place's name in gold with its region; a click hurries it. When a walk begins, a
+card names the area, says the goal plainly and shows the controls; it goes once Hervé sets off,
+leaving the goal in a banner at the top.
 
 Players click to move to the next shot and press Esc (or Skip) to end the cutscene; skip mode passes
 cutscenes by.
@@ -604,6 +612,8 @@ lantern or the pond at any window shape; `#colour` is optional everywhere.
 | `shade` | y,height [, count, darkness] | the shadows of clouds sliding over the land |
 | `lightning` | rate [, horizon] | the sky flashes twice and a bolt forks down (off with reduced motion) |
 | `splashes` | y,height [, rate] | raindrops bursting on the ground |
+| `herd` | y,count,speed [, scale, dir, spread] | wild horses galloping across in a loose group, round and round |
+| `rider` | y,x0,x1,seconds [, scale, delay] | Hervé at a gallop on a pale horse, from x0 to x1 |
 | `army` | y,dir,speed,count,type [, scale, x0, x1, fire] | soldiers marching in ranks: type 0 the imperial army, 1 samurai with banners, 2 French infantry; `fire` makes the front rank let off volleys |
 | `airship` | y,dir,speed [, scale, x] | a steam airship crossing the sky (tricolour rudder, turning propeller, a trail of smoke), wrapping round |
 | `balloon` | x,y [, scale, tether, colours] | an observation balloon bobbing on its tether (to `tether`, a height); colours 0 red and cream, 1 blue and cream |

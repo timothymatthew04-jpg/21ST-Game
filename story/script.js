@@ -167,9 +167,10 @@ bgfx japan_path grass=0.9,0.1,0.8,0,0.34,0.66,#78a848
 bgfx hara_kei_estate ripples=0.1,0.83,0.82,0.14,0.7,#c8d8ff
 bgfx estate_day ripples=0.12,0.83,0.76,0.14,0.9,#e8f4ff walkers=0.79,0.26,0.74,2,1,1,0.02
 bgfx smuggler_boat ripples=0,0.52,1,0.25,0.6,#c8d8ff
-bgfx op_sky rays=0.27,0.72,1.4,0.8,#ffd8b0 glow=0.275,0.72,0.2,#ffc8a0 birds=4,0.1,0.35 stars=0,0,1,0.18,16
-bgfx op_grass grass=0.8,0.13,1.2,0.3,#f0dca0 rays=0.775,0.4,1.2,0.7,#fff0c0 motes=0,0.3,1,0.5,36,#fff4d0 flutter=0.1,0.55,0.8,0.25,5 birds=3,0.08,0.3
-bgfx op_sunset glints=0.3,0.64,0.26,0.36,46,#fff0c0 glow=0.43,0.555,0.12,#ffc890 birds=5,0.1,0.32 mist=0.6,0.08,0.25,#ffb8a8
+bgfx op_mountain grass=0.86,0.1,0.8,0.2,#f0dca0 birds=4,0.3,0.45
+bgfx op_autumn mist=0.62,0.2,0.3,#eeeeea
+bgfx op_sakura birds=3,0.1,0.3
+bgfx op_gold grass=0.9,0.08,0.6,0.5,#fff4d8
 bgfx forest_camp_night flame=0.429,0.82,0.12,#ff9a40 embers=0.429,0.8,1 smoke=0.429,0.78,0.8,#6a7288 fireflies=0,0.55,1,0.3,14 mist=0.7,0.2,0.3,#b8c8ff rays=0.6,0,0.9,0.45,#b8d0ff flame=0.219,0.79,0.05,#ffb860 glow=0.625,0.096,0.03,#cfe0ff
 
 # Each place has its own sound, which starts when the story arrives there and fades

@@ -21,6 +21,9 @@
  *    sprites  characters in the shot: [{ id, x, y, h, expr, to, filter, opacity }]
  *    map      a journey across the map: { stops: [...], zoom, travel }
  *    letter   a sheet of writing: { lang: 'ja' or 'fr', lines: [...] }
+ *    fxUnder  the id of a layer of the picture to draw the fx behind (a herd behind the rider)
+ *    logo     the game's glowing title (logoAt: when);  leaf: when a golden leaf flies at the
+ *             camera and turns the screen gold, fading into whatever comes next
  *
  *  Click moves to the next shot; Esc or "Skip" ends the cutscene.
  * ============================================================================
@@ -241,10 +244,14 @@
     // ---------------------------------------------------------------- the opening: Japan, before the story reaches it
     opening: {
       shots: [
-        { bg: 'op_sky', dur: 8.5, cam: [[1.75, 0.42, 0.18], [1.12, 0.55, 0.52]], ease: 'cubic-bezier(0.45, 0, 0.25, 1)', kanji: '空', sound: [['wind_gust', 0.3, 0.3], ['chime', 3.2, 0.3]] },
-        { bg: 'op_grass', dur: 7.5, cam: [[1.5, 0.22, 0.72], [1.1, 0.58, 0.62]], kanji: '風', fade: 1.6, sound: [['wind_gust', 0.6, 0.45], ['wind_gust', 4.4, 0.35]] },
-        { bg: 'op_grass', dur: 5, cam: [[2.0, 0.84, 0.66], [2.4, 0.8, 0.58]], fade: 1.2, fx: 'motes=0.5,0.3,0.5,0.6,40,#fffbe0', sound: [['wind_gust', 0.8, 0.5]] },
-        { bg: 'op_sunset', dur: 10, cam: [[1.45, 0.38, 0.62], [1.04, 0.52, 0.5]], trans: 'white', logo: true, logoAt: 2.2, kanji: '絹', sound: [['temple_bell', 0.9, 0.5], ['swell', 2.4, 0.35]] },
+        // the mountain under a storm, wild horses running, the rider watching
+        { bg: 'op_mountain', dur: 9, cam: [[1.5, 0.24, 0.7], [1.06, 0.55, 0.5]], ease: 'cubic-bezier(0.45, 0, 0.25, 1)', kanji: '山', fx: 'herd=0.715,9,26,1,-1,0.025 lightning=0.12,0.36', fxUnder: 'rider', sound: [['wind_gust', 0.3, 0.35], ['gallop', 1.4, 0.3], ['thunder', 4.5, 0.25]] },
+        // the castle on its cliff, through the autumn maples
+        { bg: 'op_autumn', dur: 9, cam: [[1.32, 0.64, 0.62], [1.08, 0.48, 0.46]], kanji: '秋', fade: 1.4, fx: 'leaves=2.4 mist=0.52,0.26,0.35,#f0eeea', sound: [['wind_gust', 0.5, 0.4], ['rustle', 3, 0.5]] },
+        // the avenue of cherry trees in bloom
+        { bg: 'op_sakura', dur: 9, cam: [[1.05, 0.5, 0.56], [1.32, 0.56, 0.5]], kanji: '桜', fade: 1.4, fx: 'petals=2.6 glints=0,0.62,0.48,0.05,14,#ffffff', sound: [['chime', 0.8, 0.35]] },
+        // the golden field: the rider at a gallop, the title, and a golden leaf into the story
+        { bg: 'op_gold', dur: 11, cam: [[1.22, 0.3, 0.55], [1.04, 0.56, 0.5]], trans: 'white', kanji: '絹', logo: true, logoAt: 2.8, leaf: 8.3, fxUnder: 'near', fx: 'rider=0.82,-0.1,1.12,10,3 rays=0.31,0.2,1.6,1.2,#fff4c8 motes=0,0.3,1,0.6,50,#fff6d8', sound: [['temple_bell', 0.9, 0.5], ['swell', 2.4, 0.35]] },
       ],
     },
 

@@ -82,6 +82,7 @@
         const layer = h('div.bg-layer', {
           style: { left: pct(l.x / NW), top: pct(l.y / NH), width: pct(l.w / NW), height: pct(l.h / NH), '--d': String(l.depth) },
         });
+        layer.dataset.id = l.id;
         const cv = h('canvas.bg-art');
         const reps = drift ? 2 : 1;
         cv.width = l.w * k * reps;

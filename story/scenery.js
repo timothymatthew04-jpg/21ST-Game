@@ -2493,11 +2493,11 @@ window.VN_SCENERY = {
    }
   ]
  },
- "op_grass": {
-  "flat": "assets/scenes/op_grass/flat.png",
+ "op_autumn": {
+  "flat": "assets/scenes/op_autumn/flat.png",
   "vignette": [
-   0.28,
-   "40,26,10"
+   0.3,
+   "40,20,10"
   ],
   "layers": [
    {
@@ -2508,194 +2508,130 @@ window.VN_SCENERY = {
     "h": 270,
     "depth": 0,
     "anim": null,
-    "src": "assets/scenes/op_grass/sky.png"
+    "src": "assets/scenes/op_autumn/sky.png"
    },
    {
     "id": "clouds",
     "x": 0,
-    "y": 27,
-    "w": 480,
-    "h": 62,
-    "depth": 0.04,
-    "anim": {
-     "type": "drift",
-     "t": 300
-    },
-    "src": "assets/scenes/op_grass/clouds.png"
-   },
-   {
-    "id": "far",
-    "x": 0,
-    "y": 108,
-    "w": 480,
-    "h": 162,
-    "depth": 0.07,
-    "anim": null,
-    "src": "assets/scenes/op_grass/far.png"
-   },
-   {
-    "id": "hills",
-    "x": 0,
-    "y": 145,
-    "w": 480,
-    "h": 29,
-    "depth": 0.14,
-    "anim": null,
-    "src": "assets/scenes/op_grass/hills.png"
-   },
-   {
-    "id": "field",
-    "x": 0,
-    "y": 164,
-    "w": 480,
-    "h": 106,
-    "depth": 0.25,
-    "anim": null,
-    "src": "assets/scenes/op_grass/field.png"
-   },
-   {
-    "id": "tree",
-    "x": 84,
-    "y": 118,
-    "w": 67,
-    "h": 52,
-    "depth": 0.2,
-    "anim": {
-     "type": "sway",
-     "a": 0.6,
-     "t": 7,
-     "oy": 1
-    },
-    "src": "assets/scenes/op_grass/tree.png"
-   },
-   {
-    "id": "path",
-    "x": 198,
-    "y": 172,
-    "w": 86,
-    "h": 98,
-    "depth": 0.3,
-    "anim": null,
-    "src": "assets/scenes/op_grass/path.png"
-   },
-   {
-    "id": "susuki_mid",
-    "x": 5,
-    "y": 180,
-    "w": 475,
-    "h": 55,
-    "depth": 0.45,
-    "anim": {
-     "type": "sway",
-     "a": 1.1,
-     "t": 4.6,
-     "oy": 1
-    },
-    "src": "assets/scenes/op_grass/susuki_mid.png"
-   },
-   {
-    "id": "susuki_front",
-    "x": 0,
-    "y": 184,
-    "w": 480,
-    "h": 86,
-    "depth": 0.85,
-    "anim": {
-     "type": "sway",
-     "a": 2,
-     "t": 3.8,
-     "oy": 1
-    },
-    "src": "assets/scenes/op_grass/susuki_front.png"
-   }
-  ]
- },
- "op_sky": {
-  "flat": "assets/scenes/op_sky/flat.png",
-  "vignette": [
-   0.3,
-   "20,10,40"
-  ],
-  "layers": [
-   {
-    "id": "sky",
-    "x": 0,
     "y": 0,
     "w": 480,
-    "h": 270,
-    "depth": 0,
-    "anim": null,
-    "src": "assets/scenes/op_sky/sky.png"
-   },
-   {
-    "id": "high",
-    "x": 0,
-    "y": 55,
-    "w": 480,
-    "h": 75,
+    "h": 36,
     "depth": 0.03,
     "anim": {
      "type": "drift",
      "t": 420
     },
-    "src": "assets/scenes/op_sky/high.png"
+    "src": "assets/scenes/op_autumn/clouds.png"
    },
    {
-    "id": "mountain",
-    "x": 180,
-    "y": 97,
-    "w": 300,
-    "h": 117,
-    "depth": 0.06,
+    "id": "cliff",
+    "x": 134,
+    "y": 20,
+    "w": 279,
+    "h": 182,
+    "depth": 0.07,
     "anim": null,
-    "src": "assets/scenes/op_sky/mountain.png"
+    "src": "assets/scenes/op_autumn/cliff.png"
    },
    {
-    "id": "sea_back",
+    "id": "mist",
     "x": 0,
-    "y": 158,
+    "y": 149,
     "w": 480,
-    "h": 112,
-    "depth": 0.1,
+    "h": 46,
+    "depth": 0.09,
     "anim": {
      "type": "drift",
-     "t": 380
+     "t": 240
     },
-    "src": "assets/scenes/op_sky/sea_back.png"
+    "src": "assets/scenes/op_autumn/mist.png"
    },
    {
-    "id": "sea_mid",
+    "id": "valley",
     "x": 0,
-    "y": 182,
+    "y": 174,
     "w": 480,
-    "h": 88,
-    "depth": 0.18,
-    "anim": {
-     "type": "drift",
-     "t": 260
-    },
-    "src": "assets/scenes/op_sky/sea_mid.png"
+    "h": 76,
+    "depth": 0.13,
+    "anim": null,
+    "src": "assets/scenes/op_autumn/valley.png"
    },
    {
-    "id": "sea_front",
-    "x": 0,
-    "y": 214,
-    "w": 480,
-    "h": 56,
-    "depth": 0.32,
+    "id": "knoll",
+    "x": 150,
+    "y": 208,
+    "w": 330,
+    "h": 33,
+    "depth": 0.22,
+    "anim": null,
+    "src": "assets/scenes/op_autumn/knoll.png"
+   },
+   {
+    "id": "rider",
+    "x": 282,
+    "y": 145,
+    "w": 55,
+    "h": 113,
+    "depth": 0.3,
     "anim": {
-     "type": "drift",
-     "t": 160
+     "type": "bob",
+     "a": 0.35,
+     "t": 3.8
     },
-    "src": "assets/scenes/op_sky/sea_front.png"
+    "src": "assets/scenes/op_autumn/rider.png"
+   },
+   {
+    "id": "maples_left",
+    "x": 0,
+    "y": 0,
+    "w": 148,
+    "h": 270,
+    "depth": 0.45,
+    "anim": {
+     "type": "sway",
+     "a": 0.7,
+     "t": 6,
+     "oy": 1
+    },
+    "src": "assets/scenes/op_autumn/maples_left.png"
+   },
+   {
+    "id": "maples_right",
+    "x": 328,
+    "y": 0,
+    "w": 152,
+    "h": 270,
+    "depth": 0.5,
+    "anim": {
+     "type": "sway",
+     "a": 0.6,
+     "t": 6.8,
+     "oy": 1
+    },
+    "src": "assets/scenes/op_autumn/maples_right.png"
+   },
+   {
+    "id": "brush",
+    "x": 0,
+    "y": 219,
+    "w": 480,
+    "h": 51,
+    "depth": 0.72,
+    "anim": {
+     "type": "sway",
+     "a": 1.2,
+     "t": 4.6,
+     "oy": 1
+    },
+    "src": "assets/scenes/op_autumn/brush.png"
    }
   ]
  },
- "op_sunset": {
-  "flat": "assets/scenes/op_sunset/flat.png",
+ "op_gold": {
+  "flat": "assets/scenes/op_gold/flat.png",
   "vignette": [
-   0.35,
-   "30,10,30"
+   0.28,
+   "60,40,10"
   ],
   "layers": [
    {
@@ -2706,118 +2642,300 @@ window.VN_SCENERY = {
     "h": 270,
     "depth": 0,
     "anim": null,
-    "src": "assets/scenes/op_sunset/sky.png"
-   },
-   {
-    "id": "clouds",
-    "x": 0,
-    "y": 40,
-    "w": 480,
-    "h": 73,
-    "depth": 0.05,
-    "anim": {
-     "type": "drift",
-     "t": 340
-    },
-    "src": "assets/scenes/op_sunset/clouds.png"
+    "src": "assets/scenes/op_gold/sky.png"
    },
    {
     "id": "far",
     "x": 0,
-    "y": 139,
+    "y": 91,
     "w": 480,
-    "h": 131,
+    "h": 50,
+    "depth": 0.04,
+    "anim": null,
+    "src": "assets/scenes/op_gold/far.png"
+   },
+   {
+    "id": "hill",
+    "x": 0,
+    "y": 72,
+    "w": 480,
+    "h": 89,
     "depth": 0.08,
     "anim": null,
-    "src": "assets/scenes/op_sunset/far.png"
+    "src": "assets/scenes/op_gold/hill.png"
    },
    {
-    "id": "sea",
+    "id": "haze",
     "x": 0,
-    "y": 168,
+    "y": 136,
     "w": 480,
-    "h": 102,
-    "depth": 0.12,
-    "anim": null,
-    "src": "assets/scenes/op_sunset/sea.png"
-   },
-   {
-    "id": "boat70",
-    "x": 58,
-    "y": 172,
-    "w": 23,
-    "h": 17,
-    "depth": 0.2,
+    "h": 23,
+    "depth": 0.1,
     "anim": {
-     "type": "bob",
-     "a": 1,
-     "t": 5.5
+     "type": "drift",
+     "t": 300
     },
-    "src": "assets/scenes/op_sunset/boat70.png"
+    "src": "assets/scenes/op_gold/haze.png"
    },
    {
-    "id": "boat410",
-    "x": 396,
-    "y": 177,
-    "w": 28,
-    "h": 21,
-    "depth": 0.2,
-    "anim": {
-     "type": "bob",
-     "a": 1,
-     "t": 6.5
-    },
-    "src": "assets/scenes/op_sunset/boat410.png"
-   },
-   {
-    "id": "torii",
-    "x": 278,
-    "y": 142,
-    "w": 104,
-    "h": 87,
-    "depth": 0.4,
-    "anim": null,
-    "src": "assets/scenes/op_sunset/torii.png"
-   },
-   {
-    "id": "torii_reflection",
-    "x": 278,
-    "y": 227,
-    "w": 104,
-    "h": 41,
-    "depth": 0.4,
-    "anim": {
-     "type": "wave",
-     "a": 0.6,
-     "t": 3
-    },
-    "src": "assets/scenes/op_sunset/torii_reflection.png"
-   },
-   {
-    "id": "shore",
+    "id": "field",
     "x": 0,
-    "y": 214,
-    "w": 170,
-    "h": 56,
-    "depth": 0.7,
+    "y": 150,
+    "w": 480,
+    "h": 120,
+    "depth": 0.14,
     "anim": null,
-    "src": "assets/scenes/op_sunset/shore.png"
+    "src": "assets/scenes/op_gold/field.png"
    },
    {
-    "id": "pine",
-    "x": 3,
-    "y": 100,
-    "w": 106,
-    "h": 129,
-    "depth": 0.8,
+    "id": "near",
+    "x": 0,
+    "y": 226,
+    "w": 480,
+    "h": 44,
+    "depth": 0.55,
     "anim": {
      "type": "sway",
-     "a": 0.8,
-     "t": 6.5,
-     "ox": 0,
+     "a": 1.4,
+     "t": 4.4,
      "oy": 1
     },
-    "src": "assets/scenes/op_sunset/pine.png"
+    "src": "assets/scenes/op_gold/near.png"
+   }
+  ]
+ },
+ "op_mountain": {
+  "flat": "assets/scenes/op_mountain/flat.png",
+  "vignette": [
+   0.32,
+   "20,22,30"
+  ],
+  "layers": [
+   {
+    "id": "sky",
+    "x": 0,
+    "y": 0,
+    "w": 480,
+    "h": 270,
+    "depth": 0,
+    "anim": null,
+    "src": "assets/scenes/op_mountain/sky.png"
+   },
+   {
+    "id": "storm_high",
+    "x": 0,
+    "y": 0,
+    "w": 480,
+    "h": 64,
+    "depth": 0.02,
+    "anim": {
+     "type": "drift",
+     "t": 560
+    },
+    "src": "assets/scenes/op_mountain/storm_high.png"
+   },
+   {
+    "id": "storm_low",
+    "x": 0,
+    "y": 68,
+    "w": 480,
+    "h": 23,
+    "depth": 0.04,
+    "anim": {
+     "type": "drift",
+     "t": 380
+    },
+    "src": "assets/scenes/op_mountain/storm_low.png"
+   },
+   {
+    "id": "mountain",
+    "x": 70,
+    "y": 75,
+    "w": 410,
+    "h": 107,
+    "depth": 0.06,
+    "anim": null,
+    "src": "assets/scenes/op_mountain/mountain.png"
+   },
+   {
+    "id": "far",
+    "x": 0,
+    "y": 160,
+    "w": 480,
+    "h": 36,
+    "depth": 0.1,
+    "anim": null,
+    "src": "assets/scenes/op_mountain/far.png"
+   },
+   {
+    "id": "plain",
+    "x": 0,
+    "y": 186,
+    "w": 480,
+    "h": 40,
+    "depth": 0.16,
+    "anim": null,
+    "src": "assets/scenes/op_mountain/plain.png"
+   },
+   {
+    "id": "near",
+    "x": 0,
+    "y": 214,
+    "w": 480,
+    "h": 56,
+    "depth": 0.28,
+    "anim": {
+     "type": "sway",
+     "a": 0.5,
+     "t": 5,
+     "oy": 1
+    },
+    "src": "assets/scenes/op_mountain/near.png"
+   },
+   {
+    "id": "rider",
+    "x": 84,
+    "y": 168,
+    "w": 62,
+    "h": 73,
+    "depth": 0.3,
+    "anim": {
+     "type": "bob",
+     "a": 0.4,
+     "t": 3.4
+    },
+    "src": "assets/scenes/op_mountain/rider.png"
+   },
+   {
+    "id": "front",
+    "x": 4,
+    "y": 226,
+    "w": 476,
+    "h": 44,
+    "depth": 0.7,
+    "anim": {
+     "type": "sway",
+     "a": 1.6,
+     "t": 4.2,
+     "oy": 1
+    },
+    "src": "assets/scenes/op_mountain/front.png"
+   }
+  ]
+ },
+ "op_sakura": {
+  "flat": "assets/scenes/op_sakura/flat.png",
+  "vignette": [
+   0.25,
+   "30,20,40"
+  ],
+  "layers": [
+   {
+    "id": "sky",
+    "x": 0,
+    "y": 0,
+    "w": 480,
+    "h": 270,
+    "depth": 0,
+    "anim": null,
+    "src": "assets/scenes/op_sakura/sky.png"
+   },
+   {
+    "id": "clouds",
+    "x": 0,
+    "y": 25,
+    "w": 480,
+    "h": 42,
+    "depth": 0.03,
+    "anim": {
+     "type": "drift",
+     "t": 360
+    },
+    "src": "assets/scenes/op_sakura/clouds.png"
+   },
+   {
+    "id": "mountains",
+    "x": 0,
+    "y": 112,
+    "w": 480,
+    "h": 61,
+    "depth": 0.05,
+    "anim": null,
+    "src": "assets/scenes/op_sakura/mountains.png"
+   },
+   {
+    "id": "castle",
+    "x": 0,
+    "y": 125,
+    "w": 480,
+    "h": 55,
+    "depth": 0.08,
+    "anim": null,
+    "src": "assets/scenes/op_sakura/castle.png"
+   },
+   {
+    "id": "field",
+    "x": 0,
+    "y": 176,
+    "w": 480,
+    "h": 76,
+    "depth": 0.16,
+    "anim": null,
+    "src": "assets/scenes/op_sakura/field.png"
+   },
+   {
+    "id": "trees_mid",
+    "x": 22,
+    "y": 130,
+    "w": 436,
+    "h": 74,
+    "depth": 0.24,
+    "anim": {
+     "type": "sway",
+     "a": 0.5,
+     "t": 6.4,
+     "oy": 1
+    },
+    "src": "assets/scenes/op_sakura/trees_mid.png"
+   },
+   {
+    "id": "rider",
+    "x": 164,
+    "y": 156,
+    "w": 49,
+    "h": 101,
+    "depth": 0.32,
+    "anim": {
+     "type": "bob",
+     "a": 0.35,
+     "t": 3.6
+    },
+    "src": "assets/scenes/op_sakura/rider.png"
+   },
+   {
+    "id": "trees_big",
+    "x": 0,
+    "y": 0,
+    "w": 480,
+    "h": 270,
+    "depth": 0.5,
+    "anim": {
+     "type": "sway",
+     "a": 0.4,
+     "t": 7,
+     "oy": 1
+    },
+    "src": "assets/scenes/op_sakura/trees_big.png"
+   },
+   {
+    "id": "floor",
+    "x": 0,
+    "y": 243,
+    "w": 480,
+    "h": 27,
+    "depth": 0.75,
+    "anim": null,
+    "src": "assets/scenes/op_sakura/floor.png"
    }
   ]
  },

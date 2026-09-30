@@ -305,6 +305,12 @@
 
     inCover(x = this.x) { return this.cover.some((cv) => x >= cv.x0 && x <= cv.x1); }
 
+    dismissGoal() {
+      this.goalGone = true;
+      this.goalCard.classList.add('gone');
+      this.hint.classList.add('on');
+    }
+
     async start() {
       this.layers = [];
       for (const l of this.scenery.layers) this.layers.push({ ...l, img: prescale(await image(l.src)) });
@@ -325,7 +331,9 @@
       this.canvas = h('canvas.wk-canvas');
       this.prompt = h('div.wk-prompt');
       this.say = h('div.wk-say', h('div.wk-say-name'), h('div.wk-say-text'), h('div.wk-say-next', '▼'));
-      this.hint = h('div.wk-hint', this.def.hint || '');
+      // the goal: said plainly on a card as the walk begins, then kept in a banner at the top
+      const goal = (this.def.goal || this.def.hint || '').replace(/\s*→\s*$/, '');
+      this.hint = h('div.wk-hint', h('span.wk-hint-tag', 'Goal'), h('span', `${goal} →`));
       this.notices = h('div.item-notices.wk-notices', { 'aria-live': 'polite' });
       this.purse = h('div.wk-purse', h('span.wk-coin'), h('b', String(this.engine.francs())));
       const skip = h('button.wk-skip', { type: 'button' }, 'Skip ▸▸');
@@ -337,8 +345,16 @@
       this.chaseEl = this.chase ? h('div.wk-chase', h('span.wk-chase-label', 'The riders'), h('div.wk-chase-track', h('i.wk-chase-them'), h('i.wk-chase-you'))) : null;
       this.hurtEl = h('div.wk-hurt');
       this.bubbles = h('div.wk-bubbles');
-      const title = h('div.wk-title', h('b', this.def.title || ''), h('span', this.def.region || ''));
-      this.el = h('div.overlay.walk', this.canvas, h('div.wk-vignette'), this.bubbles, this.prompt, title, this.hint, this.purse, this.notices, help, this.alertEl, this.chaseEl, this.hurtEl, this.say, skip, h('div.wk-fade'));
+      this.goalCard = h('div.wk-goal',
+        h('div.wk-goal-tag', this.def.chase ? 'Ride!' : 'Explore'),
+        h('div.wk-goal-place', this.def.title || ''),
+        this.def.region ? h('div.wk-goal-region', this.def.region) : null,
+        h('div.wk-goal-rule', h('i'), h('b'), h('i')),
+        h('div.wk-goal-label', 'Your goal'),
+        h('div.wk-goal-text', goal),
+        h('div.wk-goal-keys', ...[...help.children].map((k) => k.cloneNode(true)), this.def.chase ? null : h('span.wk-goal-click', 'or hold the mouse on either side')),
+        h('div.wk-goal-go', this.def.chase ? 'It starts now!' : 'Start walking to begin'));
+      this.el = h('div.overlay.walk', this.canvas, h('div.wk-vignette'), this.bubbles, this.prompt, this.goalCard, this.hint, this.purse, this.notices, help, this.alertEl, this.chaseEl, this.hurtEl, this.say, skip, h('div.wk-flash'), h('div.wk-fade'));
       this.el.style.setProperty('--wk-accent', this.def.accent || '255,214,140');
       this.say.addEventListener('click', (e) => { e.stopPropagation(); this.use(); });
       return new Promise((resolve) => {
@@ -361,6 +377,8 @@
         this.onResize = () => this.resize();
         window.addEventListener('resize', this.onResize);
         this.last = performance.now();
+        // the camera begins further along and glides back to Hervé, showing the way ahead
+        if (!this.reduce && !this.def.chase) this.camX = VN.clamp(this.x + 200, 0, this.W - LW);
         this.raf = requestAnimationFrame((t) => this.frame(t));
         this.audio.fx('whoosh', { volume: 0.5 });
       });
@@ -653,6 +671,8 @@
       for (const th of this.things) if (th.kind === 'goal' && th.auto && !th.used && Math.abs(th.x - this.x) < 10) { th.used = true; this.use(th); }
       const n = this.talking || this.chase ? null : this.near();
       this.showPrompt(n);
+      // the goal card goes once Hervé sets off (or after a while), leaving the banner at the top
+      if (!this.goalGone && (this.moving || this.talking || this.t > (this.def.chase ? 3 : 12))) this.dismissGoal();
       this.life(dt);
     }
 
