@@ -48,12 +48,18 @@
     boy: { coat: '#6a5a3a', coatDark: '#50442a', legs: '#50442a', boots: '#e8c0a0', skin: '#e8c0a0', hat: 'none', hatCol: '#1a1414', small: 1 },
     patrol: { coat: '#3a3a2a', coatDark: '#2a2a1e', legs: '#2a2a1e', boots: '#141410', skin: '#d8b090', hat: 'jingasa', hatCol: '#2a2420', lantern: 1 },
     bandit: { coat: '#3a3028', coatDark: '#2a221c', legs: '#2a221c', boots: '#141010', skin: '#c89878', hat: 'fur', hatCol: '#1a1410', beard: '#3a2a20' },
+    // the French army of the 1860s: line infantry with rifles, officers, gunners and Zouaves
+    rifleman: { coat: '#2e4a8a', coatDark: '#22386a', legs: '#b83a3a', boots: '#1a1412', skin: '#e8c0a0', hat: 'kepi', hatCol: '#b83a3a', belt: '#e8dcc0', rifle: 1 },
+    officer: { coat: '#1e2e5a', coatDark: '#141f40', legs: '#b83a3a', boots: '#1a1412', skin: '#e8c0a0', hat: 'kepi', hatCol: '#1e2e5a', belt: '#e8c050', epaulette: '#f0c050', sword: 1, beard: '#5a3a2a' },
+    gunner: { coat: '#1e2a4a', coatDark: '#141c34', legs: '#1e2a4a', stripe: '#c83a3a', boots: '#1a1412', skin: '#e0b898', hat: 'kepi', hatCol: '#1e2a4a', belt: '#e8dcc0' },
+    zouave: { coat: '#2a3a7a', coatDark: '#1e2a5a', legs: '#c83a3a', wideLegs: 1, boots: '#e8dcc0', skin: '#d8a888', hat: 'fez', hatCol: '#c83a3a', sash: '#3a6ab0', beard: '#3a2a20' },
   };
 
   function rect(c, x, y, w, hh, col) { c.fillStyle = col; c.fillRect(Math.round(x), Math.round(y), Math.round(w), Math.round(hh)); }
 
   /** A person standing (or walking) with their feet at (x, y), facing right; flip the canvas to face left. */
-  function drawPerson(c, L, t, moving, running, crouch = false) {
+  function drawPerson(c, L, t, moving, running, crouch = false, pose = null) {
+    if (pose === 'sit') crouch = true;
     const k = L.small ? 0.8 : 1;
     const legH = Math.round((crouch ? 3 : 8) * k), bodyH = Math.round((crouch ? 8 : 10) * k), w = Math.round((L.wide ? 8 : 6) * k);
     const ph = t * (running ? 16 : 10);
@@ -64,9 +70,15 @@
     if (L.robe) {
       rect(c, -w / 2 - 1, y - legH - 1, w + 2, legH + 1, L.coatDark);
       rect(c, -w / 2 + swing, y - 2, 3, 2, L.boots); rect(c, w / 2 - 3 - swing, y - 2, 3, 2, L.boots);
+    } else if (L.wideLegs) {
+      rect(c, -3 + Math.round(swing * 2), y - legH, 3, legH - 1, L.legs);
+      rect(c, 1 - Math.round(swing * 2), y - legH, 3, legH - 1, L.legs);
+      rect(c, -2 + Math.round(swing * 2), y - 2, 3, 2, L.boots);
+      rect(c, 1 - Math.round(swing * 2), y - 2, 3, 2, L.boots);
     } else {
       rect(c, -2 + Math.round(swing * 2), y - legH, 2, legH, L.legs);
       rect(c, 1 - Math.round(swing * 2), y - legH, 2, legH, L.legs);
+      if (L.stripe) { rect(c, -2 + Math.round(swing * 2), y - legH, 1, legH - 2, L.stripe); rect(c, 2 - Math.round(swing * 2), y - legH, 1, legH - 2, L.stripe); }
       rect(c, -2 + Math.round(swing * 2), y - 2, 3, 2, L.boots);
       rect(c, 1 - Math.round(swing * 2), y - 2, 3, 2, L.boots);
     }
@@ -76,10 +88,28 @@
     rect(c, -w / 2, top, 2, bodyH + 2, L.coatDark);
     if (!L.robe) rect(c, -w / 2 - 1 + (moving ? Math.round(-swing) : 0), top + bodyH - 1, 2, 3, L.coatDark);
     if (L.belt) rect(c, -w / 2, top + bodyH - 4, w, 1, L.belt);
+    if (L.sash) rect(c, -w / 2, top + bodyH - 4, w, 2, L.sash);
     if (L.scarf) rect(c, -w / 2 + 1, top, w - 1, 2, L.scarf);
-    // an arm swinging opposite to the legs
-    rect(c, 0 - Math.round(swing * 2), top + 2, 2, 7, L.coatDark);
-    rect(c, 0 - Math.round(swing * 2), top + 8, 2, 2, L.skin);
+    if (L.epaulette) { rect(c, -w / 2 - 1, top, 2, 1, L.epaulette); rect(c, w / 2 - 1, top, 2, 1, L.epaulette); }
+    // an arm: swinging opposite to the legs, raised as they talk, or holding the rifle up in front
+    if (pose === 'talk') {
+      const up = Math.sin(t * 7) > 0 ? 1 : 0;
+      rect(c, 1, top + 3 - up, 2, 4, L.coatDark);
+      rect(c, 3, top + 1 - up, 2, 2, L.skin);
+    } else if (pose === 'present' && L.rifle) {
+      rect(c, 2, top + 3, 2, 5, L.coatDark);
+      rect(c, 3, top - 9, 1, 19, '#4a3424');
+      rect(c, 3, top - 13, 1, 4, '#d0d0d8');
+      rect(c, 2, top + 5, 2, 2, L.skin);
+    } else {
+      rect(c, 0 - Math.round(swing * 2), top + 2, 2, 7, L.coatDark);
+      rect(c, 0 - Math.round(swing * 2), top + 8, 2, 2, L.skin);
+    }
+    // a rifle on the shoulder, bayonet fixed
+    if (L.rifle && pose !== 'present') {
+      for (let k = 0; k < 16; k++) rect(c, -3 + Math.round(k * 0.18), top + 9 - k, 1, 1, '#4a3424');
+      rect(c, 0, top - 10, 1, 4, '#d0d0d8');
+    }
     // the head, and whatever is on it
     const hy = top - 5;
     rect(c, -2, hy, 5, 5, L.skin);
@@ -93,6 +123,7 @@
     else if (L.hat === 'topknot') { rect(c, -2, hy - 1, 5, 2, hc); rect(c, -1, hy - 3, 2, 2, hc); }
     else if (L.hat === 'bun') { rect(c, -3, hy - 1, 6, 3, hc); rect(c, -4, hy - 3, 3, 3, hc); }
     else if (L.hat === 'jingasa') { rect(c, -5, hy - 1, 11, 1, hc); rect(c, -3, hy - 2, 7, 1, hc); }
+    else if (L.hat === 'fez') { rect(c, -1, hy - 3, 4, 3, hc); rect(c, -2, hy - 1, 1, 2, '#1a2a5a'); }
     else rect(c, -2, hy - 1, 5, 2, hc);
     if (L.sword) rect(c, -w / 2 - 1, top + bodyH - 3, 8, 1, '#8a8a90');
     if (L.drum) { rect(c, 2, top + 5, 5, 5, '#b83a3a'); rect(c, 2, top + 5, 5, 1, '#e8dcc8'); }
@@ -215,6 +246,16 @@
         this.chase = { ...ch, gap: ch.gap || 110, obstacles, jumpY: 0, vy: 0 };
       }
       if (def.shelling) this.shelling = { ...def.shelling, list: [], wait: def.shelling.first || 2.2, hits: 0 };
+      // life that is only there to be seen: groups talking, men marching, a drill, sentries on
+      // their towers, flags, smoke, fires, and airships and balloons in the sky
+      this.crowd = (def.crowd || []).map((g) => ({ ...g, k: 0, timer: 0.4 + Math.random(), showing: -1, bubble: null }));
+      this.marchers = (def.marchers || []).map((m) => ({ ...m, x: m.start != null ? m.start : m.x0, dir: m.dir || 1, wait: 0, look: LOOKS[m.look || 'rifleman'] }));
+      if (def.drill) this.drill = { ...def.drill, k: -1, timer: 1.5, pose: null, bubble: null };
+      this.flags = def.flags || [];
+      this.fires = def.fires || [];
+      this.smokes = (def.smoke || []).map((sm) => ({ ...sm, acc: Math.random() }));
+      this.puffs = [];
+      this.sky = def.airships || [];
     }
 
     inCover(x = this.x) { return this.cover.some((cv) => x >= cv.x0 && x <= cv.x1); }
@@ -246,8 +287,9 @@
       this.alertEl = this.patrols.length ? h('div.wk-alert', h('span.wk-alert-eye', '目'), h('span.wk-alert-text', 'Unseen')) : null;
       this.chaseEl = this.chase ? h('div.wk-chase', h('span.wk-chase-label', 'The riders'), h('div.wk-chase-track', h('i.wk-chase-them'), h('i.wk-chase-you'))) : null;
       this.hurtEl = h('div.wk-hurt');
+      this.bubbles = h('div.wk-bubbles');
       const title = h('div.wk-title', h('b', this.def.title || ''), h('span', this.def.region || ''));
-      this.el = h('div.overlay.walk', this.canvas, h('div.wk-vignette'), this.prompt, title, this.hint, this.purse, this.notices, help, this.alertEl, this.chaseEl, this.hurtEl, this.say, skip, h('div.wk-fade'));
+      this.el = h('div.overlay.walk', this.canvas, h('div.wk-vignette'), this.bubbles, this.prompt, title, this.hint, this.purse, this.notices, help, this.alertEl, this.chaseEl, this.hurtEl, this.say, skip, h('div.wk-fade'));
       this.el.style.setProperty('--wk-accent', this.def.accent || '255,214,140');
       this.say.addEventListener('click', (e) => { e.stopPropagation(); this.use(); });
       return new Promise((resolve) => {
@@ -562,6 +604,94 @@
       for (const th of this.things) if (th.kind === 'goal' && th.auto && !th.used && Math.abs(th.x - this.x) < 10) { th.used = true; this.use(th); }
       const n = this.talking || this.chase ? null : this.near();
       this.showPrompt(n);
+      this.life(dt);
+    }
+
+    /** The camp going about its morning: talk, marching, drill, smoke. */
+    life(dt) {
+      const quiet = !!this.talking || this.done;
+      // one conversation on the ground at a time (the nearest one), and none where a prompt is
+      // showing; the sentries up on their towers talk over everyone's heads
+      const low = (g) => !g.people || !g.people.some((p) => p.y && p.y < GY - 20);
+      let nearest = null, best = Infinity;
+      const cands = [...this.crowd.filter(low), ...(this.drill ? [this.drill] : [])];
+      for (const g of cands) {
+        const gx = g === this.drill ? g.x + (g.officer || 0) : g.x;
+        const d = Math.abs(this.x - gx);
+        if (d < (g.near || 150) && d < best) { best = d; nearest = g; }
+      }
+      const blocked = (gx) => this.promptFor && Math.abs(this.promptFor.x - gx) < 70;
+      this.talkingGroup = nearest;
+      for (const g of this.crowd) {
+        const near = !quiet && Math.abs(this.x - g.x) < (g.near || 150) && (!low(g) || g === nearest) && !blocked(g.x);
+        g.timer -= dt;
+        if (!near) { if (g.showing >= 0) this.hideBubble(g); g.timer = Math.max(g.timer, 0.3); continue; }
+        if (g.timer > 0) continue;
+        if (g.showing >= 0) { this.hideBubble(g); g.timer = 0.9; continue; }
+        const [who, text] = g.lines[g.k % g.lines.length];
+        g.k++;
+        g.showing = who;
+        g.timer = 1.8 + text.length * 0.05;
+        this.showBubble(g, text);
+      }
+      for (const m of this.marchers) {
+        if (m.wait > 0) { m.wait -= dt; continue; }
+        m.x += m.dir * (m.speed || 20) * dt;
+        if ((m.dir > 0 && m.x > m.x1) || (m.dir < 0 && m.x < m.x0)) { m.x = VN.clamp(m.x, m.x0, m.x1); m.dir *= -1; m.wait = m.pause || 1.6; }
+      }
+      const d = this.drill;
+      if (d) {
+        d.timer -= dt;
+        if (d.timer <= 0) {
+          d.k++;
+          const call = d.calls[d.k % d.calls.length];
+          d.pose = call.pose || null;
+          d.timer = d.period || 4.5;
+          if (!quiet && d === this.talkingGroup && !blocked(d.x + (d.officer || 0))) this.showBubble(d, call.text, d.x + (d.officer || 0), GY);
+          else if (d.bubble) this.hideBubble(d);
+        } else if (d.bubble && (d.timer < (d.period || 4.5) - 2.6 || d !== this.talkingGroup)) this.hideBubble(d);
+      }
+      for (const sm of this.smokes) {
+        sm.acc += dt * (sm.rate || 1.4);
+        while (sm.acc > 1) {
+          sm.acc -= 1;
+          this.puffs.push({ x: sm.x + rnd(-1, 1), y: sm.y, vx: rnd(2, 6) * (sm.lean || 1), vy: -rnd(6, 10), r: rnd(1.2, 2), grow: rnd(1.2, 2), age: 0, life: rnd(4, 6), col: sm.col || '236,222,230', a: sm.a || 0.55 });
+        }
+      }
+      for (const p of this.puffs) { p.age += dt; p.x += p.vx * dt; p.y += p.vy * dt; p.vy *= 0.995; p.r += p.grow * dt; }
+      this.puffs = this.puffs.filter((p) => p.age < p.life);
+    }
+
+    /** A few words over someone's head, as the camp talks among itself. */
+    showBubble(g, text, x, y) {
+      if (!g.bubble) {
+        g.bubble = h('div.wk-bubble', h('span'));
+        this.bubbles.append(g.bubble);
+      }
+      g.bubble.firstChild.textContent = text;
+      g.bubbleAt = x != null ? [x, y] : null;
+      g.bubble.classList.remove('on');
+      void g.bubble.offsetWidth;
+      g.bubble.classList.add('on');
+    }
+
+    hideBubble(g) {
+      g.showing = -1;
+      if (g.bubble) g.bubble.classList.remove('on');
+    }
+
+    /** Where each bubble sits: over the speaker's head, following the camera. */
+    placeBubbles() {
+      const put = (g, lx, ly) => {
+        const [cx, cy] = this.toCss(lx - this.camX, ly);
+        g.bubble.style.transform = `translate(${cx.toFixed(0)}px, ${cy.toFixed(0)}px) translate(-50%, -100%)`;
+      };
+      for (const g of this.crowd) {
+        if (!g.bubble || g.showing < 0) continue;
+        const p = g.people[g.showing] || g.people[0];
+        put(g, g.x + (p.dx || 0), (p.y || GY) - 30);
+      }
+      if (this.drill && this.drill.bubble && this.drill.bubbleAt) put(this.drill, this.drill.bubbleAt[0], this.drill.bubbleAt[1] - 30);
     }
 
     showPrompt(th) {
@@ -582,8 +712,18 @@
       c.clearRect(0, 0, LW * SS, LH * SS);
       const behind = this.layers.filter((l) => l.depth <= 1);
       const front = this.layers.filter((l) => l.depth > 1);
-      for (const l of behind) this.layer(c, l, cam);
-      // the things along the way, and the people
+      // the airships and balloons fly between the clouds and the horizon
+      let skyDone = !this.sky.length;
+      for (const l of behind) {
+        if (!skyDone && l.depth > 0.1) { this.drawSky(c, cam); skyDone = true; }
+        this.layer(c, l, cam);
+      }
+      if (!skyDone) this.drawSky(c, cam);
+      this.drawPuffs(c, cam);
+      for (const f of this.flags) this.drawFlag(c, f, cam);
+      for (const f of this.fires) this.drawFire(c, f, cam);
+      // the camp's people, then the things along the way
+      this.drawLife(c, cam);
       for (const th of this.things) this.thing(c, th, cam);
       this.drawShadows(c, cam);
       for (const p of this.patrols) this.drawPatrol(c, p, cam);
@@ -614,6 +754,7 @@
       this.water(c);
       for (const l of front) this.layer(c, l, cam);
       if (this.weather && !this.reduce) stepWeather(c, this.weather, dt, this.t, this.camDx || 0);
+      this.placeBubbles();
       // onto the screen
       const out = this.canvas.getContext('2d');
       out.imageSmoothingEnabled = false;
@@ -621,6 +762,158 @@
       out.clearRect(0, 0, this.canvas.width, this.canvas.height);
       const jolt = this.shake > 0 && !this.reduce ? this.shake * 6 : 0;
       out.drawImage(this.buf, this.view.ox * sx + rnd(-jolt, jolt), this.view.oy * sx + rnd(-jolt, jolt), LW * this.view.k * sx, LH * this.view.k * sx);
+    }
+
+    /** Someone standing about: at (x, y), facing `face`, in a pose. */
+    figure(c, look, x, y, face, t, moving, pose) {
+      if (x < -20 || x > LW + 20) return;
+      c.save();
+      c.translate(Math.round(x * SS), Math.round(y * SS));
+      c.scale(SS * face, SS);
+      drawPerson(c, look, t, moving, false, false, pose);
+      c.restore();
+    }
+
+    drawLife(c, cam) {
+      for (const g of this.crowd) {
+        g.people.forEach((p, i) => {
+          const face = p.face || 1;
+          const pose = g.showing === i ? 'talk' : p.pose || null;
+          this.figure(c, LOOKS[p.look || 'soldier'], g.x + (p.dx || 0) - cam, p.y || GY, p.turn ? (Math.sin(this.t * 0.4 + i) > 0 ? 1 : -1) : face, this.t + i, false, pose);
+        });
+      }
+      for (const m of this.marchers) {
+        for (let i = 0; i < (m.n || 2); i++) this.figure(c, m.look, m.x - m.dir * i * (m.gap || 9) - cam, GY, m.dir, this.t, m.wait <= 0, null);
+      }
+      const d = this.drill;
+      if (d) {
+        for (let i = 0; i < (d.n || 5); i++) this.figure(c, LOOKS[d.look || 'rifleman'], d.x + i * (d.gap || 9) - cam, GY, d.face || 1, 0, false, d.pose);
+        if (d.officer != null) this.figure(c, LOOKS.officer, d.x + d.officer - cam, GY, -(d.face || 1), this.t, false, d.bubble && d.bubble.classList.contains('on') ? 'talk' : null);
+      }
+    }
+
+    /** A flag waving on its pole: every column rides the wind a little later than the last. */
+    drawFlag(c, f, cam) {
+      const x0 = f.x - cam * (f.depth == null ? 1 : f.depth);
+      if (x0 < -40 || x0 > LW + 10) return;
+      const w = f.w || 24, hh = f.h || 11;
+      const cols = f.colors || ['#2e4a9a', '#f2eee6', '#c83a3a'];
+      for (let i = 0; i < w; i++) {
+        const k = i / w;
+        const dy = Math.sin(this.t * 4.2 - i * 0.42) * k * 1.8;
+        const slope = Math.cos(this.t * 4.2 - i * 0.42);
+        const col = cols[Math.min(cols.length - 1, Math.floor(k * cols.length))];
+        c.fillStyle = col;
+        c.fillRect(Math.round((x0 + i) * SS), Math.round((f.y + dy) * SS), SS, Math.round(hh * SS));
+        if (Math.abs(slope) > 0.55) { c.fillStyle = slope > 0 ? 'rgba(255,240,240,0.18)' : 'rgba(40,20,50,0.2)'; c.fillRect(Math.round((x0 + i) * SS), Math.round((f.y + dy) * SS), SS, Math.round(hh * SS)); }
+        if (f.fringe && i % 2 === 0) { c.fillStyle = '#f0c050'; c.fillRect(Math.round((x0 + i) * SS), Math.round((f.y + dy + hh) * SS), SS, SS); }
+      }
+    }
+
+    /** A camp fire: flames that never hold still, and the light they throw. */
+    drawFire(c, f, cam) {
+      const x = f.x - cam;
+      if (x < -40 || x > LW + 40) return;
+      const g = c.createRadialGradient(x * SS, (f.y - 6) * SS, 0, x * SS, (f.y - 6) * SS, 34 * SS);
+      g.addColorStop(0, `rgba(255,170,90,${0.22 + Math.sin(this.t * 9) * 0.05})`);
+      g.addColorStop(1, 'rgba(255,140,70,0)');
+      c.fillStyle = g;
+      c.fillRect((x - 34) * SS, (f.y - 40) * SS, 68 * SS, 68 * SS);
+      for (let k = 0; k < 7; k++) {
+        const fx = x - 6 + k * 2, hgt = 4 + Math.abs(Math.sin(this.t * (7 + k) + k * 1.7)) * (k === 3 ? 9 : 6);
+        c.fillStyle = '#ff7a2a'; c.fillRect(Math.round(fx * SS), Math.round((f.y - 2 - hgt) * SS), 2 * SS, Math.round(hgt * SS));
+        c.fillStyle = '#ffd070'; c.fillRect(Math.round(fx * SS), Math.round((f.y - 2 - hgt * 0.55) * SS), SS, Math.round(hgt * 0.55 * SS));
+      }
+    }
+
+    drawPuffs(c, cam) {
+      for (const p of this.puffs) {
+        const x = p.x - cam;
+        if (x < -30 || x > LW + 30) continue;
+        const k = 1 - p.age / p.life;
+        c.fillStyle = `rgba(${p.col},${(p.a * k).toFixed(3)})`;
+        const R = p.r, n = Math.ceil(R);
+        for (let dy = -n; dy <= n; dy++) { const w = Math.floor(Math.sqrt(Math.max(0, R * R - dy * dy))); c.fillRect(Math.round((x - w) * SS), Math.round((p.y + dy) * SS), (w * 2 + 1) * SS, SS); }
+      }
+    }
+
+    /** The sky of an industrious empire: steam airships crossing, observation balloons on their tethers. */
+    drawSky(c, cam) {
+      for (const a of this.sky) {
+        const s = a.s || 1;
+        if (a.kind === 'balloon') {
+          const x = a.x - cam * (a.depth == null ? 0.12 : a.depth);
+          if (x < -30 || x > LW + 30) continue;
+          const y = a.y + Math.sin(this.t * 0.7 + a.x) * 1.5;
+          this.drawBalloon(c, x, y, s, a);
+          continue;
+        }
+        const span = LW + 160 * s;
+        const raw = a.x - cam * (a.depth == null ? 0.04 : a.depth) + (a.dir || -1) * this.t * (a.speed || 5);
+        const x = ((raw % span) + span) % span - 80 * s;
+        this.drawAirship(c, x, a.y + Math.sin(this.t * 0.5 + a.x) * 1.2, s, a.dir || -1);
+      }
+    }
+
+    drawAirship(c, x, y, s, dir) {
+      const P = (px, py, w, hh, col) => { c.fillStyle = col; c.fillRect(Math.round((x + px * dir) * SS - (dir < 0 ? Math.round(w * SS) : 0)), Math.round((y + py) * SS), Math.round(w * SS), Math.round(hh * SS)); };
+      const L = 34 * s, H2 = 8 * s;
+      // the envelope, a long cigar pointed at the front, lighter on top, with its seams
+      for (let yy = -H2; yy <= H2; yy += 0.5) {
+        const k = yy / H2;
+        const half = L * Math.sqrt(Math.max(0, 1 - k * k));
+        const nose = half * (1 - 0.15 * (1 - Math.abs(k)));
+        const col = k < -0.55 ? '#fff6f0' : k < 0.2 ? '#eee0d8' : k < 0.6 ? '#d6c0c2' : '#b8a0aa';
+        P(-half, yy, half + nose, 0.5, col);
+      }
+      P(-L * 0.9, -1, L * 1.8, 0.5, '#d8c4c4');
+      P(-L * 0.8, H2 * 0.45, L * 1.6, 0.5, '#c0aab2');
+      // the tricolour band near the tail, and the rudder
+      P(-L * 0.62, -H2 * 0.85, 2 * s, H2 * 1.7, '#2e4a9a');
+      P(-L * 0.62 + 2 * s, -H2 * 0.9, 2 * s, H2 * 1.8, '#f2eee6');
+      P(-L * 0.62 + 4 * s, -H2 * 0.85, 2 * s, H2 * 1.7, '#c83a3a');
+      for (let k = 0; k < 7 * s; k += 0.5) P(-L - 2 * s - k * 0.4, -k, 3 * s, 0.5, k < 3.5 * s ? '#c83a3a' : '#2e4a9a');
+      // the keel, the rigging and the gondola, with its engine's propeller turning
+      P(-L * 0.75, H2 + 4 * s, L * 1.5, 0.7, '#5a4a50');
+      for (let k = -0.7; k <= 0.7; k += 0.2) P(L * k, H2 * 0.9, 0.5, 3.2 * s, 'rgba(90,70,80,0.8)');
+      P(-6 * s, H2 + 4.5 * s, 12 * s, 3 * s, '#6a4a3a');
+      P(-4 * s, H2 + 5.2 * s, 1.5, 1.2, '#ffd28a'); P(0, H2 + 5.2 * s, 1.5, 1.2, '#ffd28a');
+      if (Math.floor(this.t * 16) % 2) P(-L * 0.78, H2 + 2 * s, 0.8, 5 * s, '#3a2e2a');
+      else P(-L * 0.78 - 2 * s, H2 + 4 * s, 4 * s, 0.8, '#3a2e2a');
+      // the steam engine's smoke, trailing behind
+      for (let k = 0; k < 4; k++) {
+        const age = ((this.t * 0.8 + k * 0.25) % 1);
+        c.fillStyle = `rgba(230,220,228,${(0.5 * (1 - age)).toFixed(2)})`;
+        const r = (1 + age * 3) * s;
+        const px = x - dir * (6 * s + age * 26 * s), py = y + H2 + 3 * s - age * 3;
+        c.fillRect(Math.round((px - r) * SS), Math.round((py - r * 0.6) * SS), Math.round(r * 2 * SS), Math.round(r * 1.2 * SS));
+      }
+    }
+
+    drawBalloon(c, x, y, s, a) {
+      const R = 8 * s;
+      const cols = a.colors || ['#f2e6dc', '#c83a3a'];
+      for (let yy = -R; yy <= R; yy += 0.5) {
+        const w = Math.sqrt(Math.max(0, R * R - yy * yy)) * (yy > R * 0.3 ? 1 - (yy - R * 0.3) / (R * 1.3) : 1);
+        for (let xx = -w; xx < w; xx += 1) {
+          const gore = Math.floor(((Math.asin(Math.max(-1, Math.min(1, xx / Math.max(1, w)))) / Math.PI) + 0.5) * 6);
+          let col = cols[gore % cols.length];
+          if (xx > w * 0.35 || yy > R * 0.45) col = gore % 2 ? '#9a2a34' : '#c8b0b4';
+          if (xx < -w * 0.4 && yy < 0) col = gore % 2 ? '#e05050' : '#fff8f0';
+          c.fillStyle = col;
+          c.fillRect(Math.round((x + xx) * SS), Math.round((y + yy) * SS), SS, Math.ceil(0.5 * SS));
+        }
+      }
+      // ropes, the basket with two observers, and the tether down to the fort
+      c.fillStyle = 'rgba(70,50,60,0.9)';
+      for (const k of [-0.5, 0.5]) c.fillRect(Math.round((x + k * R * 0.9) * SS), Math.round((y + R * 0.8) * SS), SS / 2, Math.round(5 * s * SS));
+      c.fillStyle = '#6a4a3a'; c.fillRect(Math.round((x - 2.5 * s) * SS), Math.round((y + R + 4 * s) * SS), Math.round(5 * s * SS), Math.round(3 * s * SS));
+      c.fillStyle = '#2e4a8a'; c.fillRect(Math.round((x - 1.5 * s) * SS), Math.round((y + R + 3 * s) * SS), SS, SS); c.fillRect(Math.round((x + 1 * s) * SS), Math.round((y + R + 3 * s) * SS), SS, SS);
+      if (a.tether) {
+        c.fillStyle = 'rgba(70,50,60,0.55)';
+        const y0 = y + R + 7 * s, y1 = a.tether;
+        for (let yy = y0; yy < y1; yy += 1) c.fillRect(Math.round((x + (yy - y0) * 0.08) * SS), Math.round(yy * SS), 1, SS);
+      }
     }
 
     /** Somewhere to hide: a charred wall, a heap of rubble, sandbags, an overturned cart. */

@@ -457,6 +457,13 @@ where a shell will land and Hervé is knocked down unless he is crouched behind 
 the game: `walk ruins into how` sets `how` to caught, escaped, arrived or skipped, and the story
 goes on from there. Action is set to one difficulty for everyone.
 
+A walk can also simply be alive (the army camp is): soldiers standing about who talk among
+themselves in small bubbles when Hervé comes near (one conversation at a time), men marching up
+and down, a drill with an officer calling the orders, sentries up on the towers, flags waving,
+chimney and camp-fire smoke, fires, and airships and balloons in the sky. None of it stops him;
+story/walks.js describes each (`crowd`, `marchers`, `drill`, `flags`, `smoke`, `fires`,
+`airships`).
+
 Walks never replace the rest: choices, cutscenes and minigames happen around them as before. The
 game menu (Esc) pauses a walk, and saving during one saves just before it. A quiet walk is passed
 over while skipping; a walk with danger in it (a chase, patrols, shelling, or `into`) stops skipping
@@ -596,6 +603,8 @@ lantern or the pond at any window shape; `#colour` is optional everywhere.
 | `lightning` | rate [, horizon] | the sky flashes twice and a bolt forks down (off with reduced motion) |
 | `splashes` | y,height [, rate] | raindrops bursting on the ground |
 | `army` | y,dir,speed,count,type [, scale, x0, x1, fire] | soldiers marching in ranks: type 0 the imperial army, 1 samurai with banners, 2 French infantry; `fire` makes the front rank let off volleys |
+| `airship` | y,dir,speed [, scale, x] | a steam airship crossing the sky (tricolour rudder, turning propeller, a trail of smoke), wrapping round |
+| `balloon` | x,y [, scale, tether, colours] | an observation balloon bobbing on its tether (to `tether`, a height); colours 0 red and cream, 1 blue and cream |
 | `gunfire` | y,x0,x1 [, rate, size] | muzzle flashes twinkling along a line, with volleys (a battle far off) |
 | `cannon` | x,y,period,offset [, dir, size] | a gun firing every `period` seconds, first after `offset`: flash, fire and rolling smoke |
 | `shells` | rate,y0,y1 [, x0, x1] | shells arcing in and bursting on the ground |

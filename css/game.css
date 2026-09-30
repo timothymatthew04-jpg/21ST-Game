@@ -3631,3 +3631,38 @@ input[type='range']::-moz-range-thumb { width: 18px; height: 24px; background: v
 .mg-said { flex: 1; }
 .mg-harakei b { display: block; font-family: var(--name-font); font-size: 16px; letter-spacing: 0.08em; color: #c9a24d; margin-bottom: 6px; }
 .mg-harakei span { font-family: var(--name-font); font-style: italic; font-size: 20px; line-height: 1.5; color: #fff0d8; }
+
+/* ---- the camp talking among itself: small bubbles over soldiers' heads ---------------------- */
+.wk-bubbles { position: absolute; inset: 0; pointer-events: none; z-index: 2; }
+.wk-bubble {
+  position: absolute;
+  left: 0;
+  top: 0;
+  max-width: 250px;
+  padding: 6px 11px 7px;
+  font-family: var(--text-font);
+  font-size: 15px;
+  line-height: 1.3;
+  color: #2e2230;
+  text-align: center;
+  background: #fbf3ea;
+  border-radius: 10px;
+  box-shadow: 0 0 0 2px rgba(46, 34, 48, 0.85), 0 4px 10px rgba(30, 16, 30, 0.35);
+  opacity: 0;
+  transition: opacity 0.25s ease;
+  white-space: normal;
+  width: max-content;
+}
+.wk-bubble::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: -7px;
+  margin-left: -6px;
+  border: 6px solid transparent;
+  border-bottom: 0;
+  border-top: 7px solid #fbf3ea;
+  filter: drop-shadow(0 2px 0 rgba(46, 34, 48, 0.85));
+}
+.wk-bubble.on { opacity: 1; animation: wk-bubble-in 0.3s cubic-bezier(0.2, 0.9, 0.3, 1.3); }
+@keyframes wk-bubble-in { from { transform-origin: 50% 100%; scale: 0.7; } }

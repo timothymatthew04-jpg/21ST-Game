@@ -1008,6 +1008,81 @@
     }
   }
 
+  // ---------------------------------------------------------------- the sky of an empire
+  /** airship=y,dir,speed,scale,x — a steam airship crossing the sky, its propeller turning, smoke trailing. */
+  class Airship {
+    constructor(nums) {
+      const [y = 0.2, dir = -1, speed = 5, scale = 1, x = 0.5] = nums;
+      Object.assign(this, { yf: y, dir: dir < 0 ? -1 : 1, speed, s: scale, xf: x });
+    }
+    resize(W, H) { if (this.x == null) this.x = this.xf * W; this.W = W; this.H = H; }
+    step(dt) {
+      if (!this.W) return;
+      this.x += this.dir * this.speed * dt;
+      const m = 45 * this.s;
+      if (this.dir < 0 && this.x < -m) this.x = this.W + m;
+      if (this.dir > 0 && this.x > this.W + m) this.x = -m;
+    }
+    draw(c, t) {
+      if (!this.W) return;
+      const s = this.s, dir = this.dir, x = this.x, y = this.yf * this.H + Math.sin(t * 0.5 + this.xf * 9) * 1.2;
+      const P = (px, py, w, hh, col) => { c.fillStyle = col; c.fillRect(x + px * dir - (dir < 0 ? w : 0), y + py, w, hh); };
+      const L = 34 * s, H2 = 8 * s;
+      for (let yy = -H2; yy <= H2; yy += 0.5) {
+        const k = yy / H2;
+        const half = L * Math.sqrt(Math.max(0, 1 - k * k));
+        const col = k < -0.55 ? '#fff6f0' : k < 0.2 ? '#eee0d8' : k < 0.6 ? '#d6c0c2' : '#b8a0aa';
+        P(-half, yy, half * (2 - 0.15 * (1 - Math.abs(k))), 0.5, col);
+      }
+      P(-L * 0.62, -H2 * 0.85, 2 * s, H2 * 1.7, '#2e4a9a');
+      P(-L * 0.62 + 2 * s, -H2 * 0.9, 2 * s, H2 * 1.8, '#f2eee6');
+      P(-L * 0.62 + 4 * s, -H2 * 0.85, 2 * s, H2 * 1.7, '#c83a3a');
+      for (let k = 0; k < 7 * s; k += 0.5) P(-L - 2 * s - k * 0.4, -k, 3 * s, 0.5, k < 3.5 * s ? '#c83a3a' : '#2e4a9a');
+      P(-L * 0.75, H2 + 4 * s, L * 1.5, 0.7, '#5a4a50');
+      for (let k = -0.7; k <= 0.7; k += 0.2) P(L * k, H2 * 0.9, 0.5, 3.2 * s, 'rgba(90,70,80,0.8)');
+      P(-6 * s, H2 + 4.5 * s, 12 * s, 3 * s, '#6a4a3a');
+      P(-4 * s, H2 + 5.2 * s, 1.5, 1.2, '#ffd28a'); P(0, H2 + 5.2 * s, 1.5, 1.2, '#ffd28a');
+      if (Math.floor(t * 16) % 2) P(-L * 0.78, H2 + 2 * s, 0.8, 5 * s, '#3a2e2a');
+      else P(-L * 0.78 - 2 * s, H2 + 4 * s, 4 * s, 0.8, '#3a2e2a');
+      for (let k = 0; k < 4; k++) {
+        const age = (t * 0.8 + k * 0.25) % 1, r = (1 + age * 3) * s;
+        c.fillStyle = `rgba(230,220,228,${(0.5 * (1 - age)).toFixed(2)})`;
+        c.fillRect(x - dir * (6 * s + age * 26 * s) - r, y + H2 + 3 * s - age * 3 - r * 0.6, r * 2, r * 1.2);
+      }
+    }
+  }
+  /** balloon=x,y,scale,tether,colours — an observation balloon, bobbing on its tether above the lines. */
+  class Balloon {
+    constructor(nums) {
+      const [x = 0.5, y = 0.3, scale = 1, tether = 0.62, kind = 0] = nums;
+      Object.assign(this, { xf: x, yf: y, s: scale, tf: tether, cols: kind ? ['#f2e6dc', '#2e4a9a'] : ['#f2e6dc', '#c83a3a'] });
+    }
+    resize(W, H) { this.W = W; this.H = H; }
+    step() {}
+    draw(c, t) {
+      if (!this.W) return;
+      const s = this.s, R = 8 * s, x = this.xf * this.W, y = this.yf * this.H + Math.sin(t * 0.7 + this.xf * 7) * 1.5;
+      for (let yy = -R; yy <= R; yy += 0.5) {
+        const w = Math.sqrt(Math.max(0, R * R - yy * yy)) * (yy > R * 0.3 ? 1 - (yy - R * 0.3) / (R * 1.3) : 1);
+        for (let xx = -w; xx < w; xx += 1) {
+          const gore = Math.floor(((Math.asin(Math.max(-1, Math.min(1, xx / Math.max(1, w)))) / Math.PI) + 0.5) * 6);
+          let col = this.cols[gore % 2];
+          if (xx > w * 0.35 || yy > R * 0.45) col = gore % 2 ? '#9a2a34' : '#c8b0b4';
+          if (xx < -w * 0.4 && yy < 0) col = gore % 2 ? '#e05050' : '#fff8f0';
+          c.fillStyle = col;
+          c.fillRect(x + xx, y + yy, 1, 0.5);
+        }
+      }
+      c.fillStyle = 'rgba(70,50,60,0.9)';
+      for (const k of [-0.5, 0.5]) c.fillRect(x + k * R * 0.9, y + R * 0.8, 0.5, 5 * s);
+      c.fillStyle = '#6a4a3a'; c.fillRect(x - 2.5 * s, y + R + 4 * s, 5 * s, 3 * s);
+      c.fillStyle = '#2e4a8a'; c.fillRect(x - 1.5 * s, y + R + 3 * s, 1, 1); c.fillRect(x + s, y + R + 3 * s, 1, 1);
+      c.fillStyle = 'rgba(70,50,60,0.55)';
+      const y0 = y + R + 7 * s, y1 = this.tf * this.H;
+      for (let yy = y0; yy < y1; yy += 1) c.fillRect(x + (yy - y0) * 0.08, yy, 0.5, 1);
+    }
+  }
+
   // ---------------------------------------------------------------- the per-background controller
   class SceneFx {
     constructor(bgEl, specs, settings, frame = null) {
@@ -1038,6 +1113,8 @@
           case 'blasts': this.systems.push(new Blasts(n, s.color)); break;
           case 'rockets': this.systems.push(new Rockets(n)); break;
           case 'army': this.systems.push(new Army(n)); break;
+          case 'airship': this.systems.push(new Airship(n)); break;
+          case 'balloon': this.systems.push(new Balloon(n)); break;
           case 'walkers': this.systems.push(new Walkers(n)); break;
           case 'ripples': this.systems.push(new Ripples(n, s.color)); break;
           case 'shade': this.systems.push(new Shade(n, s.color)); break;

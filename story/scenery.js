@@ -3,8 +3,8 @@ window.VN_SCENERY = {
  "army_camp": {
   "flat": "assets/scenes/army_camp/flat.png",
   "vignette": [
-   0.35,
-   "30,20,30"
+   0.3,
+   "40,20,40"
   ],
   "layers": [
    {
@@ -20,94 +20,130 @@ window.VN_SCENERY = {
    {
     "id": "clouds",
     "x": 0,
-    "y": 30,
+    "y": 6,
     "w": 480,
-    "h": 60,
+    "h": 92,
     "depth": 0.05,
     "anim": {
      "type": "drift",
-     "t": 200
+     "t": 260
     },
     "src": "assets/scenes/army_camp/clouds.png"
    },
    {
     "id": "far",
     "x": 0,
-    "y": 129,
+    "y": 98,
     "w": 480,
-    "h": 33,
+    "h": 83,
     "depth": 0.1,
     "anim": null,
     "src": "assets/scenes/army_camp/far.png"
    },
    {
+    "id": "walls",
+    "x": 0,
+    "y": 139,
+    "w": 480,
+    "h": 45,
+    "depth": 0.22,
+    "anim": null,
+    "src": "assets/scenes/army_camp/walls.png"
+   },
+   {
     "id": "land",
     "x": 0,
-    "y": 137,
+    "y": 164,
     "w": 480,
-    "h": 133,
+    "h": 106,
     "depth": 0.3,
     "anim": null,
     "src": "assets/scenes/army_camp/land.png"
    },
    {
+    "id": "hq",
+    "x": 54,
+    "y": 86,
+    "w": 253,
+    "h": 106,
+    "depth": 0.32,
+    "anim": null,
+    "src": "assets/scenes/army_camp/hq.png"
+   },
+   {
+    "id": "flagHQ",
+    "x": 121,
+    "y": 87,
+    "w": 13,
+    "h": 8,
+    "depth": 0.32,
+    "anim": {
+     "type": "sway",
+     "a": 3,
+     "t": 1.8,
+     "ox": 0,
+     "oy": 0
+    },
+    "src": "assets/scenes/army_camp/flagHQ.png"
+   },
+   {
     "id": "tents",
-    "x": 1,
-    "y": 165,
+    "x": 3,
+    "y": 181,
     "w": 477,
-    "h": 58,
+    "h": 61,
     "depth": 0.4,
     "anim": null,
     "src": "assets/scenes/army_camp/tents.png"
    },
    {
     "id": "camp",
-    "x": 138,
-    "y": 150,
-    "w": 304,
-    "h": 101,
+    "x": 9,
+    "y": 115,
+    "w": 442,
+    "h": 141,
     "depth": 0.5,
     "anim": null,
     "src": "assets/scenes/army_camp/camp.png"
    },
    {
-    "id": "flag138",
-    "x": 140,
-    "y": 150,
-    "w": 24,
-    "h": 12,
-    "depth": 0.45,
+    "id": "flag10",
+    "x": 12,
+    "y": 119,
+    "w": 26,
+    "h": 14,
+    "depth": 0.5,
     "anim": {
      "type": "sway",
      "a": 3,
-     "t": 1.627406750386581,
+     "t": 2,
      "ox": 0,
      "oy": 0
     },
-    "src": "assets/scenes/army_camp/flag138.png"
+    "src": "assets/scenes/army_camp/flag10.png"
    },
    {
-    "id": "flag440",
-    "x": 442,
-    "y": 150,
-    "w": 24,
-    "h": 12,
-    "depth": 0.45,
+    "id": "banner356",
+    "x": 348,
+    "y": 184,
+    "w": 18,
+    "h": 29,
+    "depth": 0.5,
     "anim": {
      "type": "sway",
-     "a": 3,
-     "t": 2.1208359606098384,
+     "a": 1.5,
+     "t": 2.6,
      "ox": 0,
      "oy": 0
     },
-    "src": "assets/scenes/army_camp/flag440.png"
+    "src": "assets/scenes/army_camp/banner356.png"
    },
    {
     "id": "grass",
-    "x": 1,
-    "y": 243,
-    "w": 479,
-    "h": 27,
+    "x": 0,
+    "y": 246,
+    "w": 474,
+    "h": 24,
     "depth": 0.6,
     "anim": {
      "type": "sway",

@@ -33,51 +33,118 @@ function reeds(f, r, cols, n = 90) {
 }
 
 // ---------------------------------------------------------------- the army camp, at dawn
+// France at its proudest: the regiment's headquarters, ramparts and watchtowers, tents and guns,
+// and on the horizon the citadels, barracks, domes and towers of a military nation. The
+// airships and balloons, the waving flags, the soldiers, the smoke and the fire are drawn by
+// the walk itself (story/walks.js says where).
 WALKS.camp = (c, L) => {
   const r = rng(401);
-  vgrad(c, 0, 0, 480, WY, [[0, '#3c4a7a'], [0.35, '#8a7ea0'], [0.66, '#e8a47a'], [0.86, '#ffd29a'], [1, '#fff0c0']]);
-  sun(c, 150, 164, 13, '#fff4d0', 'rgba(255,190,120,0.6)');
-  const cl = L('clouds', { depth: 0.05, anim: { type: 'drift', t: 300 } });
-  for (let x = 0; x < S(0.1); x += 260) cloudBand(cl, r, x + r.r(0, 80), r.r(28, 90), r.r(160, 260), r.r(5, 9), { body: '#7a6488', rim: '#ffc090', shadow: '#5e4e74', hi: '#ffe6c0', lightFromBelow: true });
-  const far = L('far', { depth: 0.15 });
-  ridge(far, r, 176, 34, '#7a6a88', { x1: S(0.15) });
-  ridge(far, r, 182, 20, '#6e6082', { x1: S(0.15) });
-  treeLine(far, r, 184, 0, S(0.15), 5, ['#5a4e70', '#665a7a']);
-  const mid = L('mid', { depth: 0.45 });
-  vgrad(mid, 0, 182, S(0.45), 20, [[0, '#a09a60'], [1, '#7a7a44']]);
-  for (let x = 20; x < S(0.45); x += r.r(40, 90)) poplar(mid, r, x, 190, r.r(26, 40), { trunk: '#4a3a3a', leaves: ['#4e5a3a', '#6a7644', '#9aa05a'] }, -1);
-  for (const x of [260, 700]) frHouse(mid, r, x, 192, 30, 16, { wall: '#d8c0a0', wallDark: '#b09878', roof: '#a85a3c', roofDark: '#7a3e28', roofH: 8, windows: [[8, 5, 4, 5, { lit: true }]] });
+  // a pink dawn, the sun just up on the left
+  vgrad(c, 0, 0, 480, WY, [[0, '#56588e'], [0.28, '#9a78aa'], [0.52, '#e296ae'], [0.74, '#f7b4a4'], [0.9, '#ffd6b0'], [1, '#fff0d4']]);
+  stars(c, r, 16, 0, 0, 480, 34, '#f4ecff');
+  sun(c, 118, 150, 15, '#fff6e6', 'rgba(255,150,170,0.55)');
+  c.clearRect(0, WY, 480, H - WY);
+  // heavy clouds drifting over, lit pink from below by the rising sun
+  const cl = L('clouds', { depth: 0.05, anim: { type: 'drift', t: 420 } });
+  wrapped(cl, 71, (cc, rr) => {
+    frCloud(cc, rr, 10, 20, 150, 38, {});
+    frCloud(cc, rr, 200, 44, 110, 30, { light: -1 });
+    frCloud(cc, rr, 330, 14, 130, 34, {});
+    frCloud(cc, rr, 120, 92, 90, 16, { body: '#c4a8c0', shadow: '#9a86a8' });
+    frCloud(cc, rr, 380, 100, 80, 14, { body: '#c4a8c0', shadow: '#9a86a8' });
+  });
+  // the horizon: citadels and barracks in front, Paris behind, smoke from the arsenals
+  const far = L('far', { depth: 0.12 });
+  const fx1 = S(0.12);
+  const hz = { col: '#9a7896', lit: '#d8a4b4', dark: '#6a5070', roof: '#7a5a80' };
+  // (everything stands on a far rise, so it shows above the camp's ramparts)
+  const B = 172;
+  hill(far, r, -40, fx1 + 40, B + 4, 14, '#a88aa4');
+  rect(far, 0, B + 2, fx1, 30, '#a88aa4');
+  frBarracks(far, r, 6, B, 60, 13, hz.col, hz.roof, hz.lit);
+  frStack(far, 72, B, 34, hz.col, hz.lit); frSmoke(far, r, 72, B - 36, 12, 'rgba(226,200,214,0.6)', 1);
+  frCathedral(far, 90, B, 1.2, hz.col, hz.lit);
+  frDome(far, 180, B, 1.05, hz.col, hz.lit);
+  const k1 = frCitadel(far, r, 214, 340, B, 16, hz.col, hz.lit, hz.dark);
+  rect(far, k1[0], k1[1], 4, 2, FR.blue); rect(far, k1[0] + 4, k1[1], 4, 2, FR.white); rect(far, k1[0] + 8, k1[1], 4, 2, FR.red);
+  frArch(far, 350, B, 1.05, hz.col, hz.lit);
+  frBarracks(far, r, 384, B, 70, 14, hz.col, hz.roof, hz.lit);
+  for (const x of [400, 426, 452]) { frStack(far, x, B - 12, 24, hz.col, hz.lit); frSmoke(far, r, x, B - 38, 10, 'rgba(226,200,214,0.55)', 1); }
+  const k2 = frCitadel(far, r, 466, 604, B, 18, hz.col, hz.lit, hz.dark);
+  rect(far, k2[0], k2[1], 4, 2, FR.blue); rect(far, k2[0] + 4, k2[1], 4, 2, FR.white); rect(far, k2[0] + 8, k2[1], 4, 2, FR.red);
+  // a semaphore tower, the telegraph of the army, arms raised
+  rect(far, 616, B - 40, 3, 40, hz.col); rect(far, 608, B - 40, 19, 2, hz.col); line(far, 608, B - 40, 604, B - 46, hz.col, 1); line(far, 627, B - 39, 632, B - 33, hz.col, 1);
+  far.save(); far.globalCompositeOperation = 'source-atop'; vgrad(far, 0, 110, fx1, 76, [[0, 'rgba(255,190,200,0.05)'], [1, 'rgba(255,200,205,0.35)']]); far.restore();
+  // nearer: the outer works of the fortress, poplars along the road, the garrison town's roofs
+  const mid = L('mid', { depth: 0.38 });
+  const mx1 = S(0.38);
+  vgrad(mid, 0, 184, mx1, 12, [[0, '#9a8a78'], [1, '#7e7058']]);
+  const pts = [[0, 196], [0, 186]];
+  for (let x = 0; x < mx1; x += 70) pts.push([x + 10, 186], [x + 30, 186], [x + 38, 181], [x + 46, 186], [x + 70, 186]);
+  pts.push([mx1, 186], [mx1, 196]);
+  poly(mid, pts, '#8a6e82');
+  for (let x = 0; x < mx1; x += 70) { poly(mid, [[x + 30, 186], [x + 38, 181], [x + 38, 196]], '#b08e9e'); px(mid, x + 36, 184, '#3a2e3a'); px(mid, x + 42, 184, '#3a2e3a'); }
+  for (let x = 12; x < mx1; x += r.r(26, 52)) poplar(mid, r, x, 188, r.r(30, 44), { trunk: '#4a3a44', leaves: ['#56604a', '#6e7a56', '#a0a070'] }, -1);
+  for (const x of [150, 420, 700]) {
+    frHouse(mid, r, x, 190, 28, 14, { wall: '#d8bcb4', wallDark: '#b09098', roof: '#6e6c8e', roofDark: '#4e4c6e', roofH: 8, windows: [[6, 4, 3, 4, { lit: true }], [18, 4, 3, 4]] });
+    frHouse(mid, r, x + 30, 190, 22, 12, { wall: '#e0c4b4', wallDark: '#b89a98', roof: '#a8583e', roofDark: '#7a3e2c', roofH: 7, windows: [[8, 4, 3, 4]] });
+  }
+  // the camp itself
   const g = L('ground', { depth: 1 });
-  vgrad(g, 0, 188, W, 16, [[0, '#8a8a4a'], [1, '#6a7038']]);
-  bank(g, r, 0, W, { grass0: '#7a8a3a', grass1: '#5a6a2a', tip: '#a0a85a', earth: '#6a5238', dark: '#3a2c20', stone: '#8a8478' });
-  const tent = (x, s) => {
-    const yb = GY - 4;
-    ellipse(g, x, yb + 1, s * 1.2, s * 0.14, 'rgba(40,30,30,0.35)');
-    poly(g, [[x - s, yb], [x, yb - s * 0.9], [x + s, yb]], '#e6dcc4');
-    poly(g, [[x, yb - s * 0.9], [x + s, yb], [x + s * 0.2, yb]], '#b8aa90');
-    poly(g, [[x - s * 0.18, yb], [x, yb - s * 0.45], [x + s * 0.18, yb]], '#4a3a30');
-    line(g, x, yb - s * 0.9, x, yb - s * 1.05, '#5a4a3a', 1);
-  };
-  for (let x = 50; x < W - 200; x += r.r(110, 170)) tent(x, r.r(16, 22));
-  const rifles = (x) => { line(g, x - 8, GY - 3, x, GY - 26, '#3a2c24', 2); line(g, x + 8, GY - 3, x, GY - 26, '#3a2c24', 2); line(g, x, GY - 3, x, GY - 26, '#4a382c', 2); rect(g, x - 1, GY - 28, 3, 3, '#8a8a90'); };
-  for (const x of [230, 610, 980]) rifles(x);
-  // the fire, the drum, crates and a supply wagon
-  ellipse(g, 520, GY - 2, 18, 4, '#3a2a22');
-  for (let k = 0; k < 6; k++) line(g, 506 + k * 6, GY - 1, 514 + k * 4, GY - 10, '#5a3a24', 2);
-  glow(g, 520, GY - 10, 50, 'rgba(255,150,70,0.4)');
-  ellipse(g, 420, GY - 3, 11, 4, '#8a2e2e'); rect(g, 409, GY - 15, 22, 12, '#b83a3a'); ellipse(g, 420, GY - 15, 11, 4, '#e8dcc8');
-  for (const [x, w, hh] of [[850, 22, 14], [870, 16, 20]]) { rect(g, x, GY - 3 - hh, w, hh, '#7a5a3a'); rect(g, x, GY - 3 - hh, w, 2, '#b08a5a'); }
-  rect(g, 1080, GY - 30, 60, 18, '#6a4a2a'); poly(g, [[1076, GY - 30], [1144, GY - 30], [1134, GY - 52], [1086, GY - 52]], '#e8dcc0');
-  for (const x of [1090, 1128]) { circle(g, x, GY - 8, 8, '#3a2a1a'); circle(g, x, GY - 8, 3, '#6a4a2a'); }
-  // flags on their poles
-  for (const x of [140, 760]) { rect(g, x, GY - 60, 2, 58, '#4a3a2a'); rect(g, x + 2, GY - 60, 8, 11, '#2e4a9a'); rect(g, x + 10, GY - 60, 8, 11, '#f0ece4'); rect(g, x + 18, GY - 60, 8, 11, '#c83a3a'); }
-  // the edge of camp: a gate in a rail fence, and the road away to the north
-  for (let x = 1230; x < W; x += 16) { rect(g, x, GY - 16, 2, 14, '#6a4a2a'); }
-  rect(g, 1230, GY - 14, 60, 2, '#8a6a3a'); rect(g, 1330, GY - 14, W - 1330, 2, '#8a6a3a'); rect(g, 1230, GY - 8, 60, 2, '#8a6a3a'); rect(g, 1330, GY - 8, W - 1330, 2, '#8a6a3a');
+  vgrad(g, 0, 184, W, 22, [[0, '#b89478'], [1, '#8e6c52']]);
+  texture(g, r, 0, 184, W, 22, 0.06, 2);
+  bank(g, r, 0, W, { grass0: '#94885a', grass1: '#6e6a40', tip: '#bcb070', earth: '#6e5042', dark: '#3a2a26', stone: '#a88c8c' });
+  frRampart(g, r, 0, 1198, 188, 22, { lamps: [300, 560, 960] });
+  // tents in rows before the wall
+  for (const [x, s] of [[176, 18], [214, 21], [254, 17], [470, 19], [506, 17], [1152, 17]]) frTent(g, x, GY - 3, s, { pennant: s > 20 });
+  frTent(g, 1104, GY - 3, 24, { pennant: true });
+  // the west watchtower and the great flag
+  frTower(g, r, 94, GY - 2);
+  rect(g, 140, GY - 92, 2, 90, '#3a2e2a'); rect(g, 140, GY - 92, 1, 90, '#7a6a60'); circle(g, 141, GY - 93, 2, FR.gold.lit);
+  // the armoury, the shooting range and the band
+  frBannerPole(g, 196, GY - 2); frBannerCloth(g, 196, GY - 2, 'rifles');
+  frRifles(g, 232, GY - 1);
+  for (const x of [356, 380]) {
+    line(g, x - 5, GY - 2, x - 3, GY - 16, FR.wood.mid, 1); line(g, x + 5, GY - 2, x + 3, GY - 16, FR.wood.mid, 1);
+    circle(g, x, GY - 18, 6, '#f2eadc'); circle(g, x, GY - 18, 4.5, '#c83a3a'); circle(g, x, GY - 18, 3, '#f2eadc'); circle(g, x, GY - 18, 1.5, '#2a2030');
+    rect(g, x - 7, GY - 6, 14, 5, '#d8b860'); rect(g, x - 7, GY - 6, 14, 1, '#f0d890');
+  }
+  frBannerPole(g, 446, GY - 2); frBannerCloth(g, 446, GY - 2, 'drum');
+  frRifles(g, 612, GY - 1);
+  // the headquarters, with the regiment's colours either side
+  const hq = frHQ(g, r, 752, GY - 2);
+  for (const x of [646, 858]) { rect(g, x, GY - 70, 2, 68, '#3a2e2a'); circle(g, x + 1, GY - 72, 2.5, FR.gold.lit); poly(g, [[x - 2, GY - 74], [x + 1, GY - 79], [x + 4, GY - 74]], FR.gold.mid); }
+  // the fire before the steps
+  ellipse(g, 752, GY - 1, 16, 3, '#3a2a26');
+  for (let k = 0; k < 6; k++) line(g, 740 + k * 5, GY - 1, 747 + k * 3, GY - 8, '#5a3a24', 2);
+  glow(g, 752, GY - 10, 46, 'rgba(255,150,80,0.45)');
+  // stores, the artillery park, the drill ground
+  for (const [x, w, hh] of [[866, 18, 12], [884, 14, 18], [872, 12, 8]]) { rect(g, x, GY - 2 - hh, w, hh, '#7a5a3a'); rect(g, x, GY - 2 - hh, w, 2, '#b08a5a'); line(g, x, GY - 2 - hh, x + w, GY - 2, '#5a3e28', 1); }
+  for (const x of [902, 910]) { ellipse(g, x, GY - 8, 4, 7, '#6a4a2e'); rect(g, x - 4, GY - 10, 8, 1, '#3a2a1e'); rect(g, x - 4, GY - 5, 8, 1, '#3a2a1e'); }
+  frBannerPole(g, 924, GY - 2); frBannerCloth(g, 924, GY - 2, 'cannon');
+  frGun(g, 1030, GY - 1, 1); frGun(g, 1074, GY - 1, 1); frShot(g, 1050, GY - 1);
+  // the supply wagon
+  rect(g, 1126, GY - 26, 56, 16, '#6a4a2a'); rect(g, 1126, GY - 26, 56, 2, '#8a6a3a');
+  poly(g, [[1122, GY - 26], [1186, GY - 26], [1176, GY - 46], [1132, GY - 46]], '#ece0d0'); poly(g, [[1154, GY - 46], [1176, GY - 46], [1186, GY - 26], [1160, GY - 26]], '#c8b4b0');
+  for (const x of [1138, 1170]) { circle(g, x, GY - 8, 8, '#3a2a1a'); circle(g, x, GY - 8, 6, '#6a4a2a'); circle(g, x, GY - 8, 2, '#3a2a1a'); }
+  // the gate: stone pillars, the iron gates standing open, and the east watchtower inside
+  frTower(g, r, 1182, GY - 2);
+  for (const x of [1200, 1246]) {
+    rect(g, x, GY - 52, 12, 50, FR.stone.mid); rect(g, x, GY - 52, 4, 50, FR.stone.hi); rect(g, x + 9, GY - 52, 3, 50, FR.stone.shade);
+    poly(g, [[x - 2, GY - 52], [x + 14, GY - 52], [x + 6, GY - 62]], FR.slate.mid);
+    for (let y = GY - 48; y < GY - 4; y += 6) rect(g, x, y, 12, 1, FR.stone.line);
+    rect(g, x + 4, GY - 68, 4, 5, FR.lit); glow(g, x + 6, GY - 66, 12, 'rgba(255,200,120,0.55)');
+  }
+  for (const [x, s] of [[1212, 1], [1246, -1]]) for (let k = 0; k < 7; k++) line(g, x + s * k * 2, GY - 4, x + s * k * 2 - s * 3, GY - 40 + k, '#2e2a34', 1);
+  // outside: the road north between poplars, a fence, the milestone and the signpost
+  for (let x = 1266; x < W; x += 16) rect(g, x, GY - 16, 2, 14, '#6a4a2a');
+  rect(g, 1266, GY - 14, W - 1266, 2, '#8a6a3a'); rect(g, 1266, GY - 8, W - 1266, 2, '#8a6a3a');
+  for (const x of [1290, 1330, 1420]) poplar(g, r, x, GY - 4, r.r(52, 64), { trunk: '#4a3a3a', leaves: ['#4e5a3a', '#6a7644', '#9aa05a'] }, -1);
   rect(g, 1360, GY - 34, 3, 32, '#5a3a24'); poly(g, [[1348, GY - 34], [1392, GY - 34], [1398, GY - 30], [1392, GY - 26], [1348, GY - 26]], '#c8a878');
+  rect(g, 1312, GY - 12, 6, 10, '#d8d0c4'); rect(g, 1312, GY - 12, 6, 2, '#c83a3a');
   const fr = L('front', { depth: 1.3, anim: sway(3, 3.4) });
-  reeds(fr, r, ['#3a4a22', '#566a2e', '#78883e']);
-  return { colors: 64, vignette: [0.3, '30,20,30'] };
+  reeds(fr, r, ['#4a4a2a', '#66663a', '#8a8a4a']);
+  return { colors: 96, vignette: [0.25, '40,20,40'], anchors: { flag: hq.flag, chimneys: hq.chimneys } };
 };
 
 // ---------------------------------------------------------------- across the steppe, at sunset

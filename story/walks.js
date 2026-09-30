@@ -29,15 +29,55 @@
  *              knocked down (`set` counts the times Hervé was hit in a story variable)
  *    caughtLines / escapedLines: what is said when he is caught, or gets away
  *  The walk then ends as "caught" or "escaped" instead of "arrived" (see `walk ... into`).
+ *
+ *  And some are simply alive (none of this stops Hervé):
+ *    crowd:    [{ x, near, people: [{ dx, y, look, face, pose, turn }], lines: [[who, '...'], ...] }]
+ *              people standing about (pose 'sit' to sit; y to stand up on a tower; turn to look
+ *              about); when Hervé comes within `near`, they talk in bubbles, one line at a time
+ *    marchers: [{ x0, x1, n, gap, speed, look, pause }]  men marching up and down, in step
+ *    drill:    { x, n, gap, face, officer, calls: [{ text, pose: 'present' }], period }  a rank
+ *              at drill, an officer (at x + officer) calling the orders
+ *    flags:    [{ x, y, w, h, fringe }]  flags of France waving (paint the pole)
+ *    fires:    [{ x, y }]   smoke: [{ x, y, rate }]   flames and rising smoke
+ *    airships: [{ kind: 'ship', x, y, s, speed, depth }, { kind: 'balloon', x, y, s, depth, tether }]
+ *  Looks for the French army: soldier, rifleman (a rifle on the shoulder), officer, gunner, zouave.
  * ============================================================================
  */
 window.VN_WALKS = {
   // ---------------------------------------------------------------- Chapter 1: the army camp at dawn
   camp: {
     title: 'The Army Camp', region: 'The south of France · 1861',
-    hero: 'soldier', start: 60, weather: 'motes', accent: '255,214,140',
-    water: ['rgba(110,96,150,0.55)', 'rgba(24,20,44,0.9)'],
+    hero: 'soldier', start: 60, weather: 'motes', accent: '255,200,190',
+    water: ['rgba(200,140,170,0.5)', 'rgba(50,34,64,0.9)'],
     hint: 'Walk to the edge of camp →',
+    // the camp's morning: nothing here stops Hervé, it is only there to be seen
+    airships: [
+      { kind: 'ship', x: 380, y: 52, s: 1, speed: 5, depth: 0.04 },
+      { kind: 'ship', x: 120, y: 30, s: 0.55, speed: 3, depth: 0.03 },
+      { kind: 'balloon', x: 250, y: 96, s: 0.8, depth: 0.12, tether: 170 },
+      { kind: 'balloon', x: 560, y: 82, s: 0.6, depth: 0.12, tether: 168, colors: ['#f2e6dc', '#2e4a9a'] },
+    ],
+    flags: [
+      { x: 142, y: 113, w: 28, h: 14 },
+      { x: 753, y: 59, w: 20, h: 11 },
+      { x: 648, y: 135, w: 16, h: 10, fringe: true },
+      { x: 860, y: 135, w: 16, h: 10, fringe: true },
+    ],
+    fires: [{ x: 752, y: 203 }],
+    smoke: [{ x: 752, y: 192, rate: 1.6 }, { x: 676, y: 124, rate: 0.8 }, { x: 829, y: 124, rate: 0.8 }],
+    crowd: [
+      { x: 94, near: 120, people: [{ dx: 0, y: 156, look: 'rifleman', turn: true }], lines: [[0, 'All quiet on the south road, Corporal!'], [0, 'Nothing moves out there but the mist.']] },
+      { x: 292, people: [{ dx: -8, look: 'soldier', face: 1 }, { dx: 8, look: 'soldier', face: -1 }], lines: [[0, 'Pay\'s late again.'], [1, 'It\'s always late. That\'s how you know it\'s the army.'], [0, 'When I\'m discharged, I\'m opening a café in Marseille.'], [1, 'Last week it was Toulon.'], [0, 'Toulon, Marseille. Somewhere with the sea.']] },
+      { x: 492, people: [{ dx: -7, look: 'rifleman', face: 1 }, { dx: 8, look: 'soldier', face: -1, pose: 'sit' }], lines: [[0, 'Polish your buttons, Lefèvre. The colonel counts them.'], [1, 'Then the colonel can count mine himself.'], [1, 'My mother writes that the silkworms are sick again at home.'], [0, 'Tell her the army eats bread, not silk.']] },
+      { x: 752, near: 170, people: [{ dx: -20, look: 'soldier', face: 1, pose: 'sit' }, { dx: 20, look: 'zouave', face: -1, pose: 'sit' }, { dx: -30, look: 'gunner', face: 1 }], lines: [[0, 'Did you see the airship over the citadel?'], [1, 'Giffard\'s contraption? It flies like a fat pigeon.'], [2, 'A pigeon that can see all the way to Prussia.'], [1, 'Then tell it to look at my mother\'s farm. Tell her I\'m eating.'], [0, 'The Emperor reviewed the Guard in Paris this spring.'], [2, 'And we got soup.']] },
+      { x: 1052, people: [{ dx: -12, look: 'gunner', face: 1 }, { dx: 12, look: 'gunner', face: -1 }], lines: [[0, 'New rifled barrels. The La Hitte pattern.'], [1, 'Four thousand yards, the colonel says.'], [0, 'The colonel says a great many things.'], [1, 'He says them very loudly, too.']] },
+      { x: 1182, near: 120, people: [{ dx: 0, y: 156, look: 'rifleman', turn: true }], lines: [[0, 'Rider on the north road!'], [0, 'Coming fast. A big man, on a tired horse.']] },
+    ],
+    drill: { x: 944, n: 5, gap: 9, face: 1, officer: 58, near: 170, period: 4.2, calls: [{ text: 'Present — arms!', pose: 'present' }, { text: 'Steady, the Seventh. Steady.', pose: 'present' }, { text: 'Shoulder — arms!' }, { text: 'Eyes — front!' }] },
+    marchers: [
+      { x0: 470, x1: 640, n: 2, gap: 9, speed: 18, look: 'rifleman', pause: 1.6 },
+      { x0: 330, x1: 460, n: 3, gap: 9, speed: 16, look: 'rifleman', pause: 2, start: 400, dir: -1 },
+    ],
     things: [
       { x: 140, kind: 'look', label: 'The flag', lines: ['The tricolour, stiff with dew. We saluted it every morning, and I never once asked myself why.'] },
       { x: 232, kind: 'look', label: 'Your rifle', lines: ['My rifle, stacked with the others. I had cleaned it every day for two years and never fired it at anyone.'] },

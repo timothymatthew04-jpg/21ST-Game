@@ -5,59 +5,87 @@
  */
 
 // ---------------------------------------------------------------- the army camp at dawn
+// The regiment's camp, France at its proudest: the headquarters under its dome and flag, the
+// ramparts with a watchtower at the gate, tents, the fire, and beyond the walls the citadels,
+// barracks and domes of a military nation. The airships and balloons, the marching column and
+// the fire's smoke are the scene's living effects (bgfx army_camp in the story script).
 SCENES.army_camp = (c, L) => {
   const r = rng(301);
-  vgrad(c, 0, 0, W, 160, [[0, '#3c4a7a'], [0.35, '#8a7ea0'], [0.7, '#e8a47a'], [0.92, '#ffd29a'], [1, '#fff0c0']]);
-  sun(c, 86, 150, 12, '#fff4d0', 'rgba(255,190,120,0.6)');
-  const cl = L('clouds', { depth: 0.05, anim: { type: 'drift', t: 200 } });
-  wrapped(cl, 31, (cc, rr) => {
-    cloudBand(cc, rr, 180, 36, 260, 9, { body: '#7a6488', rim: '#ffc090', shadow: '#5e4e74', hi: '#ffe6c0', lightFromBelow: true });
-    cloudBand(cc, rr, 10, 84, 180, 6, { body: '#a07890', rim: '#ffcc98', shadow: '#846078', hi: '#fff0d0', lightFromBelow: true });
+  vgrad(c, 0, 0, W, 172, [[0, '#56588e'], [0.3, '#9a78aa'], [0.56, '#e296ae'], [0.78, '#f7b4a4'], [0.92, '#ffd6b0'], [1, '#fff0d4']]);
+  stars(c, r, 14, 0, 0, W, 30, '#f4ecff');
+  sun(c, 92, 150, 13, '#fff6e6', 'rgba(255,150,170,0.55)');
+  const cl = L('clouds', { depth: 0.05, anim: { type: 'drift', t: 260 } });
+  wrapped(cl, 33, (cc, rr) => {
+    frCloud(cc, rr, 20, 18, 140, 34, {});
+    frCloud(cc, rr, 250, 34, 120, 28, {});
+    frCloud(cc, rr, 150, 84, 80, 14, { body: '#c4a8c0', shadow: '#9a86a8' });
+    frCloud(cc, rr, 400, 70, 70, 14, { body: '#c4a8c0', shadow: '#9a86a8' });
   });
+  // the horizon: citadels, barracks and stacks, and the domes and towers of Paris
   const far = L('far', { depth: 0.1 });
-  hill(far, r, -60, 280, 160, 34, '#7a6a88');
-  hill(far, r, 160, 540, 160, 26, '#6e6082');
-  treeLine(far, r, 160, 0, W, 5, ['#5a4e70', '#665a7a']);
-  // the road home, winding away to the north
+  const hz = { col: '#9a7896', lit: '#d8a4b4', dark: '#6a5070', roof: '#7a5a80' };
+  const B = 168;
+  hill(far, r, -40, W + 40, B + 3, 10, '#a88aa4');
+  rect(far, 0, B + 1, W, 12, '#a88aa4');
+  frBarracks(far, r, 180, B, 56, 10, hz.col, hz.roof, hz.lit);
+  frCathedral(far, 246, B, 0.9, hz.col, hz.lit);
+  frDome(far, 300, B, 0.95, hz.col, hz.lit);
+  const k1 = frCitadel(far, r, 330, 460, B, 12, hz.col, hz.lit, hz.dark);
+  rect(far, k1[0], k1[1], 3, 2, FR.blue); rect(far, k1[0] + 3, k1[1], 3, 2, FR.white); rect(far, k1[0] + 6, k1[1], 3, 2, FR.red);
+  for (const x of [196, 214, 470]) { frStack(far, x, B - 8, 20, hz.col, hz.lit); frSmoke(far, r, x, B - 30, 9, 'rgba(226,200,214,0.55)', 1); }
+  far.save(); far.globalCompositeOperation = 'source-atop'; vgrad(far, 0, 110, W, 70, [[0, 'rgba(255,190,200,0.05)'], [1, 'rgba(255,200,205,0.3)']]); far.restore();
+  // the ramparts, with the gate where the road runs out of camp to the north
+  const walls = L('walls', { depth: 0.22 });
+  vgrad(walls, 0, 172, W, 12, [[0, '#b0947c'], [1, '#9a7e68']]);
+  frRampart(walls, r, -10, 318, 180, 13, { lamps: [120, 250] });
+  frRampart(walls, r, 346, W + 10, 180, 13, { lamps: [420] });
+  for (const x of [312, 346]) {
+    rect(walls, x, 150, 9, 30, FR.stone.mid); rect(walls, x, 150, 3, 30, FR.stone.hi); rect(walls, x + 7, 150, 2, 30, FR.stone.shade);
+    poly(walls, [[x - 1, 150], [x + 10, 150], [x + 4.5, 143]], FR.slate.mid);
+    rect(walls, x + 3, 139, 3, 3, FR.lit); glow(walls, x + 4, 140, 9, 'rgba(255,200,120,0.55)');
+  }
+  // the land inside the walls: the parade ground, trodden pink-brown in the dawn
   const g = L('land', { depth: 0.3 });
-  vgrad(g, 0, 158, W, H - 158, [[0, '#b0a068'], [0.25, '#86864a'], [1, '#2e3620']]);
-  texture(g, r, 0, 158, W, 112, 0.08, 3);
-  speckle(g, r, 0, 160, W, 110, ['#c8b070', '#7a7a42', '#5a6034'], 900);
-  poly(g, [[300, 160], [312, 160], [372, 206], [430, H], [330, H], [322, 206]], '#c8b088');
-  texture(g, r, 300, 160, 130, 110, 0.12, 2, (cc) => { cc.moveTo(300, 160); cc.lineTo(312, 160); cc.lineTo(372, 206); cc.lineTo(430, H); cc.lineTo(330, H); cc.lineTo(322, 206); });
-  for (let i = 0; i < 6; i++) poplar(g, r, 326 + i * 9 + (i % 2) * 4, 168 - i * 1.5, 30 - i * 3, { trunk: '#4a3a3a', leaves: ['#4e5a3a', '#6a7644', '#9aa05a'] }, -1);
-  // rows of canvas tents
-  const tent = (cv, x, yb, s) => {
-    ellipse(cv, x, yb, s * 1.2, s * 0.18, 'rgba(40,30,30,0.35)');
-    poly(cv, [[x - s, yb], [x, yb - s * 0.9], [x + s, yb]], '#e6dcc4');
-    poly(cv, [[x, yb - s * 0.9], [x + s, yb], [x + s * 0.2, yb]], '#b8aa90');
-    poly(cv, [[x - s * 0.18, yb], [x, yb - s * 0.45], [x + s * 0.18, yb]], '#4a3a30');
-    line(cv, x, yb - s * 0.9, x, yb - s * 1.05, '#5a4a3a', 1);
-    line(cv, x - s, yb, x - s * 1.25, yb + 1, '#8a7a60', 1);
-  };
+  vgrad(g, 0, 180, W, H - 180, [[0, '#b89478'], [0.3, '#a0846a'], [1, '#5a4636']]);
+  texture(g, r, 0, 180, W, 90, 0.07, 3);
+  speckle(g, r, 0, 182, W, 88, ['#c8a488', '#8a6e58', '#7a7a4a'], 700);
+  // the road north, out through the gate
+  poly(g, [[322, 180], [340, 180], [410, H], [300, H]], '#d2b48e');
+  texture(g, r, 300, 180, 110, 90, 0.1, 2, (cc) => { cc.moveTo(322, 180); cc.lineTo(340, 180); cc.lineTo(410, H); cc.lineTo(300, H); });
+  for (let i = 0; i < 5; i++) poplar(g, r, 352 + i * 14 + i * i * 3, 186 + i * 10, 22 + i * 7, { trunk: '#4a3a3a', leaves: ['#4e5a3a', '#6a7644', '#9aa05a'] }, -1);
+  // the headquarters, a little way off across the parade ground, and the watchtower by the gate
+  const hq = L('hq', { depth: 0.32 });
+  hq.save(); hq.translate(120, 190); hq.scale(0.72, 0.72); frHQ(hq, r, 0, 0); hq.restore();
+  hq.save(); hq.translate(292, 192); hq.scale(0.8, 0.8); frTower(hq, r, 0, 0); hq.restore();
+  // the regiment's colours on the dome, and the tricolour on its tall mast
+  const fl = L('flagHQ', { depth: 0.32, anim: sway(3, 1.8, { ox: 0, oy: 0 }) });
+  frTricolour(fl, 121, 87, 13, 8);
+  // rows of tents
   const tents = L('tents', { depth: 0.4 });
-  for (const [x, y, s] of [[40, 178, 12], [80, 180, 13], [124, 177, 12], [168, 181, 14], [214, 178, 12], [258, 182, 13], [420, 180, 13], [462, 177, 11]]) tent(tents, x, y, s);
-  for (const [x, y, s] of [[26, 214, 20], [96, 220, 22], [250, 218, 21], [454, 222, 24]]) tent(tents, x, y, s);
-  // stacked rifles, a drum, crates, and the fire
+  for (const [x, y, s] of [[200, 196, 10], [228, 198, 11], [258, 196, 10], [440, 196, 10], [466, 199, 11], [20, 196, 10]]) frTent(tents, x, y, s);
+  for (const [x, y, s] of [[30, 232, 20], [96, 240, 23], [462, 238, 22]]) frTent(tents, x, y, s, { pennant: true });
+  // stacked rifles, the drum, crates, the fire, a field gun and its shot
   const camp = L('camp', { depth: 0.5 });
-  for (const x of [160, 186]) { line(camp, x - 8, 238, x, 214, '#3a2c24', 2); line(camp, x + 8, 238, x, 214, '#3a2c24', 2); line(camp, x, 238, x, 214, '#4a382c', 2); rect(camp, x - 1, 212, 3, 3, '#8a8a90'); }
-  ellipse(camp, 322, 236, 13, 5, '#8a2e2e'); rect(camp, 309, 224, 26, 12, '#b83a3a'); ellipse(camp, 322, 224, 13, 5, '#e8dcc8');
-  for (let k = 0; k < 5; k++) line(camp, 310 + k * 6, 225, 313 + k * 6, 235, '#e8d8a0', 1);
-  line(camp, 316, 218, 330, 212, '#6a4a2a', 1); line(camp, 320, 218, 334, 214, '#6a4a2a', 1);
-  for (const [x, y, w, hh] of [[360, 226, 22, 14], [378, 218, 18, 22]]) { rect(camp, x, y, w, hh, '#7a5a3a'); rect(camp, x, y, w, 2, '#b08a5a'); line(camp, x, y, x + w, y + hh, '#5a3e28', 1); }
+  frRifles(camp, 160, 238); frRifles(camp, 186, 240);
+  ellipse(camp, 272, 240, 12, 4, '#8a2e2e'); rect(camp, 260, 228, 24, 12, '#b83a3a'); ellipse(camp, 272, 228, 12, 4, '#e8dcc8');
+  for (let k = 0; k < 5; k++) line(camp, 262 + k * 5, 229, 265 + k * 5, 239, '#e8d8a0', 1);
+  for (const [x, y, w, hh] of [[132, 244, 20, 12], [146, 236, 16, 20]]) { rect(camp, x, y, w, hh, '#7a5a3a'); rect(camp, x, y, w, 2, '#b08a5a'); line(camp, x, y, x + w, y + hh, '#5a3e28', 1); }
   ellipse(camp, 222, 246, 20, 5, '#3a2a22');
   for (let k = 0; k < 6; k++) line(camp, 206 + k * 6, 248, 214 + k * 4, 238, '#5a3a24', 2);
   for (let k = 0; k < 6; k++) ellipse(camp, 222 + r.r(-7, 7), 238 + r.r(-5, 2), r.r(2, 4), r.r(3, 7), r.pick(['#ffb040', '#ff7a2a', '#ffd070']));
   glow(camp, 222, 238, 60, 'rgba(255,150,70,0.45)');
-  // flags on poles, stirring in the morning wind
-  for (const [x, y, hh] of [[138, 150, 36], [440, 150, 40]]) {
-    rect(camp, x, y, 2, hh, '#4a3a2a');
-    const f = L(`flag${x}`, { depth: 0.45, anim: sway(3, r.r(1.6, 2.2), { ox: 0, oy: 0 }) });
-    rect(f, x + 2, y, 8, 12, '#2e4a9a'); rect(f, x + 10, y, 8, 12, '#f0ece4'); rect(f, x + 18, y, 8, 12, '#c83a3a');
-  }
+  camp.save(); camp.translate(420, 250); camp.scale(1.3, 1.3); frGun(camp, 0, 0, -1); camp.restore();
+  frShot(camp, 440, 252);
+  // the great flagpole and the regiment's banner
+  rect(camp, 10, 118, 2, 128, '#3a2e2a'); rect(camp, 10, 118, 1, 128, '#7a6a60'); circle(camp, 11, 117, 2, FR.gold.lit);
+  const f1 = L('flag10', { depth: 0.5, anim: sway(3, 2, { ox: 0, oy: 0 }) });
+  frTricolour(f1, 12, 119, 26, 14);
+  frBannerPole(camp, 356, 244, 64);
+  const f2 = L('banner356', { depth: 0.5, anim: sway(1.5, 2.6, { ox: 0, oy: 0 }) });
+  frBannerCloth(f2, 356, 244, 'eagle', 64);
   const gr = L('grass', { depth: 0.6, anim: sway(4, 3.2) });
-  tufts(gr, r, 0, 244, W, 26, 90, ['#2a3418', '#44522a', '#66703a']);
-  return { colors: 64, vignette: [0.35, '30,20,30'] };
+  tufts(gr, r, 0, 248, W, 22, 90, ['#3a3a22', '#56562e', '#78783e']);
+  return { colors: 80, vignette: [0.3, '40,20,40'] };
 };
 
 // ---------------------------------------------------------------- the Joncours' bedroom at night

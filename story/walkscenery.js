@@ -90,52 +90,52 @@ window.VN_WALKSCENERY = {
    {
     "id": "clouds",
     "x": 0,
-    "y": 33,
+    "y": 2,
     "w": 1440,
-    "h": 49,
+    "h": 112,
     "depth": 0.05,
     "anim": {
      "type": "drift",
-     "t": 300
+     "t": 420
     },
     "src": "assets/walks/camp/clouds.png"
    },
    {
     "id": "far",
     "x": 0,
-    "y": 149,
-    "w": 668,
-    "h": 121,
-    "depth": 0.15,
+    "y": 93,
+    "w": 675,
+    "h": 111,
+    "depth": 0.12,
     "anim": null,
     "src": "assets/walks/camp/far.png"
    },
    {
     "id": "mid",
     "x": 0,
-    "y": 150,
-    "w": 952,
+    "y": 144,
+    "w": 885,
     "h": 52,
-    "depth": 0.45,
+    "depth": 0.38,
     "anim": null,
     "src": "assets/walks/camp/mid.png"
    },
    {
     "id": "ground",
     "x": 0,
-    "y": 144,
+    "y": 57,
     "w": 1440,
-    "h": 68,
+    "h": 155,
     "depth": 1,
     "anim": null,
     "src": "assets/walks/camp/ground.png"
    },
    {
     "id": "front",
-    "x": 45,
-    "y": 236,
-    "w": 1395,
-    "h": 34,
+    "x": 32,
+    "y": 232,
+    "w": 1408,
+    "h": 38,
     "depth": 1.3,
     "anim": {
      "type": "sway",
