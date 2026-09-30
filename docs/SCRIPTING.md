@@ -487,7 +487,12 @@ in her garden, and the story goes on from there. Hara Kei's village in Japan is 
 way: fog drifting between the layers and low over the street (`fog`), cherry petals falling
 (weather `sakura`), samurai on their rounds and geisha under parasols, archers loosing arrows at
 the butts (`range` of kind `bow`), street players with their drum, and townsfolk who stop and
-stare at the foreigner and whisper in Japanese (a person's `watch`, a crowd's `sound`).
+stare at the foreigner and whisper in Japanese (a person's `watch`, a crowd's `sound`). The road
+from the coast is a battlefield: red lightning over a burning town, the fighting flashing along the
+far hills with guns booming, lines of soldiers trading volleys in the fields, townhouses on fire
+that give way and fall in as Hervé passes, and an airship shot down in flames that explodes and
+stays, its wreck burning, for the rest of the way (`lightning`, `battle`, `skirmish`,
+`collapses`, `crash`). The shells and the cover work exactly as before.
 
 Walks never replace the rest: choices, cutscenes and minigames happen around them as before. The
 game menu (Esc) pauses a walk, and saving during one saves just before it. A quiet walk is passed
@@ -625,7 +630,8 @@ lantern or the pond at any window shape; `#colour` is optional everywhere.
 | `walkers` | y,x0,x1 [, count, kind, scale, depth] | people strolling and stopping along a path: kind 0 the south of France, 1 Japan (kimono, straw hats, carrying poles), 2 dockworkers with crates |
 | `ripples` | x,y,w,h [, rate] | rings spreading on still water |
 | `shade` | y,height [, count, darkness] | the shadows of clouds sliding over the land |
-| `lightning` | rate [, horizon] | the sky flashes twice and a bolt forks down (off with reduced motion) |
+| `lightning` | rate [, horizon] [#colour] | the sky flashes twice and a bolt forks down (off with reduced motion); with a colour (`#ff3a2a`) the flash is that colour and the bolt a forking stroke glowing in it, striking soon after the shot begins |
+| `crash` | x0,y0,x1,y1 [, delay, dur, scale] | an airship on fire comes down from (x0,y0) to (x1,y1), nose first, trailing flame and smoke; it explodes (a fireball, sparks, a flash) and its wreck stays there burning, nose in the ground, frame and tail fins rising |
 | `splashes` | y,height [, rate] | raindrops bursting on the ground |
 | `herd` | y,count,speed [, scale, dir, spread] | wild horses galloping across in a loose group, round and round |
 | `rider` | y,x0,x1,seconds [, scale, delay] | Hervé at a gallop on a pale horse, from x0 to x1 |

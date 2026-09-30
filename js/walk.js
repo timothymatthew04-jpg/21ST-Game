@@ -80,6 +80,9 @@
     taiko: { coat: '#26345e', coatDark: '#1a2444', legs: '#1a1a24', boots: '#e8e2d6', skin: '#dcb090', hat: 'hachimaki', hatCol: '#e8e2d6', belt: '#e8e2d6' },
     juggler: { coat: '#c8703a', coatDark: '#9a5028', legs: '#3a2a2a', wideLegs: 1, boots: '#e8e2d6', skin: '#dcb090', hat: 'hachimaki', hatCol: '#d83a3a' },
     dancer: { coat: '#ecd8e8', coatDark: '#c0a8c0', legs: '#c0a8c0', robe: 1, boots: '#f0ece4', skin: '#f6f2ee', hat: 'kitsune', hatCol: '#141418', sash: '#c83a3a' },
+    // armies seen at a distance through the smoke, all but silhouettes
+    farSoldier: { coat: '#2a2026', coatDark: '#1e161c', legs: '#2a2026', boots: '#140c10', skin: '#5a3e3a', hat: 'kepi', hatCol: '#1e161c', rifle: 1 },
+    farSamurai: { coat: '#241c22', coatDark: '#1a1418', legs: '#2a2228', wideLegs: 1, boots: '#140c10', skin: '#5a3e3a', hat: 'jingasa', hatCol: '#1a1418', rifle: 1, sword: 1 },
     // the Imperial Navy: sailors in the striped marinière and the red-pompom cap, and a captain
     sailor: { coat: '#f0ece4', coatDark: '#c8c2b8', legs: '#2a3a6a', boots: '#1a1412', skin: '#e0b494', hat: 'pompom', hatCol: '#f2eee6', scarf: '#2e4a9a', stripes: '#2e4a9a' },
     captain: { coat: '#1e2a4a', coatDark: '#141c34', legs: '#1e2a4a', boots: '#141010', skin: '#e8c0a0', hat: 'bicorne', hatCol: '#141414', epaulette: '#f0c050', sword: 1, beard: '#6a5a4a' },
@@ -544,6 +547,13 @@
       this.range = def.range ? { period: [1.1, 1.8], pause: [2.5, 4], ...def.range, k: 0, t: 2, aim: -1, flash: 0, fired: -1 } : null;
       this.windmills = def.windmills || [];
       this.beacons = def.beacons || [];
+      // a battlefield: red lightning, the fighting on the horizon, two lines trading volleys, burning
+      // houses falling in as Hervé passes, and an airship coming down in flames
+      this.lightning = def.lightning ? { every: [3, 7], col: '255,60,40', z: 0.06, horizon: 150, ...def.lightning, wait: 2, t: 99, bolt: null } : null;
+      this.battle = def.battle ? { rate: 3, cannons: 0.25, ...def.battle, flashes: [], smoke: [], acc: 0 } : null;
+      this.skirmish = (def.skirmish || []).map((k) => ({ scale: 0.6, n: 6, gap: 7, every: [2.5, 4.5], ...k, wait: rnd(1, 3), firing: -1, flash: 0, smoke: [] }));
+      this.collapses = (def.collapses || []).map((b) => ({ near: 150, h: 40, ...b, state: 'up', chunks: [], t: 0 }));
+      this.crash = def.crash ? { depth: 0.3, dur: 6, s: 1.2, lean: 0.6, ...def.crash, state: 'wait', t: 0, smoke: [], sparks: [] } : null;
       // bands of fog lying between the painted layers (and one low over the street, in front)
       this.fog = (def.fog || []).map((f) => ({ ...f, tex: fogTexture(f.col || '220,210,224', Math.round(f.h)) }));
       this.sparkles = (def.sparkles || []).map((s) => ({ ...s, ph: s.ph == null ? Math.random() * 6 : s.ph }));
@@ -569,6 +579,10 @@
       if (this.train) this.slots.push({ z: this.train.depth + 0.001, draw: (c, cam) => this.drawTrain(c, cam) });
       if (this.flockDef) this.slots.push({ z: 0.09, draw: (c) => this.drawFlocks(c) });
       for (const m of this.windmills) this.slots.push({ z: m.depth + 0.001, draw: (c, cam) => this.drawSails(c, m, cam) });
+      if (this.lightning) this.slots.push({ z: this.lightning.z, draw: (c) => this.drawLightning(c) });
+      if (this.battle) this.slots.push({ z: this.battle.depth + 0.001, draw: (c, cam) => this.drawBattle(c, cam) });
+      for (const k of this.skirmish) this.slots.push({ z: k.depth + 0.001, draw: (c, cam) => this.drawSkirmish(c, k, cam) });
+      if (this.crash) this.slots.push({ z: this.crash.depth + 0.001, draw: (c, cam) => this.drawCrash(c, cam) });
       for (const f of this.fog) if (!f.front) this.slots.push({ z: f.z, draw: (c, cam) => this.drawFogBand(c, f, cam) });
       for (const b of this.beacons) this.slots.push({ z: b.depth + 0.002, draw: (c, cam) => this.drawBeacon(c, b, cam) });
       for (const s of this.sparkles) this.slots.push({ z: s.depth + 0.002, draw: (c, cam) => this.drawSparkle(c, s, cam) });
@@ -977,6 +991,7 @@
       }
       this.stepRunners(dt);
       this.stepRange(dt);
+      this.stepWar(dt);
       // the drums of the street players and the like, heard when Hervé is near
       for (const g of this.crowd) {
         if (!g.sound) continue;
@@ -1247,6 +1262,7 @@
           this.figure(c, LOOKS[p.look || 'soldier'], g.x + (p.dx || 0) - cam, p.y || GY, f, this.t + i, false, pose);
         });
       });
+      for (const b of this.collapses) this.drawCollapse(c, b, cam);
       this.drawRunners(c, cam);
       this.drawRange(c, cam);
       for (const m of this.marchers) {
@@ -1705,6 +1721,257 @@
         }
         c.restore();
       }
+    }
+
+    stepWar(dt) {
+      const L = this.lightning;
+      if (L) {
+        L.t += dt; L.wait -= dt;
+        if (L.wait <= 0) {
+          L.wait = rnd(L.every[0], L.every[1]); L.t = 0;
+          const pts = [];
+          let x = rnd(40, LW - 40), y = 0;
+          while (y < L.horizon) { pts.push([x, y]); x += rnd(-6, 6); y += rnd(4, 9); }
+          L.bolt = pts;
+          const at = Math.floor(pts.length * rnd(0.3, 0.5)), side = Math.random() < 0.5 ? -1 : 1;
+          L.fork = pts.slice(at, at + 7).map(([px_, py], i) => [px_ + side * i * rnd(3, 6), py + i * 1.5]);
+          if (!this.done) this.audio.fx('thunder', { volume: 0.3, delay: rnd(0.2, 0.9) });
+        }
+      }
+      const B = this.battle;
+      if (B) {
+        B.acc += dt * B.rate;
+        while (B.acc > 1) {
+          B.acc -= 1;
+          const big = Math.random() < B.cannons, x = rnd(B.x0, B.x1), y = B.y + rnd(-3, 3);
+          B.flashes.push({ x, y, t: 0, big });
+          if (big) { B.smoke.push({ x, y, r: 1.5, life: 0, max: rnd(3, 5) }); if (Math.random() < 0.35 && !this.done) this.audio.fx('cannon_far', { volume: 0.14 }); }
+        }
+        for (const f of B.flashes) f.t += dt;
+        B.flashes = B.flashes.filter((f) => f.t < (f.big ? 0.22 : 0.12));
+        for (const s_ of B.smoke) { s_.life += dt; s_.y -= dt * 3; s_.r += dt * 2.2; }
+        B.smoke = B.smoke.filter((s_) => s_.life < s_.max);
+      }
+      for (const k of this.skirmish) {
+        k.flash = Math.max(0, k.flash - dt);
+        if (k.firing >= 0) {
+          k.ft -= dt;
+          if (k.ft <= 0) {
+            k.flash = 0.1; k.firing = -1; k.wait = rnd(k.every[0], k.every[1]);
+            for (let i = 0; i < k.n; i++) if (Math.random() < 0.8) k.smoke.push({ x: k.x0 + i * k.gap + k.dir * 15 * k.scale, y: k.y - 13 * k.scale, r: 1, life: 0, max: rnd(1.5, 2.5) });
+            const d = Math.abs(this.x - (k.x0 + this.camX * (1 - k.depth)));
+            if (!this.done && d < 400) this.audio.fx('volley', { volume: 0.12 });
+          }
+        } else if ((k.wait -= dt) <= 0) { k.firing = 1; k.ft = 0.7; }
+        for (const s_ of k.smoke) { s_.life += dt; s_.y -= dt * 2; s_.x += dt * 3 * k.dir; s_.r += dt * 1.6; }
+        k.smoke = k.smoke.filter((s_) => s_.life < s_.max);
+      }
+      for (const b of this.collapses) {
+        if (b.state === 'up' && this.x > b.x - b.near) {
+          // the house gives way: its timbers and tiles tumble down into a burning heap
+          b.state = 'falling';
+          const cols = ['#3a2620', '#2a1a16', '#6a4a3a', '#4a3a36', '#2a2630', '#1e1a22'];
+          for (let yy = 0; yy < b.h; yy += 6) for (let xx = 0; xx < b.w; xx += 6) {
+            const roof = yy < 12;
+            b.chunks.push({ x: b.x + xx, y: GY - 3 - b.h + yy, w: 6, h: roof ? 4 : 6, col: roof ? cols[4 + (xx / 6) % 2] : cols[(xx / 6 + yy / 6) % 4], vx: rnd(-26, 26) + (xx - b.w / 2) * 0.6, vy: rnd(-50, -5), a: 0, va: rnd(-6, 6), floor: GY - 3 - rnd(0, Math.min(12, b.h * 0.3)), rest: false });
+          }
+          for (let i = 0; i < 14; i++) this.puffs.push({ x: b.x + rnd(0, b.w), y: GY - rnd(2, b.h * 0.7), vx: rnd(-10, 10), vy: -rnd(3, 9), r: rnd(1.2, 2.4), grow: rnd(1.2, 2.4), age: 0, life: rnd(1.6, 3), col: '64,44,42', a: 0.5 });
+          if (!this.done) { this.audio.fx('explosion', { volume: 0.45 }); this.audio.fx('thud', { volume: 0.5, delay: 0.3 }); }
+        }
+        if (b.state === 'falling') {
+          let moving = false;
+          for (const ch of b.chunks) {
+            if (ch.rest) continue;
+            moving = true;
+            ch.vy += 260 * dt; ch.x += ch.vx * dt; ch.y += ch.vy * dt; ch.a += ch.va * dt;
+            if (ch.y >= ch.floor) { ch.y = ch.floor; if (Math.abs(ch.vy) > 40) { ch.vy *= -0.3; ch.vx *= 0.5; ch.va *= 0.4; } else { ch.rest = true; ch.a = Math.round(ch.a / (Math.PI / 2)) * (Math.PI / 2) + rnd(-0.3, 0.3); } }
+          }
+          if (!moving) b.state = 'down';
+        }
+      }
+      const C = this.crash;
+      if (C) {
+        const pos = (p) => [C.from[0] + (C.to[0] - C.from[0]) * p, C.from[1] + (C.to[1] - C.from[1]) * p * p];
+        if (C.state === 'wait') { if (this.x >= C.trigger) { C.state = 'fall'; C.t = 0; if (!this.done) this.audio.fx('rocket', { volume: 0.3 }); } }
+        else if (C.state === 'fall') {
+          C.t += dt;
+          const p = Math.min(1, C.t / C.dur), [x, y] = pos(p);
+          if (Math.random() < dt * 30) C.smoke.push({ x: x - 6, y, r: 2, life: 0, max: rnd(2.5, 4), dark: true });
+          if (p >= 1) {
+            C.state = 'wreck'; C.boom = 0;
+            for (let i = 0; i < 50; i++) C.sparks.push({ x, y, vx: rnd(-70, 70), vy: rnd(-90, -10), life: 0, max: rnd(0.6, 1.5) });
+            if (!this.done) { this.audio.fx('explosion', { volume: 0.9 }); this.audio.fx('cannon', { volume: 0.6, delay: 0.15 }); }
+          }
+        } else {
+          C.boom += dt;
+          if (Math.random() < dt * 9) C.smoke.push({ x: C.to[0] + rnd(-30, 30) * C.s, y: C.to[1] - 8 * C.s, r: 2, life: 0, max: rnd(5, 8), dark: true });
+        }
+        for (const s_ of C.smoke) { s_.life += dt; s_.y -= dt * 7; s_.x += dt * 4; s_.r += dt * 3.5; }
+        C.smoke = C.smoke.filter((s_) => s_.life < s_.max);
+        for (const s_ of C.sparks) { s_.life += dt; s_.x += s_.vx * dt; s_.y += s_.vy * dt; s_.vy += 120 * dt; }
+        C.sparks = C.sparks.filter((s_) => s_.life < s_.max);
+      }
+    }
+
+    /** Red lightning: the sky flashes the colour of blood, a bolt forks down behind the hills. */
+    drawLightning(c) {
+      const L = this.lightning;
+      if (!L || L.t > 0.45 || this.reduce) return;
+      // a flicker: a bright stroke, a second, a fading afterglow
+      const f = L.t < 0.07 ? 1 : L.t < 0.12 ? 0.25 : L.t < 0.2 ? 0.8 : L.t < 0.45 ? 0.35 * (1 - (L.t - 0.2) / 0.25) : 0;
+      if (f > 0) {
+        const g = c.createLinearGradient(0, 0, 0, L.horizon * SS);
+        g.addColorStop(0, `rgba(${L.col},${(0.34 * f).toFixed(3)})`);
+        g.addColorStop(1, `rgba(${L.col},${(0.14 * f).toFixed(3)})`);
+        c.fillStyle = g; c.fillRect(0, 0, LW * SS, L.horizon * SS);
+      }
+      if (L.bolt && L.t < 0.32) {
+        const path = (pts) => { c.beginPath(); pts.forEach(([x, y], i) => (i ? c.lineTo(x * SS, y * SS) : c.moveTo(x * SS, y * SS))); c.stroke(); };
+        c.save(); c.lineJoin = 'round'; c.lineCap = 'round';
+        for (const [pts, wide] of [[L.bolt, 1], [L.fork, 0.6]]) {
+          if (!pts) continue;
+          c.strokeStyle = `rgba(${L.col},${(0.45 * Math.max(f, 0.3)).toFixed(3)})`; c.lineWidth = 5 * wide * SS; path(pts);
+          c.strokeStyle = f > 0.5 ? '#ffe8e0' : `rgba(255,200,190,${(0.4 + f * 0.4).toFixed(3)})`; c.lineWidth = Math.max(1, 1.4 * wide * SS); path(pts);
+        }
+        c.restore();
+      }
+    }
+
+    /** The fighting on the horizon: musket flashes up and down the line, the guns, their smoke. */
+    drawBattle(c, cam) {
+      const B = this.battle, off = cam * B.depth;
+      const D = (x, y, w, hh, col) => { c.fillStyle = col; c.fillRect(Math.round(x * SS), Math.round(y * SS), Math.max(1, Math.round(w * SS)), Math.max(1, Math.round(hh * SS))); };
+      for (const s_ of B.smoke) { const x = s_.x - off; if (x < -20 || x > LW + 20) continue; c.fillStyle = `rgba(60,40,44,${(0.6 * (1 - s_.life / s_.max)).toFixed(3)})`; c.beginPath(); c.arc(x * SS, s_.y * SS, s_.r * SS, 0, Math.PI * 2); c.fill(); }
+      for (const f of B.flashes) {
+        const x = f.x - off;
+        if (x < -10 || x > LW + 10) continue;
+        if (f.big) { D(x - 2, f.y - 1, 5, 3, '#ffd080'); D(x - 1, f.y - 2, 3, 5, '#fff4c0'); c.fillStyle = 'rgba(255,170,90,0.25)'; c.beginPath(); c.arc(x * SS, f.y * SS, 10 * SS, 0, Math.PI * 2); c.fill(); }
+        else { D(x, f.y, 1, 1, '#fff0b0'); D(x + 1, f.y, 1, 1, '#ffb050'); }
+      }
+    }
+
+    /** Two lines of soldiers far off, trading volleys through the smoke. */
+    drawSkirmish(c, k, cam) {
+      const off = cam * k.depth;
+      for (let i = 0; i < k.n; i++) {
+        const x = k.x0 + i * k.gap - off;
+        if (x < -20 || x > LW + 20) continue;
+        c.save();
+        c.translate(Math.round(x * SS), Math.round(k.y * SS));
+        c.scale(SS * k.scale * k.dir, SS * k.scale);
+        drawPerson(c, LOOKS[k.look || 'farSoldier'], this.t + i, false, false, false, k.firing >= 0 ? 'aim' : null);
+        c.restore();
+        if (k.flash > 0) { c.fillStyle = '#ffe090'; c.fillRect(Math.round((x + k.dir * 15 * k.scale) * SS), Math.round((k.y - 13 * k.scale) * SS), SS * 2, SS); }
+      }
+      for (const s_ of k.smoke) { const x = s_.x - off; c.fillStyle = `rgba(200,180,176,${(0.5 * (1 - s_.life / s_.max)).toFixed(3)})`; c.beginPath(); c.arc(x * SS, s_.y * SS, s_.r * SS, 0, Math.PI * 2); c.fill(); }
+    }
+
+    /** Tongues of flame along a line: tapered, leaning with the wind, each flickering on its own. */
+    flameTongues(c, x, y, w, n, hgt, seed = 0) {
+      for (let k = 0; k < n; k++) {
+        const fx = x + (k + 0.5) * (w / n) + Math.sin(this.t * 3 + k * 5.1 + seed) * 1.2;
+        const fh = hgt * (0.45 + 0.55 * Math.abs(Math.sin(this.t * (4.5 + (k % 3)) + k * 1.9 + seed))) * (k % 3 === 1 ? 1.3 : 1);
+        const bw = Math.max(2, w / n * 1.3), lean = Math.sin(this.t * 2.2 + k + seed) * fh * 0.25 + fh * 0.15;
+        const tongue = (sc, col) => { c.fillStyle = col; c.beginPath(); c.moveTo((fx - bw / 2 * sc) * SS, y * SS); c.quadraticCurveTo((fx - bw * 0.3 * sc) * SS, (y - fh * 0.5 * sc) * SS, (fx + lean * sc) * SS, (y - fh * sc) * SS); c.quadraticCurveTo((fx + bw * 0.4 * sc) * SS, (y - fh * 0.45 * sc) * SS, (fx + bw / 2 * sc) * SS, y * SS); c.closePath(); c.fill(); };
+        tongue(1, k % 2 ? '#e0501e' : '#ff7a2a'); tongue(0.62, '#ffb040'); tongue(0.3, '#fff0a0');
+      }
+    }
+
+    /** A soft round glow of firelight. */
+    fireGlow(c, x, y, rad, a = 0.35) {
+      const g = c.createRadialGradient(x * SS, y * SS, 0, x * SS, y * SS, rad * SS);
+      g.addColorStop(0, `rgba(255,140,60,${(a * (0.85 + 0.15 * Math.sin(this.t * 9))).toFixed(3)})`);
+      g.addColorStop(1, 'rgba(255,110,40,0)');
+      c.fillStyle = g; c.fillRect((x - rad) * SS, (y - rad) * SS, rad * 2 * SS, rad * 2 * SS);
+    }
+
+    /** A townhouse on fire, and after it has given way, its heap of timbers and tiles still burning. */
+    drawCollapse(c, b, cam) {
+      const x0 = b.x - cam;
+      if (x0 > LW + 30 || x0 + b.w < -40) return;
+      const R = (x, y, w, hh, col) => { c.fillStyle = col; c.fillRect(Math.round(x * SS), Math.round(y * SS), Math.max(1, Math.round(w * SS)), Math.max(1, Math.round(hh * SS))); };
+      const yb = GY - 3, top = yb - b.h, f1 = Math.round(b.h * 0.5);
+      if (b.state === 'up') {
+        this.fireGlow(c, x0 + b.w / 2, top + b.h * 0.4, b.w * 1.1, 0.4);
+        // the ground floor: dark timber and lattice, its doorway full of fire
+        R(x0, yb - f1, b.w, f1, '#2a1a18');
+        for (let k = 2; k < b.w - 2; k += 2) R(x0 + k, yb - f1 + 2, 1, f1 - 4, '#3e2622');
+        const dx = x0 + b.w * 0.55, dw = Math.min(12, b.w * 0.3), fl = Math.sin(this.t * 11) > 0;
+        R(dx, yb - f1 + 3, dw, f1 - 3, fl ? '#ff8a3a' : '#ffa848'); R(dx + 2, yb - f1 + 5, dw - 4, f1 - 7, '#ffd070');
+        // the little roof between the floors, tiles slipping
+        R(x0 - 3, yb - f1 - 2, b.w + 6, 3, '#26222c'); for (let k = 0; k < b.w; k += 3) R(x0 + k, yb - f1 - 2, 1, 1, '#4a3a3a');
+        // the upper floor: soot-stained plaster, a hole burned through it with the fire showing
+        R(x0 + 2, top + 6, b.w - 4, b.h - f1 - 8, '#7a6a64'); R(x0 + 2, top + 6, 2, b.h - f1 - 8, '#9a8478');
+        for (let k = 0; k < 4; k++) R(x0 + 4 + k * (b.w / 4), top + 6, b.w / 5, 3 + k % 2 * 2, '#3a2a2a');
+        R(x0 + b.w * 0.25, top + 9, b.w * 0.3, b.h - f1 - 13, fl ? '#ffa040' : '#ff7a2a');
+        // the main roof, sagging, tiles missing, its eave lit from below
+        c.fillStyle = '#221e28'; c.beginPath(); c.moveTo((x0 - 5) * SS, (top + 7) * SS); c.lineTo((x0 + b.w + 5) * SS, (top + 7) * SS); c.lineTo((x0 + b.w - 3) * SS, (top - 2) * SS); c.lineTo((x0 + b.w * 0.5) * SS, (top + 1) * SS); c.lineTo((x0 + 3) * SS, (top - 2) * SS); c.closePath(); c.fill();
+        for (let k = -3; k < b.w + 3; k += 2) R(x0 + k, top + 7, 1, 1, '#c8603a');
+        R(x0 + b.w * 0.58, top + 1, 7, 5, '#ff7a2a');
+        this.flameTongues(c, x0 + 2, top + 2, b.w - 4, Math.max(4, Math.round(b.w / 6)), 14, b.x);
+        this.flameTongues(c, x0 + b.w * 0.25, top + b.h - f1 - 4, b.w * 0.3, 3, 6, b.x + 3);
+      } else {
+        this.fireGlow(c, x0 + b.w / 2, yb - 6, b.w * 0.9, 0.35);
+        for (const ch of b.chunks) {
+          c.save();
+          c.translate(Math.round((ch.x - cam + ch.w / 2) * SS), Math.round((ch.y + ch.h / 2) * SS));
+          c.rotate(ch.a);
+          c.fillStyle = ch.col;
+          c.fillRect(Math.round(-ch.w / 2 * SS), Math.round(-ch.h / 2 * SS), Math.round(ch.w * SS), Math.round(ch.h * SS));
+          c.restore();
+        }
+        this.flameTongues(c, x0, yb - 1, b.w, Math.max(4, Math.round(b.w / 6)), b.state === 'down' ? 9 : 13, b.x);
+      }
+    }
+
+    /** The airship coming down on fire, its explosion, and the wreck left burning where it fell. */
+    drawCrash(c, cam) {
+      const C = this.crash, off = cam * C.depth, u = C.s;
+      const pos = (p) => [C.from[0] + (C.to[0] - C.from[0]) * p, C.from[1] + (C.to[1] - C.from[1]) * p * p];
+      for (const s_ of C.smoke) { const x = s_.x - off; if (x < -40 || x > LW + 40) continue; c.fillStyle = `rgba(34,22,26,${(0.65 * (1 - s_.life / s_.max)).toFixed(3)})`; c.beginPath(); c.arc(x * SS, s_.y * SS, s_.r * SS, 0, Math.PI * 2); c.fill(); }
+      const R = (x, y, w, hh, col) => { c.fillStyle = col; c.fillRect(Math.round(x * SS), Math.round(y * SS), Math.max(1, Math.round(w * SS)), Math.max(1, Math.round(hh * SS))); };
+      if (C.state === 'fall') {
+        const p = Math.min(1, C.t / C.dur), [x, y] = pos(p), [x2, y2] = pos(Math.min(1, p + 0.02));
+        const sx = x - off, ang = Math.atan2(y2 - y, x2 - x);
+        c.save();
+        c.translate(sx * SS, y * SS); c.rotate(ang); c.translate(-sx * SS, -y * SS);
+        this.drawAirship(c, sx, y, u, 1);
+        this.fireGlow(c, sx - 4 * u, y - 4 * u, 34 * u, 0.45);
+        this.flameTongues(c, sx - 30 * u, y - 5 * u, 44 * u, 11, 12 * u, 7);
+        c.restore();
+      } else if (C.state === 'wreck') {
+        const sx = C.to[0] - off, y = C.to[1];
+        if (C.boom < 0.14) { c.fillStyle = `rgba(255,210,160,${(0.45 * (1 - C.boom / 0.14)).toFixed(3)})`; c.fillRect(0, 0, LW * SS, LH * SS); }
+        // the wreck: the airship driven nose-first into the ground, its skeleton rising at a slant, ribs
+        // and girders lit by the fire inside, rags of its skin hanging, the tail fins high above the ruins
+        const ang = C.lean, ca = Math.cos(ang), sa = Math.sin(ang), len = 64;
+        const hw = (k) => 8.5 * u * Math.sqrt(Math.max(0, 1 - Math.pow((k + len / 2) / (len / 2), 2))) * (k > -14 ? 0.55 + 0.45 * (-k / 14) : 1);
+        const at = (k, v) => [sx + k * u * ca - v * sa, y + k * u * sa + v * ca];
+        this.fireGlow(c, ...at(-len * 0.45, 0), 50 * u, 0.5);
+        c.save();
+        c.translate(sx * SS, y * SS); c.rotate(ang);
+        const Q = (x, yy, w, hh, col) => { c.fillStyle = col; c.fillRect(Math.round(x * SS), Math.round(yy * SS), Math.max(1, Math.round(w * SS)), Math.max(1, Math.round(hh * SS))); };
+        for (let k = -len; k <= 2; k += 1) { const h_ = hw(k); Q(k * u, -h_, u, 1.2 * u, '#2e1a1c'); Q(k * u, -h_, u, 0.5 * u, '#e8884a'); Q(k * u, h_ - 1.2 * u, u, 1.2 * u, '#2e1a1c'); if (k % 2 === 0) Q(k * u, -0.6 * u, u, 1.2 * u, '#3a2020'); }
+        for (let k = -len + 2; k <= 0; k += 5) { const h_ = hw(k); Q(k * u, -h_, 1.3 * u, h_ * 2, '#2e1a1c'); Q(k * u, -h_, 0.5 * u, h_ * 2, '#d06a3a'); }
+        for (const [k, v, hh] of [[-50, -6, 7], [-36, -8, 9], [-22, -7, 6], [-10, -4, 5]]) { Q(k * u, v * u, 4 * u, hh * u, '#8a6a66'); Q(k * u, v * u, 4 * u, 0.8 * u, '#d0a89e'); Q((k + 1) * u, (v + hh) * u, 2 * u, 2 * u, '#6a4e4e'); }
+        // the tail fins, still whole, and the ensign's stripes burnt to rags
+        c.fillStyle = '#2e1a1c';
+        c.beginPath(); c.moveTo((-len + 8) * u * SS, -hw(-len + 8) * SS); c.lineTo((-len - 6) * u * SS, -14 * u * SS); c.lineTo((-len - 2) * u * SS, -hw(-len + 3) * SS); c.closePath(); c.fill();
+        c.beginPath(); c.moveTo((-len + 8) * u * SS, hw(-len + 8) * SS); c.lineTo((-len - 6) * u * SS, 14 * u * SS); c.lineTo((-len - 2) * u * SS, hw(-len + 3) * SS); c.closePath(); c.fill();
+        Q((-len - 5) * u, -13 * u, 7 * u, 0.6 * u, '#e8884a');
+        Q((-len - 3) * u, -11 * u, 2 * u, 3 * u, '#2e4a8a'); Q((-len - 1) * u, -11 * u, 2 * u, 3 * u, '#d8d0c8'); Q((-len + 1) * u, -11 * u, 2 * u, 2 * u, '#b83a3a');
+        c.restore();
+        // the gondola crushed at its foot, and fire all along the frame, climbing it
+        R(sx - 16 * u, y - 4 * u, 14 * u, 4 * u, '#3a2422'); R(sx - 16 * u, y - 4 * u, 14 * u, 0.8 * u, '#a8603a');
+        this.flameTongues(c, sx - 30 * u, y - 1, 44 * u, 10, 12 * u, 3);
+        for (let k = -len + 6, i = 0; k < -4; k += 7, i++) { const [fx, fy] = at(k, -hw(k)); this.flameTongues(c, fx - 4 * u, fy + 2 * u, 8 * u, 3, (6 + (i % 3) * 3) * u, i * 7); }
+        if (C.boom < 1.2) {
+          const k = C.boom / 1.2;
+          c.fillStyle = `rgba(255,240,190,${(0.95 * (1 - k)).toFixed(2)})`; c.beginPath(); c.arc(sx * SS, (y - 10 * u) * SS, (8 + k * 36) * u * SS, 0, Math.PI * 2); c.fill();
+          c.fillStyle = `rgba(255,120,40,${(0.85 * (1 - k)).toFixed(2)})`; c.beginPath(); c.arc(sx * SS, (y - 8 * u) * SS, (5 + k * 24) * u * SS, 0, Math.PI * 2); c.fill();
+        }
+      }
+      for (const s_ of C.sparks) { const x = s_.x - off; R(x, s_.y, 1, 1, s_.life < 0.3 ? '#fff0a0' : '#ff8a3a'); }
     }
 
     /** A band of fog, drifting on the wind at its own distance. */

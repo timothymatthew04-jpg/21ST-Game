@@ -990,9 +990,9 @@
 
   /** lightning=rate — now and then the sky whitens, twice, and a bolt forks down to the hills. */
   class Lightning {
-    constructor(nums) {
+    constructor(nums, color) {
       const [rate = 0.1, horizon = 0.55] = nums;
-      Object.assign(this, { rate, horizon, wait: rnd(2, 6), t: 99, bolt: null });
+      Object.assign(this, { rate, horizon, wait: color ? rnd(0.3, 1.2) : rnd(2, 6), t: 99, bolt: null, col: color || null });
     }
     resize(W, H) { this.W = W; this.H = H; }
     step(dt) {
@@ -1006,18 +1006,132 @@
         let x = rnd(0.15, 0.85) * this.W, y = 0;
         while (y < this.horizon * this.H) { pts.push([x, y]); x += rnd(-5, 5); y += rnd(3, 7); }
         this.bolt = pts;
+        const at = Math.floor(pts.length * rnd(0.3, 0.5)), side = Math.random() < 0.5 ? -1 : 1;
+        this.fork = pts.slice(at, at + 8).map(([x_, y_], i) => [x_ + side * i * rnd(2, 5), y_ + i]);
       }
     }
     draw(c) {
       if (!this.W || this.t > 0.6) return;
       // two flashes: a bright one, then a weaker echo
       const f = this.t < 0.08 ? 1 : this.t > 0.18 && this.t < 0.26 ? 0.55 : 0;
-      if (f) { c.globalAlpha = 0.3 * f; c.fillStyle = '#e8f0ff'; c.fillRect(0, 0, this.W, this.H); }
+      if (f) { c.globalAlpha = (this.col ? 0.36 : 0.3) * f; c.fillStyle = this.col || '#e8f0ff'; c.fillRect(0, 0, this.W, this.H); }
       if (this.bolt && this.t < 0.3) {
-        c.globalAlpha = f ? 1 : 0.4;
-        c.fillStyle = '#ffffff';
-        for (const [x, y] of this.bolt) c.fillRect(Math.round(x), Math.round(y), 1, 4);
+        // a coloured bolt (red, over a burning land) is drawn with a glow of its colour round it
+        if (this.col) {
+          // one unbroken, forking stroke: its coloured glow, then the white-hot core
+          const path = (pts) => { c.beginPath(); pts.forEach(([x, y], i) => (i ? c.lineTo(x, y) : c.moveTo(x, y))); c.stroke(); };
+          c.save(); c.lineJoin = 'round'; c.lineCap = 'round';
+          for (const [pts, w] of [[this.bolt, 1], [this.fork, 0.6]]) {
+            if (!pts) continue;
+            c.globalAlpha = f ? 0.6 : 0.3; c.strokeStyle = this.col; c.lineWidth = 3.5 * w; path(pts);
+            c.globalAlpha = f ? 1 : 0.5; c.strokeStyle = '#ffe4dc'; c.lineWidth = Math.max(1, 1.2 * w); path(pts);
+          }
+          c.restore();
+        } else {
+          c.globalAlpha = f ? 1 : 0.4;
+          c.fillStyle = '#ffffff';
+          for (const [x, y] of this.bolt) c.fillRect(Math.round(x), Math.round(y), 1, 4);
+        }
       }
+      c.globalAlpha = 1;
+    }
+  }
+
+  /**
+   * crash=x0,y0,x1,y1,delay,dur[,scale] — an airship on fire coming down: from (x0,y0) it falls,
+   * nose first, trailing flame and smoke, to (x1,y1), where it explodes; then its burning wreck
+   * stays there, smoking.
+   */
+  class Crash {
+    constructor(nums) {
+      const [x0 = 0.1, y0 = 0.15, x1 = 0.7, y1 = 0.62, delay = 1, dur = 5, scale = 1] = nums;
+      Object.assign(this, { x0, y0, x1, y1, delay, dur, scale, t: 0, smoke: [], sparks: [], boomed: false });
+    }
+    resize(W, H) { this.W = W; this.H = H; }
+    pos(p) { const W = this.W, H = this.H, e = p * p; return [(this.x0 + (this.x1 - this.x0) * p) * W, (this.y0 + (this.y1 - this.y0) * e) * H]; }
+    step(dt) {
+      if (!this.W) return;
+      this.t += dt;
+      const p = (this.t - this.delay) / this.dur;
+      if (p > 0 && p < 1 && Math.random() < dt * 30) { const [x, y] = this.pos(p); this.smoke.push({ x: x - 6 * this.scale, y, r: 2, a: 0.7, life: 0, max: rnd(2, 3.5) }); }
+      if (p >= 1 && !this.boomed) {
+        this.boomed = true;
+        const [x, y] = this.pos(1);
+        for (let i = 0; i < 40; i++) this.sparks.push({ x, y, vx: rnd(-60, 60), vy: rnd(-80, -10), life: 0, max: rnd(0.6, 1.4) });
+      }
+      if (this.boomed && Math.random() < dt * 10) { const [x, y] = this.pos(1), k = rnd(0, 30) * this.scale; this.smoke.push({ x: x - k * 0.83, y: y - k * 0.56 - 4, r: 2, a: 0.6, life: 0, max: rnd(3, 5) }); }
+      for (const s of this.smoke) { s.life += dt; s.y -= dt * 8; s.x += dt * 4; s.r += dt * 4; }
+      this.smoke = this.smoke.filter((s) => s.life < s.max);
+      for (const s of this.sparks) { s.life += dt; s.x += s.vx * dt; s.y += s.vy * dt; s.vy += 120 * dt; }
+      this.sparks = this.sparks.filter((s) => s.life < s.max);
+    }
+    /** Tongues of flame along a line, tapered and flickering, leaning by `lean` (in their own frame). */
+    flames(c, t, x, y, w, n, hgt, lean = 0.2, seed = 0) {
+      for (let k = 0; k < n; k++) {
+        const fx = x + (k + 0.5) * (w / n), fh = hgt * (0.45 + 0.55 * Math.abs(Math.sin(t * (4.5 + (k % 3)) + k * 1.9 + seed))) * (k % 3 === 1 ? 1.3 : 1);
+        const bw = Math.max(1.5, (w / n) * 1.3), ln = fh * lean + Math.sin(t * 2.2 + k + seed) * fh * 0.2;
+        for (const [sc, col] of [[1, k % 2 ? '#e0501e' : '#ff7a2a'], [0.62, '#ffb040'], [0.3, '#fff0a0']]) {
+          c.fillStyle = col; c.beginPath(); c.moveTo(fx - (bw / 2) * sc, y);
+          c.quadraticCurveTo(fx - bw * 0.3 * sc, y - fh * 0.5 * sc, fx + ln * sc, y - fh * sc);
+          c.quadraticCurveTo(fx + bw * 0.4 * sc, y - fh * 0.45 * sc, fx + (bw / 2) * sc, y); c.closePath(); c.fill();
+        }
+      }
+    }
+    glow(c, x, y, r, a) {
+      const g = c.createRadialGradient(x, y, 0, x, y, r);
+      g.addColorStop(0, `rgba(255,140,60,${a})`); g.addColorStop(1, 'rgba(255,110,40,0)');
+      c.fillStyle = g; c.fillRect(x - r, y - r, r * 2, r * 2);
+    }
+    draw(c, t) {
+      if (!this.W) return;
+      const p = (this.t - this.delay) / this.dur, u = this.scale;
+      for (const s of this.smoke) { c.globalAlpha = s.a * (1 - s.life / s.max); c.fillStyle = '#2a1a1c'; c.beginPath(); c.arc(s.x, s.y, s.r, 0, TAU); c.fill(); }
+      c.globalAlpha = 1;
+      if (p > 0 && p < 1) {
+        // the airship coming down, its envelope pale in the firelight, burning from end to end
+        const [x, y] = this.pos(p), [x2, y2] = this.pos(Math.min(1, p + 0.02));
+        const ang = Math.atan2(y2 - y, x2 - x);
+        this.glow(c, x, y, 30 * u, 0.45);
+        c.save(); c.translate(x, y); c.rotate(ang);
+        const g = c.createLinearGradient(0, -5 * u, 0, 5 * u);
+        g.addColorStop(0, '#fff2ea'); g.addColorStop(0.45, '#e2d0cc'); g.addColorStop(1, '#a88e98');
+        c.fillStyle = g; c.beginPath(); c.ellipse(0, 0, 18 * u, 5 * u, 0, 0, TAU); c.fill();
+        c.fillStyle = 'rgba(120,90,100,0.5)'; for (let k = -14; k < 16; k += 4) c.fillRect(k * u, -4 * u, Math.max(1, 0.4 * u), 8 * u);
+        c.fillStyle = '#3a2e34'; c.fillRect(-5 * u, 4.5 * u, 10 * u, 2.2 * u);
+        c.fillStyle = '#2e4a9a'; c.fillRect(-17 * u, -1.5 * u, 2 * u, 3 * u); c.fillStyle = '#e8e0d8'; c.fillRect(-15 * u, -1.5 * u, 2 * u, 3 * u); c.fillStyle = '#c83a3a'; c.fillRect(-13 * u, -1.5 * u, 2 * u, 3 * u);
+        c.fillStyle = '#4a3a40'; c.beginPath(); c.moveTo(-15 * u, -3 * u); c.lineTo(-21 * u, -8 * u); c.lineTo(-19 * u, -2 * u); c.closePath(); c.fill();
+        // the fire has eaten through the back half: ribs showing, flames streaming back
+        c.fillStyle = '#2a1a1c'; c.fillRect(-18 * u, -4.5 * u, 12 * u, 3 * u);
+        c.fillStyle = '#e8884a'; for (let k = -17; k < -6; k += 2) c.fillRect(k * u, -4.5 * u, Math.max(1, 0.5 * u), 3 * u);
+        this.flames(c, t, -18 * u, -3.5 * u, 30 * u, 10, 9 * u, -0.5, 1);
+        c.restore();
+      }
+      if (this.boomed) {
+        const [x, y] = this.pos(1), since = this.t - this.delay - this.dur;
+        // the wreck: nose driven into the ground, the frame rising at a slant, tail fins high, burning
+        const lean = 0.6, ca = Math.cos(lean), sa = Math.sin(lean), len = 36;
+        const hw = (k) => 5 * u * Math.sqrt(Math.max(0, 1 - Math.pow((k + len / 2) / (len / 2), 2))) * (k > -8 ? 0.55 + 0.45 * (-k / 8) : 1);
+        this.glow(c, x - len * 0.45 * u * ca, y - len * 0.45 * u * sa, 34 * u, 0.5);
+        c.save(); c.translate(x, y); c.rotate(lean);
+        for (let k = -len; k <= 1; k += 0.5) { const h = hw(k); c.fillStyle = '#2e1a1c'; c.fillRect(k * u, -h, Math.max(1, 0.5 * u), Math.max(1, 0.7 * u)); c.fillRect(k * u, h - 0.7 * u, Math.max(1, 0.5 * u), Math.max(1, 0.7 * u)); c.fillStyle = '#e8884a'; c.fillRect(k * u, -h, Math.max(1, 0.5 * u), Math.max(1, 0.3 * u)); }
+        for (let k = -len + 1; k <= 0; k += 3) { const h = hw(k); c.fillStyle = '#2e1a1c'; c.fillRect(k * u, -h, Math.max(1, 0.7 * u), h * 2); c.fillStyle = '#d06a3a'; c.fillRect(k * u, -h, Math.max(1, 0.3 * u), h * 2); }
+        for (const [k, v, hh] of [[-28, -3, 4], [-19, -4.5, 5], [-11, -3.5, 3]]) { c.fillStyle = '#8a6a66'; c.fillRect(k * u, v * u, 2.2 * u, hh * u); }
+        c.fillStyle = '#2e1a1c';
+        c.beginPath(); c.moveTo((-len + 5) * u, -hw(-len + 5)); c.lineTo((-len - 4) * u, -8 * u); c.lineTo((-len - 1) * u, -hw(-len + 2)); c.closePath(); c.fill();
+        c.beginPath(); c.moveTo((-len + 5) * u, hw(-len + 5)); c.lineTo((-len - 4) * u, 8 * u); c.lineTo((-len - 1) * u, hw(-len + 2)); c.closePath(); c.fill();
+        c.fillStyle = '#2e4a9a'; c.fillRect((-len - 2) * u, -7 * u, 1.2 * u, 2 * u); c.fillStyle = '#e8e0d8'; c.fillRect((-len - 0.8) * u, -7 * u, 1.2 * u, 2 * u); c.fillStyle = '#c83a3a'; c.fillRect((-len + 0.4) * u, -7 * u, 1.2 * u, 2 * u);
+        c.restore();
+        this.flames(c, t, x - 18 * u, y, 26 * u, 8, 8 * u, 0.2, 3);
+        for (let k = -len + 4, i = 0; k < -3; k += 5, i++) { const fx = x + k * u * ca + hw(k) * sa, fy = y + k * u * sa - hw(k) * ca; this.flames(c, t, fx - 2.5 * u, fy + u, 5 * u, 3, (4 + (i % 3) * 2) * u, 0.2, i * 7); }
+        if (since < 1) {
+          const k = since / 1;
+          c.globalAlpha = (1 - k) * 0.95; c.fillStyle = '#fff0c0'; c.beginPath(); c.arc(x, y - 4 * u, (6 + k * 34) * u, 0, TAU); c.fill();
+          c.globalAlpha = (1 - k) * 0.85; c.fillStyle = '#ff7a2a'; c.beginPath(); c.arc(x, y - 3 * u, (4 + k * 24) * u, 0, TAU); c.fill();
+          if (since < 0.14) { c.globalAlpha = 0.45 * (1 - since / 0.14); c.fillStyle = '#ffd0a0'; c.fillRect(0, 0, this.W, this.H); }
+          c.globalAlpha = 1;
+        }
+      }
+      for (const s of this.sparks) { c.globalAlpha = 1 - s.life / s.max; c.fillStyle = s.life < 0.3 ? '#fff0a0' : '#ff8a3a'; c.fillRect(Math.round(s.x), Math.round(s.y), 1, 1); }
       c.globalAlpha = 1;
     }
   }
@@ -1337,7 +1451,8 @@
           case 'walkers': this.systems.push(new Walkers(n)); break;
           case 'ripples': this.systems.push(new Ripples(n, s.color)); break;
           case 'shade': this.systems.push(new Shade(n, s.color)); break;
-          case 'lightning': if (!this.reduce) this.systems.push(new Lightning(n)); break;
+          case 'lightning': if (!this.reduce) this.systems.push(new Lightning(n, s.color)); break;
+          case 'crash': this.systems.push(new Crash(n)); break;
           case 'splashes': this.systems.push(new Splashes(n, s.color)); break;
           case 'herd': this.systems.push(new Herd(n)); break;
           case 'fish': this.systems.push(new Fish(n)); break;

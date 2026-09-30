@@ -673,33 +673,105 @@ WALKS.ruins = (c, L) => {
 // ---------------------------------------------------------------- the road from the coast, through the war
 WALKS.crossing = (c, L) => {
   const r = rng(461);
-  vgrad(c, 0, 0, 480, WY, [[0, '#140c14'], [0.35, '#3a1622'], [0.65, '#8a2e24'], [0.88, '#e0602a'], [1, '#ffa050']]);
-  const cl = L('clouds', { depth: 0.05, anim: { type: 'drift', t: 140 } });
-  for (let x = 0; x < S(0.1); x += 170) cloudBand(cl, r, x + r.r(0, 60), r.r(18, 100), r.r(170, 250), r.r(10, 16), { body: '#2e1418', rim: '#e0602a', shadow: '#1e0c10', hi: '#ffa050', lightFromBelow: true });
-  const far = L('far', { depth: 0.12 });
-  ridge(far, r, 176, 40, '#2e1420', { x1: S(0.12) });
-  // fires along the far hills, and smoke going up from them
-  for (let x = 30; x < S(0.12); x += r.r(90, 160)) {
-    glow(far, x, 172, 30, 'rgba(255,120,50,0.55)');
-    for (let k = 0; k < 5; k++) ellipse(far, x + r.r(-5, 5), 172 - r.r(0, 6), r.r(1.5, 3), r.r(3, 6), r.pick(['#ffb040', '#ff7a2a', '#e0502a']));
-    for (let i = 0; i < 22; i++) { const t = i / 22; ellipse(far, x + t * t * 40 + r.r(-2, 2), 168 - t * 90, 3 + t * 14, 3 + t * 11, t < 0.2 ? '#6a2a20' : '#241016'); }
-  }
-  const mid = L('mid', { depth: 0.4 });
-  for (let x = 0; x < S(0.4); x += r.r(50, 110)) {
-    bareTree(mid, r, x, 198, r.r(28, 46), '#140a0c', null);
-    if (r() < 0.4) { glow(mid, x, 170, 16, 'rgba(255,120,40,0.6)'); for (let k = 0; k < 4; k++) ellipse(mid, x + r.r(-6, 6), 168 - r.r(0, 14), r.r(1.5, 3), r.r(3, 6), r.pick(['#ffb040', '#ff7a2a'])); }
-  }
+  // a sky gone the colour of the fires, black smoke rolling over it
+  vgrad(c, 0, 0, 480, WY, [[0, '#0e060c'], [0.3, '#2e0e18'], [0.55, '#6a1c1e'], [0.78, '#c8401e'], [0.92, '#f07a2a'], [1, '#ffb050']]);
+  glow(c, 120, 180, 150, 'rgba(255,110,40,0.45)'); glow(c, 380, 176, 130, 'rgba(255,90,40,0.4)');
+  const cl = L('clouds', { depth: 0.05, anim: { type: 'drift', t: 90 } });
+  for (let x = 0; x < S(0.1); x += 120) cloudBand(cl, r, x + r.r(0, 50), r.r(10, 110), r.r(150, 240), r.r(12, 20), { body: '#241016', rim: '#e8582a', shadow: '#160a10', hi: '#ff9a4a', lightFromBelow: true });
+  // silhouettes lit from below by fire
+  const burnt = (cc, rr, x, yb, w, hh, col, fire) => {
+    // a house burned to its frame: a jagged broken wall, the stumps of its posts, a window full of fire
+    const top = yb - hh, pts = [[x, yb]];
+    for (let k = 0; k <= w; k += 3) pts.push([x + k, top + rr.r(0, hh * 0.55) * (k > w * 0.3 ? 1 : 0.4)]);
+    pts.push([x + w, yb]);
+    poly(cc, pts, col);
+    for (let k = x + 2; k < x + w; k += rr.r(5, 9)) rect(cc, k, top - rr.r(0, hh * 0.35), 2, hh * 0.6, col);
+    if (fire) {
+      glow(cc, x + w / 2, top + hh * 0.4, w * 0.9, 'rgba(255,120,40,0.5)');
+      for (let k = 0; k < w / 6; k++) rect(cc, x + rr.r(3, w - 5), top + hh * rr.r(0.4, 0.8), rr.r(2, 4), rr.r(2, 4), rr.pick(['#ffb040', '#ff7a2a', '#ffe080']));
+    }
+  };
+  const smokeCol = (cc, rr, x, yb, hh, lean, dark = '#1e0c12') => {
+    for (let i = 0; i < 26; i++) { const t = i / 26; ellipse(cc, x + t * t * lean + rr.r(-2, 2), yb - t * hh, 3 + t * 16, 3 + t * 12, t < 0.12 ? '#7a2a1e' : t < 0.3 ? '#3a1618' : dark); }
+  };
+  const flames = (cc, rr, x, yb, w, hh) => {
+    glow(cc, x + w / 2, yb - hh / 2, w + 10, 'rgba(255,130,50,0.55)');
+    for (let k = 0; k < w; k += 2) { const fh = hh * rr.r(0.3, 1); poly(cc, [[x + k - 1, yb], [x + k + 2, yb], [x + k + 0.5 + rr.r(-1, 1), yb - fh]], rr.pick(['#ff7a2a', '#ff9a3a', '#e0502a'])); if (rr() < 0.5) rect(cc, x + k, yb - fh * 0.4, 1, fh * 0.4, '#ffd070'); }
+  };
+
+  // far: the burning town on its hill, the castle in flames, a pagoda broken in half, columns of smoke
+  const far = L('far', { depth: 0.1 });
+  const fx1 = S(0.1), FAR = '#2a0e16', FARL = '#4a1a1c';
+  ridge(far, r, 180, 20, FAR, { x1: fx1 });
+  const fc = { stone: '#3a1a1e', stoneLit: '#5a2a24', stoneDark: '#240e14', wall: '#4a2222', wallLit: '#7a3a2a', wallShade: '#341618', board: '#1a0a10', window: '#1a0a10', lit: '#ffa040', roof: '#1e0c12', roofLit: '#5a2420', gold: '#a86a30' };
+  smokeCol(far, r, 318, 120, 120, 70);
+  const ct = jpCastle(far, r, 300, 174, 0.72, fc);
+  flames(far, r, 284, 146, 18, 16); flames(far, r, 306, 132, 12, 12);
+  smokeCol(far, r, 116, 150, 110, -40);
+  // the pagoda, its top three storeys gone
+  pagoda(far, 116, 176, 2.2, FARL, '#8a3a24');
+  far.clearRect(96, 100, 42, 44); flames(far, r, 106, 146, 20, 12);
+  for (let x = 10; x < fx1; x += r.r(12, 22)) { if (Math.abs(x - 300) < 40 || Math.abs(x - 116) < 20) continue; burnt(far, r, x, 180, r.r(10, 18), r.r(6, 12), FAR, r() < 0.4); }
+  for (let x = 40; x < fx1; x += r.r(70, 130)) { if (Math.abs(x - 300) < 30) continue; smokeCol(far, r, x, 176, r.r(60, 110), r.r(20, 60)); flames(far, r, x - 6, 178, 12, r.r(6, 12)); }
+  glow(far, 300, 178, 180, 'rgba(255,90,30,0.28)');
+
+  // the field: rolling ground where the lines are fighting, broken walls, burnt trees, guns
+  const fld = L('field', { depth: 0.25 });
+  const fl1 = S(0.25);
+  ridge(fld, r, 190, 8, '#24101a', { x1: fl1 });
+  for (let x = 20; x < fl1; x += r.r(60, 110)) bareTree(fld, r, x, 188, r.r(18, 30), '#170a10', null);
+  for (let x = 80; x < fl1; x += r.r(90, 160)) burnt(fld, r, x, 189, r.r(22, 34), r.r(10, 16), '#1e0c14', true);
+  for (const gx of [190, 470, 690]) { rect(fld, gx, 182, 12, 3, '#160a10'); circle(fld, gx + 3, 186, 3.5, '#160a10'); line(fld, gx + 10, 183, gx + 20, 178, '#160a10', 2); }
+  for (let x = 0; x < fl1; x += r.r(40, 80)) glow(fld, x, 188, 20, 'rgba(255,110,40,0.3)');
+
+  // mid: the edge of the town, ruined townhouses burning, a torii still standing, charred trees
+  const mid = L('mid', { depth: 0.45 });
+  const mx1 = S(0.45), MID = '#1a0a10';
+  const ruinMachiya = (x, w, hh, fire) => {
+    // what is left of a townhouse: the ground floor's posts, half the upper wall, a roof sliding off
+    const yb = 196, top = yb - hh;
+    rect(mid, x, yb - hh * 0.5, w, hh * 0.5, '#2a1418');
+    for (let k = x; k < x + w; k += 5) rect(mid, k, top + r.r(0, hh * 0.3), 2, hh, MID);
+    const pts = [[x, yb - hh * 0.5]];
+    for (let k = 0; k <= w; k += 4) pts.push([x + k, top + hh * 0.1 + r.r(0, hh * 0.4) * (k / w)]);
+    pts.push([x + w, yb - hh * 0.5]);
+    poly(mid, pts, '#2e161a');
+    poly(mid, [[x - 6, top + 4], [x + w * 0.6, top - 4], [x + w * 0.7, top + 1], [x - 2, top + 10]], MID);
+    for (let k = x - 4; k < x + w * 0.6; k += 3) px(mid, k, top + 3 - (k - x) * 0.12, '#5a2420');
+    if (fire) { flames(mid, r, x + 3, top + hh * 0.5, w - 6, hh * 0.5); for (let k = 0; k < 3; k++) rect(mid, x + 4 + k * (w / 3), yb - hh * 0.35, 5, 6, '#ff8a3a'); }
+    else for (let k = 0; k < 3; k++) rect(mid, x + 4 + k * (w / 3), yb - hh * 0.35, 5, 6, '#3a1a1a');
+  };
+  for (let x = 10; x < mx1; x += r.r(70, 120)) ruinMachiya(x, r.r(30, 44), r.r(30, 44), r() < 0.6);
+  jpTorii(mid, 520, 196, 1.1);
+  for (let x = 60; x < mx1; x += r.r(90, 150)) bareTree(mid, r, x, 197, r.r(26, 40), '#12070c', null);
+  vgrad(mid, 0, 192, mx1, 8, [[0, '#2a1216'], [1, '#1e0c10']]);
+
+  // ground: the road, rubble, craters, burnt houses; the signpost at 700, the abandoned gun at 1040
   const g = L('ground', { depth: 1 });
-  vgrad(g, 0, 188, W, 16, [[0, '#3a2020'], [1, '#2a1616']]);
+  vgrad(g, 0, 192, W, 14, [[0, '#3a2020'], [1, '#2a1616']]);
   bank(g, r, 0, W, { grass0: '#3a2a22', grass1: '#2a1c18', tip: '#5a3a2a', earth: '#221412', dark: '#100808', stone: '#4a3632' });
-  // craters, a broken fence, a signpost, a field gun left behind
   for (let x = 90; x < W; x += r.r(110, 190)) { ellipse(g, x, GY - 1, r.r(10, 16), 3, '#140a0a'); ellipse(g, x, GY - 2, r.r(7, 12), 2, '#0a0606'); for (let k = 0; k < 5; k++) rect(g, x + r.r(-14, 14), GY - r.r(2, 5), 2, 1, '#4a3024'); }
-  for (let x = 240; x < 420; x += 12) { rect(g, x, GY - 14 + (x % 3), 2, 14, '#2a1a14'); if (x % 24 === 0) line(g, x, GY - 10, x + 12, GY - 8 - (x % 5), '#2a1a14', 1); }
+  const ruin = (x, w, hh) => {
+    // a burned house by the road: charred posts, a jagged wall, fallen beams and tiles, embers
+    const top = GY - 2 - hh;
+    const pts = [[x, GY - 2]];
+    for (let k = 0; k <= w; k += 3) pts.push([x + k, top + r.r(0, hh * 0.6)]);
+    pts.push([x + w, GY - 2]);
+    poly(g, pts, '#2e1a1a');
+    texture(g, r, x, top, w, hh, 0.1, 2);
+    for (let k = x + 2; k < x + w; k += r.r(6, 10)) { rect(g, k, top - r.r(0, 10), 3, hh + 10, '#140a0a'); px(g, k + 1, top + r.r(4, hh), '#ff7a2a'); }
+    line(g, x - 4, GY - 3, x + w * 0.6, top + 4, '#1a0e0c', 3);
+    line(g, x + w * 0.4, GY - 3, x + w + 6, top + hh * 0.5, '#1a0e0c', 2);
+    for (let k = 0; k < w / 2; k++) rect(g, x + r.r(-6, w + 6), GY - r.r(2, 6), r.r(2, 4), r.r(1, 2), r.pick(['#2a2630', '#1e1a22', '#3a2620', '#4a3024']));
+    glow(g, x + w / 2, GY - hh * 0.4, w * 0.8, 'rgba(255,110,40,0.3)');
+  };
+  for (const [x, w, hh] of [[34, 70, 40], [200, 80, 46], [652, 30, 24], [960, 60, 38], [1290, 80, 44]]) ruin(x, w, hh);
+  for (let x = 10; x < W; x += r.r(20, 40)) for (let k = 0; k < 3; k++) rect(g, x + r.r(0, 12), GY - r.r(2, 4), r.r(2, 5), 2, r.pick(['#2a2630', '#3a2620', '#4a3632']));
   rect(g, 700, GY - 30, 2, 30, '#2a1a14'); rect(g, 692, GY - 30, 22, 6, '#4a3020'); rect(g, 692, GY - 30, 22, 1, '#7a5234');
   rect(g, 1030, GY - 12, 26, 3, '#1e1a20'); circle(g, 1036, GY - 5, 5, '#2a1a10'); circle(g, 1036, GY - 5, 3, '#4a3020'); line(g, 1044, GY - 10, 1060, GY - 16, '#1e1a20', 3);
   const fr = L('front', { depth: 1.3, anim: sway(2, 3.6) });
   reeds(fr, r, ['#1a0e0c', '#2a1814', '#3e2218'], 80);
-  return { colors: 64, vignette: [0.5, '24,4,4'] };
+  return { colors: 80, vignette: [0.5, '24,4,4'] };
 };
 
 // ---------------------------------------------------------------- the cemetery by the river, at dusk

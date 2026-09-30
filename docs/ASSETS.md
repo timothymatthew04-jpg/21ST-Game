@@ -108,6 +108,12 @@ The smuggler's boat (`smuggler_boat`), the crossing to Japan, is a clear, cold n
 the northern lights as its sky: the aurora itself is an effect (`aurora`), rippling above the deck
 and mirrored faintly in the swell, over a painted sky that glows green at the horizon.
 
+The road from the coast (`crossing`) is the war: a sky gone red and black with smoke, the town on
+its hill burning, the castle in flames and the pagoda broken in half, soldiers fighting in the
+fields between, ruined townhouses and burnt trees, rubble and craters along the road. The red
+lightning, the fighting on the hills, the lines of soldiers, the houses falling in and the airship
+coming down are all drawn by the game over the painting (see `story/walks.js`).
+
 The eight walking areas (`camp`, `lavilledieu`, `steppe`, `village`, `aviary`, `ruins`, `crossing`, `cemetery`) are painted by
 `tools/paint-walks.js` from `tools/paint/walks.js`, with the same toolkit and style as the
 backgrounds but two to five screens wide. Each is saved as layers: the sky (one screen, it never

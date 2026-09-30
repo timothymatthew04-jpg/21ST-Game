@@ -290,52 +290,62 @@ window.VN_WALKSCENERY = {
    {
     "id": "clouds",
     "x": 0,
-    "y": 37,
+    "y": 22,
     "w": 1440,
-    "h": 52,
+    "h": 83,
     "depth": 0.05,
     "anim": {
      "type": "drift",
-     "t": 140
+     "t": 90
     },
     "src": "assets/walks/crossing/clouds.png"
    },
    {
     "id": "far",
     "x": 0,
-    "y": 69,
-    "w": 645,
-    "h": 201,
-    "depth": 0.12,
+    "y": 0,
+    "w": 647,
+    "h": 270,
+    "depth": 0.1,
     "anim": null,
     "src": "assets/walks/crossing/far.png"
    },
    {
+    "id": "field",
+    "x": 0,
+    "y": 146,
+    "w": 760,
+    "h": 124,
+    "depth": 0.25,
+    "anim": null,
+    "src": "assets/walks/crossing/field.png"
+   },
+   {
     "id": "mid",
     "x": 0,
-    "y": 135,
-    "w": 868,
-    "h": 63,
-    "depth": 0.4,
+    "y": 140,
+    "w": 960,
+    "h": 69,
+    "depth": 0.45,
     "anim": null,
     "src": "assets/walks/crossing/mid.png"
    },
    {
     "id": "ground",
     "x": 0,
-    "y": 174,
+    "y": 147,
     "w": 1440,
-    "h": 38,
+    "h": 65,
     "depth": 1,
     "anim": null,
     "src": "assets/walks/crossing/ground.png"
    },
    {
     "id": "front",
-    "x": 3,
-    "y": 233,
-    "w": 1404,
-    "h": 37,
+    "x": 14,
+    "y": 232,
+    "w": 1415,
+    "h": 38,
     "depth": 1.3,
     "anim": {
      "type": "sway",

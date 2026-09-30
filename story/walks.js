@@ -81,6 +81,17 @@
  *  A crowd's people can stare at Hervé as he passes (watch: true), and a crowd can make a sound now
  *  and then when he is near (sound: { name, every: [min, max], volume, near }), like a drum.
  *  Marchers can walk in a pose (pose: 'parasol').
+ *  A battlefield has its own (the road from the coast); none of it touches the shelling:
+ *    lightning: { every: [min, max], col, horizon }  red lightning: the sky flashes, a bolt forks down
+ *    battle:   { depth, x0, x1, y, rate, cannons }  the fighting on the far hills: musket flashes along
+ *              the line, now and then a gun with its flash, its smoke and its boom
+ *    skirmish: [{ depth, x0, y, dir, n, gap, scale, look, every }]  a line of soldiers far off in the
+ *              field, facing dir, aiming and firing a volley together (looks farSoldier, farSamurai)
+ *    collapses: [{ x, w, h, near }]  a townhouse on fire that gives way as Hervé comes within `near`:
+ *              its timbers and tiles tumble down, and the heap goes on burning
+ *    crash:    { trigger, depth, from, to, dur, s, lean }  once Hervé reaches `trigger`, an airship
+ *              falls burning from `from` to `to` (in the layer at `depth`), explodes, and its wreck
+ *              stays there, nose in the ground, its frame and tail rising out of the fire
  *  Looks for Japan: samurai, samurai2, ronin, archer, shonin (a merchant), geisha, geisha2,
  *  townswoman, taiko, juggler, dancer (poses: draw, taiko, juggle, dance, parasol).
  *  A thing can stand in a pose, and change it when Hervé comes near: { pose, nearPose, nearAt }.
@@ -361,6 +372,19 @@ window.VN_WALKS = {
       { x0: 610, x1: 646, kind: 'sandbags' }, { x0: 770, x1: 806, kind: 'rubble' }, { x0: 920, x1: 956, kind: 'wall' },
       { x0: 1080, x1: 1116, kind: 'sandbags' }, { x0: 1230, x1: 1266, kind: 'rubble' },
     ],
+    // the battle all around: red lightning, the fighting along the far hills, lines of soldiers trading
+    // volleys in the field, houses burning and giving way as Hervé passes, and an airship shot down
+    lightning: { every: [2.5, 6], horizon: 160 },
+    battle: { depth: 0.1, x0: 0, x1: 616, y: 177, rate: 5, cannons: 0.3 },
+    skirmish: [
+      { depth: 0.25, x0: 96, y: 189, dir: 1, n: 6, scale: 0.62 }, { depth: 0.25, x0: 190, y: 189, dir: -1, n: 5, scale: 0.62, look: 'farSamurai' },
+      { depth: 0.25, x0: 380, y: 190, dir: 1, n: 7, scale: 0.62 }, { depth: 0.25, x0: 482, y: 190, dir: -1, n: 6, scale: 0.62, look: 'farSamurai' },
+      { depth: 0.25, x0: 610, y: 189, dir: 1, n: 5, scale: 0.62 }, { depth: 0.25, x0: 690, y: 189, dir: -1, n: 5, scale: 0.62, look: 'farSamurai' },
+    ],
+    collapses: [{ x: 392, w: 48, h: 40 }, { x: 556, w: 40, h: 34 }, { x: 858, w: 52, h: 44 }, { x: 1166, w: 46, h: 40 }],
+    crash: { trigger: 520, depth: 0.5, from: [360, -30], to: [660, 191], dur: 6, s: 1.6 },
+    fires: [{ x: 60, y: 176 }, { x: 236, y: 172 }, { x: 990, y: 180 }, { x: 1320, y: 174 }],
+    smoke: [{ x: 60, y: 168, rate: 1.4, col: '40,24,28', a: 0.6 }, { x: 236, y: 164, rate: 1.4, col: '40,24,28', a: 0.6 }, { x: 990, y: 172, rate: 1.2, col: '40,24,28', a: 0.6 }, { x: 1320, y: 166, rate: 1.4, col: '40,24,28', a: 0.6 }],
     things: [
       { x: 700, kind: 'look', label: 'A signpost', lines: ['A signpost, its arms shot away. It still pointed somewhere, bravely, at nothing.'] },
       { x: 1040, kind: 'look', label: 'An abandoned gun', lines: ['A field gun, left where it stood. Its crew had not had time to take it with them, or had not needed to.'] },
