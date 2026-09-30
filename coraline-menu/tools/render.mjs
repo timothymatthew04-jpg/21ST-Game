@@ -4,6 +4,11 @@
 //   node tools/render.mjs --fps 30 --out frames/ [--from 0 --to 16] [--workers 3] [--query "flash=1"]
 //   node tools/render.mjs --fps 30 --out frames/ --mp4 coraline-menu.mp4
 //
+// The slow part is the 3D scene, so it can be rendered once without the menu (--bg) and the menu
+// laid over those saved frames afterwards (--compose), which is quick:
+//   node tools/render.mjs --bg --fps 15 --out bg/
+//   node tools/render.mjs --compose bg/ --fps 15 --out frames/ --mp4 export/coraline-main-menu.mp4
+//
 // Every frame is rendered at an exact time on the loop, so the result is deterministic.
 import http from 'node:http';
 import fs from 'node:fs';
@@ -21,14 +26,18 @@ const args = Object.fromEntries(process.argv.slice(2).reduce((acc, a, i, all) =>
 }, []));
 
 const types = { '.js': 'text/javascript', '.html': 'text/html', '.css': 'text/css', '.woff2': 'font/woff2', '.png': 'image/png' };
+const bgDir = typeof args.compose === 'string' ? path.resolve(args.compose) : null;
 const server = http.createServer((req, res) => {
-  const file = path.join(root, decodeURIComponent(req.url.split('?')[0]));
-  if (!file.startsWith(root) || !fs.existsSync(file) || fs.statSync(file).isDirectory()) { res.writeHead(404); res.end(); return; }
+  const url = decodeURIComponent(req.url.split('?')[0]);
+  const file = bgDir && url.startsWith('/__bg/') ? path.join(bgDir, url.slice(6)) : path.join(root, url);
+  if (!(file.startsWith(root) || (bgDir && file.startsWith(bgDir))) || !fs.existsSync(file) || fs.statSync(file).isDirectory()) { res.writeHead(404); res.end(); return; }
   res.writeHead(200, { 'content-type': types[path.extname(file)] || 'application/octet-stream' });
   fs.createReadStream(file).pipe(res);
 }).listen(0);
 await new Promise((r) => server.on('listening', r));
-const base = `http://localhost:${server.address().port}/index.html?still=1${args.query ? '&' + args.query : ''}`;
+const base = `http://localhost:${server.address().port}/index.html?still=1${bgDir ? '&compose=1' : ''}${args.query ? '&' + args.query : ''}`;
+const fpsArg = parseFloat(args.fps || 30);
+const frameName = (i) => `f${String(i).padStart(5, '0')}.png`;
 
 async function openPage() {
   const browser = await chromium.launch({ args: ['--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'] });
@@ -37,11 +46,13 @@ async function openPage() {
   await page.goto(base, { waitUntil: 'commit', timeout: 120000 });
   await page.waitForFunction('window.__ready === true', null, { timeout: 600000 });
   await page.evaluate('document.fonts.ready');
+  if (args.bg) await page.addStyleTag({ content: '#menu { display: none !important; }' });
   return { browser, page };
 }
 
 async function shoot(page, t, file) {
-  await page.evaluate((tt) => window.__render(tt), t);
+  const bg = bgDir ? `/__bg/${frameName(Math.round(t * fpsArg))}` : null;
+  await page.evaluate(([tt, src]) => window.__render(tt, src), [t, bg]);
   await page.screenshot({ path: file });
 }
 
