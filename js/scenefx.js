@@ -1084,6 +1084,78 @@
   }
 
   // ---------------------------------------------------------------- the per-background controller
+  // ---------------------------------------------------------------- a river town's
+  /** fish=x,y,w,h,rate — fish leaping out of the water and back, with rings and a spray of drops. */
+  class Fish {
+    constructor(nums) {
+      const [x = 0, y = 0.75, w = 1, h = 0.15, rate = 0.5] = nums;
+      Object.assign(this, { box: { x, y, w, h }, rate, list: [], wait: rnd(0.5, 1.5) });
+    }
+    resize(W, H) { this.W = W; this.H = H; }
+    step(dt) {
+      if (!this.W) return;
+      this.wait -= dt;
+      if (this.wait <= 0) {
+        this.wait = rnd(0.6, 1.6) / this.rate;
+        const b = this.box;
+        this.list.push({ x: (b.x + Math.random() * b.w) * this.W, y: (b.y + Math.random() * b.h) * this.H, t: 0, dur: rnd(0.6, 0.9), h: rnd(5, 10), dir: Math.random() < 0.5 ? -1 : 1 });
+      }
+      for (const f of this.list) f.t += dt;
+      this.list = this.list.filter((f) => f.t < f.dur + 0.7);
+    }
+    draw(c, t) {
+      for (const f of this.list) {
+        const p = f.t / f.dur;
+        if (p <= 1) {
+          const x = f.x + f.dir * p * 9, y = f.y - Math.sin(Math.PI * p) * f.h;
+          c.globalAlpha = 1;
+          c.fillStyle = '#d8e4f0'; c.fillRect(Math.round(x) - 1, Math.round(y) - 1, 3, 1.5);
+          c.fillStyle = '#5a6a80'; c.fillRect(Math.round(x) - 1, Math.round(y) - 1, 3, 0.5);
+          if (Math.sin(t * 30) > 0) { c.fillStyle = '#ffffff'; c.fillRect(Math.round(x), Math.round(y) - 1, 1, 1); }
+        }
+        for (const [sx, st] of [[f.x, f.t], [f.x + f.dir * 9, f.t - f.dur]]) {
+          if (st < 0 || st > 0.7) continue;
+          const k = st / 0.7;
+          c.globalAlpha = 0.7 * (1 - k);
+          c.fillStyle = '#ffffff';
+          for (let i = 0; i < 12; i++) { const a = (i / 12) * TAU; c.fillRect(Math.round(sx + Math.cos(a) * (1.5 + k * 6)), Math.round(f.y + Math.sin(a) * (0.5 + k * 1.2)), 1, 0.5); }
+        }
+      }
+      c.globalAlpha = 1;
+    }
+  }
+
+  /** flock=count,y0,y1 — flocks of birds going over in loose V shapes, now and then. */
+  class Flock {
+    constructor(nums) {
+      const [every = 14, y0 = 0.05, y1 = 0.3] = nums;
+      Object.assign(this, { every, y: [y0, y1], list: [], wait: rnd(1, 4) });
+    }
+    resize(W, H) { this.W = W; this.H = H; }
+    step(dt) {
+      if (!this.W) return;
+      this.wait -= dt;
+      if (this.wait <= 0) {
+        this.wait = rnd(this.every * 0.7, this.every * 1.3);
+        const n = Math.round(rnd(5, 9)), birds = [];
+        for (let i = 0; i < n; i++) { const k = Math.ceil(i / 2); birds.push({ dx: -k * 5, dy: k * 2.5 * (i % 2 ? 1 : 0.8), ph: rnd(0, 6) }); }
+        this.list.push({ x: -40, y: rnd(this.y[0], this.y[1]) * this.H, v: rnd(18, 26), birds });
+      }
+      for (const f of this.list) f.x += f.v * dt;
+      this.list = this.list.filter((f) => f.x < this.W + 60);
+    }
+    draw(c, t) {
+      c.globalAlpha = 0.9;
+      c.fillStyle = '#26303e';
+      for (const f of this.list) for (const b of f.birds) {
+        const fr = WINGS[Math.floor((t * 9 + b.ph) % 3)];
+        const x = Math.round(f.x + b.dx), y = Math.round(f.y + b.dy + Math.sin(t * 1.3 + b.ph));
+        for (const [dx, dy] of fr) c.fillRect(x + dx, y + dy, 1, 1);
+      }
+      c.globalAlpha = 1;
+    }
+  }
+
   // ---------------------------------------------------------------- horses at the gallop
   const COATS = [
     { coat: '#8a5a34', dark: '#5e3a20', mane: '#2a1a12' },
@@ -1228,6 +1300,8 @@
           case 'lightning': if (!this.reduce) this.systems.push(new Lightning(n)); break;
           case 'splashes': this.systems.push(new Splashes(n, s.color)); break;
           case 'herd': this.systems.push(new Herd(n)); break;
+          case 'fish': this.systems.push(new Fish(n)); break;
+          case 'flock': this.systems.push(new Flock(n)); break;
           case 'rider': this.systems.push(new Rider(n)); break;
           case 'glow': case 'flame': lights.push(this.light(s)); break;
           case 'rays': lights.push(this.rays(s)); break;

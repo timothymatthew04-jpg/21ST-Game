@@ -72,7 +72,14 @@ Triomphe and the boulevards' apartment blocks (nothing later, so no Eiffel Tower
 buildings are drawn by `tools/paint/scenes-french.js`, shared with the Chapter 1 backdrop
 (`army_camp`) and its cutscene.
 
-The seven walking areas (`camp`, `steppe`, `village`, `aviary`, `ruins`, `crossing`, `cemetery`) are painted by
+Lavilledieu, the walk home, is a river town on a sunny day: a wildflower meadow with mulberry
+trees, the silk mill and its wheel, a wash-house, pastel houses along the quay with shutters and
+geraniums, plane trees, a bakery and a café, a guinguette under paper lanterns, the church and
+its fountain, and the Joncour house in its garden of roses and lavender; behind them, houses
+climb a hill to a church, with vineyards and an old bridge beyond. It is drawn by
+`tools/paint/scenes-village.js`, shared with the Lavilledieu backdrop.
+
+The eight walking areas (`camp`, `lavilledieu`, `steppe`, `village`, `aviary`, `ruins`, `crossing`, `cemetery`) are painted by
 `tools/paint-walks.js` from `tools/paint/walks.js`, with the same toolkit and style as the
 backgrounds but two to five screens wide. Each is saved as layers: the sky (one screen, it never
 scrolls), drifting clouds, far and middle distance (scrolling slower than Hervé walks), the ground

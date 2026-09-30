@@ -113,7 +113,7 @@ place joncour_bedroom   "The Joncour House"      "Lavilledieu · Night"
 place cemetery_two      "The Cemetery"           "Lavilledieu · Many years later"
 place yuki_house        "A House in the Hills"   "Japan · Years later"
 
-bgfx lavilledieu smoke=0.752,0.574,0.6 glints=0.52,0.56,0.19,0.44,16 birds=4,0.06,0.3 motes=0.1,0.4,0.8,0.4,20,#fff6d8
+bgfx lavilledieu smoke=0.075,0.31,0.6,#f4f4f8 glints=0.04,0.74,0.3,0.16,26,#ffffff flock=10,0.04,0.3 fish=0.25,0.76,0.7,0.12,0.7 motes=0.1,0.3,0.8,0.5,20,#fff6d8
 bgfx silk_mill glow=0.36,0.38,0.08,#fff4d0 glow=0.498,0.38,0.08,#fff4d0 glow=0.635,0.38,0.08,#fff4d0 motes=0.15,0.25,0.55,0.7,45
 bgfx silk_mill_empty motes=0.15,0.25,0.55,0.7,20,#c8d4e6 rain=0.5,0.308,0.215,0.105,0.34 rain=0.5,0.446,0.215,0.105,0.34 rain=0.5,0.583,0.215,0.105,0.34
 bgfx balbadiou_office flame=0.6375,0.648,0.05,#ffc070 glow=0.87,0.35,0.1,#fff0d0 motes=0.5,0.3,0.45,0.6,30
@@ -150,7 +150,7 @@ bgfx the_glove motes=0.1,0,0.7,0.8,22,#fff0c8 rays=0.3,0,1.2,0.5,#fff0c0
 bgfx the_letter flame=0.896,0.29,0.03,#ffc070 motes=0.6,0.1,0.3,0.5,14,#ffe0a0
 # the scenes come alive: grass in the wind, people about their day, rings on the water,
 # the shadows of clouds, and storms that flash
-bgfx lavilledieu ripples=0.56,0.7,0.12,0.25,0.9,#e8f4ff walkers=0.84,0.74,0.98,4,0,1,0.04 walkers=0.72,0.08,0.4,3,0,1,0.05 grass=0.93,0.07,0.7,0,0.55,0.75,#a8d068 shade=0.5,0.5,3,0.1
+bgfx lavilledieu ripples=0.3,0.76,0.6,0.12,0.9,#e8f4ff walkers=0.665,0.34,0.98,5,0,1,0.015 grass=0.9,0.08,0.8,0,0,0,#b8e070 shade=0.62,0.3,3,0.08
 bgfx army_camp army=0.735,1,6,16,2,1,-0.1,1.1,0 grass=0.92,0.08,0.8,0,0.62,0.8,#9aa858 shade=0.6,0.4,2,0.08
 # the sky of the Second Empire over the camp: steam airships crossing, balloons on their tethers, smoke from the headquarters
 bgfx army_camp airship=0.13,-1,4,0.9,0.7 airship=0.06,1,2.5,0.5,0.2 balloon=0.62,0.27,0.7,0.6,0 balloon=0.9,0.2,0.5,0.6,1 smoke=0.135,0.49,0.5,#e8dce4 smoke=0.365,0.49,0.5,#e8dce4
@@ -450,6 +450,8 @@ label wedding
   "So I went home. Not to Japan — home, to Lavilledieu, with my discharge papers in one pocket of my coat and Baldabiou's purse in the other."
   gain francs 200
   "Money for the road, he had said. For the smugglers, and for whatever else the road would ask. Every franc that comes back is the town's."
+  # the walk home through the town, to Hélène in the garden (story/walks.js)
+  walk lavilledieu
   scene joncour_home with fade
   play music helene_theme fadein 2
   show helene surprised

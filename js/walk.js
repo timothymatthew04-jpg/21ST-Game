@@ -58,6 +58,17 @@
     cuirassier: { coat: '#1e2a5a', coatDark: '#141c40', legs: '#b83a3a', boots: '#141010', skin: '#e8c0a0', hat: 'helmet', hatCol: '#aeb4c2', cuirass: '#aeb4c2', sword: 1, saddle: '#1e2a5a' },
     cuirassierOfficer: { coat: '#1e2a5a', coatDark: '#141c40', legs: '#b83a3a', boots: '#141010', skin: '#e8c0a0', hat: 'helmet', hatCol: '#c0c6d2', cuirass: '#c0c6d2', sword: 1, saddle: '#1e2a5a', epaulette: '#f0c050', beard: '#4a3020' },
     trumpeter: { coat: '#1e2a5a', coatDark: '#141c40', legs: '#b83a3a', boots: '#141010', skin: '#f0c8a8', hat: 'helmet', hatCol: '#aeb4c2', cuirass: '#aeb4c2', saddle: '#1e2a5a', plume: '#f2eee6', trumpet: 1 },
+    // the people of Lavilledieu
+    woman: { coat: '#c86a7a', coatDark: '#9a4a5a', legs: '#9a4a5a', boots: '#3a2a2a', skin: '#f0c8a8', hat: 'bonnet', hatCol: '#f4e0b0', robe: 1, hair: '#6a4030', apron: '#f4ece0' },
+    lady: { coat: '#6a8ac8', coatDark: '#4a6aa8', legs: '#4a6aa8', boots: '#2a2a3a', skin: '#f0c8a8', hat: 'bonnet', hatCol: '#e8c8d8', robe: 1, hair: '#3a2a20' },
+    girl: { coat: '#f0a0b0', coatDark: '#d07a8a', legs: '#d07a8a', boots: '#6a4a3a', skin: '#f4d0b0', hat: 'none', hatCol: '#8a5a30', robe: 1, small: 1, hair: '#8a5a30' },
+    baker: { coat: '#f4f0e8', coatDark: '#d8d0c0', legs: '#3a3440', boots: '#2a2020', skin: '#f0c0a0', hat: 'toque', hatCol: '#ffffff', wide: 1 },
+    fisherman: { coat: '#5a6a4a', coatDark: '#465438', legs: '#4a4a5a', boots: '#2a2018', skin: '#d8a888', hat: 'straw', hatCol: '#e0c878', beard: '#8a7a6a' },
+    washer: { coat: '#6a7a9a', coatDark: '#4e5c7a', legs: '#4e5c7a', boots: '#3a2a2a', skin: '#e8b898', hat: 'scarf', hatCol: '#f0e4d0', robe: 1, apron: '#f4ece0' },
+    priest: { coat: '#1e1c24', coatDark: '#141218', legs: '#141218', boots: '#101014', skin: '#e8c0a0', hat: 'hat', hatCol: '#1e1c24', robe: 1 },
+    oldman: { coat: '#6a5a4a', coatDark: '#50443a', legs: '#4a4038', boots: '#2a2018', skin: '#e0b898', hat: 'beret', hatCol: '#2a2a3a', beard: '#d8d8d8', cane: 1 },
+    fiddler: { coat: '#8a3a2a', coatDark: '#6a2a1e', legs: '#3a3440', boots: '#2a2018', skin: '#e8c0a0', hat: 'straw', hatCol: '#e8d090', belt: '#f0c860' },
+    helene: { coat: '#b89ac8', coatDark: '#8a6a9a', legs: '#8a6a9a', boots: '#3a2a2a', skin: '#f4d0b8', hat: 'flowerhat', hatCol: '#5a4a3a', robe: 1, hair: '#5a3a24' },
   };
   // horses by their coats; the trumpeters of the cavalry rode greys
   const HORSES = {
@@ -70,7 +81,7 @@
 
   /** A person standing (or walking) with their feet at (x, y), facing right; flip the canvas to face left. */
   function drawPerson(c, L, t, moving, running, crouch = false, pose = null) {
-    if (pose === 'sit') crouch = true;
+    if (pose === 'sit' || pose === 'wash') crouch = true;
     const k = L.small ? 0.8 : 1;
     const legH = Math.round((crouch ? 3 : 8) * k), bodyH = Math.round((crouch ? 8 : 10) * k), w = Math.round((L.wide ? 8 : 6) * k);
     const ph = t * (running ? 16 : 10);
@@ -102,6 +113,7 @@
     if (L.belt) rect(c, -w / 2, top + bodyH - 4, w, 1, L.belt);
     if (L.sash) rect(c, -w / 2, top + bodyH - 4, w, 2, L.sash);
     if (L.scarf) rect(c, -w / 2 + 1, top, w - 1, 2, L.scarf);
+    if (L.apron) rect(c, -w / 2 + 1, top + 5, w - 2, bodyH - 3 + (L.robe ? legH : 0), L.apron);
     if (L.cuirass) { rect(c, -w / 2, top + 1, w, bodyH - 4, L.cuirass); rect(c, -w / 2 + 1, top + 1, 1, bodyH - 4, '#dfe3ec'); rect(c, -w / 2, top + bodyH - 3, w, 1, '#8a8e9a'); }
     if (L.epaulette) { rect(c, -w / 2 - 1, top, 2, 1, L.epaulette); rect(c, w / 2 - 1, top, 2, 1, L.epaulette); }
     // an arm: swinging opposite to the legs, raised as they talk, or holding the rifle up in front
@@ -117,6 +129,31 @@
       rect(c, 4, hy + 3, 3, 1, '#c8902e');
       rect(c, 9, hy, 2, 5, '#f0c050');
       rect(c, 10, hy + 1, 1, 3, '#fff0a8');
+    } else if (pose === 'wash') {
+      // scrubbing linen on the stone
+      const sc = Math.sin(t * 6) > 0 ? 0 : 2;
+      rect(c, 1 + sc, top + 4, 4, 2, L.coatDark);
+      rect(c, 4 + sc, top + 5, 2, 2, L.skin);
+      rect(c, 3, top + 7, 6, 2, '#f4f0e8');
+    } else if (pose === 'fish') {
+      // a rod out over the water, its line hanging down
+      rect(c, 1, top + 3, 3, 3, L.coatDark);
+      rect(c, 3, top + 5, 2, 2, L.skin);
+      for (let k = 0; k < 14; k++) rect(c, 4 + k, top + 5 - Math.round(k * 0.9), 1, 1, '#6a4a2a');
+      c.fillStyle = 'rgba(235,235,235,0.6)';
+      c.fillRect(17, top - 8, 0.5, 40);
+    } else if (pose === 'fiddle') {
+      // the fiddle under the chin, the bow sawing
+      const bow = Math.round(Math.sin(t * 8) * 2);
+      rect(c, 1, top + 1, 4, 2, '#6a3a1e');
+      rect(c, 4, top, 2, 3, '#8a4a24');
+      rect(c, -2 + bow, top + 3, 7, 1, '#e0d0b0');
+      rect(c, -1, top + 3, 2, 4, L.coatDark);
+    } else if (pose === 'wave') {
+      // an arm up, waving
+      const up = Math.sin(t * 9) > 0 ? 0 : 1;
+      rect(c, 2, top - 4 + up, 2, 6, L.coatDark);
+      rect(c, 2 + up, top - 6 + up, 2, 2, L.skin);
     } else if (pose === 'haul') {
       // hand over hand on the halyard
       const pull = Math.sin(t * 5) > 0 ? 0 : 2;
@@ -138,6 +175,7 @@
     }
     // the head, and whatever is on it
     rect(c, -2, hy, 5, 5, L.skin);
+    if (L.hair) rect(c, -3, hy, 2, 8, L.hair);
     rect(c, 2, hy + 2, 1, 1, '#2a1a14');
     if (L.beard) rect(c, -2, hy + 3, 5, 2, L.beard);
     const hc = L.hatCol;
@@ -149,6 +187,12 @@
     else if (L.hat === 'bun') { rect(c, -3, hy - 1, 6, 3, hc); rect(c, -4, hy - 3, 3, 3, hc); }
     else if (L.hat === 'jingasa') { rect(c, -5, hy - 1, 11, 1, hc); rect(c, -3, hy - 2, 7, 1, hc); }
     else if (L.hat === 'fez') { rect(c, -1, hy - 3, 4, 3, hc); rect(c, -2, hy - 1, 1, 2, '#1a2a5a'); }
+    else if (L.hat === 'bonnet') { rect(c, -3, hy - 2, 6, 3, hc); rect(c, -3, hy + 1, 1, 3, hc); rect(c, 2, hy - 1, 2, 1, hc); rect(c, -2, hy + 1, 5, 1, '#c85a6a'); }
+    else if (L.hat === 'scarf') { rect(c, -3, hy - 2, 6, 3, hc); rect(c, -3, hy, 2, 4, hc); }
+    else if (L.hat === 'toque') { rect(c, -2, hy - 6, 5, 6, hc); rect(c, -3, hy - 7, 7, 2, hc); rect(c, -2, hy - 1, 5, 1, '#d8d0c0'); }
+    else if (L.hat === 'straw') { rect(c, -5, hy - 1, 11, 1, hc); rect(c, -2, hy - 3, 5, 2, hc); rect(c, -2, hy - 2, 5, 1, '#8a3a2a'); }
+    else if (L.hat === 'beret') { rect(c, -3, hy - 2, 6, 2, hc); rect(c, 0, hy - 3, 1, 1, hc); }
+    else if (L.hat === 'flowerhat') { rect(c, -5, hy - 1, 11, 1, hc); rect(c, -2, hy - 3, 6, 2, hc); rect(c, -1, hy - 4, 2, 1, '#f08aa8'); rect(c, 1, hy - 4, 2, 1, '#e8607a'); rect(c, 3, hy - 3, 1, 1, '#f08aa8'); }
     else if (L.hat === 'helmet') {
       // the steel helmet, its brass crest, the black mane streaming behind and the plume
       rect(c, -2, hy - 2, 5, 3, hc); rect(c, -1, hy - 2, 2, 1, '#dfe3ec');
@@ -159,6 +203,7 @@
     else rect(c, -2, hy - 1, 5, 2, hc);
     if (L.sword) rect(c, -w / 2 - 1, top + bodyH - 3, 8, 1, '#8a8a90');
     if (L.drum) { rect(c, 2, top + 5, 5, 5, '#b83a3a'); rect(c, 2, top + 5, 5, 1, '#e8dcc8'); }
+    if (L.cane) rect(c, 4, top + 6, 1, legH + bodyH - 6, '#5a3a24');
     if ((L.bugle && pose !== 'bugle') || L.trumpet) { rect(c, -4, top + 5, 2, 2, '#f0c050'); rect(c, -5, top + 6, 1, 2, '#c8902e'); }
     if (L.lantern) { rect(c, 4, top + 4, 1, 4, '#3a2a22'); rect(c, 3, top + 8, 3, 4, '#ffcf72'); }
   }
@@ -208,6 +253,7 @@
       else if (wx.kind === 'ash' || wx.kind === 'petals') { p.y += dt * 9 * p.v; p.x += Math.sin(t * 0.8 + p.p) * dt * 10 - camDx * 0.8; }
       else if (wx.kind === 'embers') { p.y -= dt * 14 * p.v; p.x += Math.sin(t + p.p) * dt * 8 - camDx; }
       else if (wx.kind === 'fireflies') { p.x += Math.sin(t * 0.7 + p.p) * dt * 8 - camDx * 0.9; p.y += Math.cos(t * 0.9 + p.p) * dt * 5; }
+      else if (wx.kind === 'breeze') { p.x += (14 + Math.sin(t * 0.9 + p.p) * 8) * dt * p.v - camDx * 0.9; p.y += Math.sin(t * 1.3 + p.p * 2) * dt * 8 + dt * 2; }
       else { p.y -= dt * 3 * p.v; p.x += Math.sin(t * 0.5 + p.p) * dt * 4 - camDx * 0.6; } // motes
       if (p.y > WY + 4) { p.y = -4; p.x = Math.random() * LW; }
       if (p.y < -6) { p.y = WY; p.x = Math.random() * LW; }
@@ -219,6 +265,13 @@
       else if (wx.kind === 'petals') { c.fillStyle = 'rgba(255,190,210,0.9)'; c.fillRect(p.x * SS, p.y * SS, SS * 2, SS); }
       else if (wx.kind === 'embers') { c.fillStyle = `rgba(255,${130 + tw * 80},60,${0.5 + tw * 0.5})`; c.fillRect(p.x * SS, p.y * SS, SS, SS); }
       else if (wx.kind === 'fireflies') { c.fillStyle = `rgba(220,255,140,${0.25 + tw * 0.75})`; c.fillRect(p.x * SS, p.y * SS, SS, SS); }
+      else if (wx.kind === 'breeze') {
+        // petals of every colour, and the down of dandelion seeds
+        const k = Math.floor(p.p * 10) % 5;
+        c.fillStyle = ['#ffffff', '#ffd0dc', '#fff4a8', '#f8f8f0', '#e8c0ff'][k];
+        c.fillRect(p.x * SS, p.y * SS, k === 0 || k === 3 ? SS : SS * 2, SS);
+        if (k === 0 || k === 3) { c.fillStyle = 'rgba(255,255,255,0.45)'; c.fillRect((p.x - 1) * SS, (p.y - 1) * SS, SS, SS); }
+      }
       else { c.fillStyle = `rgba(255,240,200,${0.2 + tw * 0.4})`; c.fillRect(p.x * SS, p.y * SS, SS, SS); }
     }
   }
@@ -301,6 +354,17 @@
       if (def.cavalry) this.cavalry = { n: 4, gap: 26, speed: 40, pause: 20, y: GY - 3, ...def.cavalry, dir: -1, x: def.cavalry.from, wait: def.cavalry.first == null ? 10 : def.cavalry.first, step: 0 };
       if (def.colours) this.colours = { delay: 1.5, dur: 10.4, hold: 3, ...def.colours, t: 0, stage: 0, called: false };
       this.hum = { drone: rnd(6, 12), band: def.band ? def.band.first || 30 : 0 };
+      // a river town: boats about their trade, fish leaping, ducks, the sun's glitter, a mill wheel
+      // turning, a fountain, and flocks of birds going over
+      this.boats = (def.boats || []).map((b) => ({ ...b, ph: Math.random() * 6 }));
+      this.fish = def.fish ? { ...def.fish, list: [], wait: 1.5 } : null;
+      this.glitter = def.glitter || null;
+      this.ducks = (def.ducks || []).map((d) => ({ ...d, x: d.x0, dir: 1, wait: 0 }));
+      this.wheels = def.wheels || [];
+      this.fountains = (def.fountains || []).map((f) => ({ ...f, drops: [], acc: 0 }));
+      this.flockDef = def.flocks || null;
+      this.flocks = [];
+      if (this.flockDef) this.flockWait = this.flockDef.first == null ? 3 : this.flockDef.first;
     }
 
     inCover(x = this.x) { return this.cover.some((cv) => x >= cv.x0 && x <= cv.x1); }
@@ -317,6 +381,7 @@
       // what moves in among the painted layers, each at its own distance: airships and balloons, trains
       this.slots = this.sky.map((a) => ({ z: a.z == null ? 0.1 : a.z, draw: (c, cam) => this.drawSkyItem(c, a, cam) }));
       if (this.train) this.slots.push({ z: this.train.depth + 0.001, draw: (c, cam) => this.drawTrain(c, cam) });
+      if (this.flockDef) this.slots.push({ z: 0.09, draw: (c) => this.drawFlocks(c) });
       this.slots.sort((a, b) => a.z - b.z);
       // the band above the waterline, flipped, for the reflection
       this.mirror = document.createElement('canvas');
@@ -356,6 +421,7 @@
         h('div.wk-goal-go', this.def.chase ? 'It starts now!' : 'Start walking to begin'));
       this.el = h('div.overlay.walk', this.canvas, h('div.wk-vignette'), this.bubbles, this.prompt, this.goalCard, this.hint, this.purse, this.notices, help, this.alertEl, this.chaseEl, this.hurtEl, this.say, skip, h('div.wk-flash'), h('div.wk-fade'));
       this.el.style.setProperty('--wk-accent', this.def.accent || '255,214,140');
+      if (this.def.bright) this.el.classList.add('wk-bright');
       this.say.addEventListener('click', (e) => { e.stopPropagation(); this.use(); });
       return new Promise((resolve) => {
         this.resolve = resolve;
@@ -787,6 +853,45 @@
           if (d < 240) { cv.step += dt * 4.5; if (cv.step > 1) { cv.step -= 1; this.audio.fx('hoof', { volume: 0.45 * (1 - d / 240) }); } }
         }
       }
+      // the river and the town going about their day
+      for (const b of this.boats) {
+        b.x += (b.dir || 1) * (b.speed || 0) * dt;
+        if (b.x > this.W + 120) b.x -= this.W + 240; else if (b.x < -120) b.x += this.W + 240;
+      }
+      const fs = this.fish;
+      if (fs) {
+        fs.wait -= dt;
+        if (fs.wait <= 0) {
+          fs.wait = rnd(0.6, 1.6) / (fs.rate || 1);
+          fs.list.push({ x: this.camX + rnd(30, LW - 30), y: rnd(fs.y0 || 220, fs.y1 || 252), t: 0, dur: rnd(0.7, 1), h: rnd(8, 16), dir: Math.random() < 0.5 ? -1 : 1 });
+        }
+        for (const f of fs.list) f.t += dt;
+        fs.list = fs.list.filter((f) => f.t < f.dur + 0.8);
+      }
+      for (const d of this.ducks) {
+        if (d.wait > 0) { d.wait -= dt; continue; }
+        d.x += d.dir * (d.speed || 5) * dt;
+        if ((d.dir > 0 && d.x > d.x1) || (d.dir < 0 && d.x < d.x0)) { d.dir *= -1; d.wait = rnd(1, 3); }
+      }
+      for (const f of this.fountains) {
+        f.acc += dt * 30;
+        while (f.acc > 1) { f.acc -= 1; f.drops.push({ x: f.x + rnd(-0.5, 0.5), y: f.y, vx: rnd(-7, 7), vy: -rnd(10, 16) }); }
+        for (const p of f.drops) { p.x += p.vx * dt; p.vy += 38 * dt; p.y += p.vy * dt; }
+        f.drops = f.drops.filter((p) => p.y < f.basin);
+      }
+      if (this.flockDef) {
+        const fd = this.flockDef;
+        this.flockWait -= dt;
+        if (this.flockWait <= 0) {
+          this.flockWait = rnd(fd.every ? fd.every[0] : 14, fd.every ? fd.every[1] : 26);
+          const n = Math.round(rnd(5, 10)), dir = Math.random() < 0.7 ? 1 : -1, y = rnd(fd.y ? fd.y[0] : 18, fd.y ? fd.y[1] : 90);
+          const birds = [];
+          for (let i = 0; i < n; i++) { const k = Math.ceil(i / 2); birds.push({ dx: -k * 7 * dir + rnd(-2, 2), dy: k * 3.5 * (i % 2 ? 1 : 0.8) + rnd(-1.5, 1.5), ph: rnd(0, 6) }); }
+          this.flocks.push({ x: dir > 0 ? -60 : LW + 60, y, dir, v: rnd(26, 38), birds });
+        }
+        for (const f of this.flocks) f.x += f.dir * f.v * dt - (this.camDx || 0) * 0.15;
+        this.flocks = this.flocks.filter((f) => f.x > -150 && f.x < LW + 150);
+      }
       // now and then an airship's engines overhead, and the band practising across the camp
       if (!quiet) {
         this.hum.drone -= dt;
@@ -856,6 +961,7 @@
       this.drawPuffs(c, cam);
       for (const f of this.flags) this.drawFlag(c, f, cam);
       for (const f of this.fires) this.drawFire(c, f, cam);
+      this.drawFountains(c, cam);
       // the camp's people, then the things along the way
       this.drawLife(c, cam);
       for (const th of this.things) this.thing(c, th, cam);
@@ -886,6 +992,7 @@
       }
       // the water: everything above it, upside down, trembling
       this.water(c);
+      this.drawWaterLife(c, cam);
       for (const l of front) this.layer(c, l, cam);
       if (this.weather && !this.reduce) stepWeather(c, this.weather, dt, this.t, this.camDx || 0);
       this.placeBubbles();
@@ -1228,6 +1335,135 @@
       }
     }
 
+    /** Birds going over in a loose V, their wings beating. */
+    drawFlocks(c) {
+      c.fillStyle = '#26303e';
+      for (const f of this.flocks) for (const b of f.birds) {
+        const x = f.x + b.dx, y = f.y + b.dy + Math.sin(this.t * 1.3 + b.ph) * 1.2;
+        const fr = Math.floor(this.t * 9 + b.ph) % 3;
+        const P = (dx, dy) => c.fillRect(Math.round((x + dx) * SS), Math.round((y + dy) * SS), SS, SS);
+        P(0, 0);
+        const wy = fr === 0 ? -1 : fr === 1 ? 0 : 1;
+        P(-1, wy); P(-2, wy * 2 || 0); P(1, wy); P(2, wy * 2 || 0);
+      }
+    }
+
+    drawFountains(c, cam) {
+      c.fillStyle = 'rgba(210,236,255,0.9)';
+      for (const f of this.fountains) {
+        if (f.x - cam < -30 || f.x - cam > LW + 30) continue;
+        for (const p of f.drops) c.fillRect(Math.round((p.x - cam) * SS), Math.round(p.y * SS), SS, SS);
+      }
+    }
+
+    /** What lives on the water: the sun's glitter, ducks, boats about their trade, fish leaping, the mill wheel. */
+    drawWaterLife(c, cam) {
+      const R = (x, y, w, hh, col) => { c.fillStyle = col; c.fillRect(Math.round(x * SS), Math.round(y * SS), Math.max(1, Math.round(w * SS)), Math.max(1, Math.round(hh * SS))); };
+      const gl = this.glitter;
+      if (gl && !this.reduce) {
+        // the sun's road on the water, broken into sparkles that come and go
+        for (let i = 0; i < (gl.n || 60); i++) {
+          const seed = i * 97.13, yf = ((i * 37) % 100) / 100, y = WY + 2 + yf * (LH - WY - 4);
+          const x = (gl.x || 80) + Math.sin(seed) * (8 + yf * 60);
+          const tw = Math.sin(this.t * (2 + (i % 5)) + seed);
+          if (tw < 0.2) continue;
+          c.globalAlpha = Math.min(1, tw);
+          R(x - 1, y, 2 + (i % 3), 0.5, i % 4 ? '#ffffff' : '#fff2c0');
+        }
+        c.globalAlpha = 1;
+      }
+      for (const d of this.ducks) this.drawDucks(c, d, cam, R);
+      for (const b of this.boats) this.drawBoat(c, b, cam);
+      if (this.fish) for (const f of this.fish.list) this.drawFish(c, f, cam, R);
+      for (const w of this.wheels) this.drawWheel(c, w, cam);
+    }
+
+    drawBoat(c, b, cam) {
+      const s = b.s || 1, dir = b.dir || 1;
+      const x0 = b.x - cam, y = b.y + Math.sin(this.t * 1.4 + b.ph) * 0.6;
+      if (x0 < -90 * s || x0 > LW + 90 * s) return;
+      const P = (px, py, w, hh, col) => { c.fillStyle = col; c.fillRect(Math.round((x0 + (dir > 0 ? px : -px - w) * s) * SS), Math.round((y + py * s) * SS), Math.max(1, Math.round(w * s * SS)), Math.max(1, Math.round(hh * s * SS))); };
+      // its reflection, dark and broken by the ripples, then the boat
+      const len = b.kind === 'barge' ? 76 : b.kind === 'rowboat' ? 24 : 50;
+      for (let k = 0; k < 4; k++) { c.globalAlpha = 0.3 - k * 0.06; P(-len / 2 + Math.sin(this.t * 3 + k) * 1.5, 1.5 + k * 1.3, len, 1, '#1e2a3a'); }
+      c.globalAlpha = 1;
+      if (b.kind === 'barge') {
+        P(-38, -6, 76, 6, '#2e3a2e'); P(-38, -6, 76, 1.2, '#c83a3a'); P(-36, 0, 72, 1.5, '#1e2420');
+        P(-30, -12, 40, 6, '#c8b48a'); for (let k = -30; k < 10; k += 8) P(k, -12, 1, 6, '#a8946a');
+        P(18, -14, 14, 8, '#f0ece2'); P(20, -12, 3, 3, '#ffd88a'); P(26, -12, 3, 3, '#3a4a62'); P(17, -15, 16, 1.5, '#8a3a2a');
+        P(-36, -18, 1, 12, '#4a3424'); P(-35, -18, 5, 3, '#2e4a8a');
+        P(34, -16, 3, 7, '#3a4a6a'); P(34, -19, 3, 3, '#e8c0a0'); P(33, -20, 5, 1, '#e0c878');
+        for (let k = 0; k < 16; k++) P(38 - k * 0.3, -18 + k * 1.3, 1, 1, '#6a4a2a');
+      } else if (b.kind === 'rowboat') {
+        P(-12, -4, 24, 4, '#8a5a34'); P(-12, -4, 24, 1, '#b07a4a'); P(-10, 0, 20, 1, '#5a3a24');
+        P(-2, -11, 4, 7, '#5a6a4a'); P(-2, -14, 4, 3, '#d8a888'); P(-4, -15, 8, 1, '#e0c878');
+        for (let k = 0; k < 14; k++) P(2 + k, -10 - k * 0.8, 1, 1, '#6a4a2a');
+        for (let k = 0; k < 14; k++) P(16, -21 + k * 1.5, 0.5, 1, 'rgba(230,230,230,0.7)');
+      } else {
+        // a gabare: barrels in the hold, the square sail full of the breeze, the helmsman at the sweep
+        P(-24, -5, 50, 5, '#6a4a30'); P(-24, -5, 50, 1.5, '#9a7048'); P(-20, 0, 42, 1.5, '#4a3020');
+        for (let k = -16; k < 12; k += 5) { P(k, -9, 4, 4, '#8a5a34'); P(k, -9, 4, 1, '#5a3a24'); }
+        P(2, -38, 1.2, 33, '#4a3424');
+        const bil = Math.sin(this.t * 1.6 + b.ph);
+        P(-9, -35, 23 + bil, 22, '#f4ead6'); P(-9, -28, 23 + bil, 3, '#c84a3a'); P(-9, -35, 1, 22, '#d8cbb0');
+        P(-24, -12, 1, 8, '#4a3424'); P(-26, -13, 3, 2, '#2e4a8a');
+        P(-30, -3, 10, 1, '#6a4a2a');
+        P(-22, -12, 3, 7, '#6a3a2a'); P(-22, -15, 3, 3, '#e0b898'); P(-23, -16, 5, 1, '#3a3040');
+      }
+    }
+
+    drawFish(c, f, cam, R) {
+      const x0 = f.x - cam, p = f.t / f.dur;
+      if (x0 < -20 || x0 > LW + 20) return;
+      if (p <= 1) {
+        // a silver fish, arcing out and back, the light catching its side
+        const x = x0 + f.dir * p * 14, y = f.y - Math.sin(Math.PI * p) * f.h, tilt = Math.cos(Math.PI * p);
+        R(x - 2, y - 1 - tilt, 4, 2, '#d8e4f0');
+        R(x - 2, y - 1 - tilt, 4, 0.8, '#5a6a80');
+        R(x - f.dir * 3 - 0.5, y - 0.5 + tilt, 2, 2, '#9aaabc');
+        if (Math.sin(this.t * 30) > 0) R(x, y - 1, 1, 1, '#ffffff');
+      }
+      // rings and a spray of drops where it leaves the water and where it goes back in
+      for (const [sx, st] of [[x0, f.t], [x0 + f.dir * 14, f.t - f.dur]]) {
+        if (st < 0 || st > 0.8) continue;
+        const k = st / 0.8, rx = 2 + k * 8, ry = 0.6 + k * 1.6;
+        c.globalAlpha = 0.7 * (1 - k);
+        for (let i = 0; i < 14; i++) { const a = (i / 14) * Math.PI * 2; R(sx + Math.cos(a) * rx, f.y + Math.sin(a) * ry, 1, 0.5, '#ffffff'); }
+        if (st < 0.3) for (let i = 0; i < 4; i++) R(sx + (i - 1.5) * 2, f.y - st * 22 * (1 + (i % 2)) + st * st * 60, 0.5, 0.5, '#ffffff');
+        c.globalAlpha = 1;
+      }
+    }
+
+    drawDucks(c, d, cam, R) {
+      for (let i = 0; i <= (d.n || 4); i++) {
+        const f = d.dir, x = d.x - f * (i * 6 + (i ? 3 : 0)) - cam, y = d.y + Math.sin(this.t * 2 + i) * 0.4;
+        if (x < -10 || x > LW + 10) continue;
+        if (i === 0) {
+          R(x - 3, y - 2, 6, 2.5, '#8a6a4a'); R(x - 3, y - 2, 6, 0.8, '#a8886a');
+          R(x + (f > 0 ? 2 : -4), y - 4.5, 2, 2.5, '#2e6a3a'); R(x + (f > 0 ? 4 : -5), y - 3.5, 1.2, 0.8, '#f0b030');
+          R(x + (f > 0 ? -4 : 3), y - 2.5, 1.2, 1, '#6a4a30');
+        } else { R(x - 1.5, y - 1.5, 3, 1.8, '#f4d860'); R(x + (f > 0 ? 1 : -2), y - 2.6, 1.2, 1.2, '#f4d860'); }
+        c.globalAlpha = 0.5; R(x - f * 5, y + 0.5, 3, 0.5, '#ffffff'); c.globalAlpha = 1;
+      }
+    }
+
+    /** The mill wheel, turning with the river, spilling water from its paddles. */
+    drawWheel(c, w, cam) {
+      const x = w.x - cam;
+      if (x < -40 || x > LW + 40) return;
+      const r = w.r || 14, a0 = this.t * (w.speed || 0.8);
+      const D = (px_, py, sz, col) => { c.fillStyle = col; c.fillRect(Math.round((px_ - sz / 2) * SS), Math.round((py - sz / 2) * SS), Math.round(sz * SS), Math.round(sz * SS)); };
+      for (let i = 0; i < 56; i++) { const a = (i / 56) * Math.PI * 2; D(x + Math.cos(a) * r, w.y + Math.sin(a) * r, 1.5, '#6a4a30'); }
+      for (let k = 0; k < 10; k++) {
+        const a = a0 + (k / 10) * Math.PI * 2;
+        for (let d = 2; d < r; d += 1) D(x + Math.cos(a) * d, w.y + Math.sin(a) * d, 1, '#8a6a44');
+        const px_ = x + Math.cos(a) * (r + 1.5), py = w.y + Math.sin(a) * (r + 1.5);
+        D(px_, py, 3, '#5a3a24');
+        if (py > WY - 1 && !this.reduce) D(px_ + rnd(-2, 2), WY + rnd(-3, 0), 1, 'rgba(255,255,255,0.8)');
+      }
+      D(x, w.y, 4, '#3a2a1e');
+    }
+
     /** Somewhere to hide: a charred wall, a heap of rubble, sandbags, an overturned cart. */
     drawCover(c, cv, cam) {
       const x0 = cv.x0 - cam, x1 = cv.x1 - cam;
@@ -1368,7 +1604,7 @@
         const face = th.facing || (this.x > th.x ? 1 : -1);
         c.scale(SS * face, SS);
         if (th.ride) drawHorse(c, t, false, false, LOOKS[th.look]);
-        else drawPerson(c, LOOKS[th.look], t, !!th.pace, false);
+        else drawPerson(c, LOOKS[th.look], t, !!th.pace, false, false, th.nearPose && Math.abs(this.x - th.x) < (th.nearAt || 100) ? th.nearPose : th.pose || null);
         c.restore();
       }
       if (th.used && th.kind !== 'talk' && th.kind !== 'look') return;

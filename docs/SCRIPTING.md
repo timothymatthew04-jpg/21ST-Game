@@ -472,7 +472,11 @@ chimney and camp-fire smoke, fires, airships and balloons in the sky (one of the
 behind the clouds), the colours hoisted to a bugle call as the walk begins, a train crossing a
 viaduct now and then, cuirassiers riding through, and a band heard across the camp. None of it
 stops him; story/walks.js describes each (`crowd`, `marchers`, `drill`, `flags`, `smoke`,
-`fires`, `airships`, `colours`, `train`, `cavalry`, `band`).
+`fires`, `airships`, `colours`, `train`, `cavalry`, `band`). Lavilledieu, the walk home, has a
+river town's life too: boats about their trade, fish leaping, the sun glittering on the water,
+ducks, flocks of birds, the mill wheel turning, a fountain, and petals on the breeze (`boats`,
+`fish`, `glitter`, `ducks`, `flocks`, `wheels`, `fountains`, weather `breeze`); it ends with
+Hélène in her garden, and the story goes on from there.
 
 Walks never replace the rest: choices, cutscenes and minigames happen around them as before. The
 game menu (Esc) pauses a walk, and saving during one saves just before it. A quiet walk is passed
@@ -614,6 +618,8 @@ lantern or the pond at any window shape; `#colour` is optional everywhere.
 | `splashes` | y,height [, rate] | raindrops bursting on the ground |
 | `herd` | y,count,speed [, scale, dir, spread] | wild horses galloping across in a loose group, round and round |
 | `rider` | y,x0,x1,seconds [, scale, delay] | Hervé at a gallop on a pale horse, from x0 to x1 |
+| `fish` | x,y,w,h [, rate] | fish leaping out of the water and back, with rings and drops |
+| `flock` | every [, y0, y1] | flocks of birds going over in loose Vs, every so many seconds |
 | `army` | y,dir,speed,count,type [, scale, x0, x1, fire] | soldiers marching in ranks: type 0 the imperial army, 1 samurai with banners, 2 French infantry; `fire` makes the front rank let off volleys |
 | `airship` | y,dir,speed [, scale, x] | a steam airship crossing the sky (tricolour rudder, turning propeller, a trail of smoke), wrapping round |
 | `balloon` | x,y [, scale, tether, colours] | an observation balloon bobbing on its tether (to `tether`, a height); colours 0 red and cream, 1 blue and cream |

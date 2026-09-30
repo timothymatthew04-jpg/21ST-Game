@@ -3750,3 +3750,5 @@ input[type='range']::-moz-range-thumb { width: 18px; height: 24px; background: v
 .wk-goal-go { margin-top: 6px; font-family: var(--text-font); font-size: 13px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: #ffe2a0; animation: wk-goal-go 1.4s ease-in-out infinite; }
 @keyframes wk-goal-go { 0%, 100% { opacity: 0.55; } 50% { opacity: 1; } }
 .overlay.walk:has(.wk-goal:not(.gone)) .wk-help { opacity: 0; animation: none; }
+/* a sunny place: the edges barely darken */
+.overlay.walk.wk-bright .wk-vignette { opacity: 0.35; }

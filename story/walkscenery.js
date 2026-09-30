@@ -312,6 +312,102 @@ window.VN_WALKSCENERY = {
    }
   ]
  },
+ "lavilledieu": {
+  "w": 1920,
+  "h": 270,
+  "layers": [
+   {
+    "id": "sky",
+    "x": 0,
+    "y": 0,
+    "w": 480,
+    "h": 270,
+    "depth": 0,
+    "anim": null,
+    "src": "assets/walks/lavilledieu/sky.png"
+   },
+   {
+    "id": "clouds_high",
+    "x": 0,
+    "y": 6,
+    "w": 1920,
+    "h": 51,
+    "depth": 0.02,
+    "anim": {
+     "type": "drift",
+     "t": 700
+    },
+    "src": "assets/walks/lavilledieu/clouds_high.png"
+   },
+   {
+    "id": "clouds",
+    "x": 0,
+    "y": 23,
+    "w": 1920,
+    "h": 75,
+    "depth": 0.05,
+    "anim": {
+     "type": "drift",
+     "t": 420
+    },
+    "src": "assets/walks/lavilledieu/clouds.png"
+   },
+   {
+    "id": "far",
+    "x": 0,
+    "y": 120,
+    "w": 724,
+    "h": 54,
+    "depth": 0.1,
+    "anim": null,
+    "src": "assets/walks/lavilledieu/far.png"
+   },
+   {
+    "id": "hill",
+    "x": 260,
+    "y": 0,
+    "w": 640,
+    "h": 189,
+    "depth": 0.22,
+    "anim": null,
+    "src": "assets/walks/lavilledieu/hill.png"
+   },
+   {
+    "id": "mid",
+    "x": 0,
+    "y": 134,
+    "w": 1267,
+    "h": 63,
+    "depth": 0.5,
+    "anim": null,
+    "src": "assets/walks/lavilledieu/mid.png"
+   },
+   {
+    "id": "ground",
+    "x": 0,
+    "y": 31,
+    "w": 1920,
+    "h": 181,
+    "depth": 1,
+    "anim": null,
+    "src": "assets/walks/lavilledieu/ground.png"
+   },
+   {
+    "id": "front",
+    "x": 9,
+    "y": 233,
+    "w": 1909,
+    "h": 37,
+    "depth": 1.3,
+    "anim": {
+     "type": "sway",
+     "a": 2.4,
+     "t": 3.8
+    },
+    "src": "assets/walks/lavilledieu/front.png"
+   }
+  ]
+ },
  "ruins": {
   "w": 1440,
   "h": 270,

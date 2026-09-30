@@ -2359,8 +2359,8 @@ window.VN_SCENERY = {
  "lavilledieu": {
   "flat": "assets/scenes/lavilledieu/flat.png",
   "vignette": [
-   0.3,
-   "20,30,20"
+   0.18,
+   "20,40,60"
   ],
   "layers": [
    {
@@ -2374,122 +2374,128 @@ window.VN_SCENERY = {
     "src": "assets/scenes/lavilledieu/sky.png"
    },
    {
-    "id": "clouds",
+    "id": "clouds_high",
     "x": 0,
-    "y": 1,
+    "y": 9,
     "w": 480,
-    "h": 78,
-    "depth": 0.05,
+    "h": 53,
+    "depth": 0.02,
     "anim": {
      "type": "drift",
-     "t": 260
+     "t": 700
+    },
+    "src": "assets/scenes/lavilledieu/clouds_high.png"
+   },
+   {
+    "id": "clouds",
+    "x": 0,
+    "y": 29,
+    "w": 480,
+    "h": 57,
+    "depth": 0.04,
+    "anim": {
+     "type": "drift",
+     "t": 420
     },
     "src": "assets/scenes/lavilledieu/clouds.png"
    },
    {
     "id": "far",
     "x": 0,
-    "y": 102,
+    "y": 116,
     "w": 480,
-    "h": 45,
-    "depth": 0.12,
+    "h": 35,
+    "depth": 0.06,
     "anim": null,
     "src": "assets/scenes/lavilledieu/far.png"
    },
    {
-    "id": "land",
-    "x": 0,
-    "y": 99,
-    "w": 480,
-    "h": 171,
-    "depth": 0.35,
+    "id": "hill",
+    "x": 100,
+    "y": 0,
+    "w": 380,
+    "h": 173,
+    "depth": 0.12,
     "anim": null,
-    "src": "assets/scenes/lavilledieu/land.png"
+    "src": "assets/scenes/lavilledieu/hill.png"
    },
    {
-    "id": "poplar0",
-    "x": 231,
-    "y": 125,
-    "w": 14,
-    "h": 51,
-    "depth": 0.35,
-    "anim": {
-     "type": "sway",
-     "a": 1.4,
-     "t": 5.710159190930426
-    },
-    "src": "assets/scenes/lavilledieu/poplar0.png"
-   },
-   {
-    "id": "poplar1",
-    "x": 220,
-    "y": 136,
-    "w": 16,
-    "h": 60,
-    "depth": 0.35,
-    "anim": {
-     "type": "sway",
-     "a": 1.4,
-     "t": 5.198054536245763
-    },
-    "src": "assets/scenes/lavilledieu/poplar1.png"
-   },
-   {
-    "id": "poplar2",
-    "x": 285,
-    "y": 115,
-    "w": 10,
-    "h": 35,
-    "depth": 0.35,
-    "anim": {
-     "type": "sway",
-     "a": 1.4,
-     "t": 5.5614906759001315
-    },
-    "src": "assets/scenes/lavilledieu/poplar2.png"
-   },
-   {
-    "id": "poplar3",
-    "x": 201,
-    "y": 153,
-    "w": 21,
-    "h": 73,
-    "depth": 0.35,
-    "anim": {
-     "type": "sway",
-     "a": 1.4,
-     "t": 5.312012771610171
-    },
-    "src": "assets/scenes/lavilledieu/poplar3.png"
+    "id": "town",
+    "x": 0,
+    "y": 82,
+    "w": 480,
+    "h": 114,
+    "depth": 0.2,
+    "anim": null,
+    "src": "assets/scenes/lavilledieu/town.png"
    },
    {
     "id": "wheel",
-    "x": 287,
-    "y": 197,
+    "x": 121,
+    "y": 173,
     "w": 31,
-    "h": 30,
-    "depth": 0.35,
+    "h": 31,
+    "depth": 0.2,
     "anim": {
      "type": "spin",
-     "t": 14,
+     "t": 7,
      "ox": 0.5,
      "oy": 0.5
     },
     "src": "assets/scenes/lavilledieu/wheel.png"
    },
    {
-    "id": "grass",
+    "id": "river",
     "x": 0,
-    "y": 243,
-    "w": 219,
-    "h": 27,
+    "y": 196,
+    "w": 480,
+    "h": 50,
+    "depth": 0.3,
+    "anim": null,
+    "src": "assets/scenes/lavilledieu/river.png"
+   },
+   {
+    "id": "boat250",
+    "x": 228,
+    "y": 178,
+    "w": 46,
+    "h": 38,
+    "depth": 0.32,
+    "anim": {
+     "type": "bob",
+     "a": 0.8,
+     "t": 4.4
+    },
+    "src": "assets/scenes/lavilledieu/boat250.png"
+   },
+   {
+    "id": "boat400",
+    "x": 383,
+    "y": 214,
+    "w": 36,
+    "h": 14,
+    "depth": 0.32,
+    "anim": {
+     "type": "bob",
+     "a": 0.8,
+     "t": 5.2
+    },
+    "src": "assets/scenes/lavilledieu/boat400.png"
+   },
+   {
+    "id": "bank",
+    "x": 0,
+    "y": 232,
+    "w": 480,
+    "h": 38,
     "depth": 0.6,
     "anim": {
      "type": "sway",
-     "a": 5,
-     "t": 3.8
+     "a": 1.2,
+     "t": 4.6,
+     "oy": 1
     },
-    "src": "assets/scenes/lavilledieu/grass.png"
+    "src": "assets/scenes/lavilledieu/bank.png"
    }
   ]
  },

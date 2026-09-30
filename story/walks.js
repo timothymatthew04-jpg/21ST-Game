@@ -50,8 +50,20 @@
  *    cavalry:  { from, to, y, speed, gap, first, pause, riders: [{ look, horse }] }  horsemen riding
  *              the length of the walk and back (horses: bay, black, grey)
  *    band:     { first, volume }  a band practising somewhere, heard now and then
+ *  A river town has more (Lavilledieu):
+ *    boats:    [{ kind: 'gabare' | 'barge' | 'rowboat', x, y, speed, dir, s }]  on the water, round and round
+ *    fish:     { rate, y0, y1 }  fish leaping out of the water, rings and drops where they go in
+ *    glitter:  { x, n }  the sun's sparkle on the water, under the sun at x on the screen
+ *    flocks:   { first, every: [min, max], y: [top, bottom] }  birds going over in loose Vs
+ *    ducks:    [{ x0, x1, y, n, speed }]  a duck and her ducklings paddling to and fro
+ *    wheels:   [{ x, y, r, speed }]  a mill wheel turning in the river
+ *    fountains: [{ x, y, basin }]  water thrown up and falling back
+ *    bright:   true for a sunny place (the edges barely darken)
+ *  A thing can stand in a pose, and change it when Hervé comes near: { pose, nearPose, nearAt }.
  *  Looks for the French army: soldier, rifleman (a rifle on the shoulder), officer, gunner, zouave,
- *  bugler, and the cavalry's cuirassier, cuirassierOfficer and trumpeter.
+ *  bugler, and the cavalry's cuirassier, cuirassierOfficer and trumpeter. And the town's: woman,
+ *  lady, girl, baker, fisherman, washer, priest, oldman, fiddler, helene (poses: wash, fish,
+ *  fiddle, wave).
  * ============================================================================
  */
 window.VN_WALKS = {
@@ -112,6 +124,48 @@ window.VN_WALKS = {
       { x: 1110, kind: 'talk', look: 'soldier', label: 'A sentry', lines: [['Sentry', 'Rider on the north road, Joncour. Says he\'s here for you.']] },
       { x: 1372, kind: 'look', label: 'The signpost', lines: ['LAVILLEDIEU — 3 DAYS. I read it every morning. It never got any shorter.'] },
       { x: 1405, kind: 'goal', look: 'baldabiou', ride: true, facing: -1, label: 'The rider', verb: 'Meet', lines: ['A rider was coming up the road at a gallop. I knew the hat before I knew the face.'] },
+    ],
+  },
+
+  // ---------------------------------------------------------------- home: Lavilledieu, on a sunny day
+  lavilledieu: {
+    title: 'Lavilledieu', region: 'Home · The south of France', hero: 'traveller', start: 40, weather: 'breeze', weatherCount: 46, accent: '255,226,160', bright: true,
+    water: ['rgba(120,184,230,0.34)', 'rgba(52,108,160,0.72)'],
+    hint: 'Walk home to Hélène →',
+    // the river's trade and its life: nothing here stops Hervé, it is only there to be seen
+    boats: [
+      { kind: 'gabare', x: 300, y: 228, speed: 7, dir: 1 },
+      { kind: 'barge', x: 1300, y: 242, speed: 4, dir: -1 },
+      { kind: 'rowboat', x: 960, y: 236, speed: 0, dir: -1 },
+      { kind: 'gabare', x: 1760, y: 250, speed: 5, dir: -1, s: 1.15 },
+    ],
+    fish: { rate: 0.55, y0: 222, y1: 258 },
+    glitter: { x: 80, n: 70 },
+    flocks: { first: 3, every: [12, 22], y: [14, 80] },
+    ducks: [{ x0: 250, x1: 420, y: 218, n: 4, speed: 5 }, { x0: 1380, x1: 1540, y: 220, n: 3, speed: 4 }],
+    wheels: [{ x: 646, y: 206, r: 15, speed: 0.9 }],
+    fountains: [{ x: 1560, y: 170, basin: 194 }],
+    smoke: [{ x: 482, y: 82, rate: 0.9, col: '240,240,244' }, { x: 1782, y: 100, rate: 0.6, col: '240,240,244' }],
+    crowd: [
+      { x: 110, near: 130, people: [{ dx: -8, look: 'oldman', face: 1, pose: 'sit' }, { dx: 10, look: 'girl', face: -1 }], lines: [[0, 'Is that the Joncour boy? Out of uniform at last!'], [1, 'He looks taller, Grandpa.'], [0, 'Everyone looks taller when they come home.']] },
+      { x: 700, people: [{ dx: -12, y: 205, look: 'washer', face: 1, pose: 'wash' }, { dx: 10, y: 205, look: 'washer', face: -1, pose: 'wash' }], lines: [[0, 'The worms are sick again, all down the valley.'], [1, 'Baldabiou will think of something. He always does.'], [0, 'He has been buying drinks all week. Something is afoot.'], [1, 'Something is always afoot with that man.']] },
+      { x: 836, people: [{ dx: -8, look: 'baker', face: 1 }, { dx: 10, look: 'woman', face: -1 }], lines: [[0, 'Fresh bread! Still warm!'], [1, 'Two loaves. And one for the Joncour house: their boy is home.'], [0, 'Then take a brioche for him too. On me.']] },
+      { x: 1050, people: [{ dx: -14, look: 'oldman', face: 1, pose: 'sit' }, { dx: 16, look: 'traveller', face: -1, pose: 'sit' }], lines: [[0, 'Hervé Joncour! Sit, sit, have a glass with us.'], [1, 'Let the boy go home, Émile. Someone is waiting for him.'], [0, 'Hmph. In my day we had a glass first.']] },
+      { x: 1236, people: [{ dx: 0, look: 'fisherman', face: 1, pose: 'fish' }], lines: [[0, 'Nothing biting. The fish are all too busy jumping at the boats.']] },
+      { x: 1344, people: [{ dx: -10, look: 'fiddler', face: 1, pose: 'fiddle' }, { dx: 12, look: 'lady', face: -1 }, { dx: 22, look: 'woman', face: -1 }], lines: [[0, 'A tune for the soldier come home!'], [1, 'Play the one about the river, Jules.'], [2, 'Not that one again!']] },
+      { x: 1520, people: [{ dx: -10, look: 'priest', face: 1 }, { dx: 8, look: 'boy', face: -1 }, { dx: 15, look: 'girl', face: -1 }], lines: [[0, 'Welcome home, my son. The bells will ring for you on Sunday.'], [1, 'Monsieur Hervé! Did you see a war?'], [0, 'Leave him be, children. He has somewhere to be.']] },
+    ],
+    marchers: [
+      { x0: 760, x1: 1010, n: 1, gap: 9, speed: 12, look: 'lady', pause: 3 },
+      { x0: 1100, x1: 1290, n: 2, gap: 7, speed: 10, look: 'woman', pause: 2.5, start: 1200, dir: -1 },
+    ],
+    things: [
+      { x: 204, kind: 'look', label: 'The bee hives', lines: ['Old Verdier\'s bees. The whole meadow hummed with them. I had forgotten that sound.'] },
+      { x: 332, kind: 'coin', amount: 5, label: 'A coin in the grass', lines: ['A five-franc piece in the grass by the wayside cross. Somebody\'s bad luck, and my good.'] },
+      { x: 540, kind: 'look', label: 'The silk mill', lines: ['The mill, running as it always had. The whole town lived on what the silkworms spun, and on what Baldabiou could sell.'] },
+      { x: 1470, kind: 'look', label: 'The church', sound: 'bell', lines: ['The bell rang the hour as I passed. It had rung every hour I was away, whether I heard it or not.'] },
+      { x: 1650, kind: 'look', label: 'The garden gate', lines: ['The gate still stuck at the bottom. I lifted it, the way I always had.'] },
+      { x: 1790, kind: 'goal', look: 'helene', facing: -1, nearPose: 'wave', nearAt: 120, label: 'Hélène', verb: 'Talk to', lines: ['She was in the garden, among the roses. She saw me before I reached the gate.'] },
     ],
   },
 
