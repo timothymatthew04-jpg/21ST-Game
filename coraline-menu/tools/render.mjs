@@ -80,7 +80,7 @@ if (args.still !== undefined) {
     const ffmpeg = process.env.FFMPEG || 'ffmpeg';
     const res = spawnSync(ffmpeg, [
       '-y', '-loglevel', 'error', '-framerate', String(fps), '-i', path.join(out, 'f%05d.png'),
-      '-c:v', 'libx264', '-preset', 'slow', '-crf', '18', '-tune', 'grain', '-pix_fmt', 'yuv420p',
+      '-c:v', 'libx264', '-preset', 'slow', '-crf', '19', '-pix_fmt', 'yuv420p',
       '-movflags', '+faststart', args.mp4,
     ], { stdio: 'inherit' });
     if (res.status !== 0) throw new Error(`ffmpeg failed (${res.status ?? res.error})`);

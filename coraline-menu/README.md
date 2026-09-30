@@ -17,9 +17,15 @@ The storm has its own timeline, repeating every loop:
 | 10.6 s | A forked bolt falls far behind the house |
 | 13.3 s | The cloud there flickers once more |
 
-In front of the scene sit the title (its "o" is a sewn button), a frosted-glass panel with a red
-stitched border and sewn-on buttons, and the menu items. The items are for looks only: in Canva,
-put hyperlinks over them. They never move, so the links always line up.
+In front of the scene sit the title in the olive-mustard yellow of the reference, with a sewn
+button for its "o", and a frosted-glass panel with a red stitched border and sewn-on buttons
+holding two items, Start Adventure and Options. The items are for looks only: in Canva, put
+hyperlinks over them. They never move, so the links always line up.
+
+| Item | Position in the 1920×1080 frame (x, y, width, height) |
+| --- | --- |
+| Start Adventure | 734, 536, 452, 76 |
+| Options | 734, 612, 452, 76 |
 
 ## Look at it
 
@@ -58,5 +64,5 @@ few seconds per frame; on a machine with a GPU, open the page instead and it run
 | `js/textures.js` | Every texture, painted on canvases, including the lightning hand and bolt |
 | `css/menu.css` | Title, glass panel and buttons |
 
-Fonts: Griffy and IM Fell English (SIL Open Font License). three.js is vendored under `vendor/`
+Fonts: Griffy, Henny Penny and IM Fell English (SIL Open Font License). three.js is vendored under `vendor/`
 (MIT).
