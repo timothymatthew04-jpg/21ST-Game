@@ -383,3 +383,233 @@ function frCloud(c, r, x, y, w, h, o = {}) {
   k.restore();
   c.drawImage(cv, Math.round(x - pad), Math.round(y - pad));
 }
+
+// ---------------------------------------------------------------- Paris, as it stood in the 1860s
+// Seen far off in the dawn haze, so each is painted in a few flat tones: `P` is the haze palette
+// ({ col, lit, dark, deep, roof, win, gap }), lit on the left where the sun comes up.
+
+/** A row of the new boulevards' apartment blocks: six storeys, zinc mansards, chimney pots. */
+function frBlocks(c, r, x0, x1, yb, P, hMin = 14, hMax = 24) {
+  let x = x0;
+  while (x < x1) {
+    const w = Math.round(r.r(12, 24)), h = Math.round(r.r(hMin, hMax));
+    rect(c, x, yb - h, w, h, P.col);
+    rect(c, x, yb - h, 1, h, P.lit);
+    poly(c, [[x - 0.5, yb - h], [x + w + 0.5, yb - h], [x + w - 2, yb - h - 4], [x + 2, yb - h - 4]], P.roof);
+    for (const k of [1, w - 3]) rect(c, x + k, yb - h - 6, 2, 3, P.dark);
+    for (let yy = yb - h + 3; yy < yb - 2; yy += 3) for (let xx = x + 2; xx < x + w - 1; xx += 3) if (r() < 0.1) px(c, xx, yy, P.win);
+    x += w;
+  }
+}
+
+/** Notre-Dame: the square towers of the west front, the nave's long roof, and the new spire (1859). */
+function frNotreDame(c, x, yb, s, P) {
+  const tw = 13 * s, th = 44 * s, gap = 11 * s, fw = tw * 2 + gap;
+  // the nave running back, its flying buttresses, the transept and the apse
+  const nx0 = x + fw - 2, nx1 = x + fw + 58 * s, ny = yb - 26 * s;
+  rect(c, nx0, ny, nx1 - nx0, yb - ny, P.col);
+  poly(c, [[nx0, ny], [nx1, ny], [nx1 - 3, ny - 8 * s], [nx0, ny - 8 * s]], P.roof);
+  for (let k = nx0 + 5; k < nx1 - 2; k += 7 * s) { line(c, k, yb - 12 * s, k + 4 * s, ny + 1, P.dark, 1); rect(c, k + 4 * s, ny - 3, 1, 4, P.col); }
+  ellipse(c, nx1, yb - 13 * s, 9 * s, 13 * s, P.col);
+  const sx = x + fw + 32 * s;
+  poly(c, [[sx - 6 * s, ny], [sx + 6 * s, ny], [sx, ny - 11 * s]], P.col);
+  // the spire over the crossing: a needle on a lantern of pinnacles
+  rect(c, sx - 2 * s, ny - 16 * s, 4 * s, 7 * s, P.dark);
+  for (const k of [-2.5, 2]) poly(c, [[sx + k * s, ny - 16 * s], [sx + k * s + 1, ny - 16 * s], [sx + k * s + 0.5, ny - 21 * s]], P.dark);
+  poly(c, [[sx - 1.5 * s, ny - 16 * s], [sx + 1.5 * s, ny - 16 * s], [sx, ny - 46 * s]], P.dark);
+  // the west front: two towers, the gallery between them, the rose window, three portals
+  for (const k of [0, tw + gap]) {
+    rect(c, x + k, yb - th, tw, th, P.col);
+    rect(c, x + k, yb - th, Math.max(1, tw * 0.22), th, P.lit);
+    for (const o of [3, tw - 5]) rect(c, x + k + o * 1, yb - th + 5 * s, 2 * s, 11 * s, P.deep);
+    rect(c, x + k - 1, yb - th - 1, tw + 2, 2, P.col);
+    for (let q = 0; q < tw; q += 3) px(c, x + k + q, yb - th - 2, P.col);
+  }
+  rect(c, x + tw, yb - th * 0.78, gap, th * 0.78, P.col);
+  for (let q = 1; q < gap; q += 2) rect(c, x + tw + q, yb - th * 0.78 + 1, 1, 4 * s, P.deep);
+  rect(c, x, yb - th * 0.6, fw, 1, P.dark);
+  circle(c, x + tw + gap / 2, yb - th * 0.46, 3.6 * s, P.deep);
+  circle(c, x + tw + gap / 2, yb - th * 0.46, 2.2 * s, P.win);
+  for (const k of [tw / 2, tw + gap / 2, fw - tw / 2]) { ellipse(c, x + k, yb - 9 * s, 3 * s, 3 * s, P.deep); rect(c, x + k - 3 * s, yb - 9 * s, 6 * s, 9 * s, P.deep); }
+}
+
+/** The Panthéon: a portico with its pediment, a tall drum ringed by columns, a stone dome. */
+function frPantheon(c, x, yb, s, P) {
+  const bw = 20 * s, bh = 17 * s;
+  rect(c, x - bw, yb - bh, bw * 2, bh, P.col);
+  rect(c, x - bw, yb - bh, 2 * s, bh, P.lit);
+  for (let k = -9; k <= 9; k += 3) rect(c, x + k * s, yb - bh + 5 * s, 1, bh - 5 * s, P.dark);
+  poly(c, [[x - 11 * s, yb - bh + 4 * s], [x + 11 * s, yb - bh + 4 * s], [x, yb - bh - 3 * s]], P.col);
+  line(c, x - 9 * s, yb - bh + 3 * s, x, yb - bh - 1 * s, P.lit, 1);
+  const dw = 9 * s, dy = yb - bh - 3 * s, dh = 15 * s;
+  rect(c, x - dw - 2 * s, dy - 1 * s, dw * 2 + 4 * s, 4 * s, P.col);
+  rect(c, x - dw, dy - dh, dw * 2, dh, P.col);
+  rect(c, x - dw, dy - dh, 2 * s, dh, P.lit);
+  for (let k = -dw + 3 * s; k < dw - 1; k += 2.5 * s) rect(c, x + k, dy - dh + 3 * s, 1, dh - 4 * s, P.dark);
+  rect(c, x - dw - 1, dy - dh - 2 * s, dw * 2 + 2, 2 * s, P.col);
+  const top = dy - dh - 2 * s;
+  c.save(); c.beginPath(); c.rect(x - dw - 2, top - 12 * s, dw * 2 + 4, 12 * s); c.clip();
+  ellipse(c, x, top, 8 * s, 10 * s, P.col);
+  ellipse(c, x - 3 * s, top - 2 * s, 3 * s, 7 * s, P.lit);
+  c.restore();
+  rect(c, x - 1.5 * s, top - 15 * s, 3 * s, 5 * s, P.col);
+  ellipse(c, x, top - 15 * s, 2 * s, 2 * s, P.col);
+  rect(c, x, top - 20 * s, 1, 4 * s, P.dark);
+}
+
+/**
+ * The Invalides: the long old soldiers' hospital in front, and over its church the great dome,
+ * gilded, catching the sun before anything else in Paris. `G` is the haze-softened gold.
+ */
+function frInvalides(c, r, x, yb, s, P, G) {
+  const ww = 52 * s, wh = 11 * s;
+  rect(c, x - ww, yb - wh, ww * 2, wh, P.col);
+  rect(c, x - ww, yb - wh, 1, wh, P.lit);
+  poly(c, [[x - ww - 1, yb - wh], [x + ww + 1, yb - wh], [x + ww - 2, yb - wh - 4 * s], [x - ww + 2, yb - wh - 4 * s]], P.roof);
+  for (let k = x - ww + 3; k < x + ww - 2; k += 4 * s) { px(c, k, yb - wh - 2 * s, P.dark); if (r() < 0.25) px(c, k, yb - wh + 4 * s, P.win); }
+  // the church's front, in two orders under a pediment
+  const fw = 15 * s, fh = 22 * s;
+  rect(c, x - fw, yb - fh, fw * 2, fh, P.col);
+  rect(c, x - fw, yb - fh, 2 * s, fh, P.lit);
+  for (let k = -fw + 3 * s; k < fw - 1; k += 3 * s) rect(c, x + k, yb - fh + 3 * s, 1, fh - 4 * s, P.dark);
+  rect(c, x - fw, yb - fh * 0.5, fw * 2, 1, P.dark);
+  poly(c, [[x - 7 * s, yb - fh], [x + 7 * s, yb - fh], [x, yb - fh - 4 * s]], P.col);
+  // the drum, ringed with columns, and the attic above it
+  const dw = 11 * s, dh = 12 * s, dy = yb - fh - 3 * s;
+  rect(c, x - dw, dy - dh, dw * 2, dh + 3 * s, P.col);
+  rect(c, x - dw, dy - dh, 2 * s, dh, P.lit);
+  for (let k = -dw + 2.5 * s; k < dw; k += 2.5 * s) rect(c, x + k, dy - dh + 2 * s, 1, dh - 3 * s, P.dark);
+  rect(c, x - dw + 1, dy - dh - 3 * s, dw * 2 - 2, 3 * s, P.col);
+  // the dome: gold ribs and trophies, lit from the left
+  const R = 10 * s, db = dy - dh - 3 * s;
+  c.save(); c.beginPath(); c.rect(x - R - 1, db - 17 * s, R * 2 + 2, 17 * s); c.clip();
+  ellipse(c, x, db, R, 16 * s, G.mid);
+  ellipse(c, x - 3 * s, db - 2 * s, R * 0.55, 13 * s, G.lit);
+  for (let k = -R + 2.5 * s; k < R; k += 2.5 * s) line(c, x + k, db, x + k * 0.25, db - 15 * s, G.shade, 1);
+  line(c, x - 5 * s, db - 2 * s, x - 2 * s, db - 13 * s, G.hi, 1);
+  c.restore();
+  for (let k = -R + 3 * s; k < R - 1; k += 4 * s) px(c, x + k, db - 2 * s, G.hi);
+  // the lantern, its spire, and the cross
+  rect(c, x - 2 * s, db - 22 * s, 4 * s, 6 * s, G.mid);
+  rect(c, x - 2 * s, db - 22 * s, 1, 6 * s, G.hi);
+  poly(c, [[x - 2 * s, db - 22 * s], [x + 2 * s, db - 22 * s], [x, db - 34 * s]], G.lit);
+  rect(c, x, db - 38 * s, 1, 5 * s, G.hi);
+  rect(c, x - 1, db - 36 * s, 3, 1, G.hi);
+  return [x, db - 38 * s];
+}
+
+/** The Vendôme column, cast from the cannon taken at Austerlitz, the Emperor on top. */
+function frVendome(c, x, yb, s, P, bronze) {
+  rect(c, x - 4 * s, yb - 8 * s, 8 * s, 8 * s, P.col);
+  rect(c, x - 4 * s, yb - 8 * s, 1, 8 * s, P.lit);
+  rect(c, x - 1.5 * s, yb - 44 * s, 3 * s, 36 * s, bronze);
+  for (let y = yb - 42 * s; y < yb - 9 * s; y += 3 * s) line(c, x - 1.5 * s, y + 1.5 * s, x + 1.5 * s, y, P.deep, 1);
+  rect(c, x - 2.5 * s, yb - 46 * s, 5 * s, 2 * s, bronze);
+  rect(c, x - 1 * s, yb - 49 * s, 2 * s, 3 * s, bronze);
+  rect(c, x - 0.5, yb - 53 * s, 1, 4 * s, bronze);
+}
+
+/** The Arc de Triomphe, its great arch open to the sky beyond. */
+function frArcTriomphe(c, x, yb, s, P) {
+  const w = 30 * s, h = 32 * s;
+  rect(c, x, yb - h, w, h, P.col);
+  rect(c, x, yb - h, 3 * s, h, P.lit);
+  rect(c, x - 1, yb - h, w + 2, 2 * s, P.col);
+  rect(c, x, yb - h + 2 * s, w, 1, P.dark);
+  rect(c, x, yb - h + 7 * s, w, 1, P.dark);
+  const aw = 11 * s, ax = x + (w - aw) / 2, at = yb - h + 11 * s;
+  ellipse(c, ax + aw / 2, at + aw / 2, aw / 2, aw / 2, P.gap);
+  rect(c, ax, at + aw / 2, aw, yb - at - aw / 2, P.gap);
+  for (const k of [2 * s, w - 7 * s]) rect(c, x + k, yb - 17 * s, 5 * s, 7 * s, P.lit);
+}
+
+/** The Tour Saint-Jacques: a lone Gothic bell tower, pinnacles at its corners. */
+function frTourStJacques(c, x, yb, s, P) {
+  const w = 9 * s, h = 40 * s;
+  rect(c, x, yb - h, w, h, P.col);
+  rect(c, x, yb - h, 2 * s, h, P.lit);
+  for (const k of [2 * s, w - 3 * s]) rect(c, x + k, yb - h + 2, 1, h - 2, P.dark);
+  rect(c, x + w / 2 - 1 * s, yb - h + 6 * s, 2 * s, 12 * s, P.deep);
+  rect(c, x - 1, yb - h - 1, w + 2, 2, P.col);
+  for (const k of [-1, w / 2 - 1, w - 1]) poly(c, [[x + k, yb - h - 1], [x + k + 2, yb - h - 1], [x + k + 1, yb - h - 6 * s]], P.col);
+  rect(c, x - 1, yb - h - 8 * s, 3 * s, 7 * s, P.col);
+  rect(c, x, yb - h - 11 * s, 1, 3 * s, P.dark);
+}
+
+/** The new Opera going up: its arcade built, the stage house still a cage of scaffolding and cranes. */
+function frOperaWorks(c, r, x, yb, s, P, wood) {
+  const fw = 34 * s, fh = 16 * s;
+  rect(c, x, yb - fh, fw, fh, P.col);
+  rect(c, x, yb - fh, 2 * s, fh, P.lit);
+  for (let k = 3 * s; k < fw - 3 * s; k += 5 * s) { ellipse(c, x + k + 1.5 * s, yb - 7 * s, 1.5 * s, 1.5 * s, P.deep); rect(c, x + k, yb - 7 * s, 3 * s, 7 * s, P.deep); }
+  for (let k = 2 * s; k < fw - 1; k += 3 * s) rect(c, x + k, yb - fh + 2 * s, 1, 5 * s, P.dark);
+  // the stage house: built to half its height, then poles and ledgers and a few braces
+  const sx = x + 8 * s, sw = 22 * s, built = 10 * s, full = 32 * s;
+  rect(c, sx, yb - fh - built, sw, built, P.col);
+  rect(c, sx, yb - fh - built, 1, built, P.lit);
+  for (let k = 0; k <= sw; k += 4 * s) rect(c, sx + k, yb - fh - full, 1, full - built, wood);
+  for (let y = yb - fh - built - 4 * s; y > yb - fh - full; y -= 4 * s) rect(c, sx - 1, y, sw + 2, 1, wood);
+  line(c, sx, yb - fh - built, sx + sw * 0.5, yb - fh - full + 2, wood, 1);
+  line(c, sx + sw, yb - fh - built, sx + sw * 0.5, yb - fh - full + 2, wood, 1);
+  // two cranes, each with a stone hanging from its jib
+  for (const [cx, hh, jib] of [[x - 2 * s, 40 * s, 14 * s], [x + fw + 2 * s, 34 * s, -12 * s]]) {
+    rect(c, cx, yb - hh, 1.5, hh, wood);
+    line(c, cx, yb - hh + 1, cx + jib, yb - hh + 4 * s, wood, 1);
+    line(c, cx, yb - hh + 1, cx - jib * 0.35, yb - hh + 3 * s, wood, 1);
+    line(c, cx + jib * 0.95, yb - hh + 4 * s, cx + jib * 0.95, yb - hh + 12 * s, P.deep, 1);
+    rect(c, cx + jib * 0.95 - 1.5 * s, yb - hh + 12 * s, 3 * s, 2 * s, P.lit);
+  }
+}
+
+/** The keep of Vincennes, the army's fortress: a tall square tower, a turret at each corner. */
+function frVincennes(c, x, yb, s, P) {
+  const w = 14 * s, h = 46 * s;
+  rect(c, x, yb - h, w, h, P.col);
+  rect(c, x, yb - h, 2 * s, h, P.lit);
+  for (const k of [-2 * s, w - 2 * s]) {
+    rect(c, x + k, yb - h - 3 * s, 4 * s, h * 0.9, P.col);
+    rect(c, x + k, yb - h - 3 * s, 1, h * 0.9, k < 0 ? P.lit : P.dark);
+    poly(c, [[x + k - 0.5, yb - h - 3 * s], [x + k + 4 * s + 0.5, yb - h - 3 * s], [x + k + 2 * s, yb - h - 9 * s]], P.roof);
+  }
+  rect(c, x - 1, yb - h + 3 * s, w + 2, 2 * s, P.col);
+  for (let k = 0; k < w; k += 2 * s) px(c, x + k, yb - h + 5 * s, P.deep);
+  for (const [dx, dy] of [[5, 12], [8, 22], [5, 30]]) rect(c, x + dx * s, yb - h + dy * s, 1.5 * s, 3 * s, P.deep);
+  rect(c, x + w / 2, yb - h - 12 * s, 1, 12 * s, P.dark);
+  return [x + w / 2 + 1, yb - h - 12 * s];
+}
+
+// ---------------------------------------------------------------- the railway
+/**
+ * A stone viaduct carrying the railway across the valley: the deck and its parapet at `deck`,
+ * round arches between tall piers that go down out of sight, lit on the faces turned to the sun.
+ */
+function frViaduct(c, x0, x1, deck, yb, span, P) {
+  const pier = Math.max(3, Math.round(span * 0.2)), aw = span - pier, crown = deck + 3;
+  rect(c, x0, deck, x1 - x0, yb - deck, P.col);
+  c.save();
+  c.globalCompositeOperation = 'destination-out';
+  for (let x = x0 + pier; x < x1; x += span) {
+    ellipse(c, x + aw / 2, crown + aw / 2, aw / 2, aw / 2, '#000');
+    rect(c, x, crown + aw / 2, aw, yb - crown, '#000');
+  }
+  c.restore();
+  for (let x = x0 + pier; x < x1; x += span) {
+    rect(c, x + aw, crown + aw / 2, 1, yb - crown, P.lit);
+    rect(c, x - 1, crown + aw / 2, 1, yb - crown, P.dark);
+    px(c, x + aw / 2, crown - 1, P.dark);
+  }
+  rect(c, x0, deck, x1 - x0, 2, P.lit);
+  rect(c, x0, deck + 2, x1 - x0, 1, P.dark);
+  rect(c, x0, deck - 1, x1 - x0, 1, P.rail);
+}
+
+/** The telegraph along the line: poles every so often, their wires sagging between. */
+function frTelegraph(c, x0, x1, yb, gap, P) {
+  let prev = null;
+  for (let x = x0; x <= x1; x += gap) {
+    rect(c, x, yb - 9, 1, 9, P.pole);
+    rect(c, x - 1, yb - 9, 3, 1, P.pole);
+    if (prev != null) for (let k = 0; k <= gap; k += 1) { const t = k / gap; px(c, prev + k, yb - 9 + Math.round(Math.sin(t * Math.PI) * 2), P.wire); }
+    prev = x;
+  }
+}

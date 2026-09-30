@@ -63,9 +63,13 @@ are scaled smoothly and stay sharp at any window size (see docs/SCRIPTING.md).
 The army camp, where the game begins, shows France at its proudest at a pink dawn: the regiment's
 headquarters (mansard roofs, a clock, the eagle in the pediment, a square dome and the flag),
 ramparts, wooden watchtowers, bell tents, the armoury, a shooting range, an artillery park and the
-gate to the road north; on the horizon, citadels, barracks and smoking stacks in front of the
-towers, domes and arch of Paris. The French buildings are drawn by `tools/paint/scenes-french.js`,
-shared with the Chapter 1 backdrop (`army_camp`) and its cutscene.
+gate to the road north. Behind the camp a railway viaduct crosses the valley; beyond it stand the
+citadels, the keep of Vincennes, barracks and the arsenals' smoking stacks; and on the horizon,
+Paris as it was in the 1860s: the Tour Saint-Jacques, Notre-Dame with its new spire, the Panthéon,
+the gilded dome of the Invalides, the Vendôme column, the new Opera in its scaffolding, the Arc de
+Triomphe and the boulevards' apartment blocks (nothing later, so no Eiffel Tower). The French
+buildings are drawn by `tools/paint/scenes-french.js`, shared with the Chapter 1 backdrop
+(`army_camp`) and its cutscene.
 
 The seven walking areas (`camp`, `steppe`, `village`, `aviary`, `ruins`, `crossing`, `cemetery`) are painted by
 `tools/paint-walks.js` from `tools/paint/walks.js`, with the same toolkit and style as the

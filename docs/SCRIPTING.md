@@ -460,9 +460,11 @@ goes on from there. Action is set to one difficulty for everyone.
 A walk can also simply be alive (the army camp is): soldiers standing about who talk among
 themselves in small bubbles when Hervé comes near (one conversation at a time), men marching up
 and down, a drill with an officer calling the orders, sentries up on the towers, flags waving,
-chimney and camp-fire smoke, fires, and airships and balloons in the sky. None of it stops him;
-story/walks.js describes each (`crowd`, `marchers`, `drill`, `flags`, `smoke`, `fires`,
-`airships`).
+chimney and camp-fire smoke, fires, airships and balloons in the sky (one of them enormous, far off
+behind the clouds), the colours hoisted to a bugle call as the walk begins, a train crossing a
+viaduct now and then, cuirassiers riding through, and a band heard across the camp. None of it
+stops him; story/walks.js describes each (`crowd`, `marchers`, `drill`, `flags`, `smoke`,
+`fires`, `airships`, `colours`, `train`, `cavalry`, `band`).
 
 Walks never replace the rest: choices, cutscenes and minigames happen around them as before. The
 game menu (Esc) pauses a walk, and saving during one saves just before it. A quiet walk is passed

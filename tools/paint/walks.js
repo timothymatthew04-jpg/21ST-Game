@@ -53,28 +53,54 @@ WALKS.camp = (c, L) => {
     frCloud(cc, rr, 120, 92, 90, 16, { body: '#c4a8c0', shadow: '#9a86a8' });
     frCloud(cc, rr, 380, 100, 80, 14, { body: '#c4a8c0', shadow: '#9a86a8' });
   });
-  // the horizon: citadels and barracks in front, Paris behind, smoke from the arsenals
+  // Paris on the horizon, as it stood in the 1860s: the Tour Saint-Jacques, Notre-Dame with its new
+  // spire, the Panthéon, the gilded dome of the Invalides over the old soldiers' hospital, the
+  // Vendôme column cast from captured cannon, the new Opera going up in scaffolding, the Arc de
+  // Triomphe, and the new boulevards' apartment blocks between them. (No Eiffel Tower: not until 1889.)
+  const pa = L('paris', { depth: 0.08 });
+  const px1 = S(0.08);
+  const P = { col: '#b898b2', lit: '#e6c0cc', dark: '#9e7c98', deep: '#8e6e8a', roof: '#aa8eae', win: '#ffdcb0', gap: '#e6b2c0' };
+  const G = { hi: '#fff0c4', lit: '#f2cc8a', mid: '#d8a87c', shade: '#b48474' };
+  const BP = 168;
+  frBlocks(pa, r, -10, px1 + 10, BP, P, 14, 24);
+  frTourStJacques(pa, 8, BP, 1, P);
+  frNotreDame(pa, 34, BP, 1, P);
+  frPantheon(pa, 170, BP, 1.05, P);
+  frInvalides(pa, r, 286, BP, 1.12, P, G);
+  frVendome(pa, 364, BP, 1, P, '#a0808a');
+  frOperaWorks(pa, r, 390, BP, 1, P, '#9a7c80');
+  frArcTriomphe(pa, 462, BP, 1.1, P);
+  frDome(pa, 532, BP, 0.9, P.col, P.lit);
+  pa.save(); pa.globalCompositeOperation = 'source-atop'; vgrad(pa, 0, 70, px1, 100, [[0, 'rgba(255,200,215,0.08)'], [1, 'rgba(255,196,206,0.4)']]); pa.restore();
+  // in front, the military France: citadels, the keep of Vincennes, barracks and the arsenals' stacks
   const far = L('far', { depth: 0.12 });
   const fx1 = S(0.12);
-  const hz = { col: '#9a7896', lit: '#d8a4b4', dark: '#6a5070', roof: '#7a5a80' };
+  const hz = { col: '#9a7896', lit: '#d8a4b4', dark: '#6a5070', roof: '#7a5a80', deep: '#5e4664' };
   // (everything stands on a far rise, so it shows above the camp's ramparts)
   const B = 172;
   hill(far, r, -40, fx1 + 40, B + 4, 14, '#a88aa4');
   rect(far, 0, B + 2, fx1, 30, '#a88aa4');
-  frBarracks(far, r, 6, B, 60, 13, hz.col, hz.roof, hz.lit);
-  frStack(far, 72, B, 34, hz.col, hz.lit); frSmoke(far, r, 72, B - 36, 12, 'rgba(226,200,214,0.6)', 1);
-  frCathedral(far, 90, B, 1.2, hz.col, hz.lit);
-  frDome(far, 180, B, 1.05, hz.col, hz.lit);
-  const k1 = frCitadel(far, r, 214, 340, B, 16, hz.col, hz.lit, hz.dark);
-  rect(far, k1[0], k1[1], 4, 2, FR.blue); rect(far, k1[0] + 4, k1[1], 4, 2, FR.white); rect(far, k1[0] + 8, k1[1], 4, 2, FR.red);
-  frArch(far, 350, B, 1.05, hz.col, hz.lit);
-  frBarracks(far, r, 384, B, 70, 14, hz.col, hz.roof, hz.lit);
-  for (const x of [400, 426, 452]) { frStack(far, x, B - 12, 24, hz.col, hz.lit); frSmoke(far, r, x, B - 38, 10, 'rgba(226,200,214,0.55)', 1); }
-  const k2 = frCitadel(far, r, 466, 604, B, 18, hz.col, hz.lit, hz.dark);
+  frBarracks(far, r, 0, B, 64, 13, hz.col, hz.roof, hz.lit);
+  frStack(far, 14, B - 12, 22, hz.col, hz.lit); frSmoke(far, r, 14, B - 36, 9, 'rgba(226,200,214,0.55)', 1);
+  const k1 = frCitadel(far, r, 130, 250, B, 15, hz.col, hz.lit, hz.dark);
+  const v = frVincennes(far, k1[0] - 8, B - 12, 0.9, { col: hz.col, lit: hz.lit, dark: hz.dark, deep: hz.deep, roof: hz.roof });
+  rect(far, v[0], v[1], 4, 2, FR.blue); rect(far, v[0] + 4, v[1], 4, 2, FR.white); rect(far, v[0] + 8, v[1], 4, 2, FR.red);
+  frBarracks(far, r, 262, B, 58, 12, hz.col, hz.roof, hz.lit);
+  const k2 = frCitadel(far, r, 410, 560, B, 16, hz.col, hz.lit, hz.dark);
   rect(far, k2[0], k2[1], 4, 2, FR.blue); rect(far, k2[0] + 4, k2[1], 4, 2, FR.white); rect(far, k2[0] + 8, k2[1], 4, 2, FR.red);
+  for (const x of [576, 598]) { frStack(far, x, B - 10, 24, hz.col, hz.lit); frSmoke(far, r, x, B - 36, 10, 'rgba(226,200,214,0.55)', 1); }
   // a semaphore tower, the telegraph of the army, arms raised
-  rect(far, 616, B - 40, 3, 40, hz.col); rect(far, 608, B - 40, 19, 2, hz.col); line(far, 608, B - 40, 604, B - 46, hz.col, 1); line(far, 627, B - 39, 632, B - 33, hz.col, 1);
+  rect(far, 356, B - 40, 3, 40, hz.col); rect(far, 348, B - 40, 19, 2, hz.col); line(far, 348, B - 40, 344, B - 46, hz.col, 1); line(far, 367, B - 39, 372, B - 33, hz.col, 1);
   far.save(); far.globalCompositeOperation = 'source-atop'; vgrad(far, 0, 110, fx1, 76, [[0, 'rgba(255,190,200,0.05)'], [1, 'rgba(255,200,205,0.35)']]); far.restore();
+  // the railway on its viaduct across the valley (the trains are the walk's: story/walks.js)
+  const rl = L('rail', { depth: 0.2 });
+  const rx1 = S(0.2);
+  const RP = { col: '#bc98a6', lit: '#e0bcc4', dark: '#94748a', rail: '#5a4658', pole: '#6e5664', wire: '#8a7084' };
+  frViaduct(rl, -8, rx1 + 8, 146, 200, 20, RP);
+  frTelegraph(rl, 6, rx1, 146, 44, RP);
+  // a disc signal by the line
+  rect(rl, 268, 133, 1, 13, RP.pole); circle(rl, 268.5, 133, 2.2, '#c83a3a'); px(rl, 268, 132, '#ffd8c8');
+  rl.save(); rl.globalCompositeOperation = 'source-atop'; vgrad(rl, 0, 140, rx1, 30, [[0, 'rgba(255,196,206,0.12)'], [1, 'rgba(255,196,206,0.25)']]); rl.restore();
   // nearer: the outer works of the fortress, poplars along the road, the garrison town's roofs
   const mid = L('mid', { depth: 0.38 });
   const mx1 = S(0.38);
@@ -144,7 +170,7 @@ WALKS.camp = (c, L) => {
   rect(g, 1312, GY - 12, 6, 10, '#d8d0c4'); rect(g, 1312, GY - 12, 6, 2, '#c83a3a');
   const fr = L('front', { depth: 1.3, anim: sway(3, 3.4) });
   reeds(fr, r, ['#4a4a2a', '#66663a', '#8a8a4a']);
-  return { colors: 96, vignette: [0.25, '40,20,40'], anchors: { flag: hq.flag, chimneys: hq.chimneys } };
+  return { colors: 120, vignette: [0.25, '40,20,40'], anchors: { flag: hq.flag, chimneys: hq.chimneys } };
 };
 
 // ---------------------------------------------------------------- across the steppe, at sunset

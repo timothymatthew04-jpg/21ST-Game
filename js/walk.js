@@ -53,6 +53,17 @@
     officer: { coat: '#1e2e5a', coatDark: '#141f40', legs: '#b83a3a', boots: '#1a1412', skin: '#e8c0a0', hat: 'kepi', hatCol: '#1e2e5a', belt: '#e8c050', epaulette: '#f0c050', sword: 1, beard: '#5a3a2a' },
     gunner: { coat: '#1e2a4a', coatDark: '#141c34', legs: '#1e2a4a', stripe: '#c83a3a', boots: '#1a1412', skin: '#e0b898', hat: 'kepi', hatCol: '#1e2a4a', belt: '#e8dcc0' },
     zouave: { coat: '#2a3a7a', coatDark: '#1e2a5a', legs: '#c83a3a', wideLegs: 1, boots: '#e8dcc0', skin: '#d8a888', hat: 'fez', hatCol: '#c83a3a', sash: '#3a6ab0', beard: '#3a2a20' },
+    bugler: { coat: '#2e4a8a', coatDark: '#22386a', legs: '#b83a3a', boots: '#1a1412', skin: '#f0c8a8', hat: 'kepi', hatCol: '#b83a3a', belt: '#e8dcc0', bugle: 1 },
+    // cuirassiers: steel breastplates, and helmets with a horsehair mane; the trumpeter's plume is white
+    cuirassier: { coat: '#1e2a5a', coatDark: '#141c40', legs: '#b83a3a', boots: '#141010', skin: '#e8c0a0', hat: 'helmet', hatCol: '#aeb4c2', cuirass: '#aeb4c2', sword: 1, saddle: '#1e2a5a' },
+    cuirassierOfficer: { coat: '#1e2a5a', coatDark: '#141c40', legs: '#b83a3a', boots: '#141010', skin: '#e8c0a0', hat: 'helmet', hatCol: '#c0c6d2', cuirass: '#c0c6d2', sword: 1, saddle: '#1e2a5a', epaulette: '#f0c050', beard: '#4a3020' },
+    trumpeter: { coat: '#1e2a5a', coatDark: '#141c40', legs: '#b83a3a', boots: '#141010', skin: '#f0c8a8', hat: 'helmet', hatCol: '#aeb4c2', cuirass: '#aeb4c2', saddle: '#1e2a5a', plume: '#f2eee6', trumpet: 1 },
+  };
+  // horses by their coats; the trumpeters of the cavalry rode greys
+  const HORSES = {
+    bay: { coat: '#6a4630', dark: '#4a3020', mane: '#2a1a14', hi: '#7a5640' },
+    black: { coat: '#2e2622', dark: '#1e1816', mane: '#0e0a0a', hi: '#463a34' },
+    grey: { coat: '#c8c2be', dark: '#9a928e', mane: '#eeeae6', hi: '#e2dcd8' },
   };
 
   function rect(c, x, y, w, hh, col) { c.fillStyle = col; c.fillRect(Math.round(x), Math.round(y), Math.round(w), Math.round(hh)); }
@@ -84,18 +95,33 @@
     }
     // the coat, darker at the back, with its tail swinging a little
     const top = y - legH - bodyH;
+    const hy = top - 5;
     rect(c, -w / 2, top, w, bodyH + 2, L.coat);
     rect(c, -w / 2, top, 2, bodyH + 2, L.coatDark);
     if (!L.robe) rect(c, -w / 2 - 1 + (moving ? Math.round(-swing) : 0), top + bodyH - 1, 2, 3, L.coatDark);
     if (L.belt) rect(c, -w / 2, top + bodyH - 4, w, 1, L.belt);
     if (L.sash) rect(c, -w / 2, top + bodyH - 4, w, 2, L.sash);
     if (L.scarf) rect(c, -w / 2 + 1, top, w - 1, 2, L.scarf);
+    if (L.cuirass) { rect(c, -w / 2, top + 1, w, bodyH - 4, L.cuirass); rect(c, -w / 2 + 1, top + 1, 1, bodyH - 4, '#dfe3ec'); rect(c, -w / 2, top + bodyH - 3, w, 1, '#8a8e9a'); }
     if (L.epaulette) { rect(c, -w / 2 - 1, top, 2, 1, L.epaulette); rect(c, w / 2 - 1, top, 2, 1, L.epaulette); }
     // an arm: swinging opposite to the legs, raised as they talk, or holding the rifle up in front
     if (pose === 'talk') {
       const up = Math.sin(t * 7) > 0 ? 1 : 0;
       rect(c, 1, top + 3 - up, 2, 4, L.coatDark);
       rect(c, 3, top + 1 - up, 2, 2, L.skin);
+    } else if (pose === 'bugle') {
+      // the bugle up to the lips, its bell raised
+      rect(c, 1, top + 1, 2, 4, L.coatDark);
+      rect(c, 2, hy + 3, 2, 2, L.skin);
+      rect(c, 3, hy + 2, 6, 1, '#f0c050');
+      rect(c, 4, hy + 3, 3, 1, '#c8902e');
+      rect(c, 9, hy, 2, 5, '#f0c050');
+      rect(c, 10, hy + 1, 1, 3, '#fff0a8');
+    } else if (pose === 'haul') {
+      // hand over hand on the halyard
+      const pull = Math.sin(t * 5) > 0 ? 0 : 2;
+      rect(c, 3, top - 6 + pull, 2, 9, L.coatDark);
+      rect(c, 3, top - 8 + pull, 2, 2, L.skin);
     } else if (pose === 'present' && L.rifle) {
       rect(c, 2, top + 3, 2, 5, L.coatDark);
       rect(c, 3, top - 9, 1, 19, '#4a3424');
@@ -111,7 +137,6 @@
       rect(c, 0, top - 10, 1, 4, '#d0d0d8');
     }
     // the head, and whatever is on it
-    const hy = top - 5;
     rect(c, -2, hy, 5, 5, L.skin);
     rect(c, 2, hy + 2, 1, 1, '#2a1a14');
     if (L.beard) rect(c, -2, hy + 3, 5, 2, L.beard);
@@ -124,24 +149,33 @@
     else if (L.hat === 'bun') { rect(c, -3, hy - 1, 6, 3, hc); rect(c, -4, hy - 3, 3, 3, hc); }
     else if (L.hat === 'jingasa') { rect(c, -5, hy - 1, 11, 1, hc); rect(c, -3, hy - 2, 7, 1, hc); }
     else if (L.hat === 'fez') { rect(c, -1, hy - 3, 4, 3, hc); rect(c, -2, hy - 1, 1, 2, '#1a2a5a'); }
+    else if (L.hat === 'helmet') {
+      // the steel helmet, its brass crest, the black mane streaming behind and the plume
+      rect(c, -2, hy - 2, 5, 3, hc); rect(c, -1, hy - 2, 2, 1, '#dfe3ec');
+      rect(c, -2, hy - 3, 4, 1, '#e0b050');
+      rect(c, -5, hy - 3, 3, 1, '#141010'); rect(c, -5, hy - 2, 2, 5, '#141010');
+      rect(c, 1, hy - 6, 1, 3, L.plume || '#c83a3a');
+    }
     else rect(c, -2, hy - 1, 5, 2, hc);
     if (L.sword) rect(c, -w / 2 - 1, top + bodyH - 3, 8, 1, '#8a8a90');
     if (L.drum) { rect(c, 2, top + 5, 5, 5, '#b83a3a'); rect(c, 2, top + 5, 5, 1, '#e8dcc8'); }
+    if ((L.bugle && pose !== 'bugle') || L.trumpet) { rect(c, -4, top + 5, 2, 2, '#f0c050'); rect(c, -5, top + 6, 1, 2, '#c8902e'); }
     if (L.lantern) { rect(c, 4, top + 4, 1, 4, '#3a2a22'); rect(c, 3, top + 8, 3, 4, '#ffcf72'); }
   }
 
   /** A horse at a walk or a gallop, facing right, with its rider. */
-  function drawHorse(c, t, moving, running, rider, duck = false) {
+  function drawHorse(c, t, moving, running, rider, duck = false, hc = HORSES.bay) {
     const ph = t * (running ? 14 : 8);
     const gait = moving ? Math.sin(ph) : 0;
     const bob = moving ? Math.round(Math.abs(Math.sin(ph)) * (running ? 2 : 1)) : 0;
     const y = -bob;
-    const coat = '#6a4630', dark = '#4a3020', mane = '#2a1a14';
+    const { coat, dark, mane } = hc;
     // four legs, in two pairs that move against each other
     const leg = (x, a) => { rect(c, x + Math.round(a * 2), y - 9, 2, 9, dark); rect(c, x + Math.round(a * 2), y - 2, 2, 2, '#1a1412'); };
     leg(-8, gait); leg(-5, -gait); leg(5, -gait); leg(8, gait);
     rect(c, -10, y - 17, 21, 9, coat); // the body
-    rect(c, -10, y - 17, 21, 2, '#7a5640');
+    rect(c, -10, y - 17, 21, 2, hc.hi);
+    if (rider && rider.saddle) { rect(c, -6, y - 17, 11, 6, rider.saddle); rect(c, -6, y - 12, 11, 1, '#f0c050'); }
     rect(c, 9, y - 23, 4, 9, coat); // the neck
     rect(c, 11, y - 25, 7, 4, coat); // the head
     rect(c, 16, y - 23, 2, 2, dark);
@@ -155,6 +189,12 @@
       c.restore();
     }
   }
+
+  // ---------------------------------------------------------------- the army's train
+  // A Crampton engine and its tender, guns on flat wagons, men in covered wagons, the officers'
+  // carriage and the guard's van (lengths in pixels at the viaduct's distance)
+  const TRAIN = [{ kind: 'loco', w: 20 }, { kind: 'tender', w: 9 }, { kind: 'gun', w: 14 }, { kind: 'guns', w: 14 }, { kind: 'wagon', w: 12 }, { kind: 'wagon', w: 12 }, { kind: 'coach', w: 13 }, { kind: 'van', w: 9 }];
+  const TRAIN_LEN = TRAIN.reduce((n, car) => n + car.w + 1.5, -1.5);
 
   // ---------------------------------------------------------------- weather and light
   function makeWeather(kind, n) {
@@ -251,11 +291,16 @@
       this.crowd = (def.crowd || []).map((g) => ({ ...g, k: 0, timer: 0.4 + Math.random(), showing: -1, bubble: null }));
       this.marchers = (def.marchers || []).map((m) => ({ ...m, x: m.start != null ? m.start : m.x0, dir: m.dir || 1, wait: 0, look: LOOKS[m.look || 'rifleman'] }));
       if (def.drill) this.drill = { ...def.drill, k: -1, timer: 1.5, pose: null, bubble: null };
-      this.flags = def.flags || [];
+      this.flags = (def.flags || []).map((f) => ({ ...f }));
       this.fires = def.fires || [];
       this.smokes = (def.smoke || []).map((sm) => ({ ...sm, acc: Math.random() }));
       this.puffs = [];
       this.sky = def.airships || [];
+      // a train now and then on the viaduct, cavalry riding through, the colours going up at dawn
+      if (def.train) this.train = { depth: 0.2, deck: 146, speed: 34, pause: [24, 40], dir: -1, ...def.train, x: null, dist: 0, wait: def.train.first == null ? 6 : def.train.first, puffs: [], chuff: 0, heard: false };
+      if (def.cavalry) this.cavalry = { n: 4, gap: 26, speed: 40, pause: 20, y: GY - 3, ...def.cavalry, dir: -1, x: def.cavalry.from, wait: def.cavalry.first == null ? 10 : def.cavalry.first, step: 0 };
+      if (def.colours) this.colours = { delay: 1.5, dur: 10.4, hold: 3, ...def.colours, t: 0, stage: 0, called: false };
+      this.hum = { drone: rnd(6, 12), band: def.band ? def.band.first || 30 : 0 };
     }
 
     inCover(x = this.x) { return this.cover.some((cv) => x >= cv.x0 && x <= cv.x1); }
@@ -263,6 +308,10 @@
     async start() {
       this.layers = [];
       for (const l of this.scenery.layers) this.layers.push({ ...l, img: prescale(await image(l.src)) });
+      // what moves in among the painted layers, each at its own distance: airships and balloons, trains
+      this.slots = this.sky.map((a) => ({ z: a.z == null ? 0.1 : a.z, draw: (c, cam) => this.drawSkyItem(c, a, cam) }));
+      if (this.train) this.slots.push({ z: this.train.depth + 0.001, draw: (c, cam) => this.drawTrain(c, cam) });
+      this.slots.sort((a, b) => a.z - b.z);
       // the band above the waterline, flipped, for the reflection
       this.mirror = document.createElement('canvas');
       this.mirror.width = LW * SS;
@@ -622,8 +671,27 @@
       }
       const blocked = (gx) => this.promptFor && Math.abs(this.promptFor.x - gx) < 70;
       this.talkingGroup = nearest;
+      // the colours going up: the call, the bugle, the flag climbing its pole; the camp falls silent
+      const cl = this.colours;
+      if (cl && cl.stage < 3) {
+        cl.t += dt;
+        const g = this.crowd[cl.group], f = this.flags[cl.flag];
+        if (f) {
+          if (f.top == null) f.top = f.y;
+          f.rope = true;
+          f.cur = cl.from + (f.top - cl.from) * VN.clamp((cl.t - cl.delay) / cl.dur, 0, 1);
+        }
+        if (!cl.called && cl.t > 0.3 && g) { cl.called = true; g.showing = cl.caller; this.showBubble(g, cl.call); }
+        if (cl.stage === 0 && cl.t >= cl.delay) { cl.stage = 1; this.audio.fx('bugle', { volume: 0.9 }); }
+        if (cl.stage === 1 && g && g.showing >= 0 && cl.t > cl.delay + 1.2) this.hideBubble(g);
+        if (cl.stage === 1 && cl.t >= cl.delay + cl.dur) cl.stage = 2;
+        if (cl.stage === 2 && cl.t >= cl.delay + cl.dur + cl.hold) { cl.stage = 3; if (g) g.timer = 2; }
+      }
+      const rite = cl && cl.stage < 3 ? this.crowd[cl.group] : null;
+      const hush = !!cl && cl.stage < 2;
       for (const g of this.crowd) {
-        const near = !quiet && Math.abs(this.x - g.x) < (g.near || 150) && (!low(g) || g === nearest) && !blocked(g.x);
+        if (g === rite) continue;
+        const near = !quiet && !hush && Math.abs(this.x - g.x) < (g.near || 150) && (!low(g) || g === nearest) && !blocked(g.x);
         g.timer -= dt;
         if (!near) { if (g.showing >= 0) this.hideBubble(g); g.timer = Math.max(g.timer, 0.3); continue; }
         if (g.timer > 0) continue;
@@ -647,7 +715,7 @@
           const call = d.calls[d.k % d.calls.length];
           d.pose = call.pose || null;
           d.timer = d.period || 4.5;
-          if (!quiet && d === this.talkingGroup && !blocked(d.x + (d.officer || 0))) this.showBubble(d, call.text, d.x + (d.officer || 0), GY);
+          if (!quiet && !hush && d === this.talkingGroup && !blocked(d.x + (d.officer || 0))) this.showBubble(d, call.text, d.x + (d.officer || 0), GY);
           else if (d.bubble) this.hideBubble(d);
         } else if (d.bubble && (d.timer < (d.period || 4.5) - 2.6 || d !== this.talkingGroup)) this.hideBubble(d);
       }
@@ -660,6 +728,51 @@
       }
       for (const p of this.puffs) { p.age += dt; p.x += p.vx * dt; p.y += p.vy * dt; p.vy *= 0.995; p.r += p.grow * dt; }
       this.puffs = this.puffs.filter((p) => p.age < p.life);
+      // the train: out across the viaduct, whistling as it comes into view, steam trailing behind;
+      // then a while with the line empty, and back the other way
+      const tr = this.train;
+      if (tr) {
+        const ext = LW + (this.W - LW) * tr.depth;
+        if (tr.x == null) {
+          tr.wait -= dt;
+          if (tr.wait <= 0) { tr.x = tr.dir > 0 ? -10 : ext + 10; tr.heard = false; }
+        } else {
+          tr.x += tr.dir * tr.speed * dt;
+          tr.dist += tr.speed * dt;
+          const sx = tr.x - this.camX * tr.depth;
+          const seen = sx > -20 && sx < LW + 20;
+          if (seen && !tr.heard) { tr.heard = true; this.audio.fx('whistle', { volume: 0.45 }); }
+          tr.chuff += dt * 3.2;
+          if (tr.chuff > 1) {
+            tr.chuff -= 1;
+            for (let k = 0; k < 2; k++) tr.puffs.push({ x: tr.x - tr.dir * 1.8 + rnd(-0.5, 0.5), y: tr.deck - 13, vx: rnd(2, 6), vy: -rnd(7, 11), r: rnd(0.9, 1.4), grow: rnd(1.4, 2), age: 0, life: rnd(2.2, 3.2), a: 0.85 });
+            if (seen) this.audio.fx('chuff', { volume: 0.03 + 0.1 * Math.max(0, 1 - Math.abs(sx - LW / 2) / (LW * 0.8)) });
+          }
+          const tail = tr.x - tr.dir * TRAIN_LEN;
+          if ((tr.dir > 0 && tail > ext + 10) || (tr.dir < 0 && tail < -10)) { tr.x = null; tr.dir *= -1; tr.wait = rnd(tr.pause[0], tr.pause[1]); }
+        }
+        for (const p of tr.puffs) { p.age += dt; p.x += p.vx * dt; p.y += p.vy * dt; p.vy *= 0.99; p.r += p.grow * dt; }
+        tr.puffs = tr.puffs.filter((p) => p.age < p.life);
+      }
+      // the cuirassiers: in by the north road, the length of the camp at a walk, out, and back again
+      const cv = this.cavalry;
+      if (cv) {
+        if (cv.wait > 0) cv.wait -= dt;
+        else {
+          cv.x += cv.dir * cv.speed * dt;
+          const tail = cv.x - cv.dir * (cv.n - 1) * cv.gap;
+          if (cv.dir < 0 && tail < cv.to) { cv.dir = 1; cv.x = cv.to; cv.wait = cv.pause; }
+          else if (cv.dir > 0 && tail > cv.from) { cv.dir = -1; cv.x = cv.from; cv.wait = cv.pause; }
+          const d = Math.abs(cv.x - cv.dir * (cv.n - 1) * cv.gap / 2 - this.x);
+          if (d < 240) { cv.step += dt * 4.5; if (cv.step > 1) { cv.step -= 1; this.audio.fx('hoof', { volume: 0.45 * (1 - d / 240) }); } }
+        }
+      }
+      // now and then an airship's engines overhead, and the band practising across the camp
+      if (!quiet) {
+        this.hum.drone -= dt;
+        if (this.hum.drone <= 0) { this.hum.drone = rnd(16, 26); if (this.sky.some((a) => a.kind !== 'balloon')) this.audio.fx('drone', { volume: 0.5 }); }
+        if (this.def.band) { this.hum.band -= dt; if (this.hum.band <= 0) { this.hum.band = rnd(40, 70); this.audio.fx('band', { volume: this.def.band.volume || 0.35 }); } }
+      }
     }
 
     /** A few words over someone's head, as the camp talks among itself. */
@@ -670,6 +783,7 @@
       }
       g.bubble.firstChild.textContent = text;
       g.bubbleAt = x != null ? [x, y] : null;
+      this.audio.fx('mutter', { volume: 0.3 });
       g.bubble.classList.remove('on');
       void g.bubble.offsetWidth;
       g.bubble.classList.add('on');
@@ -712,13 +826,13 @@
       c.clearRect(0, 0, LW * SS, LH * SS);
       const behind = this.layers.filter((l) => l.depth <= 1);
       const front = this.layers.filter((l) => l.depth > 1);
-      // the airships and balloons fly between the clouds and the horizon
-      let skyDone = !this.sky.length;
+      // the layers, far to near, with whatever moves among them drawn at its own distance
+      let si = 0;
       for (const l of behind) {
-        if (!skyDone && l.depth > 0.1) { this.drawSky(c, cam); skyDone = true; }
+        while (si < this.slots.length && this.slots[si].z < l.depth) this.slots[si++].draw(c, cam);
         this.layer(c, l, cam);
       }
-      if (!skyDone) this.drawSky(c, cam);
+      while (si < this.slots.length) this.slots[si++].draw(c, cam);
       this.drawPuffs(c, cam);
       for (const f of this.flags) this.drawFlag(c, f, cam);
       for (const f of this.fires) this.drawFire(c, f, cam);
@@ -775,13 +889,29 @@
     }
 
     drawLife(c, cam) {
-      for (const g of this.crowd) {
+      const cv = this.cavalry;
+      if (cv) {
+        for (let i = 0; i < cv.n; i++) {
+          const x = cv.x - cv.dir * i * cv.gap - cam;
+          if (x < -30 || x > LW + 30) continue;
+          const rd = cv.riders[i % cv.riders.length];
+          c.save();
+          c.translate(Math.round(x * SS), Math.round(cv.y * SS));
+          c.scale(SS * cv.dir, SS);
+          drawHorse(c, this.t + i * 0.31, cv.wait <= 0, false, LOOKS[rd.look], false, HORSES[rd.horse]);
+          c.restore();
+        }
+      }
+      const cl = this.colours;
+      this.crowd.forEach((g, gi) => {
+        const rite = cl && cl.stage < 3 && gi === cl.group ? cl : null;
         g.people.forEach((p, i) => {
           const face = p.face || 1;
-          const pose = g.showing === i ? 'talk' : p.pose || null;
+          let pose = g.showing === i ? 'talk' : p.pose || null;
+          if (rite && p.rite) pose = p.rite === 'present' ? 'present' : rite.stage === 1 ? p.rite : pose;
           this.figure(c, LOOKS[p.look || 'soldier'], g.x + (p.dx || 0) - cam, p.y || GY, p.turn ? (Math.sin(this.t * 0.4 + i) > 0 ? 1 : -1) : face, this.t + i, false, pose);
         });
-      }
+      });
       for (const m of this.marchers) {
         for (let i = 0; i < (m.n || 2); i++) this.figure(c, m.look, m.x - m.dir * i * (m.gap || 9) - cam, GY, m.dir, this.t, m.wait <= 0, null);
       }
@@ -798,15 +928,17 @@
       if (x0 < -40 || x0 > LW + 10) return;
       const w = f.w || 24, hh = f.h || 11;
       const cols = f.colors || ['#2e4a9a', '#f2eee6', '#c83a3a'];
+      const fy = f.cur == null ? f.y : f.cur;
+      if (f.rope) { c.fillStyle = 'rgba(236,226,214,0.75)'; c.fillRect(Math.round(x0 * SS), Math.round(f.top * SS), 1, Math.round((GY - 16 - f.top) * SS)); }
       for (let i = 0; i < w; i++) {
         const k = i / w;
         const dy = Math.sin(this.t * 4.2 - i * 0.42) * k * 1.8;
         const slope = Math.cos(this.t * 4.2 - i * 0.42);
         const col = cols[Math.min(cols.length - 1, Math.floor(k * cols.length))];
         c.fillStyle = col;
-        c.fillRect(Math.round((x0 + i) * SS), Math.round((f.y + dy) * SS), SS, Math.round(hh * SS));
-        if (Math.abs(slope) > 0.55) { c.fillStyle = slope > 0 ? 'rgba(255,240,240,0.18)' : 'rgba(40,20,50,0.2)'; c.fillRect(Math.round((x0 + i) * SS), Math.round((f.y + dy) * SS), SS, Math.round(hh * SS)); }
-        if (f.fringe && i % 2 === 0) { c.fillStyle = '#f0c050'; c.fillRect(Math.round((x0 + i) * SS), Math.round((f.y + dy + hh) * SS), SS, SS); }
+        c.fillRect(Math.round((x0 + i) * SS), Math.round((fy + dy) * SS), SS, Math.round(hh * SS));
+        if (Math.abs(slope) > 0.55) { c.fillStyle = slope > 0 ? 'rgba(255,240,240,0.18)' : 'rgba(40,20,50,0.2)'; c.fillRect(Math.round((x0 + i) * SS), Math.round((fy + dy) * SS), SS, Math.round(hh * SS)); }
+        if (f.fringe && i % 2 === 0) { c.fillStyle = '#f0c050'; c.fillRect(Math.round((x0 + i) * SS), Math.round((fy + dy + hh) * SS), SS, SS); }
       }
     }
 
@@ -838,20 +970,180 @@
     }
 
     /** The sky of an industrious empire: steam airships crossing, observation balloons on their tethers. */
-    drawSky(c, cam) {
-      for (const a of this.sky) {
-        const s = a.s || 1;
-        if (a.kind === 'balloon') {
-          const x = a.x - cam * (a.depth == null ? 0.12 : a.depth);
-          if (x < -30 || x > LW + 30) continue;
-          const y = a.y + Math.sin(this.t * 0.7 + a.x) * 1.5;
-          this.drawBalloon(c, x, y, s, a);
-          continue;
+    drawSkyItem(c, a, cam) {
+      const s = a.s || 1;
+      if (a.kind === 'balloon') {
+        const x = a.x - cam * (a.depth == null ? 0.12 : a.depth);
+        if (x < -30 || x > LW + 30) return;
+        this.drawBalloon(c, x, a.y + Math.sin(this.t * 0.7 + a.x) * 1.5, s, a);
+        return;
+      }
+      const span = LW + 160 * s;
+      const raw = a.x - cam * (a.depth == null ? 0.04 : a.depth) + (a.dir || -1) * this.t * (a.speed || 5);
+      const x = ((raw % span) + span) % span - 80 * s;
+      const y = a.y + Math.sin(this.t * 0.5 + a.x) * 1.2;
+      if (a.kind === 'giant') this.drawGiant(c, x, y, s, a.dir || -1, a);
+      else this.drawAirship(c, x, y, s, a.dir || -1);
+    }
+
+    /**
+     * The great airship, far beyond Paris: painted off to one side, then veiled in the colour of
+     * the sky, so all the air in between softens it and it never outshines the camp.
+     */
+    drawGiant(c, x, y, s, dir, a) {
+      const L = 34 * s, H2 = 8 * s, pad = 46 * s;
+      const cw = Math.ceil((L + pad) * 2 * SS), ch = Math.ceil((H2 * 2 + 30 * s) * SS);
+      if (!this.giantCv) this.giantCv = document.createElement('canvas');
+      const cv = this.giantCv;
+      if (cv.width !== cw || cv.height !== ch) { cv.width = cw; cv.height = ch; }
+      const g = cv.getContext('2d');
+      g.clearRect(0, 0, cw, ch);
+      const ox = L + pad, oy = H2 + 12 * s;
+      this.paintGiant(g, ox, oy, s, dir);
+      g.save();
+      g.globalCompositeOperation = 'source-atop';
+      const hz = g.createLinearGradient(0, 0, 0, ch);
+      const [top, bottom] = a.haze || ['rgba(178,138,186,0.5)', 'rgba(230,160,182,0.5)'];
+      hz.addColorStop(0, top);
+      hz.addColorStop(1, bottom);
+      g.fillStyle = hz;
+      g.fillRect(0, 0, cw, ch);
+      g.restore();
+      c.drawImage(cv, Math.round((x - ox) * SS), Math.round((y - oy) * SS));
+    }
+
+    /** A great rigid airship: a long rounded hull, tail fins in the colours of France, a gondola, two engine cars. */
+    paintGiant(c, x, y, s, dir) {
+      const P = (px, py, w, hh, col) => { c.fillStyle = col; c.fillRect(Math.round((x + px * dir) * SS - (dir < 0 ? Math.round(w * SS) : 0)), Math.round((y + py) * SS), Math.max(1, Math.round(w * SS)), Math.max(1, Math.round(hh * SS))); };
+      const L = 34 * s, H2 = 7 * s;
+      const hullAt = (px) => H2 * Math.pow(Math.max(0, 1 - (px / L) * (px / L)), 0.8); // half the hull's height at px
+      // the engines' steam, trailing out behind
+      for (const ex of [-0.28, 0.2]) {
+        for (let k = 0; k < 6; k++) {
+          const age = (this.t * 0.32 + k / 6 + ex) % 1;
+          const r = (1 + age * 3.5) * s;
+          c.globalAlpha = 0.4 * (1 - age);
+          P(ex * L - 3 * s - age * 34 * s - r, H2 + 2 * s - age * 4 * s - r * 0.6, r * 2, r * 1.2, '#efe4ea');
         }
-        const span = LW + 160 * s;
-        const raw = a.x - cam * (a.depth == null ? 0.04 : a.depth) + (a.dir || -1) * this.t * (a.speed || 5);
-        const x = ((raw % span) + span) % span - 80 * s;
-        this.drawAirship(c, x, a.y + Math.sin(this.t * 0.5 + a.x) * 1.2, s, a.dir || -1);
+      }
+      c.globalAlpha = 1;
+      // the fins at the tail: above and below, the rudders striped blue, white and red
+      for (const sg of [-1, 1]) {
+        for (let px = -L * 0.72; px > -L * 0.99; px -= 0.5) {
+          const t = (-L * 0.72 - px) / (L * 0.27);
+          const h0 = hullAt(px), h1 = h0 + 6 * s * Math.min(1, t * 1.6);
+          const col = px < -L * 0.93 ? '#c83a3a' : px < -L * 0.88 ? '#f2eee6' : px < -L * 0.83 ? '#2e4a9a' : '#d8c6c8';
+          P(px, sg < 0 ? -h1 : h0, 0.5, h1 - h0, col);
+        }
+      }
+      P(-L * 1.02, -0.4 * s, L * 0.32, 0.8 * s, '#b8a4ae');
+      // the hull: lighter on top, shadowed beneath, its seams and its girders showing through
+      for (let yy = -H2; yy <= H2; yy += 0.5) {
+        // a rounded bow, the stern drawn out to a point
+        const k = yy / H2, bow = L * 0.97 * Math.sqrt(Math.max(0, 1 - k * k)), stern = L * Math.sqrt(Math.max(0, 1 - Math.pow(Math.abs(k), 1.3)));
+        const col = k < -0.6 ? '#fbf2ea' : k < -0.2 ? '#f0e2da' : k < 0.3 ? '#e2d0cc' : k < 0.65 ? '#ccb6be' : '#b098a6';
+        P(-stern, yy, stern + bow, 0.5, col);
+      }
+      for (let g = -6; g <= 6; g++) { const gx = g * L / 7.5, hh = hullAt(gx) * 0.96; P(gx, -hh, 0.5, hh * 2, 'rgba(150,120,140,0.3)'); }
+      P(-L * 0.85, -H2 * 0.1, L * 1.7, 0.5, 'rgba(160,130,150,0.35)');
+      // the tricolour round the hull, and the Emperor's golden eagle on a medallion near the bow
+      for (const [dx, col] of [[0, '#2e4a9a'], [2.4, '#f2eee6'], [4.8, '#c83a3a']]) { const gx = -L * 0.56 + dx * s, hh = hullAt(gx) * 0.97; P(gx, -hh, 2.4 * s, hh * 2, col); }
+      for (let yy = -1.6 * s; yy <= 1.6 * s; yy += 0.5) { const w = Math.sqrt(Math.max(0, 2.56 * s * s - yy * yy)); P(L * 0.5 - w, -H2 * 0.2 + yy, w * 2, 0.5, Math.abs(yy) > 1.1 * s ? '#c8a060' : '#e8c878'); }
+      P(L * 0.5 - 1.1 * s, -H2 * 0.2 - 0.3 * s, 2.2 * s, 0.6 * s, '#a07848');
+      // the gondola, slung close beneath, its windows lit; the struts that hold it
+      for (const sx of [-0.18, 0, 0.18]) P(sx * L, H2 * 0.92, 0.5, 2.2 * s, '#6a5a60');
+      P(-L * 0.24, H2 + 1.8 * s, L * 0.48, 2.8 * s, '#6a4a3a');
+      P(-L * 0.24, H2 + 1.8 * s, L * 0.48, 0.6 * s, '#9a7a5a');
+      P(L * 0.24, H2 + 2.2 * s, 1.6 * s, 2 * s, '#6a4a3a');
+      for (let k = -L * 0.2; k < L * 0.2; k += 2.4 * s) P(k, H2 + 2.8 * s, 1 * s, 1 * s, Math.round(k / s) % 3 ? '#ffd28a' : '#3a2a30');
+      // two engine cars, their propellers turning
+      for (const ex of [-0.28, 0.2]) {
+        P(ex * L - 3 * s, H2 * 0.9 + 1 * s, 6 * s, 2.2 * s, '#5a4a4a');
+        P(ex * L - 3 * s, H2 * 0.9 + 1 * s, 6 * s, 0.5 * s, '#8a7a72');
+        const px = ex * L - 3.6 * s;
+        if (Math.floor(this.t * 12 + ex * 7) % 2) P(px, H2 * 0.9 - 0.6 * s, 0.7 * s, 5 * s, '#3a2e2a');
+        else P(px - 0.5 * s, H2 * 0.9 + 1.8 * s, 1.7 * s, 0.7 * s, '#3a2e2a');
+      }
+      // and a long pennant from the top of the tail fin
+      const fx = -L * 0.97, fy = -hullAt(fx) - 6 * s;
+      for (let k = 0; k < 14 * s; k += 0.5) P(fx - k, fy + Math.sin(this.t * 3 - k * 0.35) * 1.1 * s * (k / (14 * s)), 0.5, 1.1 * s * (1 - k / (18 * s)), k < 4.6 * s ? '#2e4a9a' : k < 9.3 * s ? '#f2eee6' : '#c83a3a');
+    }
+
+    /** The train on the viaduct, and the steam it leaves hanging over the line. */
+    drawTrain(c, cam) {
+      const tr = this.train;
+      const off = cam * tr.depth;
+      if (tr.x != null) {
+        let x = tr.x;
+        for (const car of TRAIN) {
+          const x0 = (tr.dir > 0 ? x - car.w : x) - off;
+          if (x0 < LW + 4 && x0 + car.w > -4) this.drawCar(c, car, x0, tr.deck, tr.dir, tr.dist);
+          x -= tr.dir * (car.w + 1.5);
+        }
+      }
+      for (const p of tr.puffs) {
+        const x = p.x - off;
+        if (x < -20 || x > LW + 20) continue;
+        const k = 1 - p.age / p.life;
+        c.fillStyle = `rgba(248,238,242,${(p.a * k).toFixed(3)})`;
+        const R = p.r, n = Math.ceil(R);
+        for (let dy = -n; dy <= n; dy++) { const w = Math.floor(Math.sqrt(Math.max(0, R * R - dy * dy))); c.fillRect(Math.round((x - w) * SS), Math.round((p.y + dy) * SS), (w * 2 + 1) * SS, SS); }
+      }
+    }
+
+    /** One vehicle of the train, `x0` its left end on screen, drawn facing the way the train goes. */
+    drawCar(c, car, x0, yb, dir, dist) {
+      const w = car.w;
+      const R = (px, py, ww, hh, col) => { c.fillStyle = col; const X = dir > 0 ? x0 + px : x0 + w - px - ww; c.fillRect(Math.round(X * SS), Math.round((yb + py) * SS), Math.max(1, Math.round(ww * SS)), Math.max(1, Math.round(hh * SS))); };
+      const disc = (px, cy, r, col) => { for (let dy = -r; dy < r; dy += 0.5) { const hw = Math.sqrt(Math.max(0, r * r - (dy + 0.25) * (dy + 0.25))); R(px - hw, cy + dy, hw * 2, 0.5, col); } };
+      const wheel = (px, r = 1.25) => { disc(px, -r, r, '#2a2226'); const a = dist / r; R(px + Math.cos(a) * r * 0.5 - 0.25, -r + Math.sin(a) * r * 0.5 - 0.25, 0.5, 0.5, '#8a7a70'); };
+      if (car.kind !== 'loco') R(w, -3, 1.5, 0.5, '#2a2226');
+      if (car.kind === 'loco') {
+        // a Crampton engine: one great driving wheel under the cab, a long low boiler, a tall stack
+        disc(4, -3, 3, '#7a2a26'); disc(4, -3, 1, '#d8b060');
+        const a = dist / 3; R(4 + Math.cos(a) * 2 - 0.25, -3 + Math.sin(a) * 2 - 0.25, 0.5, 0.5, '#f0d080');
+        R(0.5, -6.5, 7, 0.5, '#d8b060');
+        wheel(12.5); wheel(17);
+        R(1, -3.5, 19, 0.5, '#2a2226');
+        R(5, -7.5, 13, 4, '#3e5e4e'); R(5, -7.5, 13, 0.5, '#7a9a82'); R(5, -4, 13, 0.5, '#2a4034');
+        for (const bx of [8.5, 12, 15.5]) R(bx, -7.5, 0.5, 4, '#d8b060');
+        R(17.5, -8, 2, 4.5, '#2a2a30');
+        R(17.5, -12.5, 1.5, 4.5, '#2a2a30'); R(17, -13, 2.5, 1, '#b07a4a');
+        R(11, -9, 2, 1.5, '#d8b060'); R(6.5, -8.5, 1, 1, '#d8b060');
+        R(0, -10.5, 5, 7, '#2e4a3e'); R(-0.5, -11, 6, 1, '#1e2a26'); R(1, -9.5, 2, 2, '#ffc070');
+        R(19.5, -5, 1, 1.5, '#c83a3a');
+        // a little tricolour on the cab, streaming back
+        R(2.5, -14.5, 0.5, 3.5, '#2a2a30'); R(1.5, -14.5, 1, 1.2, '#2e4a9a'); R(0.5, -14.5 + Math.sin(dist * 0.3) * 0.25, 1, 1.2, '#f2eee6'); R(-0.5, -14.5, 1, 1.2, '#c83a3a');
+      } else if (car.kind === 'tender') {
+        wheel(2); wheel(7);
+        R(0, -6.5, 9, 4, '#2e4a3e'); R(0, -6.5, 9, 0.5, '#5a7a66'); R(0.5, -7.5, 8, 1, '#1a1a1c');
+      } else if (car.kind === 'gun' || car.kind === 'guns') {
+        // a flat wagon with a field gun lashed down (and its ammunition chest), a gunner riding along
+        wheel(2.5); wheel(11.5);
+        R(0, -3.5, 14, 1, '#5a3e2a'); R(0, -3.5, 14, 0.5, '#8a6a4a');
+        disc(6, -5.5, 1.8, '#6a4a2e'); disc(6, -5.5, 0.6, '#3a2a1e');
+        R(4.5, -6.8, 7.5, 1, '#8a6a3a'); R(11.5, -7.2, 1, 1.6, '#6a4a2a'); R(2, -4.5, 4, 0.5, '#5a3e2a');
+        if (car.kind === 'guns') { R(9, -6.5, 4.5, 3, '#4e5c3c'); R(9, -6.5, 4.5, 0.5, '#6e7c56'); }
+        else { R(1, -6.5, 1, 0.8, '#c83a3a'); R(1, -5.7, 1, 1, '#e8c0a0'); R(0.8, -4.7, 1.5, 1.2, '#1e2a4a'); }
+      } else if (car.kind === 'wagon') {
+        // a covered wagon with the door slid open, and soldiers looking out
+        wheel(2.5); wheel(9.5);
+        R(0, -8.5, 12, 6, '#7a3a2e'); R(0, -8.5, 12, 0.5, '#9a5a44'); R(-0.5, -9, 13, 0.5, '#3a2a2a');
+        R(4, -7.5, 4, 4.5, '#2a1a1a');
+        for (const hx of [4.5, 6.5]) { R(hx, -7, 1, 0.6, '#c83a3a'); R(hx, -6.4, 1, 1, '#e8c0a0'); }
+        R(4.2, -5.4, 3.6, 2, '#2e4a8a');
+      } else if (car.kind === 'coach') {
+        // the officers' carriage, blue and gold, a red kepi at the window
+        wheel(2.5); wheel(10.5);
+        R(0, -8.5, 13, 6, '#2e4a8a'); R(0, -8.5, 13, 0.5, '#5a76b0'); R(-0.5, -9.5, 14, 1, '#3a3040');
+        for (const [k, lit] of [[1.5, true], [5.2, false], [8.9, true]]) R(k, -7.5, 2.6, 2, lit ? '#ffd28a' : '#1e2a44');
+        R(5.7, -7.5, 1, 0.6, '#c83a3a'); R(5.7, -6.9, 1, 1, '#e8c0a0');
+        R(0, -4.5, 13, 0.5, '#d8b060');
+      } else {
+        // the guard's van at the back, its lookout and its red lamp
+        wheel(2); wheel(7);
+        R(0, -8, 9, 5.5, '#6a4a3a'); R(-0.5, -8.5, 10, 0.5, '#3a2a2a'); R(3, -10, 3, 1.5, '#6a4a3a'); R(3.5, -9.7, 2, 0.8, '#ffd28a');
+        R(0, -6.5, 0.5, 1, '#ff4a3a');
       }
     }
 

@@ -79,6 +79,7 @@
       flt.frequency.value = f;
       flt.Q.value = q;
       const g = ctx.createGain();
+      g.gain.value = 0; // silent until its envelope begins (a start between samples could otherwise click)
       g.gain.setValueAtTime(0, t);
       g.gain.linearRampToValueAtTime(gain, t + attack);
       g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
@@ -1318,6 +1319,56 @@
     swell: (S, o, t) => { S.pad(o, [60, 64, 67, 72], t, 2.4, 0.07, { cutoff: 1500, attack: 2.2, vibrato: 0.004 }); S.cymbal(o, t, 2.6, 0.06, true); S.choir(o, [72, 76, 79], t + 0.6, 1.8, 0.04, { vowel: 'a', attack: 1.4 }); },
     dread: (S, o, t) => { S.pad(o, [28, 29], t, 3, 0.12, { cutoff: 220, attack: 1.2 }); S.bowed(o, 88, t, 3, 0.03, { vib: 0.03, attack: 1.5, bright: 0.9 }); S.bowed(o, 89, t, 3, 0.03, { vib: 0.03, attack: 1.5, bright: 0.9 }); },
     heartbeat_fast: (S, o, t) => { for (let i = 0; i < 4; i++) { S.taiko(o, t + i * 0.5, 0.5, 0.7); S.taiko(o, t + i * 0.5 + 0.2, 0.32, 0.65); } },
+    // the army camp's morning
+    bugle: (S, o, t) => {
+      // a B-flat bugle, which has only the notes of its one tube (F, B-flat, D, F, B-flat): the colours going up
+      const [F4, Bb4, D5, F5, Bb5] = [65, 70, 74, 77, 82];
+      const call = [[F4, 0.3], [Bb4, 0.3], [D5, 0.8], [0, 0.15], [F5, 0.3], [D5, 0.3], [Bb4, 0.8], [0, 0.15], [D5, 0.22], [D5, 0.22], [F5, 0.45], [D5, 0.45], [Bb4, 0.45], [F4, 0.8], [0, 0.15], [Bb4, 0.3], [D5, 0.3], [F5, 0.3], [Bb5, 1.5], [0, 0.1], [F5, 0.4], [D5, 0.4], [Bb4, 1.4]];
+      let k = 0;
+      for (const [m, d] of call) { if (m) S.brass(o, [m], t + k, d * 0.9, 0.1, { bright: 1, attack: 0.03 }); k += d; }
+    },
+    whistle: (S, o, t) => {
+      // a steam whistle, far off: a breathy chord that swoops up and holds, then a short second blast
+      const ctx = S.ctx;
+      const blast = (t0, dur) => {
+        for (const f of [520, 660, 780]) {
+          const x = ctx.createOscillator(), g = ctx.createGain();
+          x.type = 'triangle';
+          x.frequency.setValueAtTime(f * 0.9, t0);
+          x.frequency.exponentialRampToValueAtTime(f, t0 + 0.12);
+          x.frequency.setValueAtTime(f, t0 + dur);
+          x.frequency.exponentialRampToValueAtTime(f * 0.94, t0 + dur + 0.15);
+          g.gain.setValueAtTime(0, t0); g.gain.linearRampToValueAtTime(0.05, t0 + 0.1); g.gain.setValueAtTime(0.05, t0 + dur); g.gain.linearRampToValueAtTime(0, t0 + dur + 0.15);
+          x.connect(g).connect(o); x.start(t0); x.stop(t0 + dur + 0.2);
+        }
+        S.noise(o, t0, dur, { type: 'bandpass', f: 1400, q: 3, gain: 0.08, attack: 0.08 });
+      };
+      blast(t, 1.1); blast(t + 1.45, 0.45);
+    },
+    chuff: (S, o, t) => S.noise(o, t, 0.16, { type: 'bandpass', f: 380 + Math.random() * 80, q: 0.9, gain: 0.35, attack: 0.01 }),
+    drone: (S, o, t) => {
+      // an airship's engine going over: a low throb with the propeller's beat in it, rising and fading
+      const ctx = S.ctx, x = ctx.createOscillator(), lp = ctx.createBiquadFilter(), beat = ctx.createGain(), g = ctx.createGain(), am = ctx.createOscillator(), depth = ctx.createGain();
+      x.type = 'sawtooth'; x.frequency.setValueAtTime(52, t); x.frequency.linearRampToValueAtTime(47, t + 7.5);
+      lp.type = 'lowpass'; lp.frequency.value = 260;
+      am.frequency.value = 7; depth.gain.value = 0.4; beat.gain.value = 0.6;
+      g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(0.14, t + 2.5); g.gain.setValueAtTime(0.14, t + 4.5); g.gain.linearRampToValueAtTime(0, t + 7.5);
+      am.connect(depth).connect(beat.gain);
+      x.connect(lp).connect(beat).connect(g).connect(o);
+      x.start(t); am.start(t); x.stop(t + 7.6); am.stop(t + 7.6);
+    },
+    band: (S, o, t) => {
+      // a regimental band practising somewhere across the camp: fifes over a side drum and a bass drum
+      const b = 0.28;
+      const tune = [72, 77, 77, 81, 77, 72, 77, 81, 84, 82, 81, 79, 77, 0, 72, 76, 77, 79, 81, 79, 77, 76, 77, 0];
+      tune.forEach((m, i) => { if (m) S.flute(o, m, t + i * b, b * 0.85, 0.06, { scoop: 0.2, vib: 0.008 }); });
+      for (let i = 0; i < tune.length; i++) { S.snare(o, t + i * b, i % 2 ? 0.02 : 0.035); if (i % 4 === 0) S.taiko(o, t + i * b, 0.05, 0.55); }
+    },
+    mutter: (S, o, t) => {
+      // men talking, too far off to make out the words
+      const pitch = 105 + Math.random() * 60;
+      for (let k = 0, n = 4 + Math.floor(Math.random() * 4); k < n; k++) S.syllable({ pitch, muffle: 900, breath: 0.3 }, 'aoeiu'[Math.floor(Math.random() * 5)], 0.05, 1 + Math.random() * 0.15, Math.random() < 0.5, o, t + k * 0.14);
+    },
     // the everyday
     step: (S, o, t) => S.noise(o, t, 0.07, { type: 'lowpass', f: 420 + Math.random() * 120, gain: 0.45, attack: 0.003 }),
     hoof: (S, o, t) => { S.noise(o, t, 0.06, { type: 'bandpass', f: 520, q: 2, gain: 0.5, attack: 0.002 }); S.noise(o, t + 0.09, 0.05, { type: 'bandpass', f: 460, q: 2, gain: 0.35, attack: 0.002 }); },

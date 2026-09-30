@@ -40,7 +40,18 @@
  *    flags:    [{ x, y, w, h, fringe }]  flags of France waving (paint the pole)
  *    fires:    [{ x, y }]   smoke: [{ x, y, rate }]   flames and rising smoke
  *    airships: [{ kind: 'ship', x, y, s, speed, depth }, { kind: 'balloon', x, y, s, depth, tether }]
- *  Looks for the French army: soldier, rifleman (a rifle on the shoulder), officer, gunner, zouave.
+ *              kind 'giant' is the great airship, veiled in haze; `z` says which layers it flies
+ *              behind (it is drawn before every layer deeper than z: 0.03 is behind the clouds)
+ *    colours:  { group, flag, from, delay, dur, hold, call, caller }  the flag hoisted at the start:
+ *              crowd[group] shows `call`, then its people take their `rite` pose ('bugle', 'haul',
+ *              'present') while flags[flag] climbs from y `from` to its own y and the bugle sounds
+ *    train:    { depth, deck, speed, first, dir, pause: [min, max] }  a train now and then along a
+ *              viaduct painted at `depth` (its rails at y `deck`), whistling as it comes into view
+ *    cavalry:  { from, to, y, speed, gap, first, pause, riders: [{ look, horse }] }  horsemen riding
+ *              the length of the walk and back (horses: bay, black, grey)
+ *    band:     { first, volume }  a band practising somewhere, heard now and then
+ *  Looks for the French army: soldier, rifleman (a rifle on the shoulder), officer, gunner, zouave,
+ *  bugler, and the cavalry's cuirassier, cuirassierOfficer and trumpeter.
  * ============================================================================
  */
 window.VN_WALKS = {
@@ -52,8 +63,10 @@ window.VN_WALKS = {
     hint: 'Walk to the edge of camp →',
     // the camp's morning: nothing here stops Hervé, it is only there to be seen
     airships: [
-      { kind: 'ship', x: 380, y: 52, s: 1, speed: 5, depth: 0.04 },
-      { kind: 'ship', x: 120, y: 30, s: 0.55, speed: 3, depth: 0.03 },
+      // the great airship, far off beyond Paris and behind the clouds, crossing very slowly
+      { kind: 'giant', x: 330, y: 86, s: 2.1, speed: 1.4, depth: 0.015, z: 0.03 },
+      { kind: 'ship', x: 380, y: 44, s: 1, speed: 5, depth: 0.04 },
+      { kind: 'ship', x: 120, y: 24, s: 0.55, speed: 3, depth: 0.03 },
       { kind: 'balloon', x: 250, y: 96, s: 0.8, depth: 0.12, tether: 170 },
       { kind: 'balloon', x: 560, y: 82, s: 0.6, depth: 0.12, tether: 168, colors: ['#f2e6dc', '#2e4a9a'] },
     ],
@@ -65,7 +78,17 @@ window.VN_WALKS = {
     ],
     fires: [{ x: 752, y: 203 }],
     smoke: [{ x: 752, y: 192, rate: 1.6 }, { x: 676, y: 124, rate: 0.8 }, { x: 829, y: 124, rate: 0.8 }],
+    // the colours go up at dawn: the bugle, the flag hoisted, the guard presenting arms
+    colours: { group: 0, flag: 0, from: 176, delay: 1.6, dur: 10.4, hold: 3, call: 'To the colours!', caller: 5 },
+    // an army train crossing the viaduct now and then, and cuirassiers riding through the camp
+    train: { depth: 0.2, deck: 146, speed: 34, first: 12, dir: -1, pause: [24, 40] },
+    cavalry: {
+      from: 1480, to: -60, y: 201, speed: 40, gap: 26, first: 4, pause: 22,
+      riders: [{ look: 'cuirassierOfficer', horse: 'bay' }, { look: 'trumpeter', horse: 'grey' }, { look: 'cuirassier', horse: 'black' }, { look: 'cuirassier', horse: 'black' }],
+    },
+    band: { first: 35, volume: 0.35 },
     crowd: [
+      { x: 141, near: 150, people: [{ dx: -20, look: 'bugler', face: 1, rite: 'bugle' }, { dx: -4, look: 'soldier', face: 1, rite: 'haul' }, { dx: 11, look: 'rifleman', face: -1, rite: 'present' }, { dx: 18, look: 'rifleman', face: -1, rite: 'present' }, { dx: 25, look: 'rifleman', face: -1, rite: 'present' }, { dx: 36, look: 'officer', face: -1 }], lines: [[5, 'Stand easy, the colour guard.'], [0, 'I cracked the last note. Nobody say a word.'], [3, 'The colonel heard it. The colonel hears everything.'], [1, 'My arms. Every morning, my arms.']] },
       { x: 94, near: 120, people: [{ dx: 0, y: 156, look: 'rifleman', turn: true }], lines: [[0, 'All quiet on the south road, Corporal!'], [0, 'Nothing moves out there but the mist.']] },
       { x: 292, people: [{ dx: -8, look: 'soldier', face: 1 }, { dx: 8, look: 'soldier', face: -1 }], lines: [[0, 'Pay\'s late again.'], [1, 'It\'s always late. That\'s how you know it\'s the army.'], [0, 'When I\'m discharged, I\'m opening a café in Marseille.'], [1, 'Last week it was Toulon.'], [0, 'Toulon, Marseille. Somewhere with the sea.']] },
       { x: 492, people: [{ dx: -7, look: 'rifleman', face: 1 }, { dx: 8, look: 'soldier', face: -1, pose: 'sit' }], lines: [[0, 'Polish your buttons, Lefèvre. The colonel counts them.'], [1, 'Then the colonel can count mine himself.'], [1, 'My mother writes that the silkworms are sick again at home.'], [0, 'Tell her the army eats bread, not silk.']] },

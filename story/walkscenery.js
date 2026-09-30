@@ -101,21 +101,41 @@ window.VN_WALKSCENERY = {
     "src": "assets/walks/camp/clouds.png"
    },
    {
+    "id": "paris",
+    "x": 0,
+    "y": 81,
+    "w": 608,
+    "h": 87,
+    "depth": 0.08,
+    "anim": null,
+    "src": "assets/walks/camp/paris.png"
+   },
+   {
     "id": "far",
     "x": 0,
-    "y": 93,
+    "y": 95,
     "w": 675,
-    "h": 111,
+    "h": 109,
     "depth": 0.12,
     "anim": null,
     "src": "assets/walks/camp/far.png"
    },
    {
+    "id": "rail",
+    "x": 0,
+    "y": 131,
+    "w": 733,
+    "h": 77,
+    "depth": 0.2,
+    "anim": null,
+    "src": "assets/walks/camp/rail.png"
+   },
+   {
     "id": "mid",
     "x": 0,
-    "y": 144,
-    "w": 885,
-    "h": 52,
+    "y": 143,
+    "w": 889,
+    "h": 53,
     "depth": 0.38,
     "anim": null,
     "src": "assets/walks/camp/mid.png"
@@ -132,10 +152,10 @@ window.VN_WALKSCENERY = {
    },
    {
     "id": "front",
-    "x": 32,
-    "y": 232,
-    "w": 1408,
-    "h": 38,
+    "x": 14,
+    "y": 233,
+    "w": 1422,
+    "h": 37,
     "depth": 1.3,
     "anim": {
      "type": "sway",
