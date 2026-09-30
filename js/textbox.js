@@ -291,12 +291,22 @@
         st.backgroundSize = '';
         st.backgroundPosition = '';
       } else {
-        // the square of the sprite that holds the face, filling the portrait box
-        const box = this.face.offsetWidth || 236;
-        const w = box / face.rect.s, hgt = w * (face.rect.a || 850 / 400);
-        st.backgroundImage = `url("${url}")`;
-        st.backgroundSize = `${w}px ${hgt}px`;
-        st.backgroundPosition = `${-face.rect.x * w}px ${-face.rect.y * hgt}px`;
+        // the square of the sprite that holds the face, filling the portrait box, at the sprite's
+        // own proportions (a = its height / width; measured from the picture if not given)
+        const place = (a) => {
+          if (this.faceKey !== key) return;
+          const box = this.face.offsetWidth || 236;
+          const w = box / face.rect.s, hgt = w * a;
+          st.backgroundImage = `url("${url}")`;
+          st.backgroundSize = `${w}px ${hgt}px`;
+          st.backgroundPosition = `${-face.rect.x * w}px ${-face.rect.y * hgt}px`;
+        };
+        if (face.rect.a) place(face.rect.a);
+        else {
+          const img = new Image();
+          img.onload = () => place(img.naturalHeight / img.naturalWidth);
+          img.src = url;
+        }
       }
       this.face.classList.remove('enter', 'swap');
       void this.face.offsetWidth;
