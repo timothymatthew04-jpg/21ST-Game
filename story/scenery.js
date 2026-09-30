@@ -3622,13 +3622,13 @@ window.VN_SCENERY = {
    {
     "id": "clouds",
     "x": 0,
-    "y": 24,
+    "y": 114,
     "w": 480,
-    "h": 59,
+    "h": 12,
     "depth": 0.04,
     "anim": {
      "type": "drift",
-     "t": 240
+     "t": 300
     },
     "src": "assets/scenes/smuggler_boat/clouds.png"
    },

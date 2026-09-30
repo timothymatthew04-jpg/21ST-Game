@@ -631,6 +631,7 @@ lantern or the pond at any window shape; `#colour` is optional everywhere.
 | `rider` | y,x0,x1,seconds [, scale, delay] | Hervé at a gallop on a pale horse, from x0 to x1 |
 | `fish` | x,y,w,h [, rate] | fish leaping out of the water and back, with rings and drops |
 | `flock` | every [, y0, y1] | flocks of birds going over in loose Vs, every so many seconds |
+| `aurora` | top,height [, strength, flip] | the northern lights: curtains of green light rippling across the sky, violet at their tops, shimmering with rays; with `flip` they hang downward from `top`, fainter, as their reflection on water |
 | `army` | y,dir,speed,count,type [, scale, x0, x1, fire] | soldiers marching in ranks: type 0 the imperial army, 1 samurai with banners, 2 French infantry; `fire` makes the front rank let off volleys |
 | `airship` | y,dir,speed [, scale, x] | a steam airship crossing the sky (tricolour rudder, turning propeller, a trail of smoke), wrapping round |
 | `balloon` | x,y [, scale, tether, colours] | an observation balloon bobbing on its tether (to `tether`, a height); colours 0 red and cream, 1 blue and cream |

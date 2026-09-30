@@ -156,6 +156,46 @@
   }
 
   // ---------------------------------------------------------------- things that live in one region
+  /**
+   * The northern lights: curtains of light rippling slowly across the sky, bright green at their
+   * feet, teal and violet as they rise, shimmering with rays. `aurora=top,height[,strength,flip]`:
+   * with flip, the curtains hang downward from `top` instead, fainter: their reflection in water.
+   */
+  class Aurora {
+    constructor(nums) {
+      const [top = 0.05, hh = 0.4, strength = 1, flip = 0] = nums;
+      this.o = { top, hh, strength, flip: !!flip };
+      this.bands = [0, 1, 2].map((i) => ({ at: 0.55 + i * 0.18, height: 0.55 + i * 0.12, alpha: [0.55, 0.42, 0.3][i], ph: Math.random() * TAU, k: 0.012 + i * 0.006, w: 0.12 + i * 0.05 }));
+      this.strip = document.createElement('canvas');
+      this.strip.width = 1; this.strip.height = 64;
+      const g = this.strip.getContext('2d'), gr = g.createLinearGradient(0, 64, 0, 0);
+      gr.addColorStop(0, 'rgba(150,255,190,1)'); gr.addColorStop(0.12, 'rgba(90,240,160,0.95)'); gr.addColorStop(0.4, 'rgba(60,200,170,0.6)');
+      gr.addColorStop(0.72, 'rgba(90,110,240,0.3)'); gr.addColorStop(1, 'rgba(170,80,220,0)');
+      g.fillStyle = gr; g.fillRect(0, 0, 1, 64);
+    }
+    resize(W, H) { this.W = W; this.H = H; }
+    step() {}
+    draw(c, t) {
+      const { top, hh, strength, flip } = this.o, W = this.W, H = this.H;
+      c.globalCompositeOperation = 'lighter';
+      for (const b of this.bands) {
+        for (let x = 0; x < W; x += 1) {
+          const wave = Math.sin(x * b.k + t * b.w + b.ph) * H * 0.05 + Math.sin(x * b.k * 2.7 - t * b.w * 1.6 + b.ph * 2) * H * 0.02;
+          const ch = H * hh * b.height * (0.55 + 0.45 * Math.sin(x * b.k * 1.9 + t * b.w * 0.7 + b.ph * 3));
+          const fold = Math.pow(0.5 + 0.5 * Math.sin(x * b.k * 3.3 + t * 0.35 + b.ph), 1.5);
+          const rays = 0.65 + 0.35 * Math.sin(x * 0.9 + t * 2.2 + b.ph) * Math.sin(x * 0.37 - t * 1.3);
+          const a = strength * b.alpha * fold * rays * (flip ? 0.4 : 1);
+          if (a < 0.02) continue;
+          c.globalAlpha = Math.min(1, a);
+          if (!flip) { const base = H * (top + hh * b.at) + wave; c.drawImage(this.strip, x, base - ch, 1, ch); }
+          else { const base = H * top - wave * 0.3; c.save(); c.translate(0, base * 2); c.scale(1, -1); c.drawImage(this.strip, x, base - ch * 0.6, 1, ch * 0.6); c.restore(); }
+        }
+      }
+      c.globalAlpha = 1;
+      c.globalCompositeOperation = 'source-over';
+    }
+  }
+
   class Region {
     constructor(nums, fallbackN) {
       const [x = 0, y = 0, w = 1, hh = 1, n = fallbackN] = nums;
@@ -1302,6 +1342,7 @@
           case 'herd': this.systems.push(new Herd(n)); break;
           case 'fish': this.systems.push(new Fish(n)); break;
           case 'flock': this.systems.push(new Flock(n)); break;
+          case 'aurora': this.systems.push(new Aurora(n)); break;
           case 'rider': this.systems.push(new Rider(n)); break;
           case 'glow': case 'flame': lights.push(this.light(s)); break;
           case 'rays': lights.push(this.rays(s)); break;

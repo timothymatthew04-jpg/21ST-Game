@@ -129,7 +129,7 @@ bgfx cemetery_night glow=0.75,0.185,0.05,#cfe0ff flame=0.817,0.422,0.02 flame=0.
 bgfx road_east glow=0.6625,0.544,0.07,#ffd08a rays=0.6625,0.54,0.8,0.8,#ffd49a birds=5,0.08,0.4 motes=0.4,0.45,0.5,0.3,30,#ffe0a0
 bgfx road_winter snow=1.2 glow=0.625,0.407,0.05,#fff6e8 mist=0.5,0.12,0.3,#ffffff
 bgfx road_rain rain=1.3 mist=0.52,0.14,0.3,#9aa4b8
-bgfx smuggler_boat glow=0.625,0.207,0.05,#cfe0ff glints=0.5,0.53,0.25,0.25,30 stars=0,0,1,0.45,30 mist=0.48,0.12,0.25
+bgfx smuggler_boat aurora=0.02,0.42,1 aurora=0.527,0.2,0.8,1 glow=0.1375,0.133,0.035,#cfe0ff glints=0.15,0.54,0.7,0.2,34,#b8ffd8 stars=0,0,1,0.45,30 mist=0.5,0.1,0.2,#8ad8c0
 bgfx china_dock glow=0.3125,0.526,0.09,#ffc080 flame=0.252,0.593,0.03,#ff7050 flame=0.877,0.593,0.03,#ff7050 glints=0,0.56,1,0.25,26 birds=3,0.08,0.3
 bgfx japan_coast glow=0.133,0.141,0.03,#cfe0ff glow=0.85,0.55,0.25,#ffb080 glints=0.3,0.56,0.7,0.2,26 flame=0.373,0.633,0.02 birds=4,0.1,0.35 mist=0.42,0.12,0.3,#ffd0d0 stars=0,0,1,0.25,14
 bgfx japan_path rays=0.5,0.37,1.2,0.6,#fff0b0 motes=0.3,0.2,0.4,0.6,40,#fff0c0 fireflies=0,0.65,0.35,0.3,8 fireflies=0.65,0.65,0.35,0.3,8 foliage=0.6 glow=0.5125,0.14,0.07,#e8f0ff flame=0.25,0.687,0.02,#ffd28a flame=0.754,0.687,0.02,#ffd28a flame=0.329,0.678,0.012,#ffd28a

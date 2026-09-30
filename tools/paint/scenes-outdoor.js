@@ -110,33 +110,40 @@ SCENES.road_rain = (c, L) => roadScene(c, L, 'rain');
 // ---------------------------------------------------------------- a smuggler's boat at night, seen from its own deck
 SCENES.smuggler_boat = (c, L) => {
   const r = rng(21);
-  vgrad(c, 0, 0, W, 142, [[0, '#060b22'], [0.45, '#13224c'], [1, '#3a5687']]);
-  stars(c, r, 180, 0, 0, W, 125);
-  moon(c, 300, 56, 16, { seed: 4 });
-  const cl = L('clouds', { depth: 0.04, anim: { type: 'drift', t: 240 } });
+  // a clear, cold night far to the north-east, the sky full of the northern lights (the aurora
+  // itself, rippling, is the scene's effect): deep blue, a green glow along the horizon
+  vgrad(c, 0, 0, W, 142, [[0, '#030814'], [0.4, '#081a2e'], [0.75, '#0f3040'], [1, '#1e5250']]);
+  glow(c, 240, 150, 260, 'rgba(80,220,160,0.18)');
+  stars(c, r, 220, 0, 0, W, 130);
+  moon(c, 66, 36, 9, { seed: 4 });
+  const cl = L('clouds', { depth: 0.04, anim: { type: 'drift', t: 300 } });
   wrapped(cl, 8, (cc, rr) => {
-    cloudBand(cc, rr, 200, 78, 220, 8, { body: '#16244f', rim: '#8fa8dc', shadow: '#101a3c', hi: '#cfe0ff', lightFromBelow: false });
-    cloudBand(cc, rr, -10, 40, 170, 8, { body: '#121f46', rim: '#5d78b0', shadow: '#0d1636', hi: '#a9bff0', lightFromBelow: false });
-    cloudBand(cc, rr, 360, 30, 140, 6, { body: '#121f46', rim: '#6f8ac2', shadow: '#0d1636', hi: '#b9cdf5', lightFromBelow: false });
+    cloudBand(cc, rr, 40, 118, 170, 4, { body: '#0c1e2c', rim: '#4a9a88', shadow: '#08141e', hi: '#8ad8b8', lightFromBelow: false });
+    cloudBand(cc, rr, 330, 124, 150, 3, { body: '#0c1e2c', rim: '#3e8a7c', shadow: '#08141e', hi: '#7ac8a8', lightFromBelow: false });
   });
   const sea = L('sea', { depth: 0.1 });
-  hill(sea, r, -40, 250, 142, 18, '#0d1632');
-  hill(sea, r, 330, 540, 142, 7, '#0f1a38');
-  vgrad(sea, 0, 141, W, H - 141, [[0, '#2b4878'], [0.3, '#16284f'], [1, '#060d22']]);
+  hill(sea, r, -40, 250, 142, 18, '#06121c');
+  hill(sea, r, 330, 540, 142, 7, '#081620');
+  vgrad(sea, 0, 141, W, H - 141, [[0, '#1c4a4c'], [0.3, '#0e2632'], [1, '#040a14']]);
   for (let i = 0; i < 700; i++) {
     const y = 142 + Math.pow(r(), 1.5) * 128;
     sea.globalAlpha = r.r(0.2, 0.6);
-    rect(sea, r() * W, y, 2 + (y - 140) * 0.14 * r(), 1, r() < 0.55 ? '#3f5f96' : '#081330');
+    rect(sea, r() * W, y, 2 + (y - 140) * 0.14 * r(), 1, r() < 0.55 ? '#2e6a64' : '#06101c');
   }
   sea.globalAlpha = 1;
-  for (let i = 0; i < 110; i++) {
-    const y = 143 + Math.pow(r(), 1.3) * 60;
-    const spread = 4 + (y - 142) * 0.55;
+  // the aurora's green lying in long streaks on the swell, and the small moon's path
+  for (let i = 0; i < 160; i++) {
+    const y = 143 + Math.pow(r(), 1.2) * 70;
+    sea.globalAlpha = r.r(0.3, 0.9);
+    rect(sea, r.r(80, 440), y, r.r(3, 10 + (y - 142) * 0.2), 1, r.pick(['#6ae0a8', '#4ac098', '#9af0c8', '#5a8ae0']));
+  }
+  for (let i = 0; i < 50; i++) {
+    const y = 143 + Math.pow(r(), 1.3) * 50, spread = 3 + (y - 142) * 0.4;
     sea.globalAlpha = r.r(0.4, 1);
-    rect(sea, 300 + r.r(-1, 1) * spread, y, r.r(2, 3 + (y - 142) * 0.1), 1, r() < 0.3 ? '#ffffff' : '#bcd0f4');
+    rect(sea, 66 + r.r(-1, 1) * spread, y, r.r(2, 4), 1, r() < 0.3 ? '#ffffff' : '#bcd0f4');
   }
   sea.globalAlpha = 1;
-  glow(sea, 300, 160, 70, 'rgba(150,180,240,0.25)');
+  glow(sea, 240, 150, 110, 'rgba(90,230,170,0.2)');
   // the deck rises and falls on the swell
   const d = L('deck', { depth: 0.8, anim: { type: 'bob', a: 1.6, r: 0.55, t: 7, oy: 1 } });
   const bow = [318, 196];

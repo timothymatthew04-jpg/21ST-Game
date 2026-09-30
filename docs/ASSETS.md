@@ -104,6 +104,10 @@ merchants' stalls and townhouses under their paper lanterns and banners, a stage
 players, an archery butt, the walled samurai quarter and its cherry trees in pink and white, to
 Hara Kei's great gate. It is drawn by `tools/paint/scenes-japan.js`.
 
+The smuggler's boat (`smuggler_boat`), the crossing to Japan, is a clear, cold night at sea with
+the northern lights as its sky: the aurora itself is an effect (`aurora`), rippling above the deck
+and mirrored faintly in the swell, over a painted sky that glows green at the horizon.
+
 The eight walking areas (`camp`, `lavilledieu`, `steppe`, `village`, `aviary`, `ruins`, `crossing`, `cemetery`) are painted by
 `tools/paint-walks.js` from `tools/paint/walks.js`, with the same toolkit and style as the
 backgrounds but two to five screens wide. Each is saved as layers: the sky (one screen, it never
