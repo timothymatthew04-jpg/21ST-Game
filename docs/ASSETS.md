@@ -61,15 +61,20 @@ are scaled smoothly and stay sharp at any window size (see docs/SCRIPTING.md).
 
 ## Walking areas: painted in code, `assets/walks/<area>/`
 
-The army camp, where the game begins, shows France at its proudest at a pink dawn: the regiment's
-headquarters (mansard roofs, a clock, the eagle in the pediment, a square dome and the flag),
-ramparts, wooden watchtowers, bell tents, the armoury, a shooting range, an artillery park and the
-gate to the road north. Behind the camp a railway viaduct crosses the valley; beyond it stand the
-citadels, the keep of Vincennes, barracks and the arsenals' smoking stacks; and on the horizon,
-Paris as it was in the 1860s: the Tour Saint-Jacques, Notre-Dame with its new spire, the Panthéon,
-the gilded dome of the Invalides, the Vendôme column, the new Opera in its scaffolding, the Arc de
-Triomphe and the boulevards' apartment blocks (nothing later, so no Eiffel Tower). The French
-buildings are drawn by `tools/paint/scenes-french.js`, shared with the Chapter 1 backdrop
+The army camp, where the game begins, shows France at its proudest at a pink dawn, as the heart of
+the nation's military power: the regiment's headquarters (mansard roofs, a clock, the eagle in the
+pediment, a square dome and the flag), ramparts topped with barbed wire and lined with lamps, iron
+gun turrets, bell tents, the armoury, a shooting range with its firing step and earth butt, an
+artillery park with field guns and a great mortar, and a harbour where a steam ship of the line of
+the Imperial Navy lies moored (two white-banded gun decks, three masts, a funnel, a carved stern).
+At the end is the great gate, two towers and a portcullis, with Czech hedgehogs along the road
+north. Behind the camp a railway viaduct crosses the valley; beyond it stand citadels with siege
+guns and mortars on raised batteries, the keep of Vincennes, barracks and the arsenals' stacks.
+On the horizon stand the giants: a fortress-city on its rock (the main landmark), the Eiffel
+Tower (an alt-history touch, like the airships), the Louvre of Napoleon III, and a great gilded
+Invalides; behind them, the rest of 1860s Paris (the Tour Saint-Jacques, Notre-Dame, the
+Panthéon, the Vendôme column, the Opera in scaffolding, the Arc de Triomphe, the boulevards). The
+French buildings are drawn by `tools/paint/scenes-french.js`, shared with the Chapter 1 backdrop
 (`army_camp`) and its cutscene.
 
 Lavilledieu, the walk home, is an old stone river town on a bright autumn day: a meadow of late

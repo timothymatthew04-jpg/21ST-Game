@@ -21,6 +21,16 @@ SCENES.army_camp = (c, L) => {
     frCloud(cc, rr, 150, 84, 80, 14, { body: '#c4a8c0', shadow: '#9a86a8' });
     frCloud(cc, rr, 400, 70, 70, 14, { body: '#c4a8c0', shadow: '#9a86a8' });
   });
+  // the giants of France far off: the iron tower, the Louvre, the fortress-city on its rock, the Invalides
+  const gi = L('giants', { depth: 0.07 });
+  const GP = { col: '#b890aa', lit: '#f2c8cc', dark: '#946c8e', deep: '#74547a', roof: '#8a7098', roofLit: '#b8a0c0', win: '#ffd8a0', hi: '#ffe8e0', gap: '#e6b2c0' };
+  const GG = { hi: '#fff0c4', lit: '#f2cc8a', mid: '#d8a87c', shade: '#b48474' };
+  frEiffel(gi, 36, 168, 92, { col: '#8e6078', lit: '#dca4ac', dark: '#6c4664', glint: '#fff0d0' });
+  frLouvre(gi, r, 356, 168, 0.8, GP, GG);
+  const cf = frCastleRock(gi, r, 232, 168, 0.5, { rock: '#9a7a8e', rockLit: '#c8a2ac', rockDark: '#76587a', scrub: '#8a7870', wall: '#dab4b4', wallLit: '#f8dcd0', wallDark: '#aa8294', roof: '#c4506a', roofLit: '#ec7c8c', win: '#ffd8a0', winDark: '#7a5a78' });
+  rect(gi, cf[0], cf[1], 3, 2, FR.blue); rect(gi, cf[0] + 3, cf[1], 3, 2, FR.white); rect(gi, cf[0] + 6, cf[1], 3, 2, FR.red);
+  frInvalides(gi, r, 430, 168, 1.05, GP, GG);
+  gi.save(); gi.globalCompositeOperation = 'source-atop'; vgrad(gi, 0, 60, W, 110, [[0, 'rgba(255,210,220,0.04)'], [1, 'rgba(255,196,206,0.35)']]); gi.restore();
   // the horizon: citadels, barracks and stacks, and the domes and towers of Paris
   const far = L('far', { depth: 0.1 });
   const hz = { col: '#9a7896', lit: '#d8a4b4', dark: '#6a5070', roof: '#7a5a80' };
@@ -32,13 +42,17 @@ SCENES.army_camp = (c, L) => {
   frDome(far, 300, B, 0.95, hz.col, hz.lit);
   const k1 = frCitadel(far, r, 330, 460, B, 12, hz.col, hz.lit, hz.dark);
   rect(far, k1[0], k1[1], 3, 2, FR.blue); rect(far, k1[0] + 3, k1[1], 3, 2, FR.white); rect(far, k1[0] + 6, k1[1], 3, 2, FR.red);
-  for (const x of [196, 214, 470]) { frStack(far, x, B - 8, 20, hz.col, hz.lit); frSmoke(far, r, x, B - 30, 9, 'rgba(226,200,214,0.55)', 1); }
+  for (const x of [470]) { frStack(far, x, B - 8, 20, hz.col, hz.lit); frSmoke(far, r, x, B - 30, 9, 'rgba(226,200,214,0.55)', 1); }
+  const AP = { wood: '#7a5a74', dark: '#5a4462', iron: '#5e4a66', lit: '#caa2b6', bronze: '#9a7a78' };
+  for (const [x, kind] of [[350, 'gun'], [372, 'mortar'], [420, 'gun'], [444, 'mortar']]) { if (kind === 'gun') frSiegeGun(far, x, B - 12, 0.5, AP, 1); else frMortar(far, x, B - 12, 0.5, AP); }
   far.save(); far.globalCompositeOperation = 'source-atop'; vgrad(far, 0, 110, W, 70, [[0, 'rgba(255,190,200,0.05)'], [1, 'rgba(255,200,205,0.3)']]); far.restore();
   // the ramparts, with the gate where the road runs out of camp to the north
   const walls = L('walls', { depth: 0.22 });
   vgrad(walls, 0, 172, W, 12, [[0, '#b0947c'], [1, '#9a7e68']]);
   frRampart(walls, r, -10, 318, 180, 13, { lamps: [120, 250] });
   frRampart(walls, r, 346, W + 10, 180, 13, { lamps: [420] });
+  frBarbedWire(walls, r, -10, 312, 167, { gap: 10, h: 6 });
+  frBarbedWire(walls, r, 354, W + 10, 167, { gap: 10, h: 6 });
   for (const x of [312, 346]) {
     rect(walls, x, 150, 9, 30, FR.stone.mid); rect(walls, x, 150, 3, 30, FR.stone.hi); rect(walls, x + 7, 150, 2, 30, FR.stone.shade);
     poly(walls, [[x - 1, 150], [x + 10, 150], [x + 4.5, 143]], FR.slate.mid);
@@ -53,6 +67,7 @@ SCENES.army_camp = (c, L) => {
   poly(g, [[322, 180], [340, 180], [410, H], [300, H]], '#d2b48e');
   texture(g, r, 300, 180, 110, 90, 0.1, 2, (cc) => { cc.moveTo(322, 180); cc.lineTo(340, 180); cc.lineTo(410, H); cc.lineTo(300, H); });
   for (let i = 0; i < 5; i++) poplar(g, r, 352 + i * 14 + i * i * 3, 186 + i * 10, 22 + i * 7, { trunk: '#4a3a3a', leaves: ['#4e5a3a', '#6a7644', '#9aa05a'] }, -1);
+  for (const [hx, hy, hs] of [[312, 188, 0.6], [350, 190, 0.6], [298, 200, 0.8], [372, 204, 0.8]]) frHedgehog(g, hx, hy, hs);
   // the headquarters, a little way off across the parade ground, and the watchtower by the gate
   const hq = L('hq', { depth: 0.32 });
   hq.save(); hq.translate(120, 190); hq.scale(0.72, 0.72); frHQ(hq, r, 0, 0); hq.restore();

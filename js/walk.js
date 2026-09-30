@@ -68,6 +68,9 @@
     priest: { coat: '#1e1c24', coatDark: '#141218', legs: '#141218', boots: '#101014', skin: '#e8c0a0', hat: 'hat', hatCol: '#1e1c24', robe: 1 },
     oldman: { coat: '#6a5a4a', coatDark: '#50443a', legs: '#4a4038', boots: '#2a2018', skin: '#e0b898', hat: 'beret', hatCol: '#2a2a3a', beard: '#d8d8d8', cane: 1 },
     fiddler: { coat: '#8a3a2a', coatDark: '#6a2a1e', legs: '#3a3440', boots: '#2a2018', skin: '#e8c0a0', hat: 'straw', hatCol: '#e8d090', belt: '#f0c860' },
+    // the Imperial Navy: sailors in the striped marinière and the red-pompom cap, and a captain
+    sailor: { coat: '#f0ece4', coatDark: '#c8c2b8', legs: '#2a3a6a', boots: '#1a1412', skin: '#e0b494', hat: 'pompom', hatCol: '#f2eee6', scarf: '#2e4a9a', stripes: '#2e4a9a' },
+    captain: { coat: '#1e2a4a', coatDark: '#141c34', legs: '#1e2a4a', boots: '#141010', skin: '#e8c0a0', hat: 'bicorne', hatCol: '#141414', epaulette: '#f0c050', sword: 1, beard: '#6a5a4a' },
     lad: { coat: '#4a6a9a', coatDark: '#34507a', legs: '#5a4a3a', boots: '#3a2a1e', skin: '#f0c8a8', hat: 'beret', hatCol: '#2a2a3a', small: 1 },
     lass: { coat: '#e0b040', coatDark: '#b88a2a', legs: '#b88a2a', boots: '#4a3a2a', skin: '#f4d0b0', hat: 'none', hatCol: '#c87a3a', robe: 1, small: 1, hair: '#c87a3a' },
     helene: { coat: '#b89ac8', coatDark: '#8a6a9a', legs: '#8a6a9a', boots: '#3a2a2a', skin: '#f4d0b8', hat: 'flowerhat', hatCol: '#5a4a3a', robe: 1, hair: '#5a3a24' },
@@ -112,6 +115,7 @@
     rect(c, -w / 2, top, w, bodyH + 2, L.coat);
     rect(c, -w / 2, top, 2, bodyH + 2, L.coatDark);
     if (!L.robe) rect(c, -w / 2 - 1 + (moving ? Math.round(-swing) : 0), top + bodyH - 1, 2, 3, L.coatDark);
+    if (L.stripes) for (let yy = top + 3; yy < top + bodyH + 1; yy += 2) rect(c, -w / 2 + 2, yy, w - 2, 1, L.stripes);
     if (L.belt) rect(c, -w / 2, top + bodyH - 4, w, 1, L.belt);
     if (L.sash) rect(c, -w / 2, top + bodyH - 4, w, 2, L.sash);
     if (L.scarf) rect(c, -w / 2 + 1, top, w - 1, 2, L.scarf);
@@ -161,6 +165,12 @@
       const pull = Math.sin(t * 5) > 0 ? 0 : 2;
       rect(c, 3, top - 6 + pull, 2, 9, L.coatDark);
       rect(c, 3, top - 8 + pull, 2, 2, L.skin);
+    } else if (pose === 'aim') {
+      // the rifle levelled, cheek to the stock, sighting down the barrel
+      rect(c, 1, top + 3, 3, 2, L.coatDark);
+      rect(c, 4, top + 4, 2, 2, L.skin);
+      rect(c, -2, top + 4, 16, 1, '#4a3424');
+      rect(c, 10, top + 3, 5, 1, '#8a8a94');
     } else if (pose === 'present' && L.rifle) {
       rect(c, 2, top + 3, 2, 5, L.coatDark);
       rect(c, 3, top - 9, 1, 19, '#4a3424');
@@ -171,7 +181,7 @@
       rect(c, 0 - Math.round(swing * 2), top + 8, 2, 2, L.skin);
     }
     // a rifle on the shoulder, bayonet fixed
-    if (L.rifle && pose !== 'present') {
+    if (L.rifle && pose !== 'present' && pose !== 'aim') {
       for (let k = 0; k < 16; k++) rect(c, -3 + Math.round(k * 0.18), top + 9 - k, 1, 1, '#4a3424');
       rect(c, 0, top - 10, 1, 4, '#d0d0d8');
     }
@@ -193,6 +203,8 @@
     else if (L.hat === 'scarf') { rect(c, -3, hy - 2, 6, 3, hc); rect(c, -3, hy, 2, 4, hc); }
     else if (L.hat === 'toque') { rect(c, -2, hy - 6, 5, 6, hc); rect(c, -3, hy - 7, 7, 2, hc); rect(c, -2, hy - 1, 5, 1, '#d8d0c0'); }
     else if (L.hat === 'straw') { rect(c, -5, hy - 1, 11, 1, hc); rect(c, -2, hy - 3, 5, 2, hc); rect(c, -2, hy - 2, 5, 1, '#8a3a2a'); }
+    else if (L.hat === 'pompom') { rect(c, -3, hy - 2, 6, 2, hc); rect(c, -3, hy - 1, 6, 1, '#1e2a50'); rect(c, 0, hy - 3, 2, 1, '#d8303a'); }
+    else if (L.hat === 'bicorne') { rect(c, -5, hy - 2, 11, 2, hc); rect(c, -2, hy - 4, 5, 2, hc); rect(c, 1, hy - 3, 2, 1, '#c83a3a'); rect(c, -4, hy - 2, 9, 1, '#3a3a40'); }
     else if (L.hat === 'beret') { rect(c, -3, hy - 2, 6, 2, hc); rect(c, 0, hy - 3, 1, 1, hc); }
     else if (L.hat === 'flowerhat') { rect(c, -5, hy - 1, 11, 1, hc); rect(c, -2, hy - 3, 6, 2, hc); rect(c, -1, hy - 4, 2, 1, '#f08aa8'); rect(c, 1, hy - 4, 2, 1, '#e8607a'); rect(c, 3, hy - 3, 1, 1, '#f08aa8'); }
     else if (L.hat === 'helmet') {
@@ -455,6 +467,8 @@
       this.flockDef = def.flocks || null;
       this.flocks = [];
       // windmills' sails turning far off, glints of sun on spires and gilding
+      // a shooting range: riflemen on the firing step, each in turn taking aim and firing at the targets
+      this.range = def.range ? { period: [1.1, 1.8], pause: [2.5, 4], ...def.range, k: 0, t: 2, aim: -1, flash: 0, fired: -1 } : null;
       this.windmills = def.windmills || [];
       this.sparkles = (def.sparkles || []).map((s) => ({ ...s, ph: s.ph == null ? Math.random() * 6 : s.ph }));
       // children at their games and the town's dogs and cats, running about
@@ -887,6 +901,7 @@
         this.showBubble(g, text);
       }
       this.stepRunners(dt);
+      this.stepRange(dt);
       for (const m of this.marchers) {
         if (m.wait > 0) { m.wait -= dt; continue; }
         m.x += m.dir * (m.speed || 20) * dt;
@@ -1146,6 +1161,7 @@
         });
       });
       this.drawRunners(c, cam);
+      this.drawRange(c, cam);
       for (const m of this.marchers) {
         for (let i = 0; i < (m.n || 2); i++) this.figure(c, m.look, m.x - m.dir * i * (m.gap || 9) - cam, GY, m.dir, this.t, m.wait <= 0, null);
       }
@@ -1601,6 +1617,39 @@
           if (u.hoop) drawHoop(c, u.x);
         }
         c.restore();
+      }
+    }
+
+    stepRange(dt) {
+      const rg = this.range;
+      if (!rg) return;
+      rg.t -= dt;
+      rg.flash = Math.max(0, rg.flash - dt);
+      if (rg.t > 0) return;
+      if (rg.aim < 0) { rg.aim = rg.k % rg.x.length; rg.t = rnd(0.6, 0.9); return; }
+      // bang: a flash at the muzzle, smoke drifting off, dust thrown up at the target
+      const sx = rg.x[rg.aim], tx = rg.targets[rg.aim % rg.targets.length], my = rg.y - 14;
+      rg.flash = 0.09; rg.fired = rg.aim;
+      for (let i = 0; i < 3; i++) this.puffs.push({ x: sx + 16 + i * 2, y: my + rnd(-1, 1), vx: rnd(6, 12), vy: -rnd(1, 4), r: rnd(1.2, 2), grow: rnd(2.5, 4), age: 0, life: rnd(1.4, 2.2), col: '240,232,236', a: 0.7 });
+      for (let i = 0; i < 2; i++) this.puffs.push({ x: tx + rnd(-3, 3), y: rg.ty + rnd(-3, 3), vx: rnd(-3, 3), vy: -rnd(3, 7), r: 1, grow: rnd(2, 3), age: 0, life: rnd(0.8, 1.2), col: '176,146,112', a: 0.7 });
+      const d = Math.abs(this.x - sx);
+      if (d < 320 && !this.done) this.audio.fx('musket', { volume: 0.35 * (1 - d / 320) });
+      rg.k++;
+      rg.aim = -1;
+      rg.t = rg.k % rg.x.length === 0 ? rnd(rg.pause[0], rg.pause[1]) : rnd(rg.period[0], rg.period[1]);
+    }
+
+    drawRange(c, cam) {
+      const rg = this.range;
+      if (!rg) return;
+      rg.x.forEach((x, i) => {
+        const aiming = rg.aim === i || (rg.fired === i && rg.flash > 0);
+        this.figure(c, LOOKS[rg.look || 'rifleman'], x - cam, rg.y, 1, this.t + i, false, aiming ? 'aim' : null);
+      });
+      if (rg.flash > 0 && rg.fired >= 0) {
+        const mx = rg.x[rg.fired] + 15 - cam, my = rg.y - 14;
+        const D = (dx, dy, col) => { c.fillStyle = col; c.fillRect(Math.round((mx + dx) * SS), Math.round((my + dy) * SS), SS, SS); };
+        D(0, 0, '#fffbe8'); D(1, 0, '#ffe08a'); D(2, 0, '#ffb040'); D(1, -1, '#ffd070'); D(1, 1, '#ffd070'); D(3, 0, '#ff8a3a');
       }
     }
 

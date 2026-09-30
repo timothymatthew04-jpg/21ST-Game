@@ -31,11 +31,21 @@ window.VN_SCENERY = {
     "src": "assets/scenes/army_camp/clouds.png"
    },
    {
+    "id": "giants",
+    "x": 15,
+    "y": 66,
+    "w": 465,
+    "h": 103,
+    "depth": 0.07,
+    "anim": null,
+    "src": "assets/scenes/army_camp/giants.png"
+   },
+   {
     "id": "far",
     "x": 0,
-    "y": 98,
+    "y": 118,
     "w": 480,
-    "h": 83,
+    "h": 63,
     "depth": 0.1,
     "anim": null,
     "src": "assets/scenes/army_camp/far.png"
@@ -140,9 +150,9 @@ window.VN_SCENERY = {
    },
    {
     "id": "grass",
-    "x": 0,
+    "x": 3,
     "y": 246,
-    "w": 474,
+    "w": 476,
     "h": 24,
     "depth": 0.6,
     "anim": {

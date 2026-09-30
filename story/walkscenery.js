@@ -74,7 +74,7 @@ window.VN_WALKSCENERY = {
   ]
  },
  "camp": {
-  "w": 1440,
+  "w": 1920,
   "h": 270,
   "layers": [
    {
@@ -91,7 +91,7 @@ window.VN_WALKSCENERY = {
     "id": "clouds",
     "x": 0,
     "y": 2,
-    "w": 1440,
+    "w": 1920,
     "h": 112,
     "depth": 0.05,
     "anim": {
@@ -103,18 +103,28 @@ window.VN_WALKSCENERY = {
    {
     "id": "paris",
     "x": 0,
-    "y": 81,
-    "w": 608,
-    "h": 87,
+    "y": 90,
+    "w": 664,
+    "h": 78,
     "depth": 0.08,
     "anim": null,
     "src": "assets/walks/camp/paris.png"
    },
    {
+    "id": "giants",
+    "x": 41,
+    "y": 32,
+    "w": 560,
+    "h": 139,
+    "depth": 0.1,
+    "anim": null,
+    "src": "assets/walks/camp/giants.png"
+   },
+   {
     "id": "far",
     "x": 0,
     "y": 95,
-    "w": 675,
+    "w": 733,
     "h": 109,
     "depth": 0.12,
     "anim": null,
@@ -124,7 +134,7 @@ window.VN_WALKSCENERY = {
     "id": "rail",
     "x": 0,
     "y": 131,
-    "w": 733,
+    "w": 816,
     "h": 77,
     "depth": 0.2,
     "anim": null,
@@ -134,7 +144,7 @@ window.VN_WALKSCENERY = {
     "id": "mid",
     "x": 0,
     "y": 143,
-    "w": 889,
+    "w": 1095,
     "h": 53,
     "depth": 0.38,
     "anim": null,
@@ -143,19 +153,19 @@ window.VN_WALKSCENERY = {
    {
     "id": "ground",
     "x": 0,
-    "y": 57,
-    "w": 1440,
-    "h": 155,
+    "y": 14,
+    "w": 1920,
+    "h": 198,
     "depth": 1,
     "anim": null,
     "src": "assets/walks/camp/ground.png"
    },
    {
     "id": "front",
-    "x": 14,
-    "y": 233,
-    "w": 1422,
-    "h": 37,
+    "x": 12,
+    "y": 234,
+    "w": 1900,
+    "h": 36,
     "depth": 1.3,
     "anim": {
      "type": "sway",

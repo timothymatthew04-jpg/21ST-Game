@@ -613,3 +613,299 @@ function frTelegraph(c, x0, x1, yb, gap, P) {
     prev = x;
   }
 }
+
+// ---------------------------------------------------------------- the camp's grandeur (and a little alt-history)
+/**
+ * A fortress-city on its rock, the heart of the army: a craggy mound, a curtain wall ringed with
+ * round towers under red pointed roofs, an inner ring higher up, and the great keep rising in
+ * tiers to its spire; an arched causeway steps down on the right. x is the centre, yb the rock's
+ * foot. Returns the top of the flagstaff.
+ */
+function frCastleRock(c, r, x, yb, s, P) {
+  const u = (v) => v * s, X = (v) => x + u(v), Y = (v) => yb - u(v);
+  // the rock: a heaped, craggy mound, lit on its left
+  const rock = [[X(-116), yb]];
+  for (let k = -110; k <= 110; k += 10) rock.push([X(k + r.r(-3, 3)), Y(44 * Math.pow(Math.cos((k / 118) * Math.PI / 2), 0.7) + r.r(-3, 4))]);
+  rock.push([X(118), yb]);
+  poly(c, rock, P.rock);
+  c.save(); c.beginPath(); c.moveTo(rock[0][0], rock[0][1]); for (const p of rock) c.lineTo(p[0], p[1]); c.closePath(); c.clip();
+  for (let i = 0; i < 70; i++) { const a = X(r.r(-116, 20)), b = Y(r.r(0, 44)); poly(c, [[a, b], [a + u(r.r(4, 10)), b - u(r.r(2, 5))], [a + u(r.r(8, 16)), b + u(r.r(0, 3))]], P.rockLit); }
+  for (let i = 0; i < 60; i++) { const a = X(r.r(-20, 116)), b = Y(r.r(0, 40)); poly(c, [[a, b], [a + u(r.r(4, 10)), b - u(r.r(2, 5))], [a + u(r.r(8, 16)), b + u(r.r(0, 3))]], P.rockDark); }
+  for (let i = 0; i < 90; i++) px(c, X(r.r(-110, 110)), Y(r.r(0, 40)), r.pick([P.scrub, P.rockDark, P.rockLit]));
+  c.restore();
+  const tower = (tx, base, h, w, roofH) => {
+    rect(c, X(tx - w / 2), Y(base + h), u(w), u(h), P.wall);
+    rect(c, X(tx - w / 2), Y(base + h), u(w * 0.35), u(h), P.wallLit);
+    rect(c, X(tx + w / 2) - u(w * 0.25), Y(base + h), u(w * 0.25), u(h), P.wallDark);
+    for (let y = base + 5; y < base + h - 3; y += 7) rect(c, X(tx) - 0.5, Y(y + 3), 1, u(3), P.win);
+    rect(c, X(tx - w / 2 - 0.8), Y(base + h + 1), u(w + 1.6), u(1.5), P.wallLit);
+    poly(c, [[X(tx - w / 2 - 1), Y(base + h + 1)], [X(tx + w / 2 + 1), Y(base + h + 1)], [X(tx), Y(base + h + 1 + roofH)]], P.roof);
+    poly(c, [[X(tx - w / 2 - 1), Y(base + h + 1)], [X(tx), Y(base + h + 1 + roofH)], [X(tx), Y(base + h + 1)]], P.roofLit);
+    rect(c, X(tx) - 0.5, Y(base + h + roofH + 5), 1, u(4), P.wallDark);
+  };
+  const wall = (x0, x1, base, h) => {
+    rect(c, X(x0), Y(base + h), u(x1 - x0), u(h), P.wall);
+    rect(c, X(x0), Y(base + h), u((x1 - x0) * 0.3), u(h), P.wallLit);
+    for (let k = x0; k < x1; k += 3) rect(c, X(k), Y(base + h + 2), u(1.6), u(2), k < x0 + (x1 - x0) * 0.3 ? P.wallLit : P.wall);
+    for (let y = base + 3; y < base + h; y += 3.5) line(c, X(x0), Y(y), X(x1), Y(y), P.wallDark, 1);
+  };
+  // the outer curtain and its towers
+  wall(-84, 76, 34, 20);
+  for (const [tx, h] of [[-84, 30], [-60, 26], [-34, 28], [-8, 26], [18, 28], [44, 26], [72, 32]]) tower(tx, 34, h, 8, 11);
+  // the inner ring, higher up the rock
+  wall(-56, 50, 54, 18);
+  for (const [tx, h] of [[-54, 26], [-30, 30], [26, 30], [48, 26]]) tower(tx, 54, h, 7, 12);
+  // the great keep in tiers, and its spire
+  for (const [w, b, h] of [[34, 54, 26], [24, 80, 22], [16, 102, 18], [10, 120, 14]]) {
+    rect(c, X(-w / 2), Y(b + h), u(w), u(h), P.wall);
+    rect(c, X(-w / 2), Y(b + h), u(w * 0.35), u(h), P.wallLit);
+    rect(c, X(w / 2) - u(w * 0.22), Y(b + h), u(w * 0.22), u(h), P.wallDark);
+    for (let k = -w / 2 + 3; k < w / 2 - 2; k += 4) { rect(c, X(k), Y(b + h - 4), u(1.5), u(4), P.win); rect(c, X(k), Y(b + h * 0.45), u(1.5), u(3), P.winDark); }
+    for (let k = -w / 2; k < w / 2; k += 3) rect(c, X(k), Y(b + h + 1.5), u(1.6), u(1.5), k < -w / 6 ? P.wallLit : P.wall);
+  }
+  for (const [tx, b] of [[-17, 80], [15, 80], [-12, 102], [10, 102]]) tower(tx, b, 10, 5, 9);
+  poly(c, [[X(-6), Y(134)], [X(6), Y(134)], [X(0), Y(162)]], P.roof);
+  poly(c, [[X(-6), Y(134)], [X(0), Y(162)], [X(0), Y(134)]], P.roofLit);
+  rect(c, X(0) - 0.5, Y(176), 1, u(15), P.wallDark);
+  // the causeway: arches stepping down to the right, and a gate tower at their foot
+  for (const [ax, ab, ah] of [[88, 18, 26], [104, 8, 26], [120, 0, 24]]) {
+    rect(c, X(ax - 7), Y(ab + ah), u(14), u(ah), P.wall);
+    rect(c, X(ax - 7), Y(ab + ah), u(3), u(ah), P.wallLit);
+    ellipse(c, X(ax), Y(ab + ah * 0.55), u(4), u(5), P.winDark);
+    rect(c, X(ax - 4), Y(ab + ah * 0.55), u(8), u(ah * 0.55), P.winDark);
+    for (const k of [-7, 5]) poly(c, [[X(ax + k), Y(ab + ah)], [X(ax + k + 2), Y(ab + ah)], [X(ax + k + 1), Y(ab + ah + 5)]], P.wallLit);
+  }
+  tower(128, 0, 20, 7, 9);
+  return [X(0) + 0.5, Y(176)];
+}
+
+/** An iron tower of lattice girders on four splayed legs, three platforms and a lantern on top. */
+function frEiffel(c, x, yb, h, P) {
+  const hw = (t) => h * (0.215 * Math.pow(1 - t, 2.6) + 0.011);
+  const L = [], R = [];
+  for (let t = 0; t <= 1.0001; t += 0.02) { L.push([x - hw(t), yb - h * t]); R.push([x + hw(t), yb - h * t]); }
+  poly(c, [...L, ...R.reverse()], P.col);
+  // the great arch between the legs, and the gap up to the second platform
+  c.save(); c.globalCompositeOperation = 'destination-out';
+  ellipse(c, x, yb, hw(0) * 0.62, h * 0.15, '#000');
+  poly(c, [[x - hw(0.21) * 0.5, yb - h * 0.2], [x + hw(0.21) * 0.5, yb - h * 0.2], [x + 0.6, yb - h * 0.45], [x - 0.6, yb - h * 0.45]], '#000');
+  c.restore();
+  // the girders' lattice, the lit edge of the legs
+  c.save(); c.beginPath(); c.moveTo(L[0][0], L[0][1]); for (const p of [...L, ...R]) c.lineTo(p[0], p[1]); c.closePath(); c.clip();
+  for (let k = -h; k < h; k += 3.5) { line(c, x + k, yb, x + k + h * 0.6, yb - h * 0.6, P.dark, 1); line(c, x + k, yb, x + k - h * 0.6, yb - h * 0.6, P.dark, 1); }
+  c.restore();
+  for (let t = 0; t < 0.96; t += 0.02) { px(c, x - hw(t), yb - h * t, P.lit); px(c, x - hw(t) + 1, yb - h * t, P.lit); }
+  // the platforms and the lantern
+  for (const [t, ext] of [[0.2, 3], [0.47, 2], [0.88, 1]]) { rect(c, x - hw(t) - ext, yb - h * t - 1, (hw(t) + ext) * 2, 2, P.dark); rect(c, x - hw(t) - ext, yb - h * t - 2, (hw(t) + ext) * 2, 1, P.lit); }
+  rect(c, x - 1.5, yb - h - 4, 3, 4, P.col); rect(c, x - 0.5, yb - h - 10, 1, 7, P.dark);
+  px(c, x, yb - h - 3, P.glint || '#fff0c8');
+}
+
+/** The Louvre of the Second Empire: long wings on an arcade, windows aglow, mansard roofs, and the
+ *  great pavilion in the middle with its sculpted front and square dome. x is the centre. */
+function frLouvre(c, r, x, yb, s, P, G) {
+  const u = (v) => v * s, X = (v) => x + u(v), Y = (v) => yb - u(v);
+  const R = (x0, y0, x1, y1, col) => rect(c, X(x0), Y(y1), u(x1 - x0), u(y1 - y0), col);
+  // the wings: an arcade below, two floors of tall windows, a mansard with dormers
+  R(-50, 0, 50, 17, P.col); R(-50, 0, -40, 17, P.lit);
+  for (let k = -48; k < 48; k += 4) { ellipse(c, X(k + 1.5), Y(5), u(1.3), u(1.3), P.deep); R(k + 0.3, 0, k + 2.7, 5, P.deep); if (Math.abs(k) > 12) { R(k + 0.6, 8, k + 2.2, 11.5, r() < 0.5 ? P.win : P.dark); R(k + 0.6, 12.5, k + 2.2, 15.5, r() < 0.3 ? P.win : P.dark); } }
+  poly(c, [[X(-51), Y(17)], [X(51), Y(17)], [X(49), Y(22)], [X(-49), Y(22)]], P.roof);
+  for (let k = -46; k < 46; k += 6) if (Math.abs(k) > 12) { R(k, 18, k + 2, 21, P.col); px(c, X(k + 1), Y(19.5), P.win); }
+  // the corner pavilions
+  for (const px_ of [-50, 42]) { R(px_, 0, px_ + 8, 24, P.col); R(px_, 0, px_ + 2.5, 24, P.lit); poly(c, [[X(px_ - 1), Y(24)], [X(px_ + 9), Y(24)], [X(px_ + 7), Y(30)], [X(px_ + 1), Y(30)]], P.roof); R(px_ + 3, 14, px_ + 5, 20, P.win); }
+  // the great pavilion: columns in pairs, a sculpted pediment, caryatids, the square dome
+  R(-12, 0, 12, 30, P.col); R(-12, 0, -7, 30, P.lit); R(9, 0, 12, 30, P.dark);
+  ellipse(c, X(0), Y(9), u(4), u(4), P.deep); R(-4, 0, 4, 9, P.deep);
+  for (const k of [-11, -8, 6, 9]) R(k, 2, k + 1.2, 28, P.hi);
+  for (const k of [-5, 3]) { R(k, 14, k + 2.5, 22, P.win); ellipse(c, X(k + 1.25), Y(22), u(1.25), u(1.25), P.win); }
+  poly(c, [[X(-12), Y(30)], [X(12), Y(30)], [X(0), Y(36)]], P.col);
+  poly(c, [[X(-9), Y(30.8)], [X(9), Y(30.8)], [X(0), Y(34.6)]], P.dark);
+  for (let k = -6; k <= 6; k += 3) px(c, X(k), Y(32), P.hi);
+  // the dome, curved like a bell, gilded ribs, oculi, statues at its corners
+  c.fillStyle = P.roof; c.beginPath(); c.moveTo(X(-11), Y(36));
+  c.quadraticCurveTo(X(-11), Y(52), X(0), Y(55)); c.quadraticCurveTo(X(11), Y(52), X(11), Y(36)); c.closePath(); c.fill();
+  c.fillStyle = P.roofLit; c.beginPath(); c.moveTo(X(-11), Y(36)); c.quadraticCurveTo(X(-11), Y(52), X(0), Y(55)); c.lineTo(X(-3), Y(36)); c.closePath(); c.fill();
+  for (const k of [-7, 0, 7]) line(c, X(k), Y(37), X(k * 0.4), Y(53), G.lit, 1);
+  for (const k of [-5, 5]) { ellipse(c, X(k), Y(43), u(1.4), u(1.8), P.win); }
+  R(-1, 55, 1, 60, G.mid); px(c, X(0), Y(60) - 1, G.hi);
+  for (const k of [-12, 11]) { R(k, 36, k + 1.2, 40, P.hi); }
+}
+
+/** A great siege gun on its slab carriage, its long barrel raised: shown, not fired. */
+function frSiegeGun(c, x, yb, s, P, dir = 1) {
+  const u = (v) => v * s;
+  poly(c, [[x - dir * u(8), yb], [x + dir * u(8), yb], [x + dir * u(6), yb - u(5)], [x - dir * u(6), yb - u(6)]], P.wood);
+  circle(c, x - dir * u(3), yb - u(3), u(3.2), P.dark);
+  circle(c, x - dir * u(3), yb - u(3), u(1.2), P.wood);
+  const a = -0.34, L = u(22);
+  const bx = x - dir * u(2), by = yb - u(7);
+  line(c, bx, by, bx + dir * Math.cos(a) * L, by + Math.sin(a) * L, P.iron, Math.max(2, u(3)));
+  line(c, bx, by - 0.5, bx + dir * Math.cos(a) * L, by + Math.sin(a) * L - 0.5, P.lit, 1);
+  circle(c, bx + dir * Math.cos(a) * L, by + Math.sin(a) * L, Math.max(1, u(1.8)), P.iron);
+}
+
+/** A siege mortar: a squat bronze barrel raised steeply on its timber bed. */
+function frMortar(c, x, yb, s, P) {
+  const u = (v) => v * s;
+  rect(c, x - u(6), yb - u(3), u(12), u(3), P.wood);
+  rect(c, x - u(6), yb - u(3), u(12), 1, P.lit);
+  poly(c, [[x - u(4), yb - u(3)], [x + u(2), yb - u(3)], [x + u(6), yb - u(11)], [x + u(1), yb - u(13)]], P.bronze);
+  poly(c, [[x - u(4), yb - u(3)], [x - u(1), yb - u(3)], [x + u(3), yb - u(12)], [x + u(1), yb - u(13)]], P.lit);
+  ellipse(c, x + u(3.5), yb - u(12), u(2.8), u(1.4), P.dark, -1);
+  for (let k = 0; k < 3; k++) circle(c, x - u(8) - k * u(2.6), yb - u(1.2), u(1.2), P.dark);
+}
+
+/** An iron gun turret on the ramparts: a riveted drum, its gun run out through the port. */
+function frTurret(c, x, yb, s, dir = 1) {
+  const u = (v) => v * s, iron = '#4a4452', lit = '#7c7688', dark = '#2e2a36';
+  rect(c, x - u(11), yb - u(3), u(22), u(3), '#a88c9c');
+  rect(c, x - u(10), yb - u(13), u(20), u(10), iron);
+  rect(c, x - u(10), yb - u(13), u(5), u(10), lit);
+  rect(c, x + u(7), yb - u(13), u(3), u(10), dark);
+  ellipse(c, x, yb - u(13), u(10), u(2.2), '#5e5868');
+  ellipse(c, x - u(3), yb - u(13.5), u(4), u(1), lit);
+  for (let k = -9; k <= 9; k += 3) { px(c, x + u(k), yb - u(11), '#9a94a8'); px(c, x + u(k), yb - u(5), '#9a94a8'); }
+  rect(c, x - u(2), yb - u(15), u(4), u(2), dark);
+  rect(c, x + dir * u(8) - (dir < 0 ? u(4) : 0), yb - u(10), u(4), u(4), dark);
+  line(c, x + dir * u(10), yb - u(8), x + dir * u(24), yb - u(9.5), '#3a3442', Math.max(2, u(2.6)));
+  line(c, x + dir * u(10), yb - u(9), x + dir * u(24), yb - u(10.5), lit, 1);
+  rect(c, x + dir * u(23) - 1, yb - u(11), u(2), u(3.5), dark);
+}
+
+/** Barbed wire along a wall top: iron stakes, three sagging strands, barbs every few inches. */
+function frBarbedWire(c, r, x0, x1, y, o = {}) {
+  const gap = o.gap || 14, hh = o.h || 9, wire = o.wire || '#3a3440', barb = o.barb || '#6a6070';
+  for (let x = x0; x <= x1; x += gap) { line(c, x, y, x + (o.lean || 0), y - hh, o.post || '#4a3e3a', 1); px(c, x + (o.lean || 0), y - hh - 1, barb); }
+  for (const f of [0.35, 0.65, 0.95]) {
+    for (let x = x0; x < x1; x += gap) {
+      for (let t = 0; t <= 1; t += 0.08) {
+        const xx = x + gap * t, yy = y - hh * f + Math.sin(t * Math.PI) * 1.4;
+        px(c, xx, yy, wire);
+        if (Math.round(xx) % 4 === 0) { px(c, xx - 1, yy - 1, barb); px(c, xx + 1, yy + 1, barb); px(c, xx + 1, yy - 1, barb); px(c, xx - 1, yy + 1, barb); }
+      }
+    }
+  }
+}
+
+/** A Czech hedgehog: three steel angle-girders crossed, to stop anything coming down the road. */
+function frHedgehog(c, x, yb, s = 1) {
+  const u = (v) => v * s, iron = '#3e3a44', lit = '#8a8494', rust = '#7a4a34';
+  const beam = (x0, y0, x1, y1) => { line(c, x0, y0, x1, y1, iron, Math.max(2, u(2))); line(c, x0 - 0.5, y0 - 0.5, x1 - 0.5, y1 - 0.5, lit, 1); };
+  beam(x - u(7), yb, x + u(6), yb - u(13));
+  beam(x + u(7), yb, x - u(6), yb - u(13));
+  beam(x - u(9), yb - u(8), x + u(9), yb - u(5));
+  px(c, x - u(3), yb - u(4), rust); px(c, x + u(4), yb - u(10), rust); px(c, x + u(1), yb - u(7), rust);
+}
+
+/** The camp's great gate: two massive towers with machicolations and crenels, the arch between
+ *  with its portcullis raised, gun loops, lamps, and a flagstaff on top. Returns the staff's top. */
+function frGatehouse(c, r, x, yb, o = {}) {
+  const S_ = FR.stone, tw = 26, th = 84, bh = 64, aw = 26, ah = 42;
+  const block = (x0, w, h) => {
+    vgrad(c, x0, yb - h, w, h, [[0, S_.hi], [0.5, S_.lit], [1, S_.mid]]);
+    for (let y = yb - h + 4, k = 0; y < yb; y += 5, k++) { rect(c, x0, y, w, 1, S_.line); for (let xx = x0 + (k % 2) * 5; xx < x0 + w; xx += 10) rect(c, xx, y, 1, 5, S_.line); }
+    rect(c, x0, yb - h, 3, h, S_.hi);
+    rect(c, x0 + w - 4, yb - h, 4, h, S_.shade);
+    for (let xx = x0 - 2; xx < x0 + w + 2; xx += 4) { rect(c, xx, yb - h - 4, 3, 4, S_.mid); rect(c, xx, yb - h - 6, 3, 2, S_.lit); }
+    rect(c, x0 - 3, yb - h, w + 6, 3, S_.lit);
+    for (let xx = x0 - 2; xx < x0 + w + 2; xx += 4) rect(c, xx, yb - h + 3, 2, 3, S_.deep);
+    for (let yy = yb - h + 18; yy < yb - 16; yy += 18) { rect(c, x0 + w / 2 - 1, yy, 2, 8, S_.deep); rect(c, x0 + w / 2 - 3, yy + 3, 6, 2, S_.deep); }
+  };
+  // the middle, with the arch and the portcullis
+  block(x - tw / 2 - aw / 2 - 4, aw + 8 + tw, bh);
+  ellipse(c, x, yb - ah, aw / 2 + 2, 10, S_.hi);
+  rect(c, x - aw / 2 - 2, yb - ah, aw + 4, ah, S_.hi);
+  ellipse(c, x, yb - ah, aw / 2, 9, '#2a2230');
+  rect(c, x - aw / 2, yb - ah, aw, ah, '#2a2230');
+  for (let k = -aw / 2 + 2; k < aw / 2; k += 4) { rect(c, x + k, yb - ah - 7, 1, 17, '#5a5460'); poly(c, [[x + k - 1, yb - ah + 10], [x + k + 2, yb - ah + 10], [x + k + 0.5, yb - ah + 13]], '#6a6470'); }
+  for (let y = yb - ah - 4; y < yb - ah + 10; y += 4) rect(c, x - aw / 2, y, aw, 1, '#5a5460');
+  rect(c, x - aw / 2, yb - 3, aw, 3, '#4a3e3a');
+  rect(c, x - 12, yb - bh + 8, 24, 7, '#2a2e5a'); for (let k = 0; k < 5; k++) rect(c, x - 10 + k * 4.5, yb - bh + 10, 3, 3, FR.gold.lit);
+  // the two towers
+  for (const tx of [x - aw / 2 - 4 - tw, x + aw / 2 + 4]) block(tx, tw, th);
+  // lamps either side of the arch
+  for (const lx of [x - aw / 2 - 8, x + aw / 2 + 6]) { rect(c, lx, yb - 30, 2, 4, '#2e2830'); rect(c, lx - 1, yb - 36, 4, 6, FR.lit); glow(c, lx + 1, yb - 33, 14, 'rgba(255,200,120,0.55)'); }
+  rect(c, x, yb - bh - 30, 2, 26, '#3a2e2a'); circle(c, x + 1, yb - bh - 31, 2, FR.gold.lit);
+  return [x + 1, yb - bh - 29];
+}
+
+/** A lamp post of the camp: an iron column, a glazed lantern, its light. */
+function frLampPost(c, x, yb, h = 30) {
+  rect(c, x - 2, yb - 3, 5, 3, '#2e2830');
+  rect(c, x, yb - h, 1.5, h, '#2e2830');
+  rect(c, x - 2, yb - h - 1, 6, 1, '#2e2830');
+  rect(c, x - 1.5, yb - h - 7, 5, 6, '#3a3444');
+  rect(c, x - 0.5, yb - h - 6, 3, 4, FR.lit);
+  poly(c, [[x - 2.5, yb - h - 7], [x + 4.5, yb - h - 7], [x + 1, yb - h - 10]], '#2e2830');
+  glow(c, x + 1, yb - h - 4, 14, 'rgba(255,205,130,0.55)');
+}
+
+/** A steam ship of the line of the Imperial Navy, moored: a black hull banded in white with two
+ *  tiers of guns run out, the carved stern with its lit gallery, three masts with yards and furled
+ *  sails, shrouds and stays, and the funnel amidships. x is the bow, yb the waterline; the stern is
+ *  to the right. Returns where the walk's flags and funnel smoke go. */
+function frWarship(c, r, x, yb, s = 1) {
+  const u = (v) => v * s, X = (v) => x + u(v), Y = (v) => yb - u(v), L = 300;
+  const deck = (t) => 34 + 7 * Math.pow(2 * t - 1, 2);
+  const hull = '#221e28', hullLit = '#3e3848', band = '#e8dfd2', bandShade = '#b8ae9e', port = '#141018', muzzle = '#5a5664';
+  // masts first (behind the hull), with their yards, furled sails, tops and the shrouds
+  const masts = [[76, 150], [156, 166], [232, 122]], tops = [];
+  for (const [mx, mh] of masts) {
+    const base = Y(deck(mx / L));
+    rect(c, X(mx) - 1.5, Y(deck(mx / L) + mh), 3, u(mh), '#5a4030');
+    rect(c, X(mx) - 1.5, Y(deck(mx / L) + mh), 1, u(mh), '#8a6a4a');
+    for (const [f, yw] of [[0.3, 40], [0.55, 32], [0.76, 24], [0.92, 16]]) {
+      const yy = Y(deck(mx / L) + mh * f);
+      rect(c, X(mx - yw / 2), yy, u(yw), 1.5, '#4a3424');
+      ellipse(c, X(mx), yy + 2, u(yw / 2), 2.2, '#efe6d2');
+      for (let k = -yw / 2 + 2; k < yw / 2; k += 5) px(c, X(mx + k), yy + 3, '#c8bca4');
+    }
+    for (const f of [0.42, 0.7]) rect(c, X(mx - 6), Y(deck(mx / L) + mh * f), u(12), 1.5, '#4a3424');
+    for (const side of [-1, 1]) for (let k = 0; k < 3; k++) line(c, X(mx + side * (10 + k * 3)), base, X(mx) + side, Y(deck(mx / L) + mh * (0.42 + k * 0.14)), '#4a3e3a', 1);
+    tops.push([X(mx), Y(deck(mx / L) + mh)]);
+  }
+  // the stays, running fore and aft, and the bowsprit
+  line(c, tops[0][0], tops[0][1], X(-54), Y(deck(0) + 34), '#4a3e3a', 1);
+  line(c, tops[1][0], tops[1][1], tops[0][0], Y(deck(0.25) + 60), '#4a3e3a', 1);
+  line(c, tops[2][0], tops[2][1], tops[1][0], Y(deck(0.5) + 70), '#4a3e3a', 1);
+  line(c, X(2), Y(deck(0) + 2), X(-58), Y(deck(0) + 36), '#5a4030', Math.max(2, u(2.5)));
+  line(c, X(-30), Y(deck(0) + 20), X(-58), Y(deck(0) + 36), '#8a6a4a', 1);
+  // the funnel amidships
+  const fx = 116;
+  rect(c, X(fx - 5), Y(deck(fx / L) + 44), u(10), u(44), '#1e1a20');
+  rect(c, X(fx - 5), Y(deck(fx / L) + 44), u(3), u(44), '#4a4452');
+  rect(c, X(fx - 5.5), Y(deck(fx / L) + 44), u(11), u(3), '#6a4a3a');
+  // the hull: black, the white bands of the gun decks, the ports and guns, copper at the waterline
+  const top = [], n = 40;
+  for (let i = 0; i <= n; i++) { const t = i / n; top.push([X(t * L), Y(deck(t))]); }
+  poly(c, [[X(8), yb], [X(-4), Y(12)], [X(-10), Y(deck(0) + 4)], ...top, [X(L + 14), Y(deck(1) + 4)], [X(L + 8), Y(20)], [X(L), yb]], hull);
+  poly(c, [[X(-10), Y(deck(0) + 4)], [X(-4), Y(12)], [X(8), yb], [X(30), yb], [X(20), Y(deck(0.05))]], hullLit);
+  for (const [b0, b1] of [[10, 15], [21, 26]]) {
+    c.save(); c.beginPath(); c.rect(X(2), Y(b1 + 6), u(L), u(b1 - b0 + 12)); c.clip();
+    for (let i = 0; i < n; i++) { const t0 = i / n, t1 = (i + 1) / n, sag = (t) => deck(t) - 34; poly(c, [[X(t0 * L), Y(b1 + sag(t0))], [X(t1 * L), Y(b1 + sag(t1))], [X(t1 * L), Y(b0 + sag(t1))], [X(t0 * L), Y(b0 + sag(t0))]], band); }
+    c.restore();
+    for (let k = 14; k < L - 10; k += 11) {
+      const t = k / L, py = Y(b1 + deck(t) - 34);
+      rect(c, X(k), py + 1, u(4), u(b1 - b0 - 1.5), port);
+      rect(c, X(k) - 1, py + u((b1 - b0) / 2), u(2), 1.5, muzzle);
+      px(c, X(k) - 1, py + u((b1 - b0) / 2), '#8a8698');
+    }
+    line(c, X(2), Y(b0 + 0.5), X(L), Y(b0 + 0.5), bandShade, 1);
+  }
+  rect(c, X(4), yb - 2, u(L - 2), 2, '#a8683a');
+  rect(c, X(4), yb - 2, u(L - 2), 1, '#d8905a');
+  // the bulwark rail, the carved and gilded stern, its gallery of lit windows, the lantern
+  for (let i = 0; i < n; i++) { const t = i / n; rect(c, X(t * L), Y(deck(t)) - 1, u(L / n) + 1, 1.5, '#5a4a4a'); }
+  poly(c, [[X(L - 6), Y(deck(1) + 12)], [X(L + 16), Y(deck(1) + 10)], [X(L + 14), Y(10)], [X(L - 2), Y(10)]], '#3a2e36');
+  for (let row = 0; row < 2; row++) for (let k = 0; k < 4; k++) { rect(c, X(L - 2 + k * 4.2), Y(deck(1) + 6 - row * 10), u(2.6), u(4), FR.lit); }
+  rect(c, X(L - 4), Y(deck(1) + 12), u(20), 1.5, FR.gold.mid);
+  rect(c, X(L - 4), Y(deck(1) - 8), u(20), 1, FR.gold.mid);
+  circle(c, X(L + 12), Y(deck(1) + 16), u(2), FR.lit); glow(c, X(L + 12), Y(deck(1) + 16), 10, 'rgba(255,200,120,0.5)');
+  // the figurehead, gilded, and the anchor hanging at the bow
+  circle(c, X(-8), Y(deck(0) - 2), u(2.2), FR.gold.lit);
+  line(c, X(4), Y(deck(0) - 10), X(6), Y(8), '#4a4452', 1);
+  poly(c, [[X(2), Y(10)], [X(10), Y(10)], [X(6), Y(4)]], '#4a4452');
+  // the ensign staff at the stern
+  rect(c, X(L + 12), Y(deck(1) + 40), 1, u(28), '#5a4030');
+  return { funnel: [X(fx), Y(deck(fx / L) + 44)], ensign: [X(L + 13), Y(deck(1) + 40)], main: tops[1], fore: tops[0], mizzen: tops[2], deck: Y(34) };
+}

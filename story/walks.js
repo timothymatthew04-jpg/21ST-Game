@@ -52,6 +52,9 @@
  *    cavalry:  { from, to, y, speed, gap, first, pause, riders: [{ look, horse }] }  horsemen riding
  *              the length of the walk and back (horses: bay, black, grey)
  *    band:     { first, volume }  a band practising somewhere, heard now and then
+ *    range:    { x: [...], y, targets: [...], ty, look, period, pause }  riflemen on a firing step
+ *              at x (feet at y), each in turn aiming and firing at the targets (centres at ty):
+ *              a muzzle flash, smoke, dust at the target and the crack of the shot
  *  A river town has more (Lavilledieu):
  *    boats:    [{ kind: 'gabare' | 'barge' | 'rowboat', x, y, speed, dir, s }]  on the water, round and round
  *    fish:     { rate, y0, y1 }  fish leaping out of the water, rings and drops where they go in
@@ -74,7 +77,8 @@
  *  Looks for the French army: soldier, rifleman (a rifle on the shoulder), officer, gunner, zouave,
  *  bugler, and the cavalry's cuirassier, cuirassierOfficer and trumpeter. And the town's: woman,
  *  lady, girl, baker, fisherman, washer, priest, oldman, fiddler, helene, and the children lad and
- *  lass (poses: wash, fish, fiddle, wave).
+ *  lass (poses: wash, fish, fiddle, wave, aim). The navy's: sailor (the striped marinière and the
+ *  red-pompom cap) and captain.
  * ============================================================================
  */
 window.VN_WALKS = {
@@ -95,34 +99,43 @@ window.VN_WALKS = {
     ],
     flags: [
       { x: 142, y: 113, w: 28, h: 14 },
-      { x: 753, y: 59, w: 20, h: 11 },
-      { x: 648, y: 135, w: 16, h: 10, fringe: true },
-      { x: 860, y: 135, w: 16, h: 10, fringe: true },
+      { x: 1233, y: 59, w: 20, h: 11 },
+      { x: 1128, y: 135, w: 16, h: 10, fringe: true },
+      { x: 1340, y: 135, w: 16, h: 10, fringe: true },
+      // the warship's ensign at her stern and the tricolour at the main masthead; the great gate's
+      { x: 982, y: 121, w: 16, h: 10 },
+      { x: 841, y: 14, w: 12, h: 7 },
+      { x: 1717, y: 109, w: 18, h: 11 },
     ],
-    fires: [{ x: 752, y: 203 }],
-    smoke: [{ x: 752, y: 192, rate: 1.6 }, { x: 676, y: 124, rate: 0.8 }, { x: 829, y: 124, rate: 0.8 }],
+    fires: [{ x: 1232, y: 203 }],
+    smoke: [{ x: 1232, y: 192, rate: 1.6 }, { x: 1156, y: 124, rate: 0.8 }, { x: 1309, y: 124, rate: 0.8 }, { x: 804, y: 123, rate: 1.4, col: '84,74,86', a: 0.5 }],
     // the colours go up at dawn: the bugle, the flag hoisted, the guard presenting arms
     colours: { group: 0, flag: 0, from: 176, delay: 1.6, dur: 10.4, hold: 3, call: 'To the colours!', caller: 5 },
     // an army train crossing the viaduct now and then, and cuirassiers riding through the camp
     train: { depth: 0.2, deck: 146, speed: 40, afterMove: 5, dir: -1, pause: [12, 20] },
     cavalry: {
-      from: 1480, to: -60, y: 201, speed: 40, gap: 26, first: 4, pause: 22,
+      from: 1960, to: -60, y: 201, speed: 40, gap: 26, first: 4, pause: 22,
       riders: [{ look: 'cuirassierOfficer', horse: 'bay' }, { look: 'trumpeter', horse: 'grey' }, { look: 'cuirassier', horse: 'black' }, { look: 'cuirassier', horse: 'black' }],
     },
     band: { first: 35, volume: 0.35 },
+    // riflemen at the butts, firing in turn at the targets
+    range: { x: [300, 312, 324], y: 199, targets: [406, 428, 450], ty: 186 },
     crowd: [
       { x: 141, near: 150, people: [{ dx: -20, look: 'bugler', face: 1, rite: 'bugle' }, { dx: -4, look: 'soldier', face: 1, rite: 'haul' }, { dx: 11, look: 'rifleman', face: -1, rite: 'present' }, { dx: 18, look: 'rifleman', face: -1, rite: 'present' }, { dx: 25, look: 'rifleman', face: -1, rite: 'present' }, { dx: 36, look: 'officer', face: -1 }], lines: [[5, 'Stand easy, the colour guard.'], [0, 'I cracked the last note. Nobody say a word.'], [3, 'The colonel heard it. The colonel hears everything.'], [1, 'My arms. Every morning, my arms.']] },
       { x: 94, near: 120, people: [{ dx: 0, y: 156, look: 'rifleman', turn: true }], lines: [[0, 'All quiet on the south road, Corporal!'], [0, 'Nothing moves out there but the mist.']] },
-      { x: 292, people: [{ dx: -8, look: 'soldier', face: 1 }, { dx: 8, look: 'soldier', face: -1 }], lines: [[0, 'Pay\'s late again.'], [1, 'It\'s always late. That\'s how you know it\'s the army.'], [0, 'When I\'m discharged, I\'m opening a café in Marseille.'], [1, 'Last week it was Toulon.'], [0, 'Toulon, Marseille. Somewhere with the sea.']] },
+      { x: 282, near: 90, people: [{ dx: 0, look: 'officer', face: 1 }], lines: [[0, 'Aim for the black, not the sky!'], [0, 'Squeeze the trigger, Morel. Don\'t pull it.'], [0, 'Better. Again!']] },
+      { x: 256, people: [{ dx: -8, look: 'soldier', face: 1 }, { dx: 8, look: 'soldier', face: -1 }], lines: [[0, 'Pay\'s late again.'], [1, 'It\'s always late. That\'s how you know it\'s the army.'], [0, 'When I\'m discharged, I\'m opening a café in Marseille.'], [1, 'Last week it was Toulon.'], [0, 'Toulon, Marseille. Somewhere with the sea.']] },
       { x: 492, people: [{ dx: -7, look: 'rifleman', face: 1 }, { dx: 8, look: 'soldier', face: -1, pose: 'sit' }], lines: [[0, 'Polish your buttons, Lefèvre. The colonel counts them.'], [1, 'Then the colonel can count mine himself.'], [1, 'My mother writes that the silkworms are sick again at home.'], [0, 'Tell her the army eats bread, not silk.']] },
-      { x: 752, near: 170, people: [{ dx: -20, look: 'soldier', face: 1, pose: 'sit' }, { dx: 20, look: 'zouave', face: -1, pose: 'sit' }, { dx: -30, look: 'gunner', face: 1 }], lines: [[0, 'Did you see the airship over the citadel?'], [1, 'Giffard\'s contraption? It flies like a fat pigeon.'], [2, 'A pigeon that can see all the way to Prussia.'], [1, 'Then tell it to look at my mother\'s farm. Tell her I\'m eating.'], [0, 'The Emperor reviewed the Guard in Paris this spring.'], [2, 'And we got soup.']] },
-      { x: 1052, people: [{ dx: -12, look: 'gunner', face: 1 }, { dx: 12, look: 'gunner', face: -1 }], lines: [[0, 'New rifled barrels. The La Hitte pattern.'], [1, 'Four thousand yards, the colonel says.'], [0, 'The colonel says a great many things.'], [1, 'He says them very loudly, too.']] },
-      { x: 1182, near: 120, people: [{ dx: 0, y: 156, look: 'rifleman', turn: true }], lines: [[0, 'Rider on the north road!'], [0, 'Coming fast. A big man, on a tired horse.']] },
+      { x: 706, people: [{ dx: -8, look: 'sailor', face: 1 }, { dx: 8, look: 'sailor', face: -1, pose: 'haul' }], lines: [[0, 'Mind the hawser, soldier!'], [1, 'Heave, and heave again!'], [0, 'The Napoléon. Ninety guns and a steam engine. Fastest ship afloat.'], [1, 'And we still scrub her decks by hand.']] },
+      { x: 900, near: 160, people: [{ dx: -40, y: 163, look: 'sailor', turn: true }, { dx: 0, y: 162, look: 'sailor', face: -1 }, { dx: 50, y: 159, look: 'captain', face: -1 }], lines: [[2, 'Stand by to take on powder!'], [0, 'Aye, Captain!'], [2, 'And somebody tell the army to keep its boots off my gangplank.']] },
+      { x: 1232, near: 170, people: [{ dx: -20, look: 'soldier', face: 1, pose: 'sit' }, { dx: 20, look: 'zouave', face: -1, pose: 'sit' }, { dx: -30, look: 'gunner', face: 1 }], lines: [[0, 'Did you see the airship over the citadel?'], [1, 'Giffard\'s contraption? It flies like a fat pigeon.'], [2, 'A pigeon that can see all the way to Prussia.'], [1, 'Then tell it to look at my mother\'s farm. Tell her I\'m eating.'], [0, 'The Emperor reviewed the Guard in Paris this spring.'], [2, 'And we got soup.']] },
+      { x: 1532, people: [{ dx: -12, look: 'gunner', face: 1 }, { dx: 12, look: 'gunner', face: -1 }], lines: [[0, 'New rifled barrels. The La Hitte pattern.'], [1, 'Four thousand yards, the colonel says.'], [0, 'The colonel says a great many things.'], [1, 'He says them very loudly, too.']] },
+      { x: 1716, near: 130, people: [{ dx: -22, look: 'rifleman', face: 1, pose: 'present' }, { dx: 22, look: 'rifleman', face: -1, pose: 'present' }, { dx: -30, y: 118, look: 'rifleman', turn: true }, { dx: 30, y: 118, look: 'rifleman', turn: true }], lines: [[2, 'Rider on the north road!'], [3, 'Coming fast. A big man, on a tired horse.'], [0, 'Halt! ...Ah, Joncour. Pass.'], [1, 'Mind the hedgehogs out there. They bite horses.']] },
     ],
-    drill: { x: 944, n: 5, gap: 9, face: 1, officer: 58, near: 170, period: 4.2, calls: [{ text: 'Present — arms!', pose: 'present' }, { text: 'Steady, the Seventh. Steady.', pose: 'present' }, { text: 'Shoulder — arms!' }, { text: 'Eyes — front!' }] },
+    drill: { x: 1424, n: 5, gap: 9, face: 1, officer: 58, near: 170, period: 4.2, calls: [{ text: 'Present — arms!', pose: 'present' }, { text: 'Steady, the Seventh. Steady.', pose: 'present' }, { text: 'Shoulder — arms!' }, { text: 'Eyes — front!' }] },
     marchers: [
-      { x0: 470, x1: 640, n: 2, gap: 9, speed: 18, look: 'rifleman', pause: 1.6 },
-      { x0: 330, x1: 460, n: 3, gap: 9, speed: 16, look: 'rifleman', pause: 2, start: 400, dir: -1 },
+      { x0: 470, x1: 620, n: 2, gap: 9, speed: 18, look: 'rifleman', pause: 1.6 },
+      { x0: 740, x1: 1080, n: 3, gap: 9, speed: 16, look: 'rifleman', pause: 2, start: 900, dir: -1 },
     ],
     things: [
       { x: 140, kind: 'look', label: 'The flag', lines: ['The tricolour, stiff with dew. We saluted it every morning, and I never once asked myself why.'] },
@@ -130,11 +143,12 @@ window.VN_WALKS = {
       { x: 330, kind: 'coin', amount: 10, label: 'Your pay', lines: ['My pay for the month, in a twist of paper. Ten francs.'] },
       { x: 420, kind: 'talk', look: 'drummer', label: 'The drummer boy', lines: [['Drummer', 'Drill\'s done, Joncour. You look like a man waiting for something.'], 'I was. I just didn\'t know what yet.'] },
       { x: 540, kind: 'talk', look: 'soldier', label: 'The sergeant', lines: [['Sergeant', 'Someone rode in from Lavilledieu asking for you. Big man. Bigger hat.'], ['Sergeant', 'Friend of yours, or trouble?'], 'Both, probably.'] },
-      { x: 660, kind: 'coin', amount: 5, label: 'Dropped coins', lines: ['Somebody\'s winnings from last night\'s cards, trodden into the mud.'] },
-      { x: 880, kind: 'look', label: 'Supply crates', lines: ['Biscuit and powder. Everything in the army comes in a box, including the men.'] },
-      { x: 1110, kind: 'talk', look: 'soldier', label: 'A sentry', lines: [['Sentry', 'Rider on the north road, Joncour. Says he\'s here for you.']] },
-      { x: 1372, kind: 'look', label: 'The signpost', lines: ['LAVILLEDIEU — 3 DAYS. I read it every morning. It never got any shorter.'] },
-      { x: 1405, kind: 'goal', look: 'baldabiou', ride: true, facing: -1, label: 'The rider', verb: 'Meet', lines: ['A rider was coming up the road at a gallop. I knew the hat before I knew the face.'] },
+      { x: 840, kind: 'look', label: 'The warship', lines: ['A ship of the line of the Imperial Navy: ninety guns in two white bands, and a funnel between her masts. Sail and steam together, like the whole century.'] },
+      { x: 1140, kind: 'coin', amount: 5, label: 'Dropped coins', lines: ['Somebody\'s winnings from last night\'s cards, trodden into the mud.'] },
+      { x: 1360, kind: 'look', label: 'Supply crates', lines: ['Biscuit and powder. Everything in the army comes in a box, including the men.'] },
+      { x: 1590, kind: 'talk', look: 'soldier', label: 'A sentry', lines: [['Sentry', 'Rider on the north road, Joncour. Says he\'s here for you.']] },
+      { x: 1852, kind: 'look', label: 'The signpost', lines: ['LAVILLEDIEU — 3 DAYS. I read it every morning. It never got any shorter.'] },
+      { x: 1885, kind: 'goal', look: 'baldabiou', ride: true, facing: -1, label: 'The rider', verb: 'Meet', lines: ['A rider was coming up the road at a gallop. I knew the hat before I knew the face.'] },
     ],
   },
 

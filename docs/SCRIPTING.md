@@ -470,9 +470,10 @@ themselves in small bubbles when Hervé comes near (one conversation at a time),
 and down, a drill with an officer calling the orders, sentries up on the towers, flags waving,
 chimney and camp-fire smoke, fires, airships and balloons in the sky (one of them enormous, far off
 behind the clouds), the colours hoisted to a bugle call as the walk begins, a train crossing a
-viaduct now and then, cuirassiers riding through, and a band heard across the camp. None of it
-stops him; story/walks.js describes each (`crowd`, `marchers`, `drill`, `flags`, `smoke`,
-`fires`, `airships`, `colours`, `train`, `cavalry`, `band`). Lavilledieu, the walk home, has a
+viaduct now and then, cuirassiers riding through, a band heard across the camp, riflemen firing
+in turn at the butts, and sailors on the quay and the deck of the warship. None of it stops him;
+story/walks.js describes each (`crowd`, `marchers`, `drill`, `flags`, `smoke`, `fires`,
+`airships`, `colours`, `train`, `cavalry`, `band`, `range`). Lavilledieu, the walk home, has a
 river town's life too: boats about their trade, fish leaping, the sun glittering on the water,
 ducks, flocks of birds, the mill wheel turning, a fountain, windmills turning on the far ridges,
 the sun flashing on the cathedral's spires, children at tag and bowling a hoop with dogs at their
