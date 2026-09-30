@@ -443,7 +443,7 @@ if found_hairpin
 
 The player walks with ← → (or A/D, or by holding a side of the screen), runs with Shift, and uses
 E / Space / Enter (or a click) to look at things, take them, or talk. Each area is defined in
-`story/walks.js`: its title and region, the weather (snow, ash, petals, embers, fireflies, motes),
+`story/walks.js`: its title and region, the weather (snow, ash, petals, embers, fireflies, motes, breeze, autumn),
 and the things along the way, each at an x position in the painting:
 
 * `coin`: francs lying about; taking them adds to the purse.
@@ -474,9 +474,11 @@ viaduct now and then, cuirassiers riding through, and a band heard across the ca
 stops him; story/walks.js describes each (`crowd`, `marchers`, `drill`, `flags`, `smoke`,
 `fires`, `airships`, `colours`, `train`, `cavalry`, `band`). Lavilledieu, the walk home, has a
 river town's life too: boats about their trade, fish leaping, the sun glittering on the water,
-ducks, flocks of birds, the mill wheel turning, a fountain, and petals on the breeze (`boats`,
-`fish`, `glitter`, `ducks`, `flocks`, `wheels`, `fountains`, weather `breeze`); it ends with
-Hélène in her garden, and the story goes on from there.
+ducks, flocks of birds, the mill wheel turning, a fountain, windmills turning on the far ridges,
+the sun flashing on the cathedral's spires, children at tag and bowling a hoop with dogs at their
+heels, cats, and autumn leaves coming down (`boats`, `fish`, `glitter`, `ducks`, `flocks`,
+`wheels`, `fountains`, `windmills`, `sparkles`, `runners`, weather `autumn`); it ends with Hélène
+in her garden, and the story goes on from there.
 
 Walks never replace the rest: choices, cutscenes and minigames happen around them as before. The
 game menu (Esc) pauses a walk, and saving during one saves just before it. A quiet walk is passed

@@ -46,7 +46,9 @@
  *              crowd[group] shows `call`, then its people take their `rite` pose ('bugle', 'haul',
  *              'present') while flags[flag] climbs from y `from` to its own y and the bugle sounds
  *    train:    { depth, deck, speed, first, dir, pause: [min, max] }  a train now and then along a
- *              viaduct painted at `depth` (its rails at y `deck`), whistling as it comes into view
+ *              viaduct painted at `depth` (its rails at y `deck`), whistling as it comes into view;
+ *              (first: after so many seconds; afterMove: so many seconds after Hervé first moves;
+ *              each train comes in at the edge of the screen)
  *    cavalry:  { from, to, y, speed, gap, first, pause, riders: [{ look, horse }] }  horsemen riding
  *              the length of the walk and back (horses: bay, black, grey)
  *    band:     { first, volume }  a band practising somewhere, heard now and then
@@ -59,11 +61,20 @@
  *    wheels:   [{ x, y, r, speed }]  a mill wheel turning in the river
  *    fountains: [{ x, y, basin }]  water thrown up and falling back
  *    bright:   true for a sunny place (the edges barely darken)
+ *    windmills: [{ x, y, r, depth, speed, ph }]  the sails of a windmill painted at `depth`, turning
+ *              round its hub (x, y in that layer's own pixels)
+ *    sparkles: [{ x, y, depth, speed, size }]  the sun flashing on a spire or a gilded finial
+ *    runners:  [{ look | kind: 'dog' | 'cat', coat, x0, x1, speed, turn, y, hoop, follow, gap }]
+ *              children and animals running to and fro between x0 and x1, stopping now and then
+ *              (a cat sits a good while); `follow` (an index) keeps to its own side of that runner,
+ *              `gap` away: children at tag, a dog at their heels. Dogs: spaniel, black, white,
+ *              gold; cats: ginger, black, tabby; `hoop` gives a child a hoop to bowl along
+ *    weather 'autumn' brings leaves down, orange, gold and red
  *  A thing can stand in a pose, and change it when Hervé comes near: { pose, nearPose, nearAt }.
  *  Looks for the French army: soldier, rifleman (a rifle on the shoulder), officer, gunner, zouave,
  *  bugler, and the cavalry's cuirassier, cuirassierOfficer and trumpeter. And the town's: woman,
- *  lady, girl, baker, fisherman, washer, priest, oldman, fiddler, helene (poses: wash, fish,
- *  fiddle, wave).
+ *  lady, girl, baker, fisherman, washer, priest, oldman, fiddler, helene, and the children lad and
+ *  lass (poses: wash, fish, fiddle, wave).
  * ============================================================================
  */
 window.VN_WALKS = {
@@ -93,7 +104,7 @@ window.VN_WALKS = {
     // the colours go up at dawn: the bugle, the flag hoisted, the guard presenting arms
     colours: { group: 0, flag: 0, from: 176, delay: 1.6, dur: 10.4, hold: 3, call: 'To the colours!', caller: 5 },
     // an army train crossing the viaduct now and then, and cuirassiers riding through the camp
-    train: { depth: 0.2, deck: 146, speed: 34, first: 12, dir: -1, pause: [24, 40] },
+    train: { depth: 0.2, deck: 146, speed: 40, afterMove: 5, dir: -1, pause: [12, 20] },
     cavalry: {
       from: 1480, to: -60, y: 201, speed: 40, gap: 26, first: 4, pause: 22,
       riders: [{ look: 'cuirassierOfficer', horse: 'bay' }, { look: 'trumpeter', horse: 'grey' }, { look: 'cuirassier', horse: 'black' }, { look: 'cuirassier', horse: 'black' }],
@@ -129,7 +140,7 @@ window.VN_WALKS = {
 
   // ---------------------------------------------------------------- home: Lavilledieu, on a sunny day
   lavilledieu: {
-    title: 'Lavilledieu', region: 'Home · The south of France', hero: 'traveller', start: 40, weather: 'breeze', weatherCount: 46, accent: '255,226,160', bright: true,
+    title: 'Lavilledieu', region: 'Home · The south of France', hero: 'traveller', start: 40, weather: 'autumn', weatherCount: 40, accent: '255,210,140', bright: true,
     water: ['rgba(120,184,230,0.34)', 'rgba(52,108,160,0.72)'],
     hint: 'Walk home to Hélène →',
     // the river's trade and its life: nothing here stops Hervé, it is only there to be seen
@@ -145,6 +156,32 @@ window.VN_WALKS = {
     ducks: [{ x0: 250, x1: 420, y: 218, n: 4, speed: 5 }, { x0: 1380, x1: 1540, y: 220, n: 3, speed: 4 }],
     wheels: [{ x: 646, y: 206, r: 15, speed: 0.9 }],
     fountains: [{ x: 1560, y: 170, basin: 194 }],
+    // the windmills on the far ridges (their hubs, where tools/paint/walks.js painted the towers)
+    windmills: [
+      { x: 65.1, y: 129.7, r: 17, depth: 0.13, speed: 0.55 },
+      { x: 211.1, y: 127.5, r: 17, depth: 0.13, speed: 0.7, ph: 1 },
+      { x: 471.1, y: 121.5, r: 17, depth: 0.13, speed: 0.6, ph: 2 },
+      { x: 621.1, y: 127.5, r: 17, depth: 0.13, speed: 0.5, ph: 0.5 },
+    ],
+    // the sun catching the cathedral's spires and its great window, and the château's gilding
+    sparkles: [
+      { x: 561, y: 9, depth: 0.22 }, { x: 583, y: 9, depth: 0.22, speed: 0.9 }, { x: 640, y: 41, depth: 0.22, size: 2 },
+      { x: 572, y: 76, depth: 0.22, size: 2, speed: 1.4 },
+      { x: 149, y: 76, depth: 0.07, size: 2 }, { x: 108.5, y: 89, depth: 0.07, size: 2, speed: 0.8 }, { x: 163.7, y: 94, depth: 0.07, size: 2, speed: 1.3 },
+    ],
+    // children at tag in the meadow with a spaniel at their heels, a black cat by the hives, a boy
+    // bowling his hoop along the quay with a black dog after him, a ginger cat by the fountain,
+    // and the Joncours' old dog pottering about the garden
+    runners: [
+      { look: 'lass', x0: 150, x1: 420, speed: 30 },
+      { look: 'lad', follow: 0, gap: 12, speed: 34 },
+      { kind: 'dog', coat: 'spaniel', follow: 1, gap: 9, speed: 44 },
+      { kind: 'cat', coat: 'black', x0: 168, x1: 236, speed: 7 },
+      { look: 'boy', hoop: true, x0: 880, x1: 1200, speed: 30, turn: 0.05 },
+      { kind: 'dog', coat: 'black', follow: 4, gap: 20, speed: 44 },
+      { kind: 'cat', coat: 'ginger', x0: 1572, x1: 1600, speed: 8 },
+      { kind: 'dog', coat: 'gold', x0: 1700, x1: 1880, speed: 14, turn: 0.15 },
+    ],
     smoke: [{ x: 482, y: 82, rate: 0.9, col: '240,240,244' }, { x: 1782, y: 100, rate: 0.6, col: '240,240,244' }],
     crowd: [
       { x: 110, near: 130, people: [{ dx: -8, look: 'oldman', face: 1, pose: 'sit' }, { dx: 10, look: 'girl', face: -1 }], lines: [[0, 'Is that the Joncour boy? Out of uniform at last!'], [1, 'He looks taller, Grandpa.'], [0, 'Everyone looks taller when they come home.']] },

@@ -72,12 +72,16 @@ Triomphe and the boulevards' apartment blocks (nothing later, so no Eiffel Tower
 buildings are drawn by `tools/paint/scenes-french.js`, shared with the Chapter 1 backdrop
 (`army_camp`) and its cutscene.
 
-Lavilledieu, the walk home, is a river town on a sunny day: a wildflower meadow with mulberry
-trees, the silk mill and its wheel, a wash-house, pastel houses along the quay with shutters and
-geraniums, plane trees, a bakery and a café, a guinguette under paper lanterns, the church and
-its fountain, and the Joncour house in its garden of roses and lavender; behind them, houses
-climb a hill to a church, with vineyards and an old bridge beyond. It is drawn by
-`tools/paint/scenes-village.js`, shared with the Lavilledieu backdrop.
+Lavilledieu, the walk home, is an old stone river town on a bright autumn day: a meadow of late
+flowers with mulberry trees turned gold, the silk mill and its wheel, a wash-house, grey stone
+houses along the quay with moss in their joints and red creeper up their fronts, shutters and
+geraniums, plane trees in orange and gold, a bakery and a café, a guinguette under paper
+lanterns, the church and its fountain, and the Joncour house in its garden of roses and lavender.
+Above the town, stone houses climb a hill in terraces to a twin-spired Gothic cathedral on its
+platform (after Cologne's); beyond are windmills on the ridges (their sails turned by the walk),
+a château on its rock and an abbey in the autumn woods of the foothills, and snowy mountains
+behind it all. Every house and the cathedral sit on an explicit ground line (`vProfile`), so none
+floats. It is drawn by `tools/paint/scenes-village.js`, shared with the Lavilledieu backdrop.
 
 The eight walking areas (`camp`, `lavilledieu`, `steppe`, `village`, `aviary`, `ruins`, `crossing`, `cemetery`) are painted by
 `tools/paint-walks.js` from `tools/paint/walks.js`, with the same toolkit and style as the

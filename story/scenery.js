@@ -2360,7 +2360,7 @@ window.VN_SCENERY = {
   "flat": "assets/scenes/lavilledieu/flat.png",
   "vignette": [
    0.18,
-   "20,40,60"
+   "40,30,20"
   ],
   "layers": [
    {
@@ -2376,9 +2376,9 @@ window.VN_SCENERY = {
    {
     "id": "clouds_high",
     "x": 0,
-    "y": 9,
+    "y": 7,
     "w": 480,
-    "h": 53,
+    "h": 45,
     "depth": 0.02,
     "anim": {
      "type": "drift",
@@ -2389,9 +2389,9 @@ window.VN_SCENERY = {
    {
     "id": "clouds",
     "x": 0,
-    "y": 29,
+    "y": 23,
     "w": 480,
-    "h": 57,
+    "h": 55,
     "depth": 0.04,
     "anim": {
      "type": "drift",
@@ -2400,21 +2400,71 @@ window.VN_SCENERY = {
     "src": "assets/scenes/lavilledieu/clouds.png"
    },
    {
-    "id": "far",
+    "id": "peaks",
     "x": 0,
-    "y": 116,
+    "y": 30,
     "w": 480,
-    "h": 35,
+    "h": 128,
+    "depth": 0.01,
+    "anim": null,
+    "src": "assets/scenes/lavilledieu/peaks.png"
+   },
+   {
+    "id": "range",
+    "x": 0,
+    "y": 59,
+    "w": 480,
+    "h": 117,
+    "depth": 0.03,
+    "anim": null,
+    "src": "assets/scenes/lavilledieu/range.png"
+   },
+   {
+    "id": "hills",
+    "x": 0,
+    "y": 100,
+    "w": 480,
+    "h": 90,
     "depth": 0.06,
     "anim": null,
-    "src": "assets/scenes/lavilledieu/far.png"
+    "src": "assets/scenes/lavilledieu/hills.png"
+   },
+   {
+    "id": "sails0",
+    "x": 39,
+    "y": 89,
+    "w": 33,
+    "h": 33,
+    "depth": 0.06,
+    "anim": {
+     "type": "spin",
+     "t": 10,
+     "ox": 0.5,
+     "oy": 0.5
+    },
+    "src": "assets/scenes/lavilledieu/sails0.png"
+   },
+   {
+    "id": "sails1",
+    "x": 134,
+    "y": 88,
+    "w": 30,
+    "h": 31,
+    "depth": 0.06,
+    "anim": {
+     "type": "spin",
+     "t": 12,
+     "ox": 0.5,
+     "oy": 0.5
+    },
+    "src": "assets/scenes/lavilledieu/sails1.png"
    },
    {
     "id": "hill",
-    "x": 100,
-    "y": 0,
-    "w": 380,
-    "h": 173,
+    "x": 150,
+    "y": 14,
+    "w": 330,
+    "h": 182,
     "depth": 0.12,
     "anim": null,
     "src": "assets/scenes/lavilledieu/hill.png"
@@ -2422,16 +2472,16 @@ window.VN_SCENERY = {
    {
     "id": "town",
     "x": 0,
-    "y": 82,
+    "y": 92,
     "w": 480,
-    "h": 114,
+    "h": 107,
     "depth": 0.2,
     "anim": null,
     "src": "assets/scenes/lavilledieu/town.png"
    },
    {
     "id": "wheel",
-    "x": 121,
+    "x": 97,
     "y": 173,
     "w": 31,
     "h": 31,
@@ -2485,9 +2535,9 @@ window.VN_SCENERY = {
    {
     "id": "bank",
     "x": 0,
-    "y": 232,
+    "y": 231,
     "w": 480,
-    "h": 38,
+    "h": 39,
     "depth": 0.6,
     "anim": {
      "type": "sway",

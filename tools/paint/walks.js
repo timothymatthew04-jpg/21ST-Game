@@ -173,92 +173,128 @@ WALKS.camp = (c, L) => {
   return { colors: 120, vignette: [0.25, '40,20,40'], anchors: { flag: hq.flag, chimneys: hq.chimneys } };
 };
 
-// ---------------------------------------------------------------- Lavilledieu, home, on a sunny day
+// ---------------------------------------------------------------- Lavilledieu, home, on a bright autumn day
 // Out of the meadows, past the silk mill and the washerwomen, along the quay under the plane trees,
-// by the guinguette and the church, home to the Joncour house, where Hélène is in the garden.
-// The boats, the fish, the birds, the mill wheel and the fountain are the walk's (story/walks.js).
+// by the guinguette and the church, home to the Joncour house, where Hélène is in the garden. Above
+// the town the cathedral stands on its hill among the stone houses; beyond, windmills on the ridges,
+// a château and an abbey on the foothills, and the snowy mountains. The boats, the fish, the birds,
+// the windmills' sails, the children and dogs, the mill wheel and the fountain are the walk's
+// (story/walks.js), which also knows where the windmills' hubs and the cathedral's spires are.
 WALKS.lavilledieu = (c, L) => {
   const r = rng(1301);
-  vgrad(c, 0, 0, 480, WY, [[0, '#3474c4'], [0.3, '#5e9ad8'], [0.62, '#a4cced'], [0.85, '#d6ecf8'], [1, '#eef8fc']]);
-  sun(c, 80, 34, 13, '#fffef0', 'rgba(255,248,210,0.7)');
+  vgrad(c, 0, 0, 480, WY, [[0, '#2f6eba'], [0.28, '#5896d2'], [0.54, '#9cc2e2'], [0.76, '#e2dccc'], [1, '#f4e4c4']]);
+  sun(c, 80, 34, 13, '#fffef0', 'rgba(255,240,200,0.7)');
   c.clearRect(0, WY, 480, H - WY);
-  // little high clouds in rows, and big white ones drifting lower down
+  // little high clouds in rows, and big white ones drifting lower down, warm in the autumn sun
   const hi = L('clouds_high', { depth: 0.02, anim: { type: 'drift', t: 700 } });
-  wrapped(hi, 131, (cc, rr) => { for (let i = 0; i < 70; i++) { const x = rr.r(0, 480), y = rr.r(8, 56); ellipse(cc, x, y, rr.r(3, 7), rr.r(1.4, 2.4), rr.pick(['#ffffff', '#eef4fc', '#dce8f6'])); } });
+  wrapped(hi, 131, (cc, rr) => { for (let i = 0; i < 70; i++) { const x = rr.r(0, 480), y = rr.r(8, 56); ellipse(cc, x, y, rr.r(3, 7), rr.r(1.4, 2.4), rr.pick(['#ffffff', '#f4f0ec', '#dce4f0'])); } });
   const cl = L('clouds', { depth: 0.05, anim: { type: 'drift', t: 420 } });
   wrapped(cl, 132, (cc, rr) => {
-    cumulus(cc, rr, 170, 30, 120, 36, { dark: '#b8c8e0', mid: '#e8f0fa', lit: '#ffffff', lx: -1 });
-    cumulus(cc, rr, 380, 60, 80, 24, { dark: '#b8c8e0', mid: '#e8f0fa', lit: '#ffffff', lx: -1 });
-    cumulus(cc, rr, 20, 74, 70, 20, { dark: '#b8c8e0', mid: '#e8f0fa', lit: '#ffffff', lx: -1 });
+    cumulus(cc, rr, 170, 26, 120, 36, { dark: '#b8c0d8', mid: '#eceef6', lit: '#fffaf0', lx: -1 });
+    cumulus(cc, rr, 380, 52, 80, 24, { dark: '#b8c0d8', mid: '#eceef6', lit: '#fffaf0', lx: -1 });
+    cumulus(cc, rr, 20, 66, 70, 20, { dark: '#b8c0d8', mid: '#eceef6', lit: '#fffaf0', lx: -1 });
   });
-  // far hills with their vineyards, a village far off, and an old stone bridge across the valley
-  const far = L('far', { depth: 0.1 });
-  const fx1 = S(0.1);
-  hill(far, r, -60, 360, 172, 56, '#8ab0c2', { sharp: 1.1 });
-  hill(far, r, 280, fx1 + 60, 172, 44, '#80a8b6');
-  for (let y = 128; y < 170; y += 3) line(far, 120 + (y - 128), y, 300 - (y - 128) * 0.5, y + 4, 'rgba(96,136,120,0.55)', 1);
-  for (let k = 0; k < 9; k++) { const x = 420 + k * 9; rect(far, x, 150 - (k % 3) * 2, 7, 6, '#e8e0d0'); rect(far, x, 148 - (k % 3) * 2, 7, 2, '#c07058'); }
-  rect(far, 20, 156, 210, 4, VIL.stone);
-  rect(far, 20, 156, 210, 1, VIL.stoneLit);
-  for (let x = 24; x < 228; x += 20) { rect(far, x, 160, 4, 14, VIL.stone); ellipse(far, x + 12, 164, 8, 5, '#a8c8d8'); }
-  // the hill with houses climbing to the church on top, a limestone cliff on its flank
+  // the high mountains, far off, snow on their peaks
+  const pk = L('peaks', { depth: 0.03 });
+  const PK = { lit: '#b8c0dc', shade: '#8c96bc', deep: '#7a84aa', snow: '#fbfcff', snowShade: '#ccd4e8', snowline: 0.4, snowAt: 70 };
+  for (const [x, h, w] of [[-20, 96, 90], [70, 132, 110], [170, 104, 90], [262, 140, 120], [370, 112, 96], [470, 128, 110], [560, 100, 90]]) vPeak(pk, r, x, 178, h, w, PK);
+  pk.save(); pk.globalCompositeOperation = 'source-atop'; vgrad(pk, 0, 110, S(0.03), 70, [[0, 'rgba(236,228,220,0)'], [1, 'rgba(236,226,212,0.85)']]); pk.restore();
+  // the foothills: forests turned red and gold, a château in the sun on its rock, an abbey
+  const rg = L('range', { depth: 0.07 });
+  const RG = { lit: '#c8ac8c', shade: '#907870', deep: '#74605c', snow: '#fbfaf6', snowShade: '#d4d0d8', snowline: 0.22, snowAt: 84 };
+  for (const [x, h, w] of [[30, 70, 80], [230, 88, 100], [330, 64, 70], [520, 86, 100], [640, 70, 80]]) vPeak(rg, r, x, 190, h, w, RG);
+  rg.save(); rg.globalCompositeOperation = 'source-atop';
+  for (let i = 0; i < 520; i++) { const x = r.r(-10, S(0.07)), y = r.r(128, 190); crown(rg, r, x, y, r.r(3, 7), r.r(2, 4), vAutumn(r).map((col) => vMix(col, '#e0d0c0', 0.35)), { x: -0.7, y: -0.7 }, 6); }
+  vgrad(rg, 0, 150, S(0.07), 40, [[0, 'rgba(232,220,200,0)'], [1, 'rgba(232,220,200,0.6)']]);
+  rg.restore();
+  const CP = { lit: '#f4ecd8', mid: '#d4c8b0', dark: '#a89a84', hi: '#fffbee', roof: '#5a6278', roofLit: '#8a94ac', glass: '#4a5670', glassLit: '#f4cc78', rock: '#a08a78', rockLit: '#c8b098', rockDark: '#7a6660', haze: '#e0d0c0', hazeK: 0.3 };
+  const cTop = vSpur(rg, r, 104, 190, 60, 58, CP);
+  vChateau(rg, r, 106, cTop, 0.62, CP);
+  vAbbey(rg, r, 408, 162, 0.5, { ...CP, tile: '#a86a4a', deep: '#5a5048' });
+  rg.save(); rg.globalCompositeOperation = 'source-atop'; vgrad(rg, 0, 170, S(0.07), 20, [[0, 'rgba(232,220,200,0)'], [1, 'rgba(232,220,200,0.5)']]); rg.restore();
+  // rolling hills with vineyards gone red and gold, windmills on the crests, poplars
+  const hs = L('hills', { depth: 0.13 });
+  const hx1 = S(0.13);
+  const fnH = vProfile([[-10, 176], [60, 158], [140, 170], [210, 156], [300, 172], [380, 164], [470, 150], [560, 168], [620, 156], [hx1, 170]]);
+  vLand(hs, fnH, -10, hx1, 200, '#b89a58');
+  hs.save(); hs.globalCompositeOperation = 'source-atop';
+  for (let x = 0; x < hx1; x++) { const d = fnH(x + 2) - fnH(x - 2); if (d > 0.3) rect(hs, x, fnH(x), 1, 40, '#9a7e48'); else if (d < -0.3) rect(hs, x, fnH(x), 1, 30, '#ccae66'); }
+  for (let y = 150; y < 200; y += 3) for (let x = 0; x < hx1; x += 2) if (Math.sin(x * 0.02 + y * 0.3) > 0.2) px(hs, x + (y % 2), y, r.pick(['#a83a22', '#c86a2a', '#d8a040', '#8a4a2a']));
+  vgrad(hs, 0, 170, hx1, 30, [[0, 'rgba(160,120,70,0)'], [1, 'rgba(140,100,60,0.5)']]);
+  hs.restore();
+  for (const x of [26, 118, 250, 340, 430, 520, 600, 680]) poplar(hs, r, x, fnH(x) + 3, r.r(22, 30), { trunk: '#5a4a3a', leaves: ['#b0782a', '#e0a83a', '#f8d870'] }, -1);
+  const MP = { lit: '#f0e8d8', mid: '#d0c6b2', dark: '#a0947e', cap: '#7a5a3a', moss: true };
+  for (const x of [66, 212, 472, 622]) vWindmill(hs, r, x, fnH(x) + 3, 0.9, MP);
+  for (const [x0, x1] of [[150, 196], [300, 360], [540, 580]]) for (let x = x0; x < x1; x += r.r(8, 14)) smallHouse(hs, r, x, fnH(x) + 4, r.i(7, 10), r.i(5, 7), { gable: false });
+  // the cathedral's hill: stone houses in terraces up to its platform, the cathedral on top
   const hl = L('hill', { depth: 0.22 });
-  hill(hl, r, 300, 900, 186, 130, '#5e9046', { sharp: 0.7 });
-  hill(hl, r, 260, 520, 188, 60, '#6e9e50');
-  poly(hl, [[380, 186], [392, 140], [424, 122], [462, 126], [480, 150], [470, 186]], '#dccfb2');
-  poly(hl, [[380, 186], [392, 140], [424, 122], [418, 152], [404, 186]], '#ece2ca');
-  for (let k = 0; k < 14; k++) line(hl, r.r(392, 474), r.r(128, 140), r.r(392, 474), r.r(156, 184), '#b8a888', 1);
-  const ridgeAt = (x) => 186 - 130 * 0.82 * Math.pow(Math.max(0, Math.sin(Math.PI * (x - 300) / 600)), 0.7);
-  for (let i = 0; i < 60; i++) { const x = r.r(320, 880); crown(hl, r, x, r.r(ridgeAt(x) + 8, 182), r.r(5, 11), r.r(4, 7), VIL.leaf, { x: -0.7, y: -0.7 }, 10); }
-  for (let i = 0; i < 80; i++) {
-    const x = r.r(480, 760), y = ridgeAt(x) + r.r(12, 40);
-    const w = r.r(10, 16), hh = r.r(8, 12), wall = r.pick(['#f2e8d4', '#ecdcc0', '#f4e0d0', '#e8d4b4']);
-    rect(hl, x, y - hh, w, hh, wall);
-    rect(hl, x + w - 2, y - hh, 2, hh, vShade(wall, -0.12));
-    poly(hl, [[x - 1, y - hh], [x + w + 1, y - hh], [x + w - 2, y - hh - 4], [x + 2, y - hh - 4]], r() < 0.5 ? VIL.slate : VIL.roof);
-    px(hl, x + 3, y - hh + 3, r() < 0.2 ? VIL.lit : '#3a4a62'); px(hl, x + w - 5, y - hh + 3, '#3a4a62');
-  }
-  vChurch(hl, r, 586, ridgeAt(600) + 6, 0.55);
+  const cx1 = S(0.22);
+  const fnC = vProfile([[250, 198], [330, 190], [400, 170], [450, 146], [500, 122], [530, 112], [556, 110], [650, 110], [680, 114], [720, 126], [770, 136], [cx1, 146]]);
+  vLand(hl, fnC, 250, cx1, 204, '#a88a4a');
+  hl.save(); hl.globalCompositeOperation = 'source-atop';
+  for (let x = 250; x < cx1; x++) { const d = fnC(x + 3) - fnC(x - 3); rect(hl, x, fnC(x), 1, 90, d < -1 ? '#bea05a' : d > 1 ? '#8a6e3c' : '#a88a4a'); }
+  texture(hl, r, 250, 100, cx1 - 250, 104, 0.08, 2);
+  hl.restore();
+  // a limestone outcrop on the lower slope
+  poly(hl, [[372, 192], [384, 166], [404, 156], [426, 160], [434, 180], [430, 194]], '#c8bca4');
+  poly(hl, [[372, 192], [384, 166], [404, 156], [398, 176], [388, 194]], '#e0d6c0');
+  for (let k = 0; k < 8; k++) line(hl, r.r(384, 428), r.r(160, 168), r.r(384, 428), r.r(176, 190), '#a89c84', 1);
+  // trees on the slopes, rooted in them
+  for (let i = 0; i < 70; i++) { const x = r.r(270, cx1), y = fnC(x) + r.r(4, 50); if (y > 200) continue; crown(hl, r, x, y - 3, r.r(4, 8), r.r(3, 6), vAutumn(r), { x: -0.7, y: -0.7 }, 10); }
+  // the houses, stepping up the slope toward the cathedral and down the far side
+  hillTown(hl, r, fnC, 360, 540, 70, { wMin: 9, wMax: 15, hMin: 8, hMax: 12, sink: 18 });
+  hillTown(hl, r, fnC, 676, cx1, 46, { wMin: 9, wMax: 15, hMin: 8, hMax: 12, sink: 16 });
+  // the platform and its terrace wall, and the cathedral on it
+  terrace(hl, r, 540, 682, 104, fnC, { gap: 14 });
+  const spires = vCathedral(hl, r, 556, 104, 0.44);
+  hillTown(hl, r, fnC, 470, 548, 16, { wMin: 10, wMax: 14, hMin: 9, hMax: 12, sink: 24 });
   // nearer: poplars along the fields, a farm among its mulberries, the town's back rooftops
   const mid = L('mid', { depth: 0.5 });
   const mx1 = S(0.5);
-  hill(mid, r, -40, 420, 196, 22, '#78a84c');
-  for (let x = 10; x < 300; x += r.r(22, 40)) poplar(mid, r, x, 192, r.r(40, 56), { trunk: '#5a4a3a', leaves: ['#3e6a2e', '#5a8a3a', '#9ac05a'] }, -1);
-  frHouse(mid, r, 150, 190, 40, 20, { wall: '#efe2c8', roof: '#c0603c', roofDark: '#9a4428', windows: [[8, 5, 5, 7, { shutters: '#5a8a5a' }], [26, 5, 5, 7, { shutters: '#5a8a5a' }]], chimney: 0.7 });
+  hill(mid, r, -40, 420, 196, 22, '#a8903e');
+  for (let x = 10; x < 300; x += r.r(22, 40)) poplar(mid, r, x, 192, r.r(40, 56), { trunk: '#5a4a3a', leaves: ['#a86a1e', '#e0a030', '#f8d468'] }, -1);
+  frHouse(mid, r, 150, 190, 40, 20, { wall: '#b8b2a4', wallDark: '#948e80', wallLight: '#d0cabc', roof: '#a8583a', roofDark: '#7a3e28', windows: [[8, 5, 5, 7, { frame: '#8a8478' }], [26, 5, 5, 7, { frame: '#8a8478' }]], chimney: 0.7 });
+  moss(mid, r, 150, 180, 40, 10, 14);
   for (const x of [120, 206, 236]) mulberry(mid, r, x, 194, r.r(20, 28));
   for (let x = 380; x < mx1; x += r.r(26, 44)) {
     const w = r.r(24, 40), hh = r.r(30, 50), wall = r.pick(VIL.walls);
-    rect(mid, x, 196 - hh, w, hh, vShade(wall, -0.06));
+    stoneFace(mid, r, x, 196 - hh, w, hh, vShade(wall, -0.06), { course: 3, min: 3, max: 6 });
+    rect(mid, x, 196 - hh, 1, hh, vShade(wall, 0.18));
     poly(mid, [[x - 2, 196 - hh], [x + w + 2, 196 - hh], [x + w - 2, 188 - hh], [x + 2, 188 - hh]], r() < 0.4 ? VIL.slate : VIL.roof);
+    for (let i = 0; i < w * 0.4; i++) px(mid, x + r.r(0, w), 196 - hh - r.r(1, 6), r.pick(VIL.moss));
     rect(mid, x + w * 0.7, 184 - hh, 4, 8, vShade(wall, -0.25));
-    if (r() < 0.5) crown(mid, r, x + w / 2, 200 - hh, r.r(10, 16), r.r(7, 10), VIL.leaf, { x: -0.7, y: -0.7 }, 14);
+    if (r() < 0.5) crown(mid, r, x + w / 2, 200 - hh, r.r(10, 16), r.r(7, 10), vAutumn(r), { x: -0.7, y: -0.7 }, 14);
   }
   // the town itself
   const g = L('ground', { depth: 1 });
-  bank(g, r, 0, W, { grass0: '#8ab84e', grass1: '#6a9a3a', tip: '#c4e07a', earth: '#8a7458', dark: '#4a3a2e', stone: '#b8a888' });
-  // the meadow: a path through wild flowers, mulberry trees, a dry stone wall, bee hives
-  vgrad(g, 0, 184, 440, 20, [[0, '#7aac44'], [1, '#6a9a3a']]);
-  rect(g, 0, GY - 3, 440, 4, '#c8b48a');
+  bank(g, r, 0, W, { grass0: '#b4a04a', grass1: '#94823a', tip: '#dcc86e', earth: '#7a6448', dark: '#4a3a2a', stone: '#9a9284' });
+  // the meadow: a path through the autumn flowers, mulberry trees, a dry stone wall, bee hives
+  vgrad(g, 0, 184, 440, 20, [[0, '#b09a48'], [1, '#98843c']]);
+  rect(g, 0, GY - 3, 440, 4, '#c0ac84');
   stoneWall(g, r, 70, 230, GY - 4, 12);
   for (const [x, hh] of [[30, 54], [150, 46], [270, 58], [390, 48]]) mulberry(g, r, x, GY - 4, hh);
-  for (const x of [196, 212]) { rect(g, x, GY - 14, 10, 10, '#f4ece0'); rect(g, x - 1, GY - 16, 12, 3, '#b8a888'); for (let k = 0; k < 3; k++) rect(g, x, GY - 12 + k * 3, 10, 1, '#d8ccb8'); rect(g, x + 4, GY - 6, 2, 1, '#3a2a1e'); }
-  wildflowers(g, r, 0, 440, GY - 16, GY - 2, 1100);
+  for (const x of [196, 212]) { rect(g, x, GY - 14, 10, 10, '#f4ece0'); rect(g, x - 1, GY - 16, 12, 3, '#a8a294'); for (let k = 0; k < 3; k++) rect(g, x, GY - 12 + k * 3, 10, 1, '#d8ccb8'); rect(g, x + 4, GY - 6, 2, 1, '#3a2a1e'); }
+  wildflowers(g, r, 0, 440, GY - 16, GY - 2, 900);
+  leafLitter(g, r, 0, 440, GY - 6, GY + 1, 500);
   rect(g, 330, GY - 28, 3, 26, VIL.stone); rect(g, 324, GY - 22, 15, 3, VIL.stone);
+  for (let i = 0; i < 8; i++) px(g, 324 + r.r(0, 15), GY - 22 + r.r(0, 3), VIL.moss[r.i(0, 2)]);
   // the silk mill, and the wash-house by the water
   vMill(g, r, 440, GY - 2, 190, 76);
   vLavoir(g, r, 672, GY - 2, 62);
   // the quay: paving, and the town houses shoulder to shoulder
-  rect(g, 440, GY - 3, 1160, 5, '#cbbd9f');
-  for (let x = 440; x < 1600; x += 6) rect(g, x, GY - 3 + ((x / 6) % 2), 5, 1, '#b3a482');
-  rect(g, 440, GY + 2, 1160, WY - GY - 2, '#a89878');
-  for (let x = 440; x < 1600; x += r.r(10, 18)) rect(g, x, GY + r.i(3, 6), r.r(5, 9), 1, '#8a7a5a');
-  const plan = [[52, 70, { vine: 'wisteria' }], [66, 84, { shop: true, sign: 11, awning: ['#c83a3a', '#fff4e8'], goods: '#d8a050' }], [54, 76, { slate: true }], [60, 90, {}], [72, 78, { shop: true, sign: 4, awning: ['#3a8a5a', '#fff4e8'], shopGlass: '#f8e0b0', goods: '#8a5a3a' }], [50, 72, { vine: 'rose' }], [62, 94, { slate: true }], [56, 80, {}], [60, 72, { shop: true, sign: 6, awning: ['#3a5aa8', '#fff4e8'], goods: '#e86a8a' }]];
+  rect(g, 440, GY - 3, 1160, 5, '#b8b2a2');
+  for (let x = 440; x < 1600; x += 6) rect(g, x, GY - 3 + ((x / 6) % 2), 5, 1, '#9a9484');
+  rect(g, 440, GY + 2, 1160, WY - GY - 2, '#948e80');
+  for (let x = 440; x < 1600; x += r.r(10, 18)) rect(g, x, GY + r.i(3, 6), r.r(5, 9), 1, '#7a7466');
+  for (let x = 440; x < 1600; x += r.r(3, 9)) px(g, x, GY + r.i(2, 7), r.pick(VIL.moss));
+  const plan = [[52, 70, { ivy: 'left', moss: 0.5 }], [66, 84, { shop: true, sign: 11, awning: ['#b83a3a', '#f4ece0'], goods: '#d8a050' }], [54, 76, { slate: true, ivy: 'right' }], [60, 90, { moss: 0.6 }], [72, 78, { shop: true, sign: 4, awning: ['#3a7a5a', '#f4ece0'], shopGlass: '#f8e0b0', goods: '#8a5a3a' }], [50, 72, { vine: 'rose' }], [62, 94, { slate: true, ivy: 'left', moss: 0.5 }], [56, 80, {}], [60, 72, { shop: true, sign: 6, awning: ['#3a5aa8', '#f4ece0'], goods: '#e8a04a' }]];
   let hx = 748;
   for (const [w, hh, o] of plan) { vHouse(g, r, hx, GY - 3, w, hh, o); hx += w + 2; }
   // tables outside the café, lamps along the quay, and plane trees shading it all
   for (const x of [1034, 1062]) { rect(g, x, GY - 12, 12, 2, '#f4ece0'); rect(g, x + 5, GY - 10, 2, 7, '#3a3030'); rect(g, x - 4, GY - 9, 2, 6, '#3a3030'); rect(g, x + 14, GY - 9, 2, 6, '#3a3030'); rect(g, x + 3, GY - 15, 2, 3, '#c83a3a'); }
   for (const x of [870, 1010, 1160]) { rect(g, x, GY - 40, 2, 38, '#2e3440'); rect(g, x - 2, GY - 46, 6, 7, '#3a4050'); rect(g, x - 1, GY - 45, 4, 5, '#ffe6a8'); glow(g, x + 1, GY - 42, 12, 'rgba(255,220,140,0.45)'); }
   for (const x of [800, 944, 1096, 1240]) planeTree(g, r, x, GY - 3, r.r(88, 100));
+  leafLitter(g, r, 740, 1600, GY - 4, GY + 2, 700);
   for (const x of [830, 1126]) { rect(g, x, GY - 8, 20, 2, '#6a4a30'); rect(g, x, GY - 12, 20, 2, '#6a4a30'); rect(g, x + 1, GY - 6, 2, 4, '#3a2a20'); rect(g, x + 17, GY - 6, 2, 4, '#3a2a20'); }
   // the guinguette on the water's edge under its lanterns
   vGuinguette(g, r, 1300, GY - 2, 104);
@@ -266,26 +302,27 @@ WALKS.lavilledieu = (c, L) => {
   vChurch(g, r, 1418, GY - 3, 1);
   vFountain(g, 1560, GY - 2);
   // home: the garden fence and gate, the Joncour house under its roses, the garden, a mulberry
-  vHouse(g, r, 1690, GY - 3, 112, 86, { wall: '#f4e8d2', shutters: '#4a78a8', slate: true, vine: 'rose', door: '#4a6a9a', doorAt: 50, chimney: 0.8 });
-  for (let x = 1604; x < 1916; x += 6) { if (x > 1640 && x < 1660) continue; rect(g, x, GY - 14, 3, 12, '#f8f4ec'); poly(g, [[x, GY - 14], [x + 3, GY - 14], [x + 1.5, GY - 16]], '#f8f4ec'); }
-  rect(g, 1604, GY - 11, 312, 2, '#e8e2d6'); rect(g, 1604, GY - 6, 312, 2, '#e8e2d6');
-  rect(g, 1640, GY - 18, 2, 16, '#d8d0c0'); rect(g, 1660, GY - 18, 2, 16, '#d8d0c0');
+  vHouse(g, r, 1690, GY - 3, 112, 86, { wall: '#c4bfb4', shutters: '#4a6a8a', slate: true, vine: 'rose', door: '#4a5e86', doorAt: 50, chimney: 0.8, moss: 0.4 });
+  for (let x = 1604; x < 1916; x += 6) { if (x > 1640 && x < 1660) continue; rect(g, x, GY - 14, 3, 12, '#f0ece2'); poly(g, [[x, GY - 14], [x + 3, GY - 14], [x + 1.5, GY - 16]], '#f0ece2'); }
+  rect(g, 1604, GY - 11, 312, 2, '#dcd6ca'); rect(g, 1604, GY - 6, 312, 2, '#dcd6ca');
+  rect(g, 1640, GY - 18, 2, 16, '#c8c0b0'); rect(g, 1660, GY - 18, 2, 16, '#c8c0b0');
   for (const [x, w] of [[1620, 16], [1672, 14], [1818, 18], [1860, 16]]) roseBush(g, r, x, GY - 2, w);
   lavender(g, r, 1804, 1900, GY - 2);
   rect(g, 1838, GY - 9, 22, 2, '#8a6a4a'); rect(g, 1838, GY - 14, 22, 2, '#8a6a4a'); rect(g, 1840, GY - 7, 2, 5, '#5a4030'); rect(g, 1856, GY - 7, 2, 5, '#5a4030');
   mulberry(g, r, 1896, GY - 3, 64);
-  wildflowers(g, r, 1600, 1920, GY - 6, GY - 1, 200, ['#e0305a', '#f06a8a', '#ffffff', '#8a6ad0']);
-  // tall flowers and reeds at the water's edge, nearest of all, bending in the breeze
+  wildflowers(g, r, 1600, 1920, GY - 6, GY - 1, 160, ['#e0305a', '#f06a8a', '#ffffff', '#f08a2a', '#f4d23a']);
+  leafLitter(g, r, 1600, 1920, GY - 4, GY + 2, 260);
+  // tall grasses and asters at the water's edge, nearest of all, bending in the breeze
   const fr = L('front', { depth: 1.3, anim: sway(2.4, 3.8) });
   for (let i = 0; i < 70; i++) {
     const x = r() * W, hh = r.r(12, 36);
-    if (r() < 0.55) {
-      line(fr, x, H, x + r.r(-3, 3), H - hh, '#3e6a2e', 1);
-      ellipse(fr, x, H - hh, 2.2, 1.8, r.pick(['#e0302a', '#e0302a', '#ffffff', '#8a6ad0', '#f4d23a', '#f06a8a']));
+    if (r() < 0.5) {
+      line(fr, x, H, x + r.r(-3, 3), H - hh, '#6a6a2a', 1);
+      ellipse(fr, x, H - hh, 2.2, 1.8, r.pick(['#9a5ad0', '#f08a2a', '#ffffff', '#f4d23a', '#e0302a', '#c8305a']));
       px(fr, x, H - hh, '#3a2a1e');
-    } else line(fr, x, H, x + r.r(-4, 4), H - hh, r.pick(['#4a6a2a', '#6a8a3a', '#8aa84a']), 1);
+    } else line(fr, x, H, x + r.r(-4, 4), H - hh, r.pick(['#8a7a3a', '#a8904a', '#c8a85a']), 1);
   }
-  return { colors: 128, vignette: [0.16, '20,40,60'] };
+  return { colors: 150, vignette: [0.16, '40,30,20'], anchors: { spires } };
 };
 
 // ---------------------------------------------------------------- across the steppe, at sunset

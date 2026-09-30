@@ -68,6 +68,8 @@
     priest: { coat: '#1e1c24', coatDark: '#141218', legs: '#141218', boots: '#101014', skin: '#e8c0a0', hat: 'hat', hatCol: '#1e1c24', robe: 1 },
     oldman: { coat: '#6a5a4a', coatDark: '#50443a', legs: '#4a4038', boots: '#2a2018', skin: '#e0b898', hat: 'beret', hatCol: '#2a2a3a', beard: '#d8d8d8', cane: 1 },
     fiddler: { coat: '#8a3a2a', coatDark: '#6a2a1e', legs: '#3a3440', boots: '#2a2018', skin: '#e8c0a0', hat: 'straw', hatCol: '#e8d090', belt: '#f0c860' },
+    lad: { coat: '#4a6a9a', coatDark: '#34507a', legs: '#5a4a3a', boots: '#3a2a1e', skin: '#f0c8a8', hat: 'beret', hatCol: '#2a2a3a', small: 1 },
+    lass: { coat: '#e0b040', coatDark: '#b88a2a', legs: '#b88a2a', boots: '#4a3a2a', skin: '#f4d0b0', hat: 'none', hatCol: '#c87a3a', robe: 1, small: 1, hair: '#c87a3a' },
     helene: { coat: '#b89ac8', coatDark: '#8a6a9a', legs: '#8a6a9a', boots: '#3a2a2a', skin: '#f4d0b8', hat: 'flowerhat', hatCol: '#5a4a3a', robe: 1, hair: '#5a3a24' },
   };
   // horses by their coats; the trumpeters of the cavalry rode greys
@@ -208,6 +210,86 @@
     if (L.lantern) { rect(c, 4, top + 4, 1, 4, '#3a2a22'); rect(c, 3, top + 8, 3, 4, '#ffcf72'); }
   }
 
+  // the town's dogs and cats, by their coats
+  const DOGS = {
+    spaniel: { coat: '#8a5a34', dark: '#6a4226', patch: '#f0e8dc', ear: '#5a3620' },
+    black: { coat: '#2e2a28', dark: '#1a1614', patch: '#4a4440', ear: '#1a1614' },
+    white: { coat: '#ece6dc', dark: '#c8c0b4', patch: '#d8a070', ear: '#c89060' },
+    gold: { coat: '#c8883a', dark: '#a0682a', patch: '#ecc888', ear: '#8a5424' },
+  };
+  const CATS = {
+    ginger: { coat: '#d8843a', dark: '#b0642a', stripe: '#f0a860' },
+    black: { coat: '#2a2626', dark: '#1a1616', stripe: '#3a3434', white: '#f0ece6' },
+    tabby: { coat: '#8a8078', dark: '#6a625a', stripe: '#4e4842' },
+  };
+
+  /** A dog trotting, running (tongue out) or sitting, facing right, its tail going. */
+  function drawDog(c, t, moving, running, D, sit) {
+    const ph = t * (running ? 20 : 12), sw = moving ? Math.round(Math.sin(ph) * 1.5) : 0;
+    const y = moving ? -Math.round(Math.abs(Math.sin(ph))) : 0;
+    const wag = Math.sin(t * (moving ? 16 : 11)) > 0 ? 1 : 0;
+    if (sit) {
+      rect(c, -4, y - 4, 6, 4, D.coat);
+      rect(c, -5, y - 1, 3, 1, D.dark);
+      rect(c, 0, y - 8, 4, 8, D.coat);
+      rect(c, 2, y - 3, 1, 3, D.dark);
+      rect(c, 1, y - 7, 2, 4, D.patch);
+      rect(c, 1, y - 12, 5, 4, D.coat);
+      rect(c, 6, y - 10, 2, 2, D.coat);
+      rect(c, 7, y - 10, 1, 1, '#1a1210');
+      rect(c, 4, y - 11, 1, 1, '#1a1210');
+      rect(c, 1, y - 12, 2, 4, D.ear);
+      rect(c, -7 + wag, y - 1, 3, 1, D.coat);
+      return;
+    }
+    rect(c, 3 + sw, y - 3, 1, 3, D.dark); rect(c, 4 - sw, y - 3, 1, 3, D.coat);
+    rect(c, -4 - sw, y - 3, 1, 3, D.dark); rect(c, -3 + sw, y - 3, 1, 3, D.coat);
+    rect(c, -5, y - 7, 11, 4, D.coat);
+    rect(c, -5, y - 4, 11, 1, D.dark);
+    rect(c, -2, y - 7, 4, 2, D.patch);
+    rect(c, 4, y - 10, 4, 4, D.coat);
+    rect(c, 8, y - 8, 2, 2, D.coat);
+    rect(c, 9, y - 8, 1, 1, '#1a1210');
+    rect(c, 6, y - 9, 1, 1, '#1a1210');
+    rect(c, 4, y - 10, 2, 4, D.ear);
+    if (running) rect(c, 8, y - 6, 1, 1, '#e87a8a');
+    rect(c, -7, y - 9 + wag, 2, 1, D.coat); rect(c, -6, y - 8, 1, 2, D.coat);
+  }
+
+  /** A cat walking with its tail up, or sitting with its tail round its feet. */
+  function drawCat(c, t, moving, C, sit) {
+    const sw = moving ? Math.round(Math.sin(t * 10)) : 0, flick = Math.sin(t * 1.7) > 0.6 ? 1 : 0;
+    if (sit) {
+      rect(c, -3, -5, 5, 5, C.coat);
+      rect(c, -3, -1, 5, 1, C.dark);
+      rect(c, -2, -5, 1, 3, C.stripe);
+      rect(c, 0, -8, 4, 3, C.coat);
+      rect(c, 0, -9, 1, 1, C.coat); rect(c, 3, -9, 1, 1, C.coat);
+      rect(c, 2, -7, 1, 1, '#e8d040');
+      if (C.white) rect(c, 1, -4, 2, 3, C.white);
+      rect(c, -5, -1, 4, 1, C.coat); rect(c, -6, -3 + flick, 1, 2, C.coat);
+      return;
+    }
+    rect(c, 2 + sw, -2, 1, 2, C.dark); rect(c, 3 - sw, -2, 1, 2, C.coat);
+    rect(c, -3 - sw, -2, 1, 2, C.dark); rect(c, -2 + sw, -2, 1, 2, C.coat);
+    rect(c, -4, -5, 8, 3, C.coat);
+    rect(c, -4, -3, 8, 1, C.dark);
+    for (let k = 0; k < 3; k++) rect(c, -3 + k * 2, -5, 1, 2, C.stripe);
+    rect(c, 3, -7, 3, 3, C.coat);
+    rect(c, 3, -8, 1, 1, C.coat); rect(c, 5, -8, 1, 1, C.coat);
+    rect(c, 5, -6, 1, 1, '#e8d040');
+    if (C.white) rect(c, 3, -5, 2, 1, C.white);
+    rect(c, -5, -8, 1, 4, C.coat); rect(c, -6 + flick, -9, 1, 1, C.coat);
+  }
+
+  /** A child's hoop, bowled along with a stick. */
+  function drawHoop(c, x) {
+    const a0 = x * 0.25;
+    for (let k = 0; k < 24; k++) { const a = (k / 24) * Math.PI * 2; rect(c, 9 + Math.cos(a) * 4.5, -4.5 + Math.sin(a) * 4.5, 1, 1, k % 6 ? '#c89048' : '#6a4a2a'); }
+    rect(c, 9 + Math.cos(a0) * 4.5, -4.5 + Math.sin(a0) * 4.5, 1, 1, '#fff0c0');
+    for (let k = 0; k < 5; k++) rect(c, 2 + k, -8 + Math.round(k * 0.6), 1, 1, '#5a4030');
+  }
+
   /** A horse at a walk or a gallop, facing right, with its rider. */
   function drawHorse(c, t, moving, running, rider, duck = false, hc = HORSES.bay) {
     const ph = t * (running ? 14 : 8);
@@ -247,6 +329,7 @@
     for (let i = 0; i < n; i++) parts.push({ x: Math.random() * LW, y: Math.random() * LH, v: 0.5 + Math.random(), p: Math.random() * 6 });
     return { kind, parts };
   }
+  const LEAVES = ['#e0842a', '#f4c056', '#c84a24', '#b8521c', '#f07a3a', '#e0b03a'];
   function stepWeather(c, wx, dt, t, camDx) {
     for (const p of wx.parts) {
       if (wx.kind === 'snow') { p.y += dt * 12 * p.v; p.x += Math.sin(t + p.p) * dt * 6 - camDx * 0.8; }
@@ -254,6 +337,7 @@
       else if (wx.kind === 'embers') { p.y -= dt * 14 * p.v; p.x += Math.sin(t + p.p) * dt * 8 - camDx; }
       else if (wx.kind === 'fireflies') { p.x += Math.sin(t * 0.7 + p.p) * dt * 8 - camDx * 0.9; p.y += Math.cos(t * 0.9 + p.p) * dt * 5; }
       else if (wx.kind === 'breeze') { p.x += (14 + Math.sin(t * 0.9 + p.p) * 8) * dt * p.v - camDx * 0.9; p.y += Math.sin(t * 1.3 + p.p * 2) * dt * 8 + dt * 2; }
+      else if (wx.kind === 'autumn') { p.x += (12 + Math.sin(t * 0.7 + p.p) * 10) * dt * p.v - camDx * 0.9; p.y += (7 + Math.sin(t * 2.2 + p.p * 3) * 6) * dt * p.v; }
       else { p.y -= dt * 3 * p.v; p.x += Math.sin(t * 0.5 + p.p) * dt * 4 - camDx * 0.6; } // motes
       if (p.y > WY + 4) { p.y = -4; p.x = Math.random() * LW; }
       if (p.y < -6) { p.y = WY; p.x = Math.random() * LW; }
@@ -265,6 +349,12 @@
       else if (wx.kind === 'petals') { c.fillStyle = 'rgba(255,190,210,0.9)'; c.fillRect(p.x * SS, p.y * SS, SS * 2, SS); }
       else if (wx.kind === 'embers') { c.fillStyle = `rgba(255,${130 + tw * 80},60,${0.5 + tw * 0.5})`; c.fillRect(p.x * SS, p.y * SS, SS, SS); }
       else if (wx.kind === 'fireflies') { c.fillStyle = `rgba(220,255,140,${0.25 + tw * 0.75})`; c.fillRect(p.x * SS, p.y * SS, SS, SS); }
+      else if (wx.kind === 'autumn') {
+        // leaves coming down, orange, gold and red, turning over as they fall
+        c.fillStyle = LEAVES[Math.floor(p.p * 10) % LEAVES.length];
+        const flat = Math.sin(t * 5 + p.p * 7) > 0;
+        c.fillRect(p.x * SS, p.y * SS, flat ? SS * 2 : SS, flat ? SS : SS * 2);
+      }
       else if (wx.kind === 'breeze') {
         // petals of every colour, and the down of dandelion seeds
         const k = Math.floor(p.p * 10) % 5;
@@ -350,7 +440,7 @@
       this.puffs = [];
       this.sky = def.airships || [];
       // a train now and then on the viaduct, cavalry riding through, the colours going up at dawn
-      if (def.train) this.train = { depth: 0.2, deck: 146, speed: 34, pause: [24, 40], dir: -1, ...def.train, x: null, dist: 0, wait: def.train.first == null ? 6 : def.train.first, puffs: [], chuff: 0, heard: false };
+      if (def.train) this.train = { depth: 0.2, deck: 146, speed: 34, pause: [24, 40], dir: -1, ...def.train, x: null, dist: 0, wait: def.train.first == null ? 6 : def.train.first, puffs: [], chuff: 0, heard: false, armed: def.train.afterMove == null };
       if (def.cavalry) this.cavalry = { n: 4, gap: 26, speed: 40, pause: 20, y: GY - 3, ...def.cavalry, dir: -1, x: def.cavalry.from, wait: def.cavalry.first == null ? 10 : def.cavalry.first, step: 0 };
       if (def.colours) this.colours = { delay: 1.5, dur: 10.4, hold: 3, ...def.colours, t: 0, stage: 0, called: false };
       this.hum = { drone: rnd(6, 12), band: def.band ? def.band.first || 30 : 0 };
@@ -364,6 +454,12 @@
       this.fountains = (def.fountains || []).map((f) => ({ ...f, drops: [], acc: 0 }));
       this.flockDef = def.flocks || null;
       this.flocks = [];
+      // windmills' sails turning far off, glints of sun on spires and gilding
+      this.windmills = def.windmills || [];
+      this.sparkles = (def.sparkles || []).map((s) => ({ ...s, ph: s.ph == null ? Math.random() * 6 : s.ph }));
+      // children at their games and the town's dogs and cats, running about
+      this.runners = (def.runners || []).map((u) => ({ speed: u.kind === 'cat' ? 9 : u.kind === 'dog' ? 40 : 32, ...u, x: u.start != null ? u.start : u.x0 != null ? (u.x0 + u.x1) / 2 : 0, dir: Math.random() < 0.5 ? 1 : -1, face: 1, wait: Math.random() * 2, moving: false, t: Math.random() * 5 }));
+      for (const u of this.runners) if (u.follow != null && u.start == null) u.x = this.runners[u.follow].x - (u.gap || 10);
       if (this.flockDef) this.flockWait = this.flockDef.first == null ? 3 : this.flockDef.first;
     }
 
@@ -382,6 +478,8 @@
       this.slots = this.sky.map((a) => ({ z: a.z == null ? 0.1 : a.z, draw: (c, cam) => this.drawSkyItem(c, a, cam) }));
       if (this.train) this.slots.push({ z: this.train.depth + 0.001, draw: (c, cam) => this.drawTrain(c, cam) });
       if (this.flockDef) this.slots.push({ z: 0.09, draw: (c) => this.drawFlocks(c) });
+      for (const m of this.windmills) this.slots.push({ z: m.depth + 0.001, draw: (c, cam) => this.drawSails(c, m, cam) });
+      for (const s of this.sparkles) this.slots.push({ z: s.depth + 0.002, draw: (c, cam) => this.drawSparkle(c, s, cam) });
       this.slots.sort((a, b) => a.z - b.z);
       // the band above the waterline, flipped, for the reflection
       this.mirror = document.createElement('canvas');
@@ -788,6 +886,7 @@
         g.timer = 1.8 + text.length * 0.05;
         this.showBubble(g, text);
       }
+      this.stepRunners(dt);
       for (const m of this.marchers) {
         if (m.wait > 0) { m.wait -= dt; continue; }
         m.x += m.dir * (m.speed || 20) * dt;
@@ -820,8 +919,15 @@
       if (tr) {
         const ext = LW + (this.W - LW) * tr.depth;
         if (tr.x == null) {
-          tr.wait -= dt;
-          if (tr.wait <= 0) { tr.x = tr.dir > 0 ? -10 : ext + 10; tr.heard = false; }
+          // (the first train can wait for Hervé to set off: afterMove seconds after he first moves)
+          if (!tr.armed) { if (this.moving) { tr.armed = true; tr.wait = tr.afterMove; } }
+          else tr.wait -= dt;
+          if (tr.armed && tr.wait <= 0) {
+            // in at the edge of what can be seen, so it is never missed
+            const view = this.camX * tr.depth;
+            tr.x = tr.dir > 0 ? view - 12 : view + LW + 12;
+            tr.heard = false;
+          }
         } else {
           tr.x += tr.dir * tr.speed * dt;
           tr.dist += tr.speed * dt;
@@ -1039,6 +1145,7 @@
           this.figure(c, LOOKS[p.look || 'soldier'], g.x + (p.dx || 0) - cam, p.y || GY, p.turn ? (Math.sin(this.t * 0.4 + i) > 0 ? 1 : -1) : face, this.t + i, false, pose);
         });
       });
+      this.drawRunners(c, cam);
       for (const m of this.marchers) {
         for (let i = 0; i < (m.n || 2); i++) this.figure(c, m.look, m.x - m.dir * i * (m.gap || 9) - cam, GY, m.dir, this.t, m.wait <= 0, null);
       }
@@ -1448,6 +1555,84 @@
     }
 
     /** The mill wheel, turning with the river, spilling water from its paddles. */
+    /**
+     * Children and animals: each runs to and fro between x0 and x1, pausing now and then (a cat
+     * sits a long while). One with `follow` keeps to its own side of the one it follows, `gap`
+     * behind (or ahead, if that one turns and comes at it): a game of tag, or a dog at the heels.
+     */
+    stepRunners(dt) {
+      for (const u of this.runners) {
+        u.t += dt;
+        let vx = 0;
+        const lead = u.follow != null ? this.runners[u.follow] : null;
+        if (lead) {
+          const side = u.x < lead.x ? 1 : -1, d = lead.x - side * (u.gap || 10) - u.x;
+          if (Math.abs(d) > 1.5) vx = Math.sign(d) * Math.min(u.speed, Math.abs(d) * 5);
+          u.wait = vx ? 0 : u.wait + dt;
+        } else if (u.wait > 0) u.wait -= dt;
+        else {
+          vx = u.dir * u.speed;
+          const nx = u.x + vx * dt;
+          if (nx > u.x1 || nx < u.x0 || Math.random() < dt * (u.turn || 0.1)) {
+            u.dir = nx > u.x1 ? -1 : nx < u.x0 ? 1 : -u.dir;
+            vx = 0;
+            const k = Math.random();
+            u.wait = u.kind === 'cat' ? rnd(3, 9) : k < 0.55 ? rnd(0.5, 2.2) : 0;
+            u.pose = u.kind == null && Math.random() < 0.35 ? 'wave' : null;
+          }
+        }
+        u.x += vx * dt;
+        u.moving = Math.abs(vx) > 1;
+        if (u.moving) u.face = vx > 0 ? 1 : -1;
+      }
+    }
+
+    drawRunners(c, cam) {
+      for (const u of this.runners) {
+        const x = u.x - cam;
+        if (x < -20 || x > LW + 20) continue;
+        c.save();
+        c.translate(Math.round(x * SS), Math.round((u.y || GY) * SS));
+        c.scale(SS * u.face, SS);
+        if (u.kind === 'dog') drawDog(c, u.t, u.moving, u.moving && u.speed > 30, DOGS[u.coat || 'spaniel'], !u.moving && u.wait > 0.6);
+        else if (u.kind === 'cat') drawCat(c, u.t, u.moving, CATS[u.coat || 'ginger'], !u.moving);
+        else {
+          drawPerson(c, LOOKS[u.look || 'boy'], u.t, u.moving, u.moving, false, u.moving ? null : u.pose || null);
+          if (u.hoop) drawHoop(c, u.x);
+        }
+        c.restore();
+      }
+    }
+
+    /** A windmill's four sails, lattice and canvas, turning in the wind far off. */
+    drawSails(c, m, cam) {
+      const x = m.x - cam * m.depth, R = m.r || 14;
+      if (x < -R - 4 || x > LW + R + 4) return;
+      const a0 = this.t * (m.speed || 0.6) + (m.ph || 0);
+      const D = (px_, py, col) => { c.fillStyle = col; c.fillRect(Math.round(px_ * SS), Math.round(py * SS), SS, SS); };
+      for (let k = 0; k < 4; k++) {
+        const q = a0 + k * Math.PI / 2, dx = Math.cos(q), dy = Math.sin(q), nx = -dy, ny = dx, w = R * 0.3;
+        const cloth = k % 2 ? '#d8ceb8' : '#f0e8d4';
+        for (let d = R * 0.22; d <= R; d += 0.6) for (let e = 0; e <= w; e += 0.6) D(x + dx * d + nx * e, m.y + dy * d + ny * e, cloth);
+        for (let d = R * 0.22; d <= R + 0.1; d += R * 0.195) for (let e = 0; e <= w; e += 0.6) D(x + dx * d + nx * e, m.y + dy * d + ny * e, '#6a4a34');
+        for (let d = R * 0.22; d <= R; d += 0.6) D(x + dx * d + nx * w, m.y + dy * d + ny * w, '#6a4a34');
+        for (let d = 0; d <= R; d += 0.6) D(x + dx * d, m.y + dy * d, '#4a3424');
+      }
+      D(x - 0.5, m.y - 0.5, '#2a1e14');
+    }
+
+    /** A glint of sun on a spire or a gilded finial: a little star that flares and fades. */
+    drawSparkle(c, s, cam) {
+      const x = s.x - cam * s.depth;
+      if (x < -6 || x > LW + 6) return;
+      const k = Math.pow(Math.max(0, Math.sin(this.t * (s.speed || 1.1) + s.ph)), 8);
+      if (k < 0.05) return;
+      const D = (dx, dy, a) => { c.fillStyle = `rgba(255,250,225,${a.toFixed(2)})`; c.fillRect(Math.round((x + dx) * SS), Math.round((s.y + dy) * SS), SS, SS); };
+      D(0, 0, k);
+      const n = Math.round(1 + k * (s.size || 3));
+      for (let i = 1; i <= n; i++) { const a = k * (1 - i / (n + 1)); D(i, 0, a); D(-i, 0, a); D(0, i, a); D(0, -i, a); }
+    }
+
     drawWheel(c, w, cam) {
       const x = w.x - cam;
       if (x < -40 || x > LW + 40) return;
