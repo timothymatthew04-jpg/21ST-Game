@@ -84,6 +84,16 @@ html, body {
     brightness(calc(1 + 0.55 * var(--flash)));
 }
 
+.title .o-btn {
+  display: inline-block;
+  width: 0.42em;
+  height: 0.42em;
+  margin: 0 0.015em 0 0.03em;
+  vertical-align: 0.02em;
+  transform: rotate(-12deg);
+  overflow: visible;
+}
+
 .thread {
   display: block;
   width: 700px;

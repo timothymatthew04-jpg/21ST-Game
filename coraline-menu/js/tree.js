@@ -60,7 +60,7 @@ export function createBigTree(tx, leafTexture) {
   limb(r, [[1.1, 4.6, -0.2], [0.5, 6.2, 0.3], [-0.3, 7.7, 0.2], [-0.8, 9.4, 0.7]], [0.36, 0.28, 0.18, 0.08], geos, tips, 3, opts);
   limb(r, [[0.9, 4.2, 0], [1.3, 5.3, 1.2], [1.6, 6.4, 2.2], [1.9, 7.6, 2.8]], [0.3, 0.22, 0.14, 0.05], geos, tips, 2, opts);
   // a limb snapped off long ago, leaving a jagged stub
-  limb(r, [[0.3, 2.6, 0], [0.9, 2.95, -0.1], [1.35, 3.1, -0.25]], [0.3, 0.24, 0.16], geos, tips, 1, { ...opts, firstCount: 1, droop: 0.3 });
+  limb(r, [[0.3, 2.6, 0], [0.9, 2.95, -0.1], [1.35, 3.1, -0.25], [1.6, 3.22, -0.3]], [0.3, 0.24, 0.13, 0.02], geos, tips, 1, { ...opts, firstCount: 1, droop: 0.3 });
   // roots clawing into the ground
   for (let i = 0; i < 6; i++) {
     const a = (i / 6) * Math.PI * 2 + r.range(-0.3, 0.3);

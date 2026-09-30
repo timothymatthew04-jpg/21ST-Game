@@ -1,7 +1,7 @@
 // The night sky: deep blue gradient, a cratered moon (the only real light), drifting storm clouds
 // silvered where they pass the moon, and the hand-shaped lightning that lights them from inside.
 import * as THREE from 'three';
-import { lightningHand } from './textures.js';
+import { lightningHand, lightningBolt } from './textures.js';
 
 const vert = /* glsl */ `
   varying vec3 vDir;
@@ -19,6 +19,8 @@ const frag = /* glsl */ `
   uniform float uFlash;
   uniform vec3 uMoonDir;
   uniform vec3 uFlashDir;
+  uniform float uFlash2;
+  uniform vec3 uFlash2Dir;
   uniform float uLoop;
 
   float hash(vec3 p) {
@@ -36,7 +38,7 @@ const frag = /* glsl */ `
   }
   float fbm(vec3 p) {
     float s = 0.0, a = 0.5;
-    for (int i = 0; i < 6; i++) { s += a * noise(p); p = p * 2.03 + vec3(1.7, 9.2, 3.1); a *= 0.5; }
+    for (int i = 0; i < 5; i++) { s += a * noise(p); p = p * 2.03 + vec3(1.7, 9.2, 3.1); a *= 0.5; }
     return s;
   }
 
@@ -84,14 +86,15 @@ const frag = /* glsl */ `
     }
 
     // clouds on a plane above the world, drifting on a loop so the video repeats seamlessly
-    float ph = 6.2831853 * uTime / uLoop;
+    float u = fract(uTime / uLoop);
     vec2 cuv = d.xz / (d.y + 0.09);
-    vec2 drift = vec2(uTime / uLoop * 1.6, 0.0);
-    vec3 cp = vec3(cuv * 0.8 + drift, 0.0);
-    vec3 wob = vec3(cos(ph), sin(ph), 0.0) * 0.12;
-    float n = fbm(cp + wob);
-    float n2 = fbm(cp * 2.1 + vec3(5.0, 1.0, 0.0) - wob * 1.5);
-    float dens = n * 0.75 + n2 * 0.25;
+    vec2 span = vec2(1.1, 0.25);
+    vec3 pa = vec3(cuv * 0.8 + span * u, 0.0);
+    vec3 pb = vec3(cuv * 0.8 + span * (u - 1.0), 0.0);
+    float da = fbm(pa) * 0.75 + fbm(pa * 2.1 + vec3(5.0, 1.0, 0.0)) * 0.25;
+    float db = fbm(pb) * 0.75 + fbm(pb * 2.1 + vec3(5.0, 1.0, 0.0)) * 0.25;
+    float dens = mix(da, db, u);
+    dens = 0.5 + (dens - 0.5) / sqrt(u * u + (1.0 - u) * (1.0 - u));
     float cov = smoothstep(0.4, 0.66, dens);
     cov *= smoothstep(-0.02, 0.1, d.y);
     // thin cloud near the moon glows, thick cloud stays dark
@@ -106,18 +109,24 @@ const frag = /* glsl */ `
     float fl = uFlash * exp(-fd * 5.0);
     cloudCol += vec3(0.5, 0.56, 1.0) * fl * (0.25 + 1.1 * dens);
     col += vec3(0.04, 0.05, 0.12) * uFlash * exp(-fd * 1.6);
+    float fd2 = acos(clamp(dot(d, uFlash2Dir), -1.0, 1.0));
+    float fl2 = uFlash2 * exp(-fd2 * 4.0);
+    cloudCol += vec3(0.5, 0.56, 1.0) * fl2 * (0.25 + 1.1 * dens);
+    col += vec3(0.04, 0.05, 0.12) * uFlash2 * exp(-fd2 * 1.6);
 
     col = mix(col, cloudCol, cov * 0.94);
     gl_FragColor = vec4(col, 1.0);
   }
 `;
 
-export function createSky({ moonDir, flashDir, loop }) {
+export function createSky({ moonDir, flashDir, flash2Dir, loop }) {
   const uniforms = {
     uTime: { value: 0 },
     uFlash: { value: 0 },
     uMoonDir: { value: moonDir.clone().normalize() },
     uFlashDir: { value: flashDir.clone().normalize() },
+    uFlash2: { value: 0 },
+    uFlash2Dir: { value: flash2Dir.clone().normalize() },
     uLoop: { value: loop },
   };
   const mat = new THREE.ShaderMaterial({
@@ -135,5 +144,12 @@ export function createSky({ moonDir, flashDir, loop }) {
   });
   const hand = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), handMat);
   hand.renderOrder = -5;
-  return { sky, hand, uniforms, handMat };
+
+  const boltMat = new THREE.MeshBasicMaterial({
+    map: lightningBolt(), transparent: true, blending: THREE.AdditiveBlending,
+    depthWrite: false, fog: false, opacity: 0, toneMapped: false,
+  });
+  const bolt = new THREE.Mesh(new THREE.PlaneGeometry(0.5, 1), boltMat);
+  bolt.renderOrder = -5;
+  return { sky, hand, uniforms, handMat, bolt, boltMat };
 }

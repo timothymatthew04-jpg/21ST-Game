@@ -188,8 +188,8 @@ export function createHouse(tx) {
     g.rotation.y = Math.atan2(frame.out.x, frame.out.z);
     house.add(g);
     windows.push({ group: g, pane, kind });
-    if (kind) {
-      const l = new THREE.PointLight(0xffa850, 3.2, 8, 1.7);
+    if (kind && lightKinds.has(kind + seed)) {
+      const l = new THREE.PointLight(0xffa850, 3.6, 8, 1.7);
       l.position.copy(g.position).addScaledVector(frame.out, 0.9);
       l.position.y -= 0.3;
       house.add(l);
@@ -199,6 +199,8 @@ export function createHouse(tx) {
   }
 
   const trimMat = new THREE.MeshStandardMaterial({ color: 0xcfc3bd, roughness: 0.75 });
+  // only the rooms facing the camera throw light outside; the rest just glow
+  const lightKinds = new Set(['father3', 'mother4', 'lamp7', 'lamp20']);
   const front = { origin: V(0, 0, D / 2), along: V(1, 0, 0), out: V(0, 0, 1) };
   const wingFront = { origin: V(0, 0, wz), along: V(1, 0, 0), out: V(0, 0, 1) };
   const left = { origin: V(-W / 2, 0, 0), along: V(0, 0, 1), out: V(-1, 0, 0) };

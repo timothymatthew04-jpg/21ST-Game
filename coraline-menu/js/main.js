@@ -20,7 +20,13 @@ const off = new Set((params.get('off') || '').split(','));  // profiling switche
 const vec = (k, d) => (params.has(k) ? new THREE.Vector3(...params.get(k).split(',').map(Number)) : d);
 
 export const LOOP = 16;                  // seconds; every motion completes whole cycles in this time
-const STRIKES = [3.1, 11.4];            // when the hand of lightning appears
+// The storm's timeline: the hand reaches out of the cloud, later a bolt falls far behind the house,
+// then the cloud there flickers once more without a bolt.
+const STRIKES = [
+  { t: 4.0, kind: 'hand', pulses: [[0, 1], [0.11, 0.55], [0.3, 0.95], [0.52, 0.4]] },
+  { t: 10.6, kind: 'bolt', pulses: [[0, 1], [0.09, 0.5], [0.24, 0.8]] },
+  { t: 13.3, kind: 'sheet', pulses: [[0, 0.35], [0.14, 0.2]] },
+];
 const W = 1920, H = 1080;
 
 const canvas = document.getElementById('scene');
@@ -50,7 +56,8 @@ camera.updateMatrixWorld();
 // Sky directions are chosen by where they should sit on screen.
 const dirAt = (nx, ny) => new THREE.Vector3(nx, ny, 0.5).unproject(camera).sub(camera.position).normalize();
 const moonDir = dirAt(num('moonx', 0.72), num('moony', 0.72));
-const flashDir = dirAt(num('handx', -0.6), num('handy', 0.56));
+const flashDir = dirAt(num('handx', -0.52), num('handy', 0.42));
+const flash2Dir = dirAt(num('boltx', 0.86), num('bolty', 0.36));
 
 // textures
 const tx = {
@@ -60,15 +67,21 @@ const tx = {
 const leafTex = T.leaf();
 
 // sky, moon, lightning hand
-const { sky, hand, uniforms: skyU, handMat } = createSky({ moonDir, flashDir, loop: LOOP });
+const { sky, hand, uniforms: skyU, handMat, bolt, boltMat } = createSky({ moonDir, flashDir, flash2Dir, loop: LOOP });
 scene.add(sky);
 if (off.has('sky')) sky.material = new THREE.MeshBasicMaterial({ color: 0x050a1a, side: THREE.BackSide, depthWrite: false });
 hand.position.copy(camera.position).addScaledVector(flashDir, 600);
-const handSize = 2 * 600 * Math.tan(THREE.MathUtils.degToRad(num('handDeg', 17.5) / 2));
+const handSize = 2 * 600 * Math.tan(THREE.MathUtils.degToRad(num('handDeg', 27) / 2));
 hand.scale.set(handSize, handSize, 1);
 hand.lookAt(camera.position);
 handMat.color.setScalar(2.4);
 scene.add(hand);
+bolt.position.copy(camera.position).addScaledVector(flash2Dir, 700);
+const boltH = 2 * 700 * Math.tan(THREE.MathUtils.degToRad(num('boltDeg', 26) / 2));
+bolt.scale.set(boltH, boltH, 1);
+bolt.lookAt(camera.position);
+boltMat.color.setScalar(2.2);
+scene.add(bolt);
 
 // land
 scene.add(createTerrain(tx));
@@ -108,17 +121,18 @@ scene.add(falling.mesh);
 
 // Coraline, looking up at the house
 const { girl, headGroup } = createCoraline();
-const GIRL = vec('girl', new THREE.Vector3(-0.3, 0, 7.5));
+const GIRL = vec('girl', new THREE.Vector3(-1.13, 0, 2.9));
 GIRL.y = terrainHeight(GIRL.x, GIRL.z);
 girl.position.copy(GIRL);
-girl.scale.setScalar(num('girlScale', 1.0));
+const GIRL_SCALE = num('girlScale', 1.08);
 const toHouse = HOUSE.clone().sub(GIRL);
 girl.rotation.y = Math.atan2(-toHouse.x, -toHouse.z);
-headGroup.rotation.x = 0.16;
+headGroup.rotation.x = 0.2;
 scene.add(girl);
-const girlFill = new THREE.SpotLight(0xc4cbff, num('girlFill', 3.2), 8, 0.22, 0.8, 1.5);
-girlFill.position.copy(GIRL).add(new THREE.Vector3(-1.4, 2.2, 3.4));
-girlFill.target.position.copy(GIRL).add(new THREE.Vector3(0, 0.95, 0));
+// the open sky behind the camera, a soft cool fill so her yellow coat reads in the dark
+const girlFill = new THREE.SpotLight(0xd0d6ff, num('girlFill', 5), 10, 0.2, 0.7, 1.4);
+girlFill.position.copy(GIRL).add(new THREE.Vector3(0.6, 2.4, 4.2));
+girlFill.target.position.copy(GIRL).add(new THREE.Vector3(0, 0.7, 0));
 scene.add(girlFill, girlFill.target);
 
 // the black cat on the sign, eyes catching the porch light
@@ -189,10 +203,13 @@ scene.add(skyLight);
 const flashLight = new THREE.DirectionalLight(0xc6d0ff, 0);
 flashLight.position.copy(target).addScaledVector(flashDir, 150);
 flashLight.target.position.copy(target);
-scene.add(flashLight, flashLight.target);
+const flash2Light = new THREE.DirectionalLight(0xc6d0ff, 0);
+flash2Light.position.copy(target).addScaledVector(flash2Dir, 150);
+flash2Light.target.position.copy(target);
+scene.add(flashLight, flashLight.target, flash2Light, flash2Light.target);
 
 // post-processing: bloom on the moon, windows and lightning; then grade, vignette and film grain
-const composer = new EffectComposer(renderer, new THREE.WebGLRenderTarget(W, H, { type: THREE.HalfFloatType, samples: off.has('msaa') ? 0 : 4 }));
+const composer = new EffectComposer(renderer, new THREE.WebGLRenderTarget(W, H, { type: THREE.HalfFloatType, samples: off.has('msaa') ? 0 : num('msaa', 2) }));
 composer.setPixelRatio(1);
 composer.setSize(W, H);
 composer.addPass(new RenderPass(scene, camera));
@@ -222,41 +239,53 @@ const grade = new ShaderPass({
 });
 composer.addPass(grade);
 
-// the lightning: each strike flickers three times, fast
+// the lightning: each strike is a quick run of flickers
 export function flashAt(t) {
-  if (params.has('flash')) return num('flash', 0);
-  let f = 0;
-  for (const s of STRIKES) {
-    for (const [dt, amp] of [[0, 1], [0.11, 0.55], [0.3, 0.9]]) {
+  const out = { hand: 0, bolt: 0, sheet: 0 };
+  for (const { t: s, kind, pulses } of STRIKES) {
+    for (const [dt, amp] of pulses) {
       const x = (((t - s - dt) % LOOP) + LOOP) % LOOP;
-      if (x < 1.2) f = Math.max(f, amp * Math.exp(-x / 0.07));
+      if (x < 1.2) out[kind] = Math.max(out[kind], amp * Math.exp(-x / 0.07));
     }
   }
-  return f;
+  if (params.has('flash')) out.hand = num('flash', 0);
+  if (params.has('flash2')) out.bolt = num('flash2', 0);
+  return out;
 }
 
 function update(t) {
   const u = t / LOOP;
-  const flash = flashAt(t);
+  const f = flashAt(t);
+  const far = Math.max(f.bolt, f.sheet);
   skyU.uTime.value = t;
-  skyU.uFlash.value = flash;
-  handMat.opacity = Math.min(1, flash * 1.4);
-  flashLight.intensity = flash * 2.6;
-  skyLight.intensity = num('hemi', 0.75) * (1 + flash * 0.8);
+  skyU.uFlash.value = f.hand;
+  skyU.uFlash2.value = far;
+  handMat.opacity = Math.min(1, f.hand * 1.4);
+  boltMat.opacity = Math.min(1, f.bolt * 1.4);
+  flashLight.intensity = f.hand * 2.6;
+  flash2Light.intensity = far * 1.6;
+  skyLight.intensity = num('hemi', 0.75) * (1 + f.hand * 0.8 + far * 0.4);
   // the camera breathes: a slow drift that shows the depth between tree, girl and house
   camera.position.set(
-    CAM.x + Math.sin(u * Math.PI * 2) * 0.35,
-    CAM.y + Math.sin(u * Math.PI * 4) * 0.05,
-    CAM.z + Math.cos(u * Math.PI * 2) * 0.2,
+    CAM.x + Math.sin(u * Math.PI * 2) * 0.2,
+    CAM.y + Math.sin(u * Math.PI * 4) * 0.04,
+    CAM.z + Math.cos(u * Math.PI * 2) * 0.15,
   );
   camera.lookAt(LOOK);
   sky.position.copy(camera.position);
+  // Coraline breathes, and her head turns a little towards the lit windows and back
+  girl.scale.set(GIRL_SCALE, GIRL_SCALE * (1 + 0.006 * Math.sin(u * Math.PI * 2 * 5)), GIRL_SCALE);
+  headGroup.rotation.y = 0.12 * Math.sin(u * Math.PI * 2) - 0.04;
+  headGroup.rotation.x = 0.2 + 0.03 * Math.sin(u * Math.PI * 2 * 2 + 1);
   // warm lights breathe a little, like old bulbs
   houseLights.forEach((l, i) => { l.intensity = houseLightBase[i] * (0.92 + 0.08 * Math.sin(u * Math.PI * 2 * (3 + i) + i)); });
   falling.update(t);
   for (const m of mists) m.userData.tex.offset.x = m.userData.phase + u * m.userData.speed;
   grade.uniforms.uTime.value = t;
-  document.documentElement.style.setProperty('--flash', flash.toFixed(3));
+  const root = document.documentElement.style;
+  root.setProperty('--flash', Math.max(f.hand, far * 0.5).toFixed(3));
+  root.setProperty('--u', u.toFixed(4));
+  root.setProperty('--pulse', (0.5 + 0.5 * Math.sin(u * Math.PI * 2 * 4)).toFixed(3));
 }
 
 window.__render = (t) => {

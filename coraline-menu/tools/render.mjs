@@ -2,6 +2,7 @@
 //
 //   node tools/render.mjs --still 6 --out previews/calm.png
 //   node tools/render.mjs --fps 30 --out frames/ [--from 0 --to 16] [--workers 3] [--query "flash=1"]
+//   node tools/render.mjs --fps 30 --out frames/ --mp4 coraline-menu.mp4
 //
 // Every frame is rendered at an exact time on the loop, so the result is deterministic.
 import http from 'node:http';
@@ -33,7 +34,7 @@ async function openPage() {
   const browser = await chromium.launch({ args: ['--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'] });
   const page = await browser.newPage({ viewport: { width: 1920, height: 1080 } });
   page.on('pageerror', (e) => console.error('page error:', e.message));
-  await page.goto(base);
+  await page.goto(base, { waitUntil: 'commit', timeout: 120000 });
   await page.waitForFunction('window.__ready === true', null, { timeout: 600000 });
   await page.evaluate('document.fonts.ready');
   return { browser, page };
@@ -73,5 +74,17 @@ if (args.still !== undefined) {
     await browser.close();
   }));
   console.log(`rendered ${total} frames to ${out}`);
+  if (args.mp4) {
+    // H.264 for Canva; set FFMPEG if ffmpeg is not on the PATH
+    const { spawnSync } = await import('node:child_process');
+    const ffmpeg = process.env.FFMPEG || 'ffmpeg';
+    const res = spawnSync(ffmpeg, [
+      '-y', '-loglevel', 'error', '-framerate', String(fps), '-i', path.join(out, 'f%05d.png'),
+      '-c:v', 'libx264', '-preset', 'slow', '-crf', '18', '-tune', 'grain', '-pix_fmt', 'yuv420p',
+      '-movflags', '+faststart', args.mp4,
+    ], { stdio: 'inherit' });
+    if (res.status !== 0) throw new Error(`ffmpeg failed (${res.status ?? res.error})`);
+    console.log('wrote', args.mp4);
+  }
 }
 server.close();

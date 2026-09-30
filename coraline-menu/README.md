@@ -1,15 +1,25 @@
 # Coraline main menu
 
-An animated, full-screen main menu in a Coraline mood, built to be exported as a looping video for
-Canva. The background is a real 3D scene made in code with three.js. The Pink Palace stands on a
-misty hill under the moon, which is the only real light, with Coraline's parents silhouetted in the
-yellow windows. An old tree drops dark leaves across the frame, and the clouds drift. Now and then a
-lightning flash forms the Other Mother's needle-fingered hand. Coraline stands in the foreground,
-looking up at the house.
+An animated, full-screen main menu in a Coraline mood, exported as a seamless 16-second video loop
+(`export/coraline-main-menu.mp4`, 1920×1080, 30 fps) for Canva.
 
-In front of the scene sit the title, a frosted-glass panel with a red stitched border and
-sewn-on buttons, and the menu items. The items are for looks only: in Canva, put hyperlinks
-over them. They stay in the same place for the whole loop.
+The background is a real 3D scene made in code with three.js. The Pink Palace stands on a misty
+hill under the moon, which is the only real light. Coraline's parents are silhouetted in the yellow
+windows, and a black cat sits on the "Pink Palace Apartments" sign. An old tree drops dark red
+leaves across the frame while the clouds drift past the moon. Coraline stands on the worn path in
+her yellow raincoat and boots, with the dowsing stick in her hand, looking up at the house.
+
+The storm has its own timeline, repeating every loop:
+
+| Time | What happens |
+| --- | --- |
+| 4.0 s | Lightning in the shape of the Other Mother's hand (the knotted branch-hand from the film poster) reaches out of the cloud over Coraline |
+| 10.6 s | A forked bolt falls far behind the house |
+| 13.3 s | The cloud there flickers once more |
+
+In front of the scene sit the title (its "o" is a sewn button), a frosted-glass panel with a red
+stitched border and sewn-on buttons, and the menu items. The items are for looks only: in Canva,
+put hyperlinks over them. They never move, so the links always line up.
 
 ## Look at it
 
@@ -19,30 +29,33 @@ Serve the folder and open it in a browser:
 python3 -m http.server 8000     # then open http://localhost:8000/coraline-menu/
 ```
 
-Useful URL options: `?t=6` freezes the loop at 6 seconds, and `&flash=0.9` forces a lightning
-flash.
+Useful URL options: `?t=6` freezes the loop at 6 seconds, `&flash=0.9` forces the hand of
+lightning, and `&flash2=0.9` forces the distant bolt.
 
 ## Render stills and video
 
-`tools/render.mjs` drives headless Chromium (Playwright) and captures exact frames:
+`tools/render.mjs` drives headless Chromium (Playwright) and captures exact frames. Every motion
+completes whole cycles in 16 seconds, so the last frame runs straight back into the first.
 
 ```sh
 node tools/render.mjs --still 6 --out previews/calm.png
-node tools/render.mjs --still 6 --query "flash=0.9" --out previews/lightning.png
-node tools/render.mjs --fps 30 --out frames/        # the whole 16-second loop
+node tools/render.mjs --fps 30 --workers 2 --out frames/ --mp4 export/coraline-main-menu.mp4
 ```
+
+Set `FFMPEG` to an ffmpeg binary if it is not on the PATH. Rendering in software WebGL takes a
+few seconds per frame; on a machine with a GPU, open the page instead and it runs live.
 
 ## Where things are
 
 | File | What it makes |
 | --- | --- |
-| `js/main.js` | Camera, lights, fog, post-processing, the loop timeline |
-| `js/sky.js` | Sky gradient, moon, drifting clouds, the lightning hand card |
+| `js/main.js` | Camera, lights, fog, post-processing, the storm timeline |
+| `js/sky.js` | Sky gradient, moon, seamless drifting clouds, the lightning cards |
 | `js/house.js` | The Pink Palace |
-| `js/terrain.js` | Hill, steps, shrubs, grass, far forest, fence and sign |
+| `js/terrain.js` | Hill, footpath, steps, shrubs, grass, far forest, fence and sign |
 | `js/tree.js` | The framing tree, bare trees, falling and fallen leaves |
 | `js/coraline.js` | Coraline, seen from behind |
-| `js/textures.js` | Every texture, painted on canvases |
+| `js/textures.js` | Every texture, painted on canvases, including the lightning hand and bolt |
 | `css/menu.css` | Title, glass panel and buttons |
 
 Fonts: Griffy and IM Fell English (SIL Open Font License). three.js is vendored under `vendor/`

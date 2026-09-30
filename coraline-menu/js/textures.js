@@ -328,65 +328,8 @@ export function windowRoom(kind, seed = 1) {
   return tex(c, { repeat: false });
 }
 
-// The lightning: the Other Mother's hand reaching down out of the clouds, needle-fingered.
-export function lightningHand() {
-  const S = 1024;
-  const c = canvas(S, S);
-  const g = c.getContext('2d');
-  g.fillStyle = '#000';
-  g.fillRect(0, 0, S, S);
-  const r = rng(77);
-  const bolts = [];
-  // jagged polyline between two points
-  const jag = (a, b, rough, steps) => {
-    const pts = [a];
-    for (let i = 1; i < steps; i++) {
-      const t = i / steps;
-      const nx = -(b[1] - a[1]), ny = b[0] - a[0];
-      const len = Math.hypot(nx, ny) || 1;
-      const off = r.range(-1, 1) * rough;
-      pts.push([a[0] + (b[0] - a[0]) * t + (nx / len) * off, a[1] + (b[1] - a[1]) * t + (ny / len) * off]);
-    }
-    pts.push(b);
-    return pts;
-  };
-  const add = (pts, w) => bolts.push({ pts, w });
-  const chain = (points, rough, w0, w1) => {
-    for (let i = 0; i < points.length - 1; i++) {
-      const w = w0 + (w1 - w0) * (i / Math.max(1, points.length - 2));
-      add(jag(points[i], points[i + 1], rough, 5), w);
-    }
-  };
-  const joints = [];
-  // A skeletal hand, reaching down: two forearm bones out of the cloud, a knot of wrist bones,
-  // five metacarpals, and long three-jointed fingers that end in needle points.
-  chain([[488, 0], [492, 150], [497, 290]], 6, 8, 7);
-  chain([[542, 0], [538, 150], [534, 290]], 6, 8, 7);
-  add(jag([497, 290], [534, 290], 3, 3), 5);
-  add(jag([490, 300], [540, 345], 3, 4), 4);
-  add(jag([540, 300], [488, 342], 3, 4), 4);
-  const fingers = [
-    { base: [474, 348], pts: [[392, 468], [356, 570], [332, 652], [320, 724]], tip: [316, 796] },
-    { base: [502, 352], pts: [[468, 498], [454, 610], [444, 702], [438, 778]], tip: [436, 856] },
-    { base: [530, 352], pts: [[550, 498], [564, 606], [574, 692], [580, 762]], tip: [582, 830] },
-    { base: [556, 346], pts: [[626, 466], [664, 548], [690, 614], [704, 668]], tip: [710, 720] },
-  ];
-  fingers.forEach(({ base, pts, tip }) => {
-    chain([base, pts[0]], 4, 6.5, 6.5);
-    chain(pts, 4, 6, 4);
-    add(jag(pts[3], tip, 1, 2), 1.8);
-    pts.slice(0, 3).forEach((p) => joints.push(p));
-    if (r() < 0.8) add(jag(pts[1], [pts[1][0] + r.range(-50, 50), pts[1][1] + r.range(15, 45)], 4, 4), 1.2);
-  });
-  // the thumb, from the side of the wrist
-  chain([[468, 324], [404, 378], [350, 420], [306, 466]], 4, 6, 4);
-  add(jag([306, 466], [288, 516], 1, 2), 1.8);
-  joints.push([404, 378], [350, 420]);
-  // a few feeders up into the cloud
-  for (let i = 0; i < 4; i++) {
-    const st = [515 + r.range(-25, 25), r.range(30, 180)];
-    add(jag(st, [st[0] + r.range(-200, 200), st[1] + r.range(-30, 70)], 10, 6), 1.1);
-  }
+// Glowing strokes for lightning: a wide violet haze, a blue glow, then a white-hot core.
+function drawBolts(g, bolts, joints = [], core = 1) {
   const stroke = (color, blur, scale) => {
     g.strokeStyle = color;
     g.shadowColor = color;
@@ -401,23 +344,120 @@ export function lightningHand() {
     }
   };
   g.globalCompositeOperation = 'lighter';
-  stroke('rgba(90,110,255,0.28)', 46, 2.6);
+  stroke('rgba(90,110,255,0.26)', 46, 2.6);
   stroke('rgba(160,180,255,0.7)', 16, 1.5);
-  stroke('rgba(240,244,255,1)', 4, 1.05);
+  stroke('rgba(240,244,255,1)', 4, core);
   g.fillStyle = 'rgba(245,248,255,1)';
   g.shadowColor = 'rgba(170,185,255,0.9)';
   g.shadowBlur = 14;
-  for (const [x, y] of joints) { g.beginPath(); g.arc(x, y, 5.5, 0, Math.PI * 2); g.fill(); }
-  // the wrist emerges from inside the cloud
+  for (const [x, y, rr] of joints) { g.beginPath(); g.arc(x, y, rr, 0, Math.PI * 2); g.fill(); }
   g.globalCompositeOperation = 'source-over';
   g.shadowBlur = 0;
-  const fadeTop = g.createLinearGradient(0, 0, 0, 220);
+}
+
+// The lightning: the Other Mother's hand as the film poster draws it, a knotted branch-hand with
+// long crooked fingers that droop and curl at the tips, reaching down out of the cloud.
+export function lightningHand() {
+  const S = 1024;
+  const c = canvas(S, S);
+  const g = c.getContext('2d');
+  g.fillStyle = '#000';
+  g.fillRect(0, 0, S, S);
+  const r = rng(77);
+  const bolts = [], joints = [];
+  // a crooked path: heading drifts, droops under gravity, kinks at knuckles and curls at the end
+  const crooked = (start, heading, length, { droop = 0.03, curl = 0, kink = 0.32, steps = 22, w0 = 8, w1 = 1.4, knuckles = 3 }) => {
+    const pts = [start];
+    let [x, y] = start, h = heading;
+    const kinkAt = new Set(Array.from({ length: knuckles }, (_, i) => Math.round(((i + 1) / (knuckles + 1)) * steps)));
+    for (let k = 1; k <= steps; k++) {
+      const t = k / steps;
+      h += droop * Math.max(-1, Math.min(1, Math.PI / 2 - h));   // gravity bends it towards straight down
+      if (kinkAt.has(k)) { h += r.sign() * kink * r.range(0.6, 1.2); joints.push([x, y, Math.max(2.5, w0 * (1 - t) * 0.75)]); }
+      if (t > 0.78) h += curl;
+      h += r.range(-0.08, 0.08);
+      const step = length / steps;
+      x += Math.cos(h) * step + r.range(-2.5, 2.5);
+      y += Math.sin(h) * step + r.range(-2.5, 2.5);
+      pts.push([x, y]);
+    }
+    for (let i = 0; i < pts.length - 1; i++) {
+      const t = i / (pts.length - 1);
+      bolts.push({ pts: [pts[i], pts[i + 1]], w: w0 + (w1 - w0) * Math.pow(t, 0.8) });
+    }
+    return pts;
+  };
+  // wrist: a gnarled branch from the upper right into a knotted palm
+  const palm = [470, 330];
+  crooked([760, -20], Math.PI * 0.72, 330, { droop: 0.0, kink: 0.25, steps: 14, w0: 13, w1: 10, knuckles: 2 });
+  bolts.push({ pts: [[560, 260], palm], w: 10 });
+  for (let i = 0; i < 7; i++) {
+    const a = r.range(0, Math.PI * 2);
+    bolts.push({ pts: [palm, [palm[0] + Math.cos(a) * r.range(18, 40), palm[1] + Math.sin(a) * r.range(18, 40)]], w: r.range(5, 8) });
+  }
+  // six fingers fanned from left round to lower right; outer ones curl inward
+  const fingers = [
+    { a: Math.PI * 1.02, len: 430, curl: -0.16 },
+    { a: Math.PI * 0.86, len: 520, curl: -0.12 },
+    { a: Math.PI * 0.7, len: 560, curl: -0.1 },
+    { a: Math.PI * 0.53, len: 540, curl: 0.1 },
+    { a: Math.PI * 0.38, len: 500, curl: 0.13 },
+    { a: Math.PI * 0.2, len: 420, curl: 0.17 },
+  ];
+  fingers.forEach(({ a, len, curl }) => {
+    const start = [palm[0] + Math.cos(a) * 26, palm[1] + Math.sin(a) * 26];
+    const pts = crooked(start, a, len, { droop: 0.035, curl, kink: 0.34, steps: 24, w0: 8.5, w1: 1.2, knuckles: 3 });
+    // twiglets sprouting off the knuckles
+    for (let k = 0; k < 2; k++) {
+      const p = pts[Math.round(r.range(0.25, 0.7) * pts.length)];
+      crooked(p, a + r.sign() * r.range(0.5, 0.9), r.range(40, 90), { droop: 0.05, kink: 0.3, steps: 5, w0: 2.2, w1: 0.8, knuckles: 1 });
+    }
+  });
+  // stray feeders back up into the cloud
+  for (let i = 0; i < 4; i++) {
+    const st = [r.range(560, 720), r.range(10, 160)];
+    crooked(st, r.range(-0.4, 0.4) + (r() < 0.5 ? 0 : Math.PI), r.range(120, 220), { droop: 0.02, kink: 0.4, steps: 8, w0: 1.8, w1: 0.8, knuckles: 2 });
+  }
+  drawBolts(g, bolts, joints, 1.0);
+  // the wrist emerges from inside the cloud
+  const fadeTop = g.createLinearGradient(0, 0, 0, 200);
   fadeTop.addColorStop(0, 'rgba(0,0,0,1)');
   fadeTop.addColorStop(1, 'rgba(0,0,0,0)');
   g.fillStyle = fadeTop;
-  g.fillRect(0, 0, S, 220);
-  const t = tex(c, { repeat: false });
-  return t;
+  g.fillRect(0, 0, S, 200);
+  return tex(c, { repeat: false });
+}
+
+// An ordinary forked bolt for the distant storm behind the house.
+export function lightningBolt(seed = 5) {
+  const W = 512, H = 1024;
+  const c = canvas(W, H);
+  const g = c.getContext('2d');
+  g.fillStyle = '#000';
+  g.fillRect(0, 0, W, H);
+  const r = rng(seed);
+  const bolts = [];
+  const channel = (x, y, heading, length, w, depth) => {
+    const pts = [[x, y]];
+    const steps = Math.max(6, Math.round(length / 22));
+    let h = heading;
+    for (let i = 0; i < steps; i++) {
+      h = heading + r.range(-0.55, 0.55);
+      x += Math.cos(h) * (length / steps);
+      y += Math.sin(h) * (length / steps);
+      pts.push([x, y]);
+      if (depth < 3 && r() < 0.16) channel(x, y, heading + r.sign() * r.range(0.35, 0.8), length * r.range(0.25, 0.45), w * 0.45, depth + 1);
+    }
+    bolts.push({ pts, w });
+  };
+  channel(W * 0.42, 0, Math.PI / 2 + 0.08, H * 0.98, 6, 0);
+  drawBolts(g, bolts, [], 1.0);
+  const fadeTop = g.createLinearGradient(0, 0, 0, 140);
+  fadeTop.addColorStop(0, 'rgba(0,0,0,1)');
+  fadeTop.addColorStop(1, 'rgba(0,0,0,0)');
+  g.fillStyle = fadeTop;
+  g.fillRect(0, 0, W, 140);
+  return tex(c, { repeat: false });
 }
 
 // Soft drifting mist, tileable left to right, fading out at top and bottom.

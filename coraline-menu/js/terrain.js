@@ -10,6 +10,15 @@ const STAIR_DIR = new THREE.Vector3().subVectors(STAIRS.to, STAIRS.from).setY(0)
 const STAIR_PERP = new THREE.Vector3(-STAIR_DIR.z, 0, STAIR_DIR.x);
 const nearHouse = (x, z) => Math.hypot(x - PLATEAU.x, z - PLATEAU.z) < 7.8;
 
+// A worn footpath from the foreground, past where Coraline stands, to the foot of the steps.
+export const PATH = [[-0.2, 12], [-0.8, 7.5], [-1.2, 4.2], [-0.9, 1.2], [1.2, -2.5], [5.5, -8], [10.5, -13], [14.2, -16.5]]
+  .map(([x, z]) => new THREE.Vector3(x, 0, z));
+export function pathDistance(x, z) {
+  let best = Infinity;
+  for (let i = 0; i < PATH.length - 1; i++) best = Math.min(best, distToSegment(x, z, PATH[i], PATH[i + 1]).d);
+  return best;
+}
+
 function distToSegment(x, z, a, b) {
   const abx = b.x - a.x, abz = b.z - a.z;
   const t = Math.max(0, Math.min(1, ((x - a.x) * abx + (z - a.z) * abz) / (abx * abx + abz * abz)));
@@ -48,9 +57,10 @@ export function createTerrain(tx) {
     pos.setY(i, y);
     const dry = fbm2(x * 0.08 + 9, z * 0.08, 3);
     const dim = 0.62 + 0.38 * smoothstep(-20, 0, z);
-    colors[i * 3] = (0.75 + 0.35 * dry) * dim;
-    colors[i * 3 + 1] = (0.8 + 0.2 * dry) * dim;
-    colors[i * 3 + 2] = 0.9 * dim;
+    const worn = smoothstep(1.1, 0.35, pathDistance(x, z)) * (0.8 + 0.2 * dry);
+    colors[i * 3] = ((0.75 + 0.35 * dry) * (1 - worn) + 1.25 * worn) * dim;
+    colors[i * 3 + 1] = ((0.8 + 0.2 * dry) * (1 - worn) + 0.95 * worn) * dim;
+    colors[i * 3 + 2] = (0.9 * (1 - worn) + 0.72 * worn) * dim;
   }
   g.setAttribute('color', new THREE.BufferAttribute(colors, 3));
   g.computeVertexNormals();
@@ -149,7 +159,7 @@ export function createBushes(leafTexture) {
 export function createGrass() {
   const blades = [];
   const r = rng(12);
-  for (let b = 0; b < 12; b++) {
+  for (let b = 0; b < 10; b++) {
     const h = r.range(0.35, 0.8), w = r.range(0.018, 0.03);
     const lean = r.range(0.1, 0.5), a = r() * Math.PI * 2;
     const segs = 4;
@@ -171,19 +181,20 @@ export function createGrass() {
   }
   const tuft = mergeGeometries(blades);
   const mat = new THREE.MeshStandardMaterial({ color: 0x2f3a2c, roughness: 0.9, side: THREE.DoubleSide });
-  const count = 2600;
+  const count = 2200;
   const mesh = new THREE.InstancedMesh(tuft, mat, count);
   const m = new THREE.Matrix4(), q = new THREE.Quaternion(), s = new THREE.Vector3(), t = new THREE.Vector3();
   const col = new THREE.Color();
   let placed = 0, tries = 0;
   while (placed < count && tries < 20000) {
     tries++;
-    const near = placed < 1700;
+    const near = placed < 1500;
     const x = near ? r.range(-8, 14) : r.range(-6, 44);
     const z = near ? r.range(-6, 9.8) : r.range(-52, -6);
     if (distToSegment(x, z, STAIRS.from, STAIRS.to).d < 1.1) continue;
     if (nearHouse(x, z)) continue;
-    if (x > -1.6 && x < 1.4 && z > 7.3) continue; // keep the view of Coraline clear
+    if (pathDistance(x, z) < 0.75 + r() * 0.3) continue; // the worn path stays bare
+    if (z > 3.2 && Math.abs(x + 0.9 - (z - 3.2) * 0.12) < 1.1) continue; // keep the view of Coraline clear
     const sc = r.range(0.7, 1.5);
     t.set(x, terrainHeight(x, z) - 0.02, z);
     q.setFromEuler(new THREE.Euler(0, r() * 6.28, 0));
