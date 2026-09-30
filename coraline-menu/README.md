@@ -1,7 +1,7 @@
 # Coraline main menu
 
 An animated, full-screen main menu in a Coraline mood, exported as a seamless 16-second video loop
-(`export/coraline-main-menu.mp4`, 1920×1080, 30 fps) for Canva.
+(`export/coraline-main-menu.mp4`, 1920×1080, 15 fps) for Canva.
 
 The background is a real 3D scene made in code with three.js. The Pink Palace stands on a misty
 hill under the moon, which is the only real light. Coraline's parents are silhouetted in the yellow
@@ -39,7 +39,7 @@ completes whole cycles in 16 seconds, so the last frame runs straight back into 
 
 ```sh
 node tools/render.mjs --still 6 --out previews/calm.png
-node tools/render.mjs --fps 30 --workers 2 --out frames/ --mp4 export/coraline-main-menu.mp4
+node tools/render.mjs --fps 15 --workers 2 --out frames/ --mp4 export/coraline-main-menu.mp4
 ```
 
 Set `FFMPEG` to an ffmpeg binary if it is not on the PATH. Rendering in software WebGL takes a
