@@ -103,7 +103,8 @@ if (args.stills) {
   const input = ['-framerate', String(fps), '-i', path.join(out, 'f%05d.png')];
   if (args.mp4) {
     const audio = typeof args.audio === 'string' ? ['-i', args.audio] : [];
-    run([...input, ...audio, '-c:v', 'libx264', '-preset', 'slower', '-tune', 'grain', '-crf', '13', '-profile:v', 'high', '-pix_fmt', 'yuv420p',
+    run([...input, ...audio, '-c:v', 'libx264', '-preset', 'slow', '-tune', 'grain', '-crf', '13', '-profile:v', 'high',
+      '-level:v', '4.1', '-maxrate', '40M', '-bufsize', '60M', '-pix_fmt', 'yuv420p',   // level 4.1 plays on phones and in browsers
       ...(audio.length ? ['-c:a', 'aac', '-b:a', '256k', '-shortest'] : []), '-movflags', '+faststart', args.mp4]);
     console.log('wrote', args.mp4);
   }
