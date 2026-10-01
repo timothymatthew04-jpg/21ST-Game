@@ -379,6 +379,29 @@ SCENES.cs_warships = (c, L) => {
   return { colors: 60, vignette: [0.5, '20,0,10'] };
 };
 
+// ---------------------------------------------------------------- the sea battle (Chapter 11)
+// Open sea under a rust-red sky, the coast burning on the horizon; the ships are the game's own
+// (the `fleet` effect), so they can fire, burn and sink.
+SCENES.cs_seabattle = (c, L) => {
+  const r = rng(1868);
+  vgrad(c, 0, 0, W, 154, [[0, '#1e1222'], [0.35, '#4a2230'], [0.7, '#a8442e'], [0.9, '#e07a3a'], [1, '#f4a858']]);
+  sun(c, 392, 140, 13, '#ffd890', 'rgba(255,150,70,0.6)');
+  const cl = L('clouds', { depth: 0.04, anim: { type: 'drift', t: 200 } });
+  wrapped(cl, 31, (cc, rr) => { for (let i = 0; i < 6; i++) cloudBand(cc, rr, rr.r(-40, 420), rr.r(20, 110), rr.r(120, 220), rr.r(8, 15), { body: '#3a1e2a', rim: '#d8703e', shadow: '#26141e', hi: '#ffb070' }); });
+  // the coast on the horizon, the port burning, columns of smoke leaning in the wind
+  const co = L('coast', { depth: 0.08 });
+  hill(co, r, -30, 210, 156, 22, '#2e1a26'); hill(co, r, 300, 520, 156, 16, '#3a2030');
+  for (let i = 0; i < 14; i++) { const x = 10 + i * 13 + r.r(-3, 3), y = 152 + r.r(-1, 2); poly(co, [[x - 5, y], [x + 5, y], [x + 3, y - 3], [x - 3, y - 3]], '#1e0e18'); if (r() < 0.45) { px(co, x, y - 1, '#ff9a40'); glow(co, x, y - 2, 8, 'rgba(255,120,40,0.5)'); } }
+  for (const x of [40, 96, 150, 360]) { glow(co, x, 150, 24, 'rgba(255,110,40,0.55)'); for (let i = 0; i < 20; i++) { const t = i / 20; ellipse(co, x + t * t * 46, 150 - t * 80, 2 + t * 12, 2 + t * 9, t < 0.15 ? '#7a2a20' : '#2a141c'); } }
+  rect(co, 0, 154, W, 3, '#2a1620');
+  // the sea: the light of the sky on it near the horizon, darker and rougher towards us
+  const sea = L('sea', { depth: 0.1, anim: { type: 'pulse', lo: 0.88, t: 4 } });
+  vgrad(sea, 0, 155, W, H - 155, [[0, '#c8683a'], [0.12, '#7a3434'], [0.45, '#3a1e2c'], [1, '#140a14']]);
+  for (let i = 0; i < 260; i++) { const t = Math.pow(r(), 1.4), y = 156 + t * 112, x = r() * W; rect(sea, x, y, r.r(4, 10) + t * 22, 1, t < 0.15 ? '#ffb070' : t < 0.4 ? '#a8503a' : r() < 0.5 ? '#4a2a36' : '#2a1622'); }
+  for (let i = 0; i < 40; i++) px(sea, 360 + r.r(-50, 50), 158 + r.r(0, 30), '#ffd890');
+  return { colors: 64, vignette: [0.5, '20,0,10'] };
+};
+
 // ---------------------------------------------------------------- the candle (Chapter 15)
 function candleScene(c, L, dawn) {
   const r = rng(1515);

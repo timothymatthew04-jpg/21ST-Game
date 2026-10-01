@@ -638,6 +638,7 @@ lantern or the pond at any window shape; `#colour` is optional everywhere.
 | `shade` | y,height [, count, darkness] | the shadows of clouds sliding over the land |
 | `lightning` | rate [, horizon] [#colour] | the sky flashes twice and a bolt forks down (off with reduced motion); with a colour (`#ff3a2a`) the flash is that colour and the bolt a forking stroke glowing in it, striking soon after the shot begins |
 | `crash` | x0,y0,x1,y1 [, delay, dur, scale] | an airship on fire comes down from (x0,y0) to (x1,y1), nose first, trailing flame and smoke; it explodes (a fireball, sparks, a flash) and its wreck stays there burning, nose in the ground, frame and tail fins rising |
+| `fleet` | horizon [, sink1, sink2] | a sea battle: three ships a side at three distances, steam and sail, trading broadsides (flashes down the gun ports, smoke, shot arcing over, white spouts where it falls); at `sink1` seconds the nearest ship on the right blows up, burns, lists, loses its masts and sinks by the stern, leaving wreckage and foam, and at `sink2` one on the left goes the same way |
 | `splashes` | y,height [, rate] | raindrops bursting on the ground |
 | `herd` | y,count,speed [, scale, dir, spread] | wild horses galloping across in a loose group, round and round |
 | `rider` | y,x0,x1,seconds [, scale, delay] | Hervé at a gallop on a pale horse, from x0 to x1 |

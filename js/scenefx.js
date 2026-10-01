@@ -1134,6 +1134,160 @@
     }
   }
 
+  /**
+   * fleet=horizon[,sink1,sink2] — a sea battle. Three ships a side at three distances (the far ones
+   * on the horizon at `horizon`, the nearest low in the frame), steam and sail, trading broadsides:
+   * flashes down the gun ports, smoke rolling off towards the enemy, shot arcing over and the sea
+   * thrown up in white spouts where it falls. At `sink1` seconds a ship on the right is hit in the
+   * magazine and blows up; it burns, lists, its masts go over and it sinks by the stern, leaving
+   * wreckage and foam. At `sink2` one on the left goes the same way.
+   */
+  class Fleet {
+    constructor(nums) {
+      const [horizon = 0.57, sink1 = 3.2, sink2 = 6.8] = nums;
+      Object.assign(this, { hz: horizon, t: 0, plan: [[sink1, 5], [sink2, 1]], bits: new Bits(), shots: [], spouts: [], ships: null });
+    }
+    resize(W, H) {
+      if (this.ships && this.W) {
+        // the window changed size: keep every ship where it was in the picture
+        const kx = W / this.W, ky = H / this.H;
+        for (const sh of this.ships) { sh.x *= kx; sh.y *= ky; sh.s *= ky; for (const d of sh.debris) { d.x *= kx; d.w *= ky; } }
+      }
+      this.W = W; this.H = H;
+      if (this.ships) return;
+      const hz = this.hz * H, span = H - hz;
+      const at = [[0.14, 0.04, 1], [0.36, 0.4, 1], [0.17, 0.9, 1], [0.86, 0.04, -1], [0.64, 0.36, -1], [0.74, 0.86, -1]];
+      this.ships = at.map(([xf, d, dir], i) => ({ id: i, x: xf * W, y: hz + 3 + d * span * 0.6, s: (0.5 + d * 1.5) * (H / 540), d, dir, side: dir > 0 ? 0 : 1, next: rnd(0.2, 1.8), sink: null, debris: [] }));
+      this.ships.sort((a, b) => a.d - b.d);
+    }
+    /** where a point on a ship (model coordinates: x along the hull, y up from the waterline) is now */
+    world(sh, mx, my) {
+      const a = sh.sink ? sh.sink.ang : 0, cx = mx * sh.s * sh.dir, cy = my * sh.s;
+      return [sh.x + cx * Math.cos(a) - cy * Math.sin(a), sh.y + (sh.sink ? sh.sink.drop : 0) + cx * Math.sin(a) + cy * Math.cos(a)];
+    }
+    blowUp(sh) {
+      sh.sink = { t: 0, ang: 0, drop: 0, mast: 0 };
+      const [x, y] = this.world(sh, 0, -14), z = sh.s;
+      this.bits.add(2, { x, y, r: 140 * z, col: 'rgba(255,240,200,1)', glow: true, life: 0.5 });
+      this.bits.add(2, { x, y, r: 70 * z, col: 'rgba(255,200,120,1)', glow: true, life: 1 });
+      for (let k = 0; k < 40; k++) this.bits.add(2, { x, y, vx: rnd(-160, 160) * z, vy: rnd(-260, -40) * z, g: 260 * z, col: pick(FIRE), life: rnd(0.5, 1.3), s: 2 });
+      for (let k = 0; k < 18; k++) this.bits.add(2, { x, y, vx: rnd(-120, 120) * z, vy: rnd(-200, -60) * z, g: 240 * z, col: pick(['#1a1012', '#2a1c18', '#3a2a22']), life: rnd(1, 1.8), s: Math.max(2, Math.round(3 * z)) });
+      for (let k = 0; k < 9; k++) this.bits.add(1, { x: x + rnd(-24, 24) * z, y: y + rnd(-12, 4) * z, r: rnd(5, 9) * z, grow: rnd(6, 12) * z, vx: rnd(-14, 14), vy: rnd(-40, -16) * z, drag: 0.6, col: pick(['#2a1a1c', '#3a2626', '#4a3430']), a: 0.6, life: rnd(2.5, 3.5), fadeIn: 0.1 });
+      this.spout(x, sh.y, 70 * z, 18 * z);
+    }
+    spout(x, y, h, w) { this.spouts.push({ x, y, h, w, t: 0 }); for (let k = 0; k < 12; k++) this.bits.add(2, { x: x + rnd(-w, w) * 0.5, y: y - rnd(0, h * 0.4), vx: rnd(-30, 30), vy: rnd(-90, -30) * (h / 60), g: 160, col: pick(['#f4eee8', '#d8d0d0', '#b8b0b4']), life: rnd(0.5, 0.9), s: 2 }); }
+    step(dt) {
+      if (!this.W || !this.ships) return;
+      this.t += dt;
+      for (const [when, id] of this.plan) { const sh = this.ships.find((q) => q.id === id); if (sh && !sh.sink && this.t >= when) this.blowUp(sh); }
+      for (const sh of this.ships) {
+        if (sh.sink) {
+          const k = sh.sink; k.t += dt;
+          k.ang = -sh.dir * Math.min(0.5, Math.max(0, k.t - 0.4) * 0.13);
+          k.drop = Math.max(0, k.t - 0.8) * 13 * sh.s;
+          k.mast = Math.min(1.3, Math.max(0, k.t - 1.2) * 1.4);
+          // it burns as it goes, and the smoke climbs
+          if (k.drop < 70 * sh.s && Math.random() < dt * 9) { const [x, y] = this.world(sh, rnd(-40, 30), -10); this.bits.add(1, { x, y, r: 2.5 * sh.s, grow: rnd(4, 7) * sh.s, vx: rnd(4, 14), vy: rnd(-34, -20) * sh.s, drag: 0.3, col: pick(['#2a1a1c', '#3a2626']), a: 0.55, life: rnd(2.5, 3.5), fadeIn: 0.15 }); }
+          if (k.drop < 64 * sh.s && Math.random() < dt * 30) { const [x, y] = this.world(sh, rnd(-44, 40), -10 - rnd(0, 6)); this.bits.add(2, { x, y, vx: rnd(-10, 10), vy: rnd(-40, -16) * sh.s, col: pick(FIRE), life: rnd(0.25, 0.6), s: Math.max(2, Math.round(2 * sh.s)) }); }
+          if (Math.random() < dt * 20 && k.drop < 80 * sh.s) this.bits.add(2, { x: sh.x + rnd(-55, 55) * sh.s, y: sh.y + rnd(-1, 2), vx: rnd(-12, 12), vy: rnd(-20, -4), g: 40, col: '#f0eaea', life: rnd(0.4, 0.8), s: 2 });
+          if (!sh.debris.length && k.drop > 40 * sh.s) for (let i = 0; i < 9; i++) sh.debris.push({ x: sh.x + rnd(-50, 50) * sh.s, w: rnd(4, 10) * sh.s, ph: rnd(0, 6), fire: Math.random() < 0.35 });
+          continue;
+        }
+        sh.next -= dt;
+        if (sh.next <= 0) {
+          sh.next = rnd(1.6, 3.2);
+          const foes = this.ships.filter((q) => q.side !== sh.side && (!q.sink || q.sink.drop < 30 * q.s));
+          // a broadside: every port flashes in turn, smoke rolls off towards the enemy
+          for (let p = 0; p < 7; p++) {
+            const [x, y] = this.world(sh, -30 + p * 10, -5.5), dl = p * 0.05;
+            this.bits.add(2, { x, y, r: 14 * sh.s, col: 'rgba(255,236,190,1)', glow: true, life: 0.18 + dl });
+            this.bits.add(2, { x: x + sh.dir * 3 * sh.s, y, vx: sh.dir * rnd(20, 50) * sh.s, vy: rnd(-6, 6), col: pick(FIRE), life: 0.12 + dl, s: Math.max(2, Math.round(2 * sh.s)) });
+            if (p % 2 === 0) this.bits.add(1, { x, y, r: 2 * sh.s, grow: rnd(4, 7) * sh.s, vx: sh.dir * rnd(18, 50) * sh.s, vy: rnd(-12, -4) * sh.s, drag: 1.1, col: pick(['#c8bcb4', '#b0a49e', '#a09490']), a: rnd(0.35, 0.5), life: rnd(2.2, 3.4), fadeIn: 0.05 });
+          }
+          for (let k = 0; k < 3 && foes.length; k++) {
+            const to = pick(foes), [sx, sy] = this.world(sh, -20 + k * 20, -5.5);
+            const miss = Math.random() < 0.8;
+            const tx = to.x + (miss ? rnd(-70, 70) * to.s : rnd(-30, 30) * to.s), ty = to.y + (miss ? rnd(-2, 4) : -8 * to.s);
+            this.shots.push({ sx, sy, tx, ty, u: -k * 0.08, T: rnd(0.6, 1.1), arc: rnd(30, 70) * (0.5 + sh.d), hit: !miss, to, trail: [] });
+          }
+        }
+      }
+      for (let i = this.shots.length - 1; i >= 0; i--) {
+        const sh = this.shots[i];
+        sh.u += dt / sh.T;
+        if (sh.u < 0) continue;
+        const u = Math.min(1, sh.u);
+        sh.x = sh.sx + (sh.tx - sh.sx) * u; sh.y = sh.sy + (sh.ty - sh.sy) * u - Math.sin(Math.PI * u) * sh.arc;
+        if (sh.u >= 1) {
+          this.shots.splice(i, 1);
+          if (sh.hit && !sh.to.sink) { this.bits.add(2, { x: sh.x, y: sh.y, r: 22 * sh.to.s, col: 'rgba(255,220,150,1)', glow: true, life: 0.3 }); for (let k = 0; k < 10; k++) this.bits.add(2, { x: sh.x, y: sh.y, vx: rnd(-60, 60), vy: rnd(-80, -10), g: 150, col: pick(FIRE), life: rnd(0.3, 0.6), s: 2 }); this.bits.add(1, { x: sh.x, y: sh.y, r: 4, grow: 10 * sh.to.s, vy: -12, col: '#3a2a26', a: 0.8, life: 2.5 }); }
+          else this.spout(sh.x, sh.ty, rnd(24, 40) * sh.to.s, rnd(6, 10) * sh.to.s);
+        }
+      }
+      for (const sp of this.spouts) sp.t += dt;
+      this.spouts = this.spouts.filter((sp) => sp.t < 1.4);
+      this.bits.step(dt);
+    }
+    drawShip(c, sh, t) {
+      const k = sh.sink, s = sh.s;
+      c.save();
+      // the sea hides whatever has gone under
+      c.beginPath(); c.rect(0, 0, this.W, sh.y + 1); c.clip();
+      c.translate(sh.x, sh.y + (k ? k.drop : 0) + Math.sin(t * 1.3 + sh.id) * 0.8 * s);
+      if (k) c.rotate(k.ang);
+      c.scale(s * sh.dir, s);
+      const R = (x, y, w, h, col) => { c.fillStyle = col; c.fillRect(x, y, w, h); };
+      // masts and yards, sails furled (or burning); the foremast goes over when she is hit
+      const masts = [[-26, 44], [-4, 52], [20, 42]];
+      masts.forEach(([mx, mh], i) => {
+        c.save();
+        if (k && i === 2) { c.translate(mx, -9); c.rotate(k.mast); c.translate(-mx, 9); }
+        R(mx - 0.6, -9 - mh, 1.4, mh, '#1a1014');
+        for (let j = 1; j < 4; j++) {
+          const yy = -9 - mh * (j / 4) - 4, ww = 22 - j * 3.5;
+          R(mx - ww / 2, yy, ww, 1.2, '#1a1014');
+          // a sail set below the yard, bellied, catching the low sun on one side
+          const sh2 = mh / 4 - 2.5, burnt = k && k.t > 0.6;
+          if (!burnt || j === 3) { c.fillStyle = burnt ? '#4a2a24' : '#d8b498'; c.beginPath(); c.moveTo(mx - ww / 2 + 0.5, yy + 1.2); c.lineTo(mx + ww / 2 - 0.5, yy + 1.2); c.lineTo(mx + ww / 2 - 1.5, yy + 1.2 + sh2); c.lineTo(mx - ww / 2 + 1.5, yy + 1.2 + sh2); c.closePath(); c.fill(); if (!burnt) R(mx + ww / 2 - 4, yy + 1.2, 3, sh2, '#f4d8b8'); }
+        }
+        if (i === 1) R(mx + 0.8, -9 - mh, 5, 3, sh.side ? '#e8e0d0' : '#c83a2a');
+        c.restore();
+      });
+      // the funnel, smoking
+      R(4, -24, 5, 15, '#1a1014'); R(4, -24, 5, 2, '#6a3a2a');
+      // the hull: black, the rail catching the light, the gun ports
+      c.fillStyle = '#140c12';
+      c.beginPath(); c.moveTo(-50, -10); c.lineTo(46, -10); c.lineTo(52, -12); c.lineTo(46, 0); c.lineTo(-46, 0); c.closePath(); c.fill();
+      R(-46, -9, 92, 3, '#2a1a1e');
+      R(-49, -10.5, 96, 1.4, '#a8684a');
+      R(-46, -3, 92, 1, '#4a2e2a');
+      for (let p = 0; p < 7; p++) R(-31 + p * 10, -6.5, 3, 2.2, k ? '#ff8a3a' : '#5a3a2e');
+      c.strokeStyle = '#1a1014'; c.lineWidth = 1.2; c.beginPath(); c.moveTo(52, -12); c.lineTo(66, -22); c.stroke();
+      // on fire from end to end once she is hit
+      if (k && k.t < 7) for (let f = 0; f < 11; f++) { const fx = -44 + f * 8.6, fh = (4 + Math.abs(Math.sin(t * (6 + f % 3) + f * 1.7)) * 9) * Math.min(1, k.t * 2) * (f % 3 === 1 ? 1.4 : 1); R(fx, -10 - fh, 3, fh, f % 2 ? '#ff7a2a' : '#e0501e'); R(fx + 0.8, -10 - fh * 0.55, 1.6, fh * 0.55, '#ffd070'); }
+      c.restore();
+      // her shadow on the water, and the foam where she meets it
+      c.fillStyle = 'rgba(10,4,10,0.35)'; c.fillRect(sh.x - 48 * s, sh.y + 1, 96 * s, Math.max(2, 4 * s));
+      if (k && k.drop < 90 * s) { c.fillStyle = 'rgba(240,234,234,0.7)'; for (let i = 0; i < 10; i++) c.fillRect(sh.x + (Math.sin(t * 3 + i * 7) * 50 - 2) * s, sh.y - 1 + Math.sin(i) * 1.5, 3 * s, 1.5); }
+      for (const d of sh.debris) { const yy = sh.y + Math.sin(t * 1.5 + d.ph) * 1.2; c.fillStyle = '#1e1416'; c.fillRect(d.x, yy - 1, d.w, Math.max(1.5, 1.5 * s)); if (d.fire) { c.fillStyle = pick(FIRE); c.fillRect(d.x + d.w * 0.4, yy - 3 * s, Math.max(1.5, 1.5 * s), 2.5 * s); } }
+    }
+    draw(c, t) {
+      if (!this.ships) return;
+      for (const sh of this.ships) this.drawShip(c, sh, t || this.t);
+      for (const sp of this.spouts) {
+        const k = sp.t < 0.35 ? sp.t / 0.35 : Math.max(0, 1 - (sp.t - 0.35) / 1.05), hh = sp.h * (sp.t < 0.35 ? k : 1 - (1 - k) * 0.4);
+        c.globalAlpha = Math.min(1, k * 1.2) * 0.85; c.fillStyle = '#ece6e6';
+        c.fillRect(sp.x - sp.w * 0.25, sp.y - hh, sp.w * 0.5, hh);
+        c.fillStyle = '#c8c0c4'; c.fillRect(sp.x - sp.w * 0.5, sp.y - hh * 0.45, sp.w, hh * 0.45);
+        c.globalAlpha = 1;
+      }
+      c.fillStyle = '#1a1012';
+      for (const sh of this.shots) if (sh.u >= 0 && sh.x != null) c.fillRect(sh.x - 1, sh.y - 1, 2.5, 2.5);
+      this.bits.draw(c);
+      c.globalAlpha = 1;
+    }
+  }
+
   /** splashes=y,h,rate — raindrops bursting on the puddles and paving. */
   class Splashes {
     constructor(nums, color) {
@@ -1451,6 +1605,7 @@
           case 'shade': this.systems.push(new Shade(n, s.color)); break;
           case 'lightning': if (!this.reduce) this.systems.push(new Lightning(n, s.color)); break;
           case 'crash': this.systems.push(new Crash(n)); break;
+          case 'fleet': this.systems.push(new Fleet(n)); break;
           case 'splashes': this.systems.push(new Splashes(n, s.color)); break;
           case 'herd': this.systems.push(new Herd(n)); break;
           case 'fish': this.systems.push(new Fish(n)); break;

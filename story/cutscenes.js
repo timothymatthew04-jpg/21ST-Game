@@ -175,10 +175,11 @@
           shake: [[0.9, 1.6], [2.2, 0.7], [3.5, 1.6], [4.8, 0.7]], flash: [0.9, 3.5],
         },
         {
-          bg: 'cs_warships', dur: 6.5, cam: [[1.3, 0.3, 0.58], [1.12, 0.62, 0.52]], tint: 'rgba(10,6,30,0.4)', trans: 'cut',
-          fx: 'cannon=0.24,0.8,3.2,0.7,-1,1.2 cannon=0.3,0.8,3.2,1.25,-1,1.2 cannon=0.36,0.8,3.2,1.8,-1,1.2 cannon=0.66,0.72,3.2,2.35,-1,0.8 rockets=0.4,0.62,0.2,0.8 shells=0.5,0.6,0.66,0.02,0.4 smoke=0.39,0.66,1,#1a1010',
-          sound: [['battery', 0.7, 0.9], ['rocket', 2.6, 0.4], ['battery', 3.9, 0.8], ['explosion', 5.6, 0.6]],
-          shake: [[0.7, 1.1], [1.25, 0.6], [1.8, 0.9], [2.35, 0.5], [3.9, 1.1], [4.45, 0.6], [5.0, 0.9]], flash: [0.7, 3.9],
+          // at sea: two lines of ships trading broadsides; one blows up and sinks, then another
+          bg: 'cs_seabattle', dur: 10.5, cam: [[1.28, 0.36, 0.62], [1.06, 0.56, 0.56]], trans: 'cut',
+          fx: 'fleet=0.575,3.2,6.9 rockets=0.3,0.5,0.2,0.8',
+          sound: [['battery', 0.4, 0.8], ['cannon', 1.3, 0.55], ['splash', 1.9, 0.45], ['battery', 2.3, 0.7], ['explosion', 3.2, 1], ['shouts', 3.7, 0.5], ['splash', 4.3, 0.5], ['battery', 5.0, 0.8], ['cannon', 6.0, 0.6], ['explosion', 6.9, 0.9], ['splash', 7.6, 0.6], ['battery', 8.4, 0.6], ['splash', 9.3, 0.4]],
+          shake: [[0.4, 0.8], [2.3, 0.6], [3.2, 1.6], [5.0, 0.7], [6.9, 1.4], [8.4, 0.6]], flash: [3.2, 6.9],
         },
         {
           bg: 'estate_unrest', dur: 5.5, cam: [[1.3, 0.35, 0.5], [1.1, 0.55, 0.55]], tint: 'rgba(70,14,0,0.3)',

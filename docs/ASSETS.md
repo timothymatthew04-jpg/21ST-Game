@@ -104,6 +104,10 @@ merchants' stalls and townhouses under their paper lanterns and banners, a stage
 players, an archery butt, the walled samurai quarter and its cherry trees in pink and white, to
 Hara Kei's great gate. It is drawn by `tools/paint/scenes-japan.js`.
 
+The war cutscene's sea battle is fought on `cs_seabattle`: open sea under a rust-red sky, the port on
+the horizon burning; the ships are drawn by the game (the `fleet` effect) so that they can fire,
+blow up and sink.
+
 Chapter 3's arrival cutscene has three paintings of its own (tools/paint/scenes-arrival.js):
 `jp_sakura_road`, the road in under an avenue of cherry trees, pink and white, with lit stone
 lanterns and a torii, Mount Yōtei at the end of it; `jp_reveal`, Hara Kei's castle town on its hill,

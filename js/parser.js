@@ -11,7 +11,7 @@
   const ASSIGN_RE = /^([A-Za-z_]\w*(?:\.[A-Za-z_]\w*)?)\s*(\+=|-=|\*=|\/=|=)\s*(.+)$/;
   const IDENT_RE = /^[A-Za-z_]\w*$/;
   const BG_FX = ['petals', 'leaves', 'foliage', 'snow', 'ash', 'rain', 'fireflies', 'motes', 'glints', 'stars', 'smoke', 'steam', 'embers', 'birds', 'flutter', 'glow', 'flame', 'rays', 'mist', 'rock',
-    'grass', 'gunfire', 'cannon', 'boom', 'shells', 'blasts', 'rockets', 'army', 'airship', 'balloon', 'walkers', 'ripples', 'shade', 'lightning', 'splashes', 'herd', 'rider', 'fish', 'flock', 'aurora', 'crash'];
+    'grass', 'gunfire', 'cannon', 'boom', 'shells', 'blasts', 'rockets', 'army', 'airship', 'balloon', 'walkers', 'ripples', 'shade', 'lightning', 'splashes', 'herd', 'rider', 'fish', 'flock', 'aurora', 'crash', 'fleet'];
   VN.BG_FX = BG_FX;
 
   /** Split a line into bare words and "quoted strings" (with \" and \n escapes). */

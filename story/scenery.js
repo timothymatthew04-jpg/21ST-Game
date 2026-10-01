@@ -1085,6 +1085,62 @@ window.VN_SCENERY = {
    }
   ]
  },
+ "cs_seabattle": {
+  "flat": "assets/scenes/cs_seabattle/flat.png",
+  "vignette": [
+   0.5,
+   "20,0,10"
+  ],
+  "layers": [
+   {
+    "id": "sky",
+    "x": 0,
+    "y": 0,
+    "w": 480,
+    "h": 270,
+    "depth": 0,
+    "anim": null,
+    "src": "assets/scenes/cs_seabattle/sky.png"
+   },
+   {
+    "id": "clouds",
+    "x": 0,
+    "y": 19,
+    "w": 480,
+    "h": 96,
+    "depth": 0.04,
+    "anim": {
+     "type": "drift",
+     "t": 200
+    },
+    "src": "assets/scenes/cs_seabattle/clouds.png"
+   },
+   {
+    "id": "coast",
+    "x": 0,
+    "y": 64,
+    "w": 480,
+    "h": 93,
+    "depth": 0.08,
+    "anim": null,
+    "src": "assets/scenes/cs_seabattle/coast.png"
+   },
+   {
+    "id": "sea",
+    "x": 0,
+    "y": 155,
+    "w": 480,
+    "h": 115,
+    "depth": 0.1,
+    "anim": {
+     "type": "pulse",
+     "lo": 0.88,
+     "t": 4
+    },
+    "src": "assets/scenes/cs_seabattle/sea.png"
+   }
+  ]
+ },
  "cs_warships": {
   "flat": "assets/scenes/cs_warships/flat.png",
   "vignette": [
