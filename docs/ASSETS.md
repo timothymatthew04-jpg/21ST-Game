@@ -122,6 +122,11 @@ The smuggler's boat (`smuggler_boat`), the crossing to Japan, is a clear, cold n
 the northern lights as its sky: the aurora itself is an effect (`aurora`), rippling above the deck
 and mirrored faintly in the swell, over a painted sky that glows green at the horizon.
 
+The steppe (`steppe`) is a storm at sunset: a ceiling of cloud lit orange from below, curtains of
+rain, and the ruins of old stone towns along the way (a broken aqueduct, a roofless chapel with its
+window empty against the sky, shattered towers, columns, an arch the road runs under), the village
+with its onion-domed church, puddles holding the burning sky, and Lake Baikal beaten by the rain.
+
 The road from the coast (`crossing`) is the war: a sky gone red and black with smoke, the town on
 its hill burning, the castle in flames and the pagoda broken in half, soldiers fighting in the
 fields between, ruined townhouses and burnt trees, rubble and craters along the road. The red

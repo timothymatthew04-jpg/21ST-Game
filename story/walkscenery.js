@@ -562,25 +562,35 @@ window.VN_WALKSCENERY = {
    {
     "id": "clouds",
     "x": 0,
-    "y": 29,
+    "y": 0,
     "w": 2400,
-    "h": 69,
+    "h": 124,
     "depth": 0.05,
     "anim": {
      "type": "drift",
-     "t": 260
+     "t": 120
     },
     "src": "assets/walks/steppe/clouds.png"
    },
    {
     "id": "far",
     "x": 0,
-    "y": 128,
+    "y": 132,
     "w": 750,
-    "h": 142,
+    "h": 138,
     "depth": 0.12,
     "anim": null,
     "src": "assets/walks/steppe/far.png"
+   },
+   {
+    "id": "ruins",
+    "x": 0,
+    "y": 105,
+    "w": 1000,
+    "h": 91,
+    "depth": 0.25,
+    "anim": null,
+    "src": "assets/walks/steppe/ruins.png"
    },
    {
     "id": "mid",
@@ -595,24 +605,24 @@ window.VN_WALKSCENERY = {
    {
     "id": "ground",
     "x": 0,
-    "y": 154,
+    "y": 134,
     "w": 2400,
-    "h": 66,
+    "h": 86,
     "depth": 1,
     "anim": null,
     "src": "assets/walks/steppe/ground.png"
    },
    {
     "id": "front",
-    "x": 2,
-    "y": 234,
-    "w": 2395,
-    "h": 36,
+    "x": 7,
+    "y": 232,
+    "w": 2390,
+    "h": 38,
     "depth": 1.3,
     "anim": {
      "type": "sway",
      "a": 4,
-     "t": 3
+     "t": 2.4
     },
     "src": "assets/walks/steppe/front.png"
    }

@@ -433,39 +433,110 @@ WALKS.lavilledieu = (c, L) => {
 // ---------------------------------------------------------------- across the steppe, at sunset
 WALKS.steppe = (c, L) => {
   const r = rng(411);
-  vgrad(c, 0, 0, 480, WY, [[0, '#2a2a5e'], [0.4, '#7a4e7a'], [0.7, '#e2866a'], [0.9, '#ffc27a'], [1, '#ffe2a8']]);
-  sun(c, 330, 168, 16, '#fff0c8', 'rgba(255,160,90,0.6)');
-  stars(c, r, 30, 0, 0, 480, 60);
-  const cl = L('clouds', { depth: 0.05, anim: { type: 'drift', t: 260 } });
-  for (let x = 0; x < S(0.1); x += 220) cloudBand(cl, r, x + r.r(0, 60), r.r(26, 100), r.r(140, 240), r.r(5, 9), { body: '#6a4a72', rim: '#ffa878', shadow: '#503a60', hi: '#ffd8a8', lightFromBelow: true });
+  // a storm coming in over the steppe at sunset: a ceiling of cloud, and under it the west on fire
+  vgrad(c, 0, 0, 480, WY, [[0, '#221a28'], [0.3, '#3e2c3a'], [0.55, '#6a3a3a'], [0.74, '#c8602e'], [0.88, '#f09a40'], [1, '#ffc870']]);
+  sun(c, 352, 166, 15, '#fff0c0', 'rgba(255,150,70,0.6)');
+  glow(c, 352, 170, 200, 'rgba(255,140,60,0.4)');
+  const cl = L('clouds', { depth: 0.05, anim: { type: 'drift', t: 120 } });
+  for (let x = -40; x < S(0.1); x += 90) cloudBand(cl, r, x + r.r(0, 40), r.r(8, 70), r.r(160, 260), r.r(14, 24), { body: '#3a2c38', rim: '#d0703a', shadow: '#261c28', hi: '#ffaa60', lightFromBelow: true });
+  for (let x = 0; x < S(0.1); x += 140) cloudBand(cl, r, x + r.r(0, 60), r.r(92, 122), r.r(120, 200), r.r(5, 8), { body: '#5a3a3e', rim: '#ffa050', shadow: '#40283a', hi: '#ffd080', lightFromBelow: true });
+  // curtains of rain hanging from the clouds out over the plain, slanting in the wind
+  const veil = L('rainveil', { depth: 0.08, anim: { type: 'drift', t: 300 } });
+  for (let x = 0; x < S(0.1); x += r.r(60, 120)) {
+    const w = r.r(30, 70), y0 = r.r(80, 110);
+    for (let y = y0; y < 178; y += 1) for (let k = 0; k < w; k += 3) if (((k + y) % 3 === 0) && r() < 0.55 * (1 - (y - y0) / 140)) px(veil, x + k - (y - y0) * 0.35, y, '#8a6a74');
+  }
+  // far off, the ridges, and the ruins of old towns on them, dark against the light
   const far = L('far', { depth: 0.12 });
-  ridge(far, r, 172, 44, '#6a4a6e', { x1: S(0.12), peak: [320, 60, 18] });
-  ridge(far, r, 182, 22, '#5e4262', { x1: S(0.12) });
+  const fx1 = S(0.12);
+  ridge(far, r, 176, 30, '#4a2e3a', { x1: fx1, peak: [320, 60, 14] });
+  const FAR = '#3a2430';
+  for (const [x, kind] of [[60, 'tower'], [170, 'arcade'], [300, 'chapel'], [470, 'tower'], [560, 'arcade'], [680, 'chapel']]) {
+    if (kind === 'tower') { const pts = [[x, 176], [x, 140]]; for (let k = 0; k <= 10; k += 2) pts.push([x + k, 136 + r.r(-6, 6)]); pts.push([x + 10, 176]); poly(far, pts, FAR); rect(far, x + 3, 150, 2, 4, '#f08a40'); }
+    else if (kind === 'arcade') { rect(far, x, 156, 70, 4, FAR); for (let k = 0; k < 6; k++) { rect(far, x + k * 12, 156, 4, 20, FAR); } far.clearRect(x + 44, 150, 30, 8); }
+    else { poly(far, [[x, 176], [x, 152], [x + 9, 140], [x + 18, 152], [x + 18, 176]], FAR); rect(far, x + 7, 150, 4, 8, '#f08a40'); }
+  }
+  ridge(far, r, 184, 12, '#3a2430', { x1: fx1 });
+  // nearer: great ruins of stone, a broken aqueduct striding across the plain, a roofless chapel with
+  // its window empty against the sky, a shattered tower, standing columns; their edges lit by the sunset
+  const ru = L('ruins', { depth: 0.25 });
+  const rx1 = S(0.25);
+  const ST = { dark: '#2e2228', mid: '#4a363a', lit: '#e08850', wet: '#6a4a4a' };
+  vgrad(ru, 0, 184, rx1, 12, [[0, '#4a3036'], [1, '#382630']]);
+  const blocks = (x, y, w, h) => { rect(ru, x, y, w, h, ST.mid); for (let yy = y; yy < y + h; yy += 4) for (let xx = x + ((yy / 4) % 2) * 3; xx < x + w; xx += 6) rect(ru, xx, yy, 1, 4, ST.dark); for (let yy = y + 4; yy < y + h; yy += 4) rect(ru, x, yy, w, 1, ST.dark); rect(ru, x + w - 2, y, 2, h, ST.lit); };
+  const aqueduct = (x0, n, span, yb, h) => {
+    for (let i = 0; i <= n; i++) blocks(x0 + i * span, yb - h, 8, h);
+    for (let i = 0; i < n; i++) {
+      if (i === 2) continue; // a span fallen in
+      const x = x0 + i * span + 8, w = span - 8;
+      blocks(x, yb - h, w, 10);
+      ru.fillStyle = '#000'; ru.save(); ru.globalCompositeOperation = 'destination-out'; ru.beginPath(); ru.ellipse(x + w / 2, yb - h + 12, w / 2, 6, 0, Math.PI, 0); ru.fill(); ru.restore();
+    }
+    for (let i = 0; i < 6; i++) rect(ru, x0 + 2 * span + r.r(0, span), yb - r.r(2, 5), r.r(4, 8), 3, ST.mid);
+    rect(ru, x0, yb - h - 1, (n + 0) * span + 8, 1, ST.lit);
+  };
+  const chapel = (x, yb, w, h) => {
+    blocks(x, yb - h, w, h);
+    poly(ru, [[x - 1, yb - h], [x + w / 2, yb - h - w * 0.45], [x + w + 1, yb - h]], ST.mid);
+    ru.save(); ru.globalCompositeOperation = 'destination-out';
+    ru.beginPath(); ru.moveTo(x + w * 0.35, yb - h * 0.25); ru.lineTo(x + w * 0.35, yb - h * 0.75); ru.lineTo(x + w * 0.5, yb - h * 0.95); ru.lineTo(x + w * 0.65, yb - h * 0.75); ru.lineTo(x + w * 0.65, yb - h * 0.25); ru.closePath(); ru.fill();
+    ru.restore();
+    rect(ru, x + w * 0.5, yb - h * 0.95, 1, h * 0.7, ST.dark);
+    for (let k = 0; k < 8; k++) rect(ru, x + w + r.r(0, 20), yb - r.r(2, 6), r.r(3, 7), 3, ST.mid);
+    blocks(x + w, yb - h * 0.45, 14, h * 0.45);
+  };
+  const tower = (x, yb, w, h) => {
+    const pts = [[x, yb], [x, yb - h]];
+    for (let k = 0; k <= w; k += 3) pts.push([x + k, yb - h - r.r(-10, 8) - (k > w * 0.5 ? 10 : 0)]);
+    pts.push([x + w, yb]);
+    ru.save(); ru.beginPath(); ru.moveTo(pts[0][0], pts[0][1]); for (const q of pts) ru.lineTo(q[0], q[1]); ru.closePath(); ru.clip();
+    blocks(x, yb - h - 20, w, h + 20);
+    ru.restore();
+    for (let y = yb - h + 10; y < yb - 10; y += 18) { ru.save(); ru.globalCompositeOperation = 'destination-out'; rect(ru, x + w / 2 - 1, y, 3, 7, '#000'); ru.restore(); }
+  };
+  const column = (x, yb, h) => { blocks(x, yb - h, 6, h); rect(ru, x - 2, yb - h - 2, 10, 2, ST.mid); rect(ru, x - 1, yb - 3, 8, 3, ST.dark); };
+  aqueduct(30, 6, 34, 192, 46);
+  chapel(330, 192, 46, 56);
+  tower(470, 192, 28, 70);
+  for (const x of [560, 576, 592, 640]) column(x, 192, r.r(26, 40));
+  aqueduct(700, 4, 30, 192, 38);
+  chapel(880, 192, 38, 46);
+  tower(960, 192, 22, 54);
+  ru.save(); ru.globalCompositeOperation = 'source-atop'; vgrad(ru, 0, 120, rx1, 76, [[0, 'rgba(200,110,80,0.08)'], [1, 'rgba(120,70,80,0.35)']]); ru.restore();
+  // the middle distance: the village with its onion-domed church, birches bent by the wind, rubble
   const mid = L('mid', { depth: 0.4 });
-  vgrad(mid, 0, 180, S(0.4), 24, [[0, '#b08a5a'], [1, '#806838']]);
-  for (let x = 0; x < S(0.4); x += r.r(24, 60)) if (r() < 0.6) birch(mid, r, x, 190, r.r(20, 34), ['#3a4a2a', '#5a6a34', '#8a9a4a']);
-  // a village of wooden houses and a church with an onion dome, halfway across Russia
-  for (const [x, w] of [[600, 26], [640, 22], [700, 30]]) { rect(mid, x, 176, w, 14, '#6a4a30'); poly(mid, [[x - 3, 176], [x + w + 3, 176], [x + w / 2, 164]], '#4a3a2a'); rect(mid, x + w / 2 - 2, 180, 4, 5, '#ffcf72'); glow(mid, x + w / 2, 182, 10, 'rgba(255,190,90,0.5)'); }
-  rect(mid, 670, 150, 14, 40, '#e8e0d0'); ellipse(mid, 677, 148, 9, 9, '#3a8a6a'); poly(mid, [[677, 132], [673, 142], [681, 142]], '#3a8a6a'); rect(mid, 676, 126, 2, 7, '#e8c040'); rect(mid, 674, 128, 6, 1, '#e8c040');
+  vgrad(mid, 0, 180, S(0.4), 24, [[0, '#6a4a3a'], [1, '#4a3428']]);
+  for (let x = 0; x < S(0.4); x += r.r(24, 60)) if (r() < 0.6 && Math.abs(x - 670) > 80) birch(mid, r, x, 190, r.r(20, 34), ['#2a2a22', '#4a4a2e', '#7a6a3a']);
+  for (const [x, w] of [[600, 26], [640, 22], [700, 30]]) { rect(mid, x, 176, w, 14, '#4a3428'); poly(mid, [[x - 3, 176], [x + w + 3, 176], [x + w / 2, 164]], '#2e2220'); rect(mid, x + w / 2 - 2, 180, 4, 5, '#ffcf72'); glow(mid, x + w / 2, 182, 10, 'rgba(255,190,90,0.5)'); }
+  rect(mid, 670, 150, 14, 40, '#c8b8a8'); rect(mid, 682, 150, 2, 40, '#ffb070'); ellipse(mid, 677, 148, 9, 9, '#2e6a52'); poly(mid, [[677, 132], [673, 142], [681, 142]], '#2e6a52'); rect(mid, 676, 126, 2, 7, '#e8c040'); rect(mid, 674, 128, 6, 1, '#e8c040');
+  for (let x = 40; x < S(0.4); x += r.r(80, 160)) { if (Math.abs(x - 660) < 70) continue; rect(mid, x, 184, r.r(10, 20), r.r(4, 8), '#4a3a3a'); rect(mid, x + 2, 182, r.r(4, 8), 2, '#5a4646'); }
+  // the road: wet, puddles holding the burning sky, stones of the ruins fallen beside it
   const g = L('ground', { depth: 1 });
-  vgrad(g, 0, 190, W, 14, [[0, '#a88a50'], [1, '#806a3a']]);
-  bank(g, r, 0, W, { grass0: '#a0904a', grass1: '#7a6a34', tip: '#d0b870', earth: '#6a4e34', dark: '#3a2a1e', stone: '#8a7a6a' });
-  // milestones, a caravan's cart, a shrine at a crossroads, a raft on the river, then the harbour
-  for (let x = 160; x < W - 300; x += 360) { rect(g, x, GY - 14, 5, 12, '#a8a090'); rect(g, x, GY - 14, 5, 2, '#d8d0c0'); }
-  rect(g, 820, GY - 22, 44, 12, '#6a4a2a'); for (const x of [828, 856]) { circle(g, x, GY - 8, 6, '#3a2a1a'); circle(g, x, GY - 8, 2, '#8a6a3a'); }
-  poly(g, [[818, GY - 22], [866, GY - 22], [858, GY - 38], [826, GY - 38]], '#c8b890');
-  rect(g, 1240, GY - 26, 3, 24, '#5a3a24'); rect(g, 1234, GY - 26, 16, 10, '#7a5a3a'); rect(g, 1238, GY - 22, 8, 5, '#e8c070');
-  // Lake Baikal: the water opens up wide
-  for (let x = 1500; x < 1900; x += 3) rect(g, x, GY - 2 - Math.max(0, Math.sin((x - 1500) / 400 * Math.PI) * 6), 3, 4, '#c8b888');
+  vgrad(g, 0, 190, W, 14, [[0, '#6a4a36'], [1, '#4a3428']]);
+  bank(g, r, 0, W, { grass0: '#6a5a34', grass1: '#4a4026', tip: '#9a8040', earth: '#3a2a20', dark: '#1e1612', stone: '#6a5a5a' });
+  for (let x = 40; x < W - 300; x += r.r(50, 110)) { const w = r.r(10, 26); ellipse(g, x, GY - 1, w, 2, '#d07a3e'); ellipse(g, x - 2, GY - 1.5, w * 0.6, 1, '#ffb868'); }
+  const gstone = (x, w, h) => { rect(g, x, GY - 2 - h, w, h, '#4a3a3e'); for (let yy = GY - 2 - h + 4; yy < GY - 2; yy += 4) rect(g, x, yy, w, 1, '#2e2228'); rect(g, x + w - 1, GY - 2 - h, 1, h, '#c87a48'); };
+  for (const [x, w, h] of [[90, 30, 12], [126, 14, 20], [150, 22, 8], [400, 40, 6], [446, 12, 14], [1360, 26, 10], [1392, 16, 18], [1416, 34, 7], [2020, 10, 16], [2040, 8, 22], [2060, 24, 6]]) gstone(x, w, h);
+  // an old arch still standing over the road, that the road passes under
+  for (const k of [0, 46]) { gstone(1050 + k, 10, 60); }
+  rect(g, 1048, GY - 70, 60, 10, '#4a3a3e'); rect(g, 1048, GY - 70, 60, 1, '#c87a48');
+  g.save(); g.globalCompositeOperation = 'destination-out'; g.beginPath(); g.ellipse(1083, GY - 60, 23, 6, 0, Math.PI, 0); g.fill(); g.restore();
+  // milestones, the caravan's cart, the shrine at the crossroads (the things along the way)
+  for (let x = 160; x < W - 300; x += 360) { rect(g, x, GY - 14, 5, 12, '#8a7a72'); rect(g, x, GY - 14, 5, 2, '#c8a890'); }
+  rect(g, 820, GY - 22, 44, 12, '#5a3a24'); for (const x of [828, 856]) { circle(g, x, GY - 8, 6, '#2a1e14'); circle(g, x, GY - 8, 2, '#7a5a34'); }
+  poly(g, [[818, GY - 22], [866, GY - 22], [858, GY - 38], [826, GY - 38]], '#a89878');
+  rect(g, 1240, GY - 26, 3, 24, '#4a2e1e'); rect(g, 1234, GY - 26, 16, 10, '#6a4a2e'); rect(g, 1238, GY - 22, 8, 5, '#ffc870'); glow(g, 1242, GY - 20, 12, 'rgba(255,190,90,0.5)');
+  // Lake Baikal: the water opens up wide, beaten by the rain
+  for (let x = 1500; x < 1900; x += 3) rect(g, x, GY - 2 - Math.max(0, Math.sin((x - 1500) / 400 * Math.PI) * 6), 3, 4, r() < 0.3 ? '#e09060' : '#8a7a7a');
   // the harbour at the edge of the continent: a pier and the smuggler's boat
-  rect(g, 2180, GY - 4, W - 2180, 4, '#5a3e2a');
-  for (let x = 2190; x < W; x += 30) rect(g, x, GY - 2, 4, 18, '#3a2a1e');
-  poly(g, [[2290, GY + 4], [2380, GY + 2], [2372, GY + 14], [2300, GY + 14]], '#2a1e1a');
-  rect(g, 2330, GY - 50, 2, 52, '#2a1e1a'); poly(g, [[2332, GY - 48], [2362, GY - 40], [2332, GY - 8]], '#d8ccb0');
-  for (const x of [2220, 2400]) { rect(g, x, GY - 30, 2, 28, '#2a1e1a'); ellipse(g, x + 1, GY - 30, 4, 5, '#ffb050'); glow(g, x + 1, GY - 30, 16, 'rgba(255,160,70,0.5)'); }
-  const fr = L('front', { depth: 1.3, anim: sway(4, 3) });
-  reeds(fr, r, ['#6a5a2a', '#8a7a3a', '#b0a050'], 140);
-  return { colors: 64, vignette: [0.35, '30,10,30'] };
+  rect(g, 2180, GY - 4, W - 2180, 4, '#4a3020');
+  for (let x = 2190; x < W; x += 30) rect(g, x, GY - 2, 4, 18, '#2a1e16');
+  poly(g, [[2290, GY + 4], [2380, GY + 2], [2372, GY + 14], [2300, GY + 14]], '#1e1612');
+  rect(g, 2330, GY - 50, 2, 52, '#1e1612'); poly(g, [[2332, GY - 48], [2362, GY - 40], [2332, GY - 8]], '#b8a890');
+  for (const x of [2220, 2400]) { rect(g, x, GY - 30, 2, 28, '#1e1612'); ellipse(g, x + 1, GY - 30, 4, 5, '#ffb050'); glow(g, x + 1, GY - 30, 16, 'rgba(255,160,70,0.5)'); }
+  const fr = L('front', { depth: 1.3, anim: sway(4, 2.4) });
+  reeds(fr, r, ['#4a3e22', '#6a5a2e', '#9a8040'], 160);
+  return { colors: 80, vignette: [0.42, '30,10,20'] };
 };
 
 // ---------------------------------------------------------------- Hara Kei's village, at dusk in the fog

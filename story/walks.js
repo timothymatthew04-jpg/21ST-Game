@@ -80,7 +80,10 @@
  *              (a cat sits a good while); `follow` (an index) keeps to its own side of that runner,
  *              `gap` away: children at tag, a dog at their heels. Dogs: spaniel, black, white,
  *              gold; cats: ginger, black, tabby; `hoop` gives a child a hoop to bowl along
- *    weather 'autumn' brings leaves down, orange, gold and red; 'sakura' cherry petals, pink and white
+ *    weather 'autumn' brings leaves down, orange, gold and red; 'sakura' cherry petals, pink and white;
+ *              'storm' heavy rain slanting in the wind and splashing on the road
+ *    gusts:    { every: [min, max] }  gusts of wind now and then: the rain driven sideways, the
+ *              grass and reeds flattened, the wind roaring up (lightning works here too, in any colour)
  *    fog:      [{ z, y, h, alpha, speed, col, front }]  bands of fog drifting at depth z (drawn among the
  *              layers there), or in front of the people (front: true), e.g. mist over a street
  *    range:    kind 'bow' makes the range an archery butt: the archers draw and loose, arrows fly
@@ -255,7 +258,9 @@ window.VN_WALKS = {
   steppe: {
     title: 'The Steppe', region: 'Across Europe and Russia',
     music: { name: 'storm_ride', volume: 0.75 }, ambience: { name: 'tempest', volume: 1 }, wet: true,
-    hero: 'traveller', ride: true, start: 40, weather: 'motes', accent: '255,200,140',
+    hero: 'traveller', ride: true, start: 40, weather: 'storm', weatherCount: 400, accent: '255,200,140',
+    // a storm at sunset across the ruins: rain driven by gusts, lightning now and then
+    gusts: { every: [4, 9] }, lightning: { every: [6, 13], col: '255,232,214', horizon: 150, volume: 0.35 },
     water: ['rgba(150,90,110,0.5)', 'rgba(30,18,40,0.9)'],
     hint: 'Ride east, to the edge of the continent →',
     things: [

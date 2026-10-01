@@ -492,7 +492,10 @@ from the coast is a battlefield: red lightning over a burning town, the fighting
 far hills with guns booming, lines of soldiers trading volleys in the fields, townhouses on fire
 that give way and fall in as Hervé passes, and an airship shot down in flames that explodes and
 stays, its wreck burning, for the rest of the way (`lightning`, `battle`, `skirmish`,
-`collapses`, `crash`). The shells and the cover work exactly as before.
+`collapses`, `crash`). The shells and the cover work exactly as before. The ride east across the
+steppe goes through a storm at sunset, past the ruins of old stone towns: heavy rain slanting in
+the wind (weather `storm`), gusts that drive it sideways and flatten the grass (`gusts`), and
+lightning now and then.
 
 Walks never replace the rest: choices, cutscenes and minigames happen around them as before. The
 game menu (Esc) pauses a walk, and saving during one saves just before it. A quiet walk is passed

@@ -412,6 +412,7 @@
   }
   const LEAVES = ['#e0842a', '#f4c056', '#c84a24', '#b8521c', '#f07a3a', '#e0b03a'];
   function stepWeather(c, wx, dt, t, camDx) {
+    if (wx.kind === 'storm') { stepStorm(c, wx, dt, t, camDx); return; }
     for (const p of wx.parts) {
       if (wx.kind === 'snow') { p.y += dt * 12 * p.v; p.x += Math.sin(t + p.p) * dt * 6 - camDx * 0.8; }
       else if (wx.kind === 'ash' || wx.kind === 'petals') { p.y += dt * 9 * p.v; p.x += Math.sin(t * 0.8 + p.p) * dt * 10 - camDx * 0.8; }
@@ -452,6 +453,39 @@
       }
       else { c.fillStyle = `rgba(255,240,200,${0.2 + tw * 0.4})`; c.fillRect(p.x * SS, p.y * SS, SS, SS); }
     }
+  }
+
+  /** A storm: heavy rain slanting in the wind (harder in a gust), splashing where it lands. */
+  function stepStorm(c, wx, dt, t, camDx) {
+    const gust = wx.gust || 0, wind = -(60 + gust * 190), fall = 330;
+    const len = 9 + gust * 6;
+    c.lineWidth = SS * 0.6;
+    for (const [alpha, from, to] of [[0.3, 0, 0.5], [0.55, 0.5, 1]]) {
+      c.strokeStyle = `rgba(236,214,206,${alpha})`;
+      c.beginPath();
+      for (let i = Math.floor(wx.parts.length * from); i < wx.parts.length * to; i++) {
+        const p = wx.parts[i];
+        p.y += dt * fall * p.v; p.x += (wind * p.v) * dt - camDx * (0.6 + p.v * 0.3);
+        if (p.y > WY + 4) { p.y = -8; p.x = Math.random() * (LW + 120); }
+        if (p.x < -20) p.x += LW + 40;
+        if (p.x > LW + 30) p.x -= LW + 40;
+        const k = len * p.v;
+        c.moveTo(p.x * SS, p.y * SS);
+        c.lineTo((p.x - (wind / fall) * k) * SS, (p.y - k) * SS);
+      }
+      c.stroke();
+    }
+    // the drops splashing on the road and in the puddles
+    wx.splashes = wx.splashes || [];
+    const n = dt * (70 + gust * 40);
+    for (let i = 0; i < Math.floor(n) + (Math.random() < n % 1 ? 1 : 0); i++) wx.splashes.push({ x: Math.random() * LW, y: GY - 2 + Math.random() * 10, t: 0 });
+    c.fillStyle = 'rgba(240,222,214,0.7)';
+    for (const sp of wx.splashes) {
+      sp.t += dt; sp.x -= camDx;
+      const h = sp.t < 0.12 ? 1 : 0;
+      c.fillRect((sp.x - 1) * SS, (sp.y - 1 - h) * SS, SS, SS); c.fillRect((sp.x + 1) * SS, (sp.y - 1 - h) * SS, SS, SS);
+    }
+    wx.splashes = wx.splashes.filter((sp) => sp.t < 0.22);
   }
 
   // ---------------------------------------------------------------- fire and smoke, for the shelling
@@ -502,6 +536,8 @@
       this.things = (def.things || []).map((th, i) => ({ ...th, id: i, used: false, bob: Math.random() * 6 }))
         .filter((th) => !(th.kind === 'item' && th.item && this.engine.hasItem(th.item)));
       this.weather = def.weather ? makeWeather(def.weather, def.weatherCount || 60) : null;
+      // gusts of wind now and then: the rain driven sideways, the grass flattened
+      this.gusts = def.gusts ? { every: [4, 9], ...def.gusts, wait: 2, t: 0, level: 0 } : null;
       // the action some walks have: cover to crouch behind, lanterns on patrol, a chase, falling shells
       this.cover = def.cover || [];
       this.crouch = false;
@@ -992,6 +1028,7 @@
       this.stepRunners(dt);
       this.stepRange(dt);
       this.stepWar(dt);
+      this.stepGusts(dt);
       // the drums of the street players and the like, heard when Hervé is near
       for (const g of this.crowd) {
         if (!g.sound) continue;
@@ -1725,6 +1762,20 @@
       }
     }
 
+    stepGusts(dt) {
+      const G = this.gusts;
+      if (!G) return;
+      G.wait -= dt;
+      if (G.wait <= 0 && G.t <= 0) { G.t = 0.001; G.wait = rnd(G.every[0], G.every[1]); if (!this.done) this.audio.fx('wind_gust', { volume: 0.55 }); }
+      if (G.t > 0) {
+        G.t += dt;
+        // up in a second, a moment at its height, then dying away
+        G.level = G.t < 1 ? G.t : G.t < 2.4 ? 1 : Math.max(0, 1 - (G.t - 2.4) / 2);
+        if (G.t > 4.4) G.t = 0;
+      } else G.level = 0;
+      if (this.weather) this.weather.gust = G.level;
+    }
+
     stepWar(dt) {
       const L = this.lightning;
       if (L) {
@@ -2236,7 +2287,7 @@
         c.drawImage(l.img, Math.round((x + span) * SS), l.y * SS, l.w * SS, l.h * SS);
         return;
       }
-      if (l.anim && l.anim.type === 'sway' && !this.reduce) x += Math.sin(this.t * (6.28 / (l.anim.t || 4))) * 0.8;
+      if (l.anim && l.anim.type === 'sway' && !this.reduce) x += Math.sin(this.t * (6.28 / (l.anim.t || 4) * (1 + (this.gusts ? this.gusts.level : 0)))) * 0.8 * (1 + (this.gusts ? this.gusts.level * 2.5 : 0)) - (this.gusts ? this.gusts.level * 1.5 : 0);
       if (x > LW || x + l.w < 0) return;
       // something afloat rides the water, rising and settling
       const dy = l.anim && l.anim.type === 'bob' && !this.reduce ? Math.round(Math.sin(this.t * (6.28 / (l.anim.t || 5))) * (l.anim.a || 1) * SS) : 0;
