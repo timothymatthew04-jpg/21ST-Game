@@ -635,9 +635,9 @@ window.VN_WALKSCENERY = {
    {
     "id": "clouds",
     "x": 0,
-    "y": 17,
+    "y": 13,
     "w": 1920,
-    "h": 52,
+    "h": 75,
     "depth": 0.04,
     "anim": {
      "type": "drift",
@@ -648,9 +648,9 @@ window.VN_WALKSCENERY = {
    {
     "id": "peaks",
     "x": 0,
-    "y": 63,
+    "y": 41,
     "w": 563,
-    "h": 207,
+    "h": 229,
     "depth": 0.03,
     "anim": null,
     "src": "assets/walks/village/peaks.png"
@@ -658,9 +658,9 @@ window.VN_WALKSCENERY = {
    {
     "id": "castle",
     "x": 0,
-    "y": 26,
+    "y": 31,
     "w": 645,
-    "h": 194,
+    "h": 196,
     "depth": 0.08,
     "anim": null,
     "src": "assets/walks/village/castle.png"
@@ -668,9 +668,9 @@ window.VN_WALKSCENERY = {
    {
     "id": "uptown",
     "x": 0,
-    "y": 142,
+    "y": 50,
     "w": 846,
-    "h": 67,
+    "h": 155,
     "depth": 0.2,
     "anim": null,
     "src": "assets/walks/village/uptown.png"
@@ -679,7 +679,7 @@ window.VN_WALKSCENERY = {
     "id": "mid",
     "x": 0,
     "y": 38,
-    "w": 1203,
+    "w": 1199,
     "h": 158,
     "depth": 0.45,
     "anim": null,
@@ -688,19 +688,19 @@ window.VN_WALKSCENERY = {
    {
     "id": "ground",
     "x": 0,
-    "y": 108,
+    "y": 107,
     "w": 1920,
-    "h": 125,
+    "h": 127,
     "depth": 1,
     "anim": null,
     "src": "assets/walks/village/ground.png"
    },
    {
     "id": "front",
-    "x": 0,
-    "y": 235,
-    "w": 1833,
-    "h": 35,
+    "x": 15,
+    "y": 232,
+    "w": 1894,
+    "h": 38,
     "depth": 1.3,
     "anim": {
      "type": "sway",

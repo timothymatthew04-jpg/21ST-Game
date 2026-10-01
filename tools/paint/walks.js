@@ -476,73 +476,104 @@ WALKS.steppe = (c, L) => {
 // The fog, the falling petals, the people, the arrows and the drums are the walk's.
 WALKS.village = (c, L) => {
   const r = rng(421);
-  const FOG = '#a898ac';
-  vgrad(c, 0, 0, 480, WY, [[0, '#1a1830'], [0.35, '#35304e'], [0.62, '#645676'], [0.86, '#9a8a9e'], [1, '#b8a8b4']]);
-  circle(c, 372, 52, 11, '#e6dce4'); glow(c, 372, 52, 60, 'rgba(230,220,235,0.35)');
+  const HAZE = (a) => `rgba(140,84,100,${a})`;
+  // the last of the sunset, gone the colour of wine; a pale moon with a reddish ring
+  vgrad(c, 0, 0, 480, WY, [[0, '#120c20'], [0.28, '#2a1834'], [0.5, '#4e2238'], [0.7, '#80343a'], [0.86, '#b45a3c'], [1, '#d07a48']]);
+  glow(c, 240, 190, 260, 'rgba(255,120,60,0.28)');
+  circle(c, 414, 38, 8, '#ecd4cc'); circle(c, 416, 37, 7, '#f4e2da'); glow(c, 414, 38, 46, 'rgba(240,170,150,0.32)');
+  stars(c, r, 14, 0, 0, 480, 40, '#e8d8e8');
   c.clearRect(0, WY, 480, H - WY);
   const cl = L('clouds', { depth: 0.04, anim: { type: 'drift', t: 360 } });
   wrapped(cl, 141, (cc, rr) => {
-    for (const [x, y, w, h] of [[30, 30, 170, 7], [240, 64, 190, 6], [380, 20, 120, 5]]) cloudBand(cc, rr, x, y, w, h, { body: '#2e2a44', rim: '#7a6a8c', shadow: '#221f36', hi: '#a896b0', lightFromBelow: true });
+    for (const [x, y, w, h] of [[20, 26, 180, 8], [250, 58, 200, 7], [390, 16, 130, 5], [110, 84, 150, 5]]) cloudBand(cc, rr, x, y, w, h, { body: '#2a1626', rim: '#c0583a', shadow: '#1a0e1a', hi: '#e8884a', lightFromBelow: true });
   });
-  // mountains behind mountains, fading into the mist
+  // Mount Yōtei, filling the far sky: snow on its shoulders catching the last light
   const pk = L('peaks', { depth: 0.03 });
   const px1 = S(0.03);
-  ridge(pk, r, 150, 70, '#6a5e7c', { x1: px1, peak: [180, 60, 26] });
-  ridge(pk, r, 162, 50, '#7c7090', { x1: px1 });
-  pk.save(); pk.globalCompositeOperation = 'source-atop'; vgrad(pk, 0, 90, px1, 90, [[0, 'rgba(168,152,172,0)'], [1, 'rgba(168,152,172,0.85)']]); pk.restore();
-  // the castle hill, dark with pines, the white keep on its stone base at the top, a pagoda
+  ridge(pk, r, 176, 34, '#4a2a40', { x1: px1 });
+  jpYotei(pk, r, 206, 170, 480, 146, { rock: '#2e2030', rockMid: '#43283a', rockLit: '#5a3040', snow: '#b48c9a', snowLit: '#eab4a8', snowShade: '#6a5a7c', forest: '#1e1422', haze: HAZE(0.85) });
+  ridge(pk, r, 182, 18, '#3a2234', { x1: px1 });
+  pk.save(); pk.globalCompositeOperation = 'source-atop'; vgrad(pk, 0, 140, px1, 50, [[0, HAZE(0)], [1, HAZE(0.7)]]); pk.restore();
+  // the castle hill: pines and cherry trees in blossom, the white keep and its little keep, the walls
+  // with their turrets, two pagodas, temple roofs on the terraces; lights coming on everywhere
   const ca = L('castle', { depth: 0.08 });
   const cx1 = S(0.08);
-  const fnK = vProfile([[-10, 186], [80, 168], [150, 150], [240, 124], [300, 108], [370, 108], [440, 130], [520, 150], [cx1 + 10, 170]]);
-  vLand(ca, fnK, -10, cx1 + 10, 200, '#3e3a50');
-  for (let i = 0; i < 90; i++) { const x = r.r(0, cx1), y = fnK(x) + r.r(2, 40); pine(ca, r, x, y, r.r(12, 22), { trunk: '#2a2634', leaves: ['#2a2a3c', '#343448', '#484a5e'] }, r() < 0.5 ? 1 : -1); }
-  const CP = { stone: '#8a8694', stoneLit: '#aaa6b2', stoneDark: '#66626e', wall: '#e2dee4', wallLit: '#f4f0f4', wallShade: '#b8b2c0', board: '#2e2c3a', window: '#4a4658', lit: '#ffd08a', roof: '#3a3c50', roofLit: '#6a6e84', gold: '#e0b850' };
-  const ct = jpCastle(ca, r, 336, 110, 0.95, CP);
-  for (const [yx, yy] of [[268, 118], [410, 118]]) { rect(ca, yx - 8, yy - 12, 16, 12, CP.wall); rect(ca, yx - 8, yy - 4, 16, 4, CP.board); poly(ca, [[yx - 11, yy - 12], [yx + 11, yy - 12], [yx + 6, yy - 17], [yx - 6, yy - 17]], CP.roof); }
-  rect(ca, 276, 112, 126, 3, CP.wall); rect(ca, 276, 110, 126, 2, CP.roof);
-  pagoda(ca, 112, fnK(112) + 2, 3.2, '#3e3a50', '#7a7090');
-  for (let k = 0; k < 6; k++) px(ca, 112 + r.r(-8, 8), fnK(112) - r.r(10, 60), '#ffc870');
-  ca.save(); ca.globalCompositeOperation = 'source-atop'; vgrad(ca, 0, 110, cx1, 90, [[0, 'rgba(168,152,172,0.1)'], [1, 'rgba(168,152,172,0.8)']]); ca.restore();
-  // the upper town on its terraces, lights in the windows, cherry blossom between the roofs
+  const fnK = vProfile([[-10, 186], [80, 166], [150, 150], [250, 126], [310, 112], [410, 112], [480, 132], [560, 150], [cx1 + 10, 168]]);
+  vLand(ca, fnK, -10, cx1 + 10, 200, '#2e2232');
+  for (let i = 0; i < 70; i++) { const x = r.r(0, cx1), y = fnK(x) + r.r(4, 46); pine(ca, r, x, y, r.r(10, 18), { trunk: '#1e1622', leaves: ['#1e1a28', '#2a2434', '#3a3244'] }, r() < 0.5 ? 1 : -1); }
+  for (let i = 0; i < 60; i++) { const x = r.r(0, cx1), y = fnK(x) + r.r(6, 50); crown(ca, r, x, y, r.r(5, 10), r.r(4, 7), r() < 0.6 ? ['#6a3048', '#a8587a', '#d88aa8', '#f4c0d0'] : ['#6a6070', '#a8a0b0', '#d8d0dc', '#f4eef4'], { x: -0.6, y: -0.8 }, 16); }
+  // terraced walls up the hill
+  for (const [x0, x1, y] of [[140, 290, 152], [200, 300, 136], [420, 560, 140], [430, 520, 126]]) { rect(ca, x0, y, x1 - x0, 3, '#6a5e6a'); rect(ca, x0, y, x1 - x0, 1, '#8a7e86'); }
+  // temple roofs on the terraces
+  for (const [x, y, w] of [[168, 150, 30], [236, 134, 26], [470, 138, 34], [520, 152, 26]]) { rect(ca, x, y - 6, w, 6, '#4a3a44'); poly(ca, [[x - 4, y - 6], [x + w + 4, y - 6], [x + w - 2, y - 11], [x + 2, y - 11]], '#221a26'); jpLights(ca, r, x + 2, y - 3, w - 4, 2); }
+  const CP = { stone: '#6e6270', stoneLit: '#8e8290', stoneDark: '#4e4452', wall: '#d6c8cc', wallLit: '#ecdcdc', wallShade: '#a4949e', board: '#241c28', window: '#3a2e3a', lit: '#ffb860', roof: '#2a2434', roofLit: '#5a4e62', gold: '#e0a848' };
+  const ct = jpCastle(ca, r, 384, 112, 0.92, CP);
+  jpCastle(ca, r, 284, 128, 0.5, CP);
+  jpLights(ca, r, 352, 76, 64, 10, { cols: ['#ffb050', '#ff8a3a'] });
+  // the walls along the crest, with corner turrets
+  rect(ca, 250, 114, 180, 3, CP.wall); rect(ca, 250, 112, 180, 2, CP.roof);
+  for (const [yx, yy] of [[250, 120], [430, 120], [470, 132]]) { rect(ca, yx - 8, yy - 12, 16, 12, CP.wall); rect(ca, yx - 8, yy - 4, 16, 4, CP.board); poly(ca, [[yx - 11, yy - 12], [yx + 11, yy - 12], [yx + 6, yy - 17], [yx - 6, yy - 17]], CP.roof); rect(ca, yx - 2, yy - 9, 4, 2, '#ffb050'); }
+  pagoda(ca, 104, fnK(104) + 2, 3.4, '#2a2232', '#6a4a5a');
+  pagoda(ca, 560, fnK(560) + 2, 2.8, '#2a2232', '#6a4a5a');
+  for (const px_ of [104, 560]) for (let k = 0; k < 6; k++) rect(ca, px_ - 1, fnK(px_) - 6 - k * 9.5, 2, 1, '#ffb050');
+  jpTorii(ca, 196, fnK(196) + 2, 0.7);
+  jpLights(ca, r, 0, 150, cx1, 50, {});
+  for (let i = 0; i < 26; i++) { const x = r.r(0, cx1); glow(ca, x, fnK(x) + r.r(8, 40), 8, 'rgba(255,130,50,0.4)'); }
+  ca.save(); ca.globalCompositeOperation = 'source-atop'; vgrad(ca, 0, 110, cx1, 90, [[0, HAZE(0.08)], [1, HAZE(0.75)]]); ca.restore();
+  // the upper town on its terraces: roofs crowding up the slope, nearly every window lit, cherry
+  // and white blossom between the roofs, strings of lanterns, a temple and a third pagoda
   const up = L('uptown', { depth: 0.2 });
   const ux1 = S(0.2);
   const fnU = vProfile([[-10, 176], [120, 160], [260, 150], [400, 156], [560, 146], [700, 158], [ux1 + 10, 164]]);
-  vLand(up, fnU, -10, ux1 + 10, 205, '#4a4458');
-  for (let x = 0; x < ux1; x += 50) { rect(up, x, fnU(x) + 6, 46, 2, '#6a6678'); }
+  vLand(up, fnU, -10, ux1 + 10, 205, '#3a2c3a');
+  for (let x = 0; x < ux1; x += 50) { rect(up, x, fnU(x) + 6, 46, 2, '#5a4a58'); }
   const roofs = [];
-  for (let i = 0; i < 70; i++) { const w = r.i(12, 22), x = r.r(-10, ux1), yb = Math.max(fnU(x), fnU(x + w)) + r.r(4, 34); roofs.push([x, w, yb]); }
+  for (let i = 0; i < 95; i++) { const w = r.i(12, 22), x = r.r(-10, ux1), yb = Math.max(fnU(x), fnU(x + w)) + r.r(4, 34); roofs.push([x, w, yb]); }
   roofs.sort((p, q) => p[2] - q[2]);
   for (const [x, w, yb] of roofs) {
     const hh = r.i(7, 11);
-    rect(up, x, yb - hh, w, hh, '#8a8494');
-    if (r() < 0.6) rect(up, x + 2, yb - hh + 2, r.i(3, 6), 3, r() < 0.7 ? '#ffc070' : '#4a4658');
-    poly(up, [[x - 3, yb - hh], [x + w + 3, yb - hh], [x + w - 2, yb - hh - 5], [x + 2, yb - hh - 5]], '#363448');
-    if (r() < 0.2) crown(up, r, x + w + 4, yb - 8, r.r(5, 9), r.r(4, 6), r() < 0.6 ? JP.sakura : JP.blossomWhite, { x: -0.6, y: -0.8 }, 10);
+    rect(up, x, yb - hh, w, hh, '#7a6a76');
+    if (r() < 0.8) { const lw = r.i(3, 6); rect(up, x + 2, yb - hh + 2, lw, 3, r() < 0.85 ? r.pick(['#ffb050', '#ff9a40', '#ffc870']) : '#3a2e3a'); if (r() < 0.4 && w > 14) rect(up, x + w - 6, yb - hh + 2, 3, 3, '#ffa848'); if (r() < 0.5) glow(up, x + 4, yb - hh + 3, 10, 'rgba(255,130,50,0.35)'); }
+    poly(up, [[x - 3, yb - hh], [x + w + 3, yb - hh], [x + w - 2, yb - hh - 5], [x + 2, yb - hh - 5]], '#2a2232');
+    if (r() < 0.3) jpCrow(up, x + r.r(3, w - 3), yb - hh - 5, r() < 0.5 ? 1 : -1);
+    if (r() < 0.42) crown(up, r, x + w + 4, yb - 9, r.r(6, 11), r.r(5, 8), r() < 0.6 ? JP.sakura : JP.blossomWhite, { x: -0.6, y: -0.8 }, 16);
   }
-  up.save(); up.globalCompositeOperation = 'source-atop'; vgrad(up, 0, 130, ux1, 80, [[0, 'rgba(168,152,172,0.15)'], [1, 'rgba(168,152,172,0.6)']]); up.restore();
-  // nearer: the town's roofs, the temple and its pagoda, the fire-watch tower, pines and cherries
+  rect(up, 300, fnU(300) - 2, 60, 14, '#5a4a54'); poly(up, [[292, fnU(300) - 2], [368, fnU(300) - 2], [356, fnU(300) - 14], [304, fnU(300) - 14]], '#221a28'); jpLights(up, r, 304, fnU(300) + 4, 52, 6);
+  pagoda(up, 652, fnU(652) + 6, 3, '#2a2232', '#6a4a5a');
+  for (let x = 20; x < ux1 - 60; x += r.r(80, 140)) jpLanternString(up, x, fnU(x) + 8, x + 50, fnU(x + 50) + 9, 6, ['#e8402e', '#ff8a3a', '#f4ecd8']);
+  up.save(); up.globalCompositeOperation = 'source-atop'; vgrad(up, 0, 130, ux1, 80, [[0, HAZE(0.12)], [1, HAZE(0.55)]]); up.restore();
+  // nearer: the town's roofs, the temple and its pagoda, the fire-watch tower, cherry and white
+  // blossom thick between them, pines, red lanterns at the doors, crows on the ridges
   const mid = L('mid', { depth: 0.45 });
   const mx1 = S(0.45);
-  vgrad(mid, 0, 176, mx1, 20, [[0, '#4e4858'], [1, '#3a3444']]);
+  vgrad(mid, 0, 176, mx1, 20, [[0, '#3e3040'], [1, '#2e2432']]);
   for (let x = -10; x < mx1; x += r.r(24, 46)) {
     const w = r.r(22, 44), hh = r.r(16, 26), yb = 190;
-    rect(mid, x, yb - hh, w, hh, '#6a6474');
-    if (r() < 0.7) rect(mid, x + w * 0.3, yb - hh + 4, w * 0.4, 5, r() < 0.7 ? '#ffc070' : '#3e3a4a');
-    poly(mid, [[x - 4, yb - hh], [x + w + 4, yb - hh], [x + w - 3, yb - hh - 8], [x + 3, yb - hh - 8]], '#2e2c3e');
-    rect(mid, x + 2, yb - hh - 9, w - 4, 1, '#56546a');
+    rect(mid, x, yb - hh, w, hh, '#5a4a58');
+    if (r() < 0.85) { rect(mid, x + w * 0.3, yb - hh + 4, w * 0.4, 5, r() < 0.85 ? '#ffaa50' : '#3a2e3a'); glow(mid, x + w * 0.5, yb - hh + 6, 14, 'rgba(255,140,60,0.35)'); }
+    poly(mid, [[x - 4, yb - hh], [x + w + 4, yb - hh], [x + w - 3, yb - hh - 8], [x + 3, yb - hh - 8]], '#241c2a');
+    rect(mid, x + 2, yb - hh - 9, w - 4, 1, '#4e4054');
+    if (r() < 0.45) jpChochin(mid, x + w * 0.2, yb - hh + 2, '#d8402e', 0.8);
+    if (r() < 0.25) jpCrow(mid, x + r.r(4, w - 4), yb - hh - 9, r() < 0.5 ? 1 : -1);
   }
-  pagoda(mid, 96, 186, 4, '#2e2c3e', '#6a6680');
-  for (let k = 0; k < 5; k++) rect(mid, 96 - 2, 186 - 12 - k * 22.4, 4, 2, '#ffc070');
+  pagoda(mid, 96, 186, 4, '#241c2a', '#5a4658');
+  for (let k = 0; k < 5; k++) rect(mid, 96 - 2, 186 - 12 - k * 22.4, 4, 2, '#ffb050');
   // the temple hall: a great roof
-  rect(mid, 640, 150, 90, 40, '#5a5464'); for (let k = 650; k < 725; k += 12) rect(mid, k, 162, 6, 20, '#ffb860');
-  poly(mid, [[620, 152], [750, 152], [728, 126], [642, 126]], '#2e2c3e'); rect(mid, 642, 124, 86, 3, '#56546a');
-  poly(mid, [[616, 154], [624, 146], [630, 152]], '#2e2c3e'); poly(mid, [[754, 154], [746, 146], [740, 152]], '#2e2c3e');
+  rect(mid, 640, 150, 90, 40, '#4e4250'); for (let k = 650; k < 725; k += 12) rect(mid, k, 162, 6, 20, '#ffa850');
+  glow(mid, 685, 172, 50, 'rgba(255,140,60,0.4)');
+  poly(mid, [[620, 152], [750, 152], [728, 126], [642, 126]], '#241c2a'); rect(mid, 642, 124, 86, 3, '#4e4054');
+  poly(mid, [[616, 154], [624, 146], [630, 152]], '#241c2a'); poly(mid, [[754, 154], [746, 146], [740, 152]], '#241c2a');
+  jpChochin(mid, 632, 156, '#d8402e', 1.2); jpChochin(mid, 738, 156, '#d8402e', 1.2);
   // the fire-watch tower with its bell
-  for (const k of [-6, 6]) line(mid, 520 + k, 190, 520 + k * 0.4, 110, '#2a2632', 2);
-  for (let y = 120; y < 188; y += 10) line(mid, 514, y, 526, y + 8, '#2a2632', 1);
-  rect(mid, 512, 106, 16, 3, '#2a2632'); poly(mid, [[510, 106], [530, 106], [520, 98]], '#2e2c3e'); ellipse(mid, 520, 103, 2, 2.4, '#b8903a');
-  for (let x = 20; x < mx1; x += r.r(70, 130)) { if (Math.abs(x - 96) < 30 || (x > 600 && x < 760)) continue; if (r() < 0.5) jpSakura(mid, r, x, 192, r.r(40, 56), r() < 0.55 ? JP.sakura : JP.blossomWhite); else pine(mid, r, x, 192, r.r(36, 50), { trunk: '#221c26', leaves: ['#1e2430', '#28303a', '#3a4450'] }, r() < 0.5 ? 1 : -1); }
-  mid.save(); mid.globalCompositeOperation = 'source-atop'; vgrad(mid, 0, 100, mx1, 96, [[0, 'rgba(168,152,172,0.08)'], [1, 'rgba(168,152,172,0.35)']]); mid.restore();
+  for (const k of [-6, 6]) line(mid, 520 + k, 190, 520 + k * 0.4, 110, '#221c28', 2);
+  for (let y = 120; y < 188; y += 10) line(mid, 514, y, 526, y + 8, '#221c28', 1);
+  rect(mid, 512, 106, 16, 3, '#221c28'); poly(mid, [[510, 106], [530, 106], [520, 98]], '#241c2a'); ellipse(mid, 520, 103, 2, 2.4, '#b8903a');
+  jpCrow(mid, 520, 97, 1);
+  // a second pagoda further in, and a torii at the shrine steps
+  pagoda(mid, 960, 186, 3.2, '#241c2a', '#5a4658');
+  jpTorii(mid, 880, 190, 0.9);
+  for (let x = 14; x < mx1; x += r.r(46, 80)) { if (Math.abs(x - 96) < 26 || (x > 610 && x < 760) || Math.abs(x - 960) < 22) continue; if (r() < 0.72) jpSakura(mid, r, x, 192, r.r(44, 62), r() < 0.55 ? JP.sakura : JP.blossomWhite); else pine(mid, r, x, 192, r.r(36, 50), { trunk: '#1c1620', leaves: ['#1a1e28', '#242a34', '#343c48'] }, r() < 0.5 ? 1 : -1); }
+  mid.save(); mid.globalCompositeOperation = 'source-atop'; vgrad(mid, 0, 100, mx1, 96, [[0, HAZE(0.06)], [1, HAZE(0.3)]]); mid.restore();
   // the street itself
   const g = L('ground', { depth: 1 });
   vgrad(g, 0, 186, W, 20, [[0, '#4a4046'], [1, '#342c32']]);

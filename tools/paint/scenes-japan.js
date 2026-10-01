@@ -239,3 +239,71 @@ function jpGate(c, r, x, yb) {
   rect(c, x - 30, yb - 60, 60, 3, JP.roofLit);
   rect(c, x - 8, yb - 54, 16, 7, '#2a1e18'); for (let k = 0; k < 3; k++) rect(c, x - 6 + k * 5, yb - 52, 3, 3, '#f0d890');
 }
+
+/** Mount Yōtei: a broad, nearly perfect cone with a flattened top, snow down its upper slopes in
+ *  long tongues along the gullies, dark rock ribs showing through, the lit side catching the sunset
+ *  and the far side in blue shadow, dark forest round its foot. cx is the summit, yb the foot, w the
+ *  width at the foot, h the height. P: { rock, rockLit, snow, snowLit, snowShade, forest, haze }. */
+function jpYotei(c, r, cx, yb, w, h, P) {
+  const half = w / 2;
+  const hgt = (x) => {
+    const d = Math.abs(x - cx) / half;
+    if (d >= 1) return 0;
+    const top = 0.07;
+    return h * (d < top ? Math.pow(1 - top, 1.75) - (d < top * 0.55 ? 0.012 : 0) : Math.pow(1 - d, 1.75));
+  };
+  // the gullies, where the snow runs further down in tongues, and the ribs of rock between them
+  const gullies = [];
+  for (let i = 0; i < 30; i++) gullies.push({ x: cx + r.r(-0.92, 0.92) * half * 0.8, wd: r.r(1.5, 4.5), reach: r.r(0.1, 0.32) });
+  const wob = (x) => Math.sin(x * 0.23) * 0.025 + Math.sin(x * 0.61 + 1.3) * 0.018 + Math.sin(x * 1.9) * 0.01;
+  // shading across the cone: lit on the left (the sunset), shade on the right, a soft turn between
+  const tone = (x, y, lit, mid, shade) => {
+    const k = (x - cx) / half + Math.sin(y * 0.7 + x * 0.3) * 0.04;
+    return k < -0.28 ? lit : k < 0.22 ? (k < -0.1 && ((x + y) & 1) ? lit : mid) : (k < 0.32 && ((x + y) & 1) ? mid : shade);
+  };
+  for (let x = Math.floor(cx - half); x <= cx + half; x++) {
+    const H_ = hgt(x);
+    if (H_ <= 0) continue;
+    const top = yb - H_, d = Math.abs(x - cx) / half;
+    // the snow reaches down a fraction of the whole mountain's height, further in a gully
+    let reach = 0.36 + wob(x);
+    for (const g of gullies) { const k = 1 - Math.abs(x - g.x) / g.wd; if (k > 0) reach = Math.max(reach, 0.36 + g.reach * k); }
+    const snowTo = yb - h * (1 - reach);
+    for (let y = Math.floor(top); y < yb; y++) {
+      const inSnow = y < snowTo;
+      const col = inSnow ? tone(x, y, P.snowLit, P.snow, P.snowShade) : tone(x, y, P.rockLit, P.rockLit === P.rock ? P.rock : P.rockMid || P.rock, P.rock);
+      rect(c, x, y, 1, 1, col);
+    }
+    // a speckle of snow below the line, broken patches
+    for (let k = 0; k < 3; k++) { const y = snowTo + r.r(0, h * 0.08); if (y < yb && y > top) px(c, x, y, tone(x, y, P.snow, P.snowShade, P.snowShade)); }
+    void d;
+  }
+  // the lip of the summit and the lit edge
+  for (let x = Math.floor(cx - half * 0.6); x < cx + half * 0.05; x++) { const H_ = hgt(x); if (H_ > 0) px(c, x, yb - H_, P.snowLit); }
+  rect(c, cx - half * 0.065, yb - hgt(cx) - 1, half * 0.13, 1, P.snowLit);
+  // forest round its foot, and the haze rising off the plain
+  for (let x = cx - half; x < cx + half; x += 2) {
+    const H_ = hgt(x);
+    const fh = Math.min(H_, h * 0.2 + Math.sin(x * 0.3) * 3 + Math.sin(x * 0.07) * 4);
+    if (fh > 0) rect(c, x, yb - fh, 2, fh, P.forest);
+    if (r() < 0.6 && fh > 4) poly(c, [[x - 2, yb - fh + 1], [x + 2, yb - fh + 1], [x, yb - fh - r.r(3, 7)]], P.forest);
+  }
+  c.save(); c.globalCompositeOperation = 'source-atop';
+  vgrad(c, cx - half, yb - h * 0.55, w, h * 0.55, [[0, 'rgba(0,0,0,0)'], [1, P.haze]]);
+  c.restore();
+}
+
+/** Windows lit in the dusk, warm, in pairs like eyes; and red paper lanterns. */
+function jpLights(c, r, x, y, w, n, o = {}) {
+  for (let i = 0; i < n; i++) {
+    const lx = x + r.r(0, w), ly = y + r.r(-2, 2);
+    const col = r.pick(o.cols || ['#ffb050', '#ff9a3a', '#ffc870', '#e8742a']);
+    if (r() < 0.45) { rect(c, lx, ly, 1, 1, col); rect(c, lx + 2, ly, 1, 1, col); } else rect(c, lx, ly, r.i(1, 3), 1, col);
+    if (o.glow) glow(c, lx, ly, o.glow, 'rgba(255,140,60,0.35)');
+  }
+}
+
+/** A crow on a ridge or a branch: a small black hunched shape. */
+function jpCrow(c, x, y, dir = 1) {
+  rect(c, x - 1, y - 2, 3, 2, '#0e0a10'); px(c, x + dir * 2, y - 3, '#0e0a10'); px(c, x - dir * 2, y - 1, '#0e0a10'); px(c, x, y, '#0e0a10');
+}

@@ -277,13 +277,13 @@ window.VN_WALKS = {
     hero: 'traveller', start: 40, weather: 'sakura', weatherCount: 60, accent: '255,196,210',
     water: ['rgba(90,80,110,0.55)', 'rgba(14,10,26,0.92)'],
     hint: 'Follow the lanterns to Hara Kei\'s house →',
-    // dusk, and fog lying between everything: over the mountains, the castle, the upper town, the roofs, the street
+    // dusk gone red, and fog lying between everything, tinged with it: over the mountains, the castle, the upper town, the roofs, the street
     fog: [
-      { z: 0.05, y: 146, h: 80, alpha: 0.85, speed: 2, col: '196,182,200' },
-      { z: 0.1, y: 166, h: 56, alpha: 0.8, speed: 3, col: '196,182,200' },
-      { z: 0.25, y: 172, h: 48, alpha: 0.75, speed: 4.5, col: '200,188,204' },
-      { z: 0.6, y: 184, h: 36, alpha: 0.6, speed: 7, col: '206,196,210' },
-      { front: true, z: 1, y: 202, h: 24, alpha: 0.45, speed: 10, col: '214,204,218' },
+      { z: 0.05, y: 150, h: 70, alpha: 0.7, speed: 2, col: '176,120,130' },
+      { z: 0.1, y: 168, h: 52, alpha: 0.7, speed: 3, col: '170,118,128' },
+      { z: 0.25, y: 174, h: 46, alpha: 0.7, speed: 4.5, col: '168,124,134' },
+      { z: 0.6, y: 184, h: 36, alpha: 0.55, speed: 7, col: '172,134,142' },
+      { front: true, z: 1, y: 202, h: 24, alpha: 0.4, speed: 10, col: '184,150,156' },
     ],
     // archers at the butts, each loosing an arrow in turn
     range: { kind: 'bow', look: 'archer', x: [896, 912, 928], y: 204, targets: [1004, 1018, 1032], ty: 188, period: [1.4, 2.2], pause: [3, 5] },
