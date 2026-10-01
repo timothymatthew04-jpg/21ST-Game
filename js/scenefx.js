@@ -1098,7 +1098,6 @@
         c.fillStyle = g; c.beginPath(); c.ellipse(0, 0, 18 * u, 5 * u, 0, 0, TAU); c.fill();
         c.fillStyle = 'rgba(120,90,100,0.5)'; for (let k = -14; k < 16; k += 4) c.fillRect(k * u, -4 * u, Math.max(1, 0.4 * u), 8 * u);
         c.fillStyle = '#3a2e34'; c.fillRect(-5 * u, 4.5 * u, 10 * u, 2.2 * u);
-        c.fillStyle = '#2e4a9a'; c.fillRect(-17 * u, -1.5 * u, 2 * u, 3 * u); c.fillStyle = '#e8e0d8'; c.fillRect(-15 * u, -1.5 * u, 2 * u, 3 * u); c.fillStyle = '#c83a3a'; c.fillRect(-13 * u, -1.5 * u, 2 * u, 3 * u);
         c.fillStyle = '#4a3a40'; c.beginPath(); c.moveTo(-15 * u, -3 * u); c.lineTo(-21 * u, -8 * u); c.lineTo(-19 * u, -2 * u); c.closePath(); c.fill();
         // the fire has eaten through the back half: ribs showing, flames streaming back
         c.fillStyle = '#2a1a1c'; c.fillRect(-18 * u, -4.5 * u, 12 * u, 3 * u);
@@ -1119,7 +1118,6 @@
         c.fillStyle = '#2e1a1c';
         c.beginPath(); c.moveTo((-len + 5) * u, -hw(-len + 5)); c.lineTo((-len - 4) * u, -8 * u); c.lineTo((-len - 1) * u, -hw(-len + 2)); c.closePath(); c.fill();
         c.beginPath(); c.moveTo((-len + 5) * u, hw(-len + 5)); c.lineTo((-len - 4) * u, 8 * u); c.lineTo((-len - 1) * u, hw(-len + 2)); c.closePath(); c.fill();
-        c.fillStyle = '#2e4a9a'; c.fillRect((-len - 2) * u, -7 * u, 1.2 * u, 2 * u); c.fillStyle = '#e8e0d8'; c.fillRect((-len - 0.8) * u, -7 * u, 1.2 * u, 2 * u); c.fillStyle = '#c83a3a'; c.fillRect((-len + 0.4) * u, -7 * u, 1.2 * u, 2 * u);
         c.restore();
         this.flames(c, t, x - 18 * u, y, 26 * u, 8, 8 * u, 0.2, 3);
         for (let k = -len + 4, i = 0; k < -3; k += 5, i++) { const fx = x + k * u * ca + hw(k) * sa, fy = y + k * u * sa - hw(k) * ca; this.flames(c, t, fx - 2.5 * u, fy + u, 5 * u, 3, (4 + (i % 3) * 2) * u, 0.2, i * 7); }

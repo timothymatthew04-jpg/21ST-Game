@@ -549,7 +549,7 @@
       this.beacons = def.beacons || [];
       // a battlefield: red lightning, the fighting on the horizon, two lines trading volleys, burning
       // houses falling in as Hervé passes, and an airship coming down in flames
-      this.lightning = def.lightning ? { every: [3, 7], col: '255,60,40', z: 0.06, horizon: 150, ...def.lightning, wait: 2, t: 99, bolt: null } : null;
+      this.lightning = def.lightning ? { every: [3, 7], col: '255,60,40', volume: 0.3, z: 0.06, horizon: 150, ...def.lightning, wait: 2, t: 99, bolt: null } : null;
       this.battle = def.battle ? { rate: 3, cannons: 0.25, ...def.battle, flashes: [], smoke: [], acc: 0 } : null;
       this.skirmish = (def.skirmish || []).map((k) => ({ scale: 0.6, n: 6, gap: 7, every: [2.5, 4.5], ...k, wait: rnd(1, 3), firing: -1, flash: 0, smoke: [] }));
       this.collapses = (def.collapses || []).map((b) => ({ near: 150, h: 40, ...b, state: 'up', chunks: [], t: 0 }));
@@ -1500,7 +1500,7 @@
       }
     }
 
-    drawAirship(c, x, y, s, dir) {
+    drawAirship(c, x, y, s, dir, plain = false) {
       const P = (px, py, w, hh, col) => { c.fillStyle = col; c.fillRect(Math.round((x + px * dir) * SS - (dir < 0 ? Math.round(w * SS) : 0)), Math.round((y + py) * SS), Math.round(w * SS), Math.round(hh * SS)); };
       const L = 34 * s, H2 = 8 * s;
       // the envelope, a long cigar pointed at the front, lighter on top, with its seams
@@ -1513,11 +1513,13 @@
       }
       P(-L * 0.9, -1, L * 1.8, 0.5, '#d8c4c4');
       P(-L * 0.8, H2 * 0.45, L * 1.6, 0.5, '#c0aab2');
-      // the tricolour band near the tail, and the rudder
-      P(-L * 0.62, -H2 * 0.85, 2 * s, H2 * 1.7, '#2e4a9a');
-      P(-L * 0.62 + 2 * s, -H2 * 0.9, 2 * s, H2 * 1.8, '#f2eee6');
-      P(-L * 0.62 + 4 * s, -H2 * 0.85, 2 * s, H2 * 1.7, '#c83a3a');
-      for (let k = 0; k < 7 * s; k += 0.5) P(-L - 2 * s - k * 0.4, -k, 3 * s, 0.5, k < 3.5 * s ? '#c83a3a' : '#2e4a9a');
+      // the tricolour band near the tail, and the rudder (a plain ship carries no colours)
+      if (!plain) {
+        P(-L * 0.62, -H2 * 0.85, 2 * s, H2 * 1.7, '#2e4a9a');
+        P(-L * 0.62 + 2 * s, -H2 * 0.9, 2 * s, H2 * 1.8, '#f2eee6');
+        P(-L * 0.62 + 4 * s, -H2 * 0.85, 2 * s, H2 * 1.7, '#c83a3a');
+      }
+      for (let k = 0; k < 7 * s; k += 0.5) P(-L - 2 * s - k * 0.4, -k, 3 * s, 0.5, plain ? '#8a7a7e' : k < 3.5 * s ? '#c83a3a' : '#2e4a9a');
       // the keel, the rigging and the gondola, with its engine's propeller turning
       P(-L * 0.75, H2 + 4 * s, L * 1.5, 0.7, '#5a4a50');
       for (let k = -0.7; k <= 0.7; k += 0.2) P(L * k, H2 * 0.9, 0.5, 3.2 * s, 'rgba(90,70,80,0.8)');
@@ -1735,7 +1737,7 @@
           L.bolt = pts;
           const at = Math.floor(pts.length * rnd(0.3, 0.5)), side = Math.random() < 0.5 ? -1 : 1;
           L.fork = pts.slice(at, at + 7).map(([px_, py], i) => [px_ + side * i * rnd(3, 6), py + i * 1.5]);
-          if (!this.done) this.audio.fx('thunder', { volume: 0.3, delay: rnd(0.2, 0.9) });
+          if (!this.done) { const d = rnd(0.15, 0.7); this.audio.fx('thunder', { volume: L.volume, delay: d }); if (Math.random() < 0.5) this.audio.fx('thunder', { volume: L.volume * 0.6, delay: d + rnd(0.6, 1.4) }); }
         }
       }
       const B = this.battle;
@@ -1935,7 +1937,7 @@
         const sx = x - off, ang = Math.atan2(y2 - y, x2 - x);
         c.save();
         c.translate(sx * SS, y * SS); c.rotate(ang); c.translate(-sx * SS, -y * SS);
-        this.drawAirship(c, sx, y, u, 1);
+        this.drawAirship(c, sx, y, u, 1, true);
         this.fireGlow(c, sx - 4 * u, y - 4 * u, 34 * u, 0.45);
         this.flameTongues(c, sx - 30 * u, y - 5 * u, 44 * u, 11, 12 * u, 7);
         c.restore();
@@ -1954,12 +1956,11 @@
         for (let k = -len; k <= 2; k += 1) { const h_ = hw(k); Q(k * u, -h_, u, 1.2 * u, '#2e1a1c'); Q(k * u, -h_, u, 0.5 * u, '#e8884a'); Q(k * u, h_ - 1.2 * u, u, 1.2 * u, '#2e1a1c'); if (k % 2 === 0) Q(k * u, -0.6 * u, u, 1.2 * u, '#3a2020'); }
         for (let k = -len + 2; k <= 0; k += 5) { const h_ = hw(k); Q(k * u, -h_, 1.3 * u, h_ * 2, '#2e1a1c'); Q(k * u, -h_, 0.5 * u, h_ * 2, '#d06a3a'); }
         for (const [k, v, hh] of [[-50, -6, 7], [-36, -8, 9], [-22, -7, 6], [-10, -4, 5]]) { Q(k * u, v * u, 4 * u, hh * u, '#8a6a66'); Q(k * u, v * u, 4 * u, 0.8 * u, '#d0a89e'); Q((k + 1) * u, (v + hh) * u, 2 * u, 2 * u, '#6a4e4e'); }
-        // the tail fins, still whole, and the ensign's stripes burnt to rags
+        // the tail fins, still whole
         c.fillStyle = '#2e1a1c';
         c.beginPath(); c.moveTo((-len + 8) * u * SS, -hw(-len + 8) * SS); c.lineTo((-len - 6) * u * SS, -14 * u * SS); c.lineTo((-len - 2) * u * SS, -hw(-len + 3) * SS); c.closePath(); c.fill();
         c.beginPath(); c.moveTo((-len + 8) * u * SS, hw(-len + 8) * SS); c.lineTo((-len - 6) * u * SS, 14 * u * SS); c.lineTo((-len - 2) * u * SS, hw(-len + 3) * SS); c.closePath(); c.fill();
         Q((-len - 5) * u, -13 * u, 7 * u, 0.6 * u, '#e8884a');
-        Q((-len - 3) * u, -11 * u, 2 * u, 3 * u, '#2e4a8a'); Q((-len - 1) * u, -11 * u, 2 * u, 3 * u, '#d8d0c8'); Q((-len + 1) * u, -11 * u, 2 * u, 2 * u, '#b83a3a');
         c.restore();
         // the gondola crushed at its foot, and fire all along the frame, climbing it
         R(sx - 16 * u, y - 4 * u, 14 * u, 4 * u, '#3a2422'); R(sx - 16 * u, y - 4 * u, 14 * u, 0.8 * u, '#a8603a');

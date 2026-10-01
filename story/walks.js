@@ -374,7 +374,7 @@ window.VN_WALKS = {
     ],
     // the battle all around: red lightning, the fighting along the far hills, lines of soldiers trading
     // volleys in the field, houses burning and giving way as Hervé passes, and an airship shot down
-    lightning: { every: [2.5, 6], horizon: 160 },
+    lightning: { every: [1, 3], horizon: 160, volume: 0.5 },
     battle: { depth: 0.1, x0: 0, x1: 616, y: 177, rate: 5, cannons: 0.3 },
     skirmish: [
       { depth: 0.25, x0: 96, y: 189, dir: 1, n: 6, scale: 0.62 }, { depth: 0.25, x0: 190, y: 189, dir: -1, n: 5, scale: 0.62, look: 'farSamurai' },
