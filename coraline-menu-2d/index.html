@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Coraline — Main Menu</title>
+  <link rel="stylesheet" href="css/menu.css">
+</head>
+<body>
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <defs>
+      <linearGradient id="keyMetal" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#4a4a58"/>
+        <stop offset="0.45" stop-color="#16161e"/>
+        <stop offset="1" stop-color="#050508"/>
+      </linearGradient>
+      <!-- the little black key from the film, its bow a four-hole button -->
+      <symbol id="key" viewBox="0 0 120 44">
+        <circle cx="21" cy="22" r="17" fill="url(#keyMetal)" stroke="#000" stroke-width="1.4"/>
+        <circle cx="21" cy="22" r="12" fill="none" stroke="#000" stroke-opacity=".8" stroke-width="1.6"/>
+        <circle cx="21" cy="22" r="13.3" fill="none" stroke="#fff" stroke-opacity=".16" stroke-width="1"/>
+        <g fill="#000"><circle cx="17" cy="18" r="2.3"/><circle cx="25" cy="18" r="2.3"/><circle cx="17" cy="26" r="2.3"/><circle cx="25" cy="26" r="2.3"/></g>
+        <rect x="37" y="19" width="70" height="6" rx="2" fill="url(#keyMetal)" stroke="#000" stroke-width="1"/>
+        <rect x="39" y="16.5" width="5" height="11" rx="1.5" fill="url(#keyMetal)" stroke="#000" stroke-width="1"/>
+        <path d="M92 25 h6 v9 h-3 v-4 h-3 z M101 25 h6 v12 h-6 z" fill="url(#keyMetal)" stroke="#000" stroke-width="1"/>
+        <ellipse cx="15" cy="12" rx="7" ry="2.6" fill="#fff" fill-opacity=".22" transform="rotate(-30 15 12)"/>
+      </symbol>
+    </defs>
+  </svg>
+
+  <div id="stage">
+    <canvas id="scene" width="1920" height="1080"></canvas>
+    <canvas id="fx" width="1920" height="1080"></canvas>
+    <div id="grain"></div>
+
+    <a class="enter" href="#enter" aria-label="Enter the story">
+      <svg class="frame" viewBox="0 0 480 100" aria-hidden="true">
+        <rect class="outer" x="2" y="2" width="476" height="96" rx="5"/>
+        <rect class="stitch-shadow" x="11" y="12" width="458" height="77" rx="3"/>
+        <rect class="stitch" x="11" y="11" width="458" height="77" rx="3"/>
+      </svg>
+      <span class="label">Enter the story</span>
+      <svg class="key" aria-hidden="true"><use href="#key"/></svg>
+    </a>
+  </div>
+
+  <script src="js/stage.js"></script>
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>
