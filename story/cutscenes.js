@@ -82,9 +82,15 @@
 
     // ---------------------------------------------------------------- Chapter 2: Japan
     arrival: {
+      // Into Japan: the boat with no lights, the shore, the road in under the cherry trees, and then
+      // the whole of it at once: Hara Kei's castle town on its hill under Mount Yotei, the sky on
+      // fire behind; last, the village gate in the fog, the lanterns and the crows
       shots: [
-        { bg: 'smuggler_boat', dur: 5, cam: [[1.3, 0.4, 0.55], [1.12, 0.6, 0.5]], fx: 'mist=0.55,0.35,0.45,#b8c8e8', sound: [['wind_gust', 0.3, 0.5]], text: 'No lights. No questions.' },
-        { bg: 'japan_coast', dur: 6.5, cam: [[1.35, 0.2, 0.55], [1.06, 0.62, 0.45]], kanji: '日本', sound: [['temple_bell', 2.2, 0.5]], text: 'Japan.', textAt: 2.6 },
+        { bg: 'smuggler_boat', dur: 4.5, cam: [[1.3, 0.4, 0.55], [1.12, 0.6, 0.5]], fx: 'mist=0.55,0.35,0.45,#b8c8e8', sound: [['wind_gust', 0.3, 0.5]], text: 'No lights. No questions.' },
+        { bg: 'japan_coast', dur: 4, cam: [[1.35, 0.2, 0.55], [1.12, 0.5, 0.48]], fx: 'mist=0.62,0.2,0.4,#d8c8e0', sound: [['splash', 0.4, 0.25], ['wind_gust', 1.2, 0.35]] },
+        { bg: 'jp_sakura_road', dur: 6, cam: [[1.0, 0.5, 0.62], [1.75, 0.5, 0.6]], ease: 'cubic-bezier(0.4, 0, 0.6, 1)', fx: 'petals=2.8 glints=0.2,0.55,0.6,0.35,14,#ffd890', sound: [['wind_gust', 0.4, 0.45], ['chime', 2.2, 0.35], ['rustle', 3.8, 0.4]] },
+        { bg: 'jp_reveal', dur: 11, cam: [[2.7, 0.41, 0.36], [1.0, 0.5, 0.5]], ease: 'cubic-bezier(0.55, 0, 0.2, 1)', trans: 'white', kanji: '日本', text: 'Japan.', textAt: 4.2, fx: 'petals=1.4 birds=6,0.12,0.4 glints=0.15,0.42,0.45,0.35,30,#ffd070 mist=0.74,0.08,0.45,#e0906a', sound: [['temple_bell', 0.6, 0.55], ['swell', 2.4, 0.7], ['gong', 4.2, 0.3], ['temple_bell', 7.5, 0.4]] },
+        { bg: 'jp_gate', dur: 5.5, cam: [[1.0, 0.5, 0.55], [1.4, 0.5, 0.48]], trans: 'black', fx: 'mist=0.68,0.22,0.6,#a87a86 mist=0.5,0.18,0.35,#9a6a78 flame=0.408,0.43,0.02,#ff8a40 flame=0.592,0.43,0.02,#ff8a40 petals=0.5', sound: [['crow', 0.6, 0.5], ['wind_gust', 1.4, 0.45], ['crow', 3.4, 0.4], ['temple_bell', 4.4, 0.3]] },
       ],
     },
 

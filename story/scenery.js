@@ -2336,6 +2336,257 @@ window.VN_SCENERY = {
    }
   ]
  },
+ "jp_gate": {
+  "flat": "assets/scenes/jp_gate/flat.png",
+  "vignette": [
+   0.55,
+   "20,4,10"
+  ],
+  "layers": [
+   {
+    "id": "sky",
+    "x": 0,
+    "y": 0,
+    "w": 480,
+    "h": 270,
+    "depth": 0,
+    "anim": null,
+    "src": "assets/scenes/jp_gate/sky.png"
+   },
+   {
+    "id": "yotei",
+    "x": 151,
+    "y": 65,
+    "w": 299,
+    "h": 85,
+    "depth": 0.04,
+    "anim": null,
+    "src": "assets/scenes/jp_gate/yotei.png"
+   },
+   {
+    "id": "gate",
+    "x": 0,
+    "y": 57,
+    "w": 480,
+    "h": 213,
+    "depth": 0.15,
+    "anim": null,
+    "src": "assets/scenes/jp_gate/gate.png"
+   },
+   {
+    "id": "trees",
+    "x": 2,
+    "y": 83,
+    "w": 471,
+    "h": 127,
+    "depth": 0.2,
+    "anim": {
+     "type": "sway",
+     "a": 1,
+     "t": 7
+    },
+    "src": "assets/scenes/jp_gate/trees.png"
+   }
+  ]
+ },
+ "jp_reveal": {
+  "flat": "assets/scenes/jp_reveal/flat.png",
+  "vignette": [
+   0.42,
+   "30,6,14"
+  ],
+  "layers": [
+   {
+    "id": "sky",
+    "x": 0,
+    "y": 0,
+    "w": 480,
+    "h": 270,
+    "depth": 0,
+    "anim": null,
+    "src": "assets/scenes/jp_reveal/sky.png"
+   },
+   {
+    "id": "clouds_far",
+    "x": 0,
+    "y": 36,
+    "w": 480,
+    "h": 31,
+    "depth": 0.02,
+    "anim": {
+     "type": "drift",
+     "t": 900
+    },
+    "src": "assets/scenes/jp_reveal/clouds_far.png"
+   },
+   {
+    "id": "clouds_frame",
+    "x": 0,
+    "y": 0,
+    "w": 480,
+    "h": 195,
+    "depth": 0.03,
+    "anim": {
+     "type": "drift",
+     "t": 2400
+    },
+    "src": "assets/scenes/jp_reveal/clouds_frame.png"
+   },
+   {
+    "id": "yotei",
+    "x": 90,
+    "y": 51,
+    "w": 390,
+    "h": 133,
+    "depth": 0.05,
+    "anim": null,
+    "src": "assets/scenes/jp_reveal/yotei.png"
+   },
+   {
+    "id": "town",
+    "x": 46,
+    "y": 50,
+    "w": 300,
+    "h": 164,
+    "depth": 0.1,
+    "anim": null,
+    "src": "assets/scenes/jp_reveal/town.png"
+   },
+   {
+    "id": "plain",
+    "x": 0,
+    "y": 196,
+    "w": 480,
+    "h": 26,
+    "depth": 0.14,
+    "anim": null,
+    "src": "assets/scenes/jp_reveal/plain.png"
+   },
+   {
+    "id": "lake",
+    "x": 0,
+    "y": 214,
+    "w": 480,
+    "h": 56,
+    "depth": 0.2,
+    "anim": {
+     "type": "pulse",
+     "lo": 0.85,
+     "t": 5
+    },
+    "src": "assets/scenes/jp_reveal/lake.png"
+   },
+   {
+    "id": "blossom_front",
+    "x": 0,
+    "y": 0,
+    "w": 166,
+    "h": 61,
+    "depth": 0.4,
+    "anim": {
+     "type": "sway",
+     "a": 1.2,
+     "t": 6,
+     "ox": 0,
+     "oy": 0
+    },
+    "src": "assets/scenes/jp_reveal/blossom_front.png"
+   },
+   {
+    "id": "blossom_front2",
+    "x": 378,
+    "y": 0,
+    "w": 102,
+    "h": 55,
+    "depth": 0.4,
+    "anim": {
+     "type": "sway",
+     "a": 1.5,
+     "t": 7,
+     "ox": 1,
+     "oy": 0
+    },
+    "src": "assets/scenes/jp_reveal/blossom_front2.png"
+   }
+  ]
+ },
+ "jp_sakura_road": {
+  "flat": "assets/scenes/jp_sakura_road/flat.png",
+  "vignette": [
+   0.45,
+   "30,6,14"
+  ],
+  "layers": [
+   {
+    "id": "sky",
+    "x": 0,
+    "y": 0,
+    "w": 480,
+    "h": 270,
+    "depth": 0,
+    "anim": null,
+    "src": "assets/scenes/jp_sakura_road/sky.png"
+   },
+   {
+    "id": "yotei",
+    "x": 121,
+    "y": 90,
+    "w": 239,
+    "h": 66,
+    "depth": 0.04,
+    "anim": null,
+    "src": "assets/scenes/jp_sakura_road/yotei.png"
+   },
+   {
+    "id": "ground",
+    "x": 0,
+    "y": 150,
+    "w": 480,
+    "h": 120,
+    "depth": 0.2,
+    "anim": null,
+    "src": "assets/scenes/jp_sakura_road/ground.png"
+   },
+   {
+    "id": "lanterns",
+    "x": 68,
+    "y": 131,
+    "w": 344,
+    "h": 127,
+    "depth": 0.2,
+    "anim": null,
+    "src": "assets/scenes/jp_sakura_road/lanterns.png"
+   },
+   {
+    "id": "trees_far",
+    "x": 69,
+    "y": 114,
+    "w": 334,
+    "h": 94,
+    "depth": 0.25,
+    "anim": {
+     "type": "sway",
+     "a": 0.6,
+     "t": 8
+    },
+    "src": "assets/scenes/jp_sakura_road/trees_far.png"
+   },
+   {
+    "id": "trees_near",
+    "x": 0,
+    "y": 84,
+    "w": 480,
+    "h": 163,
+    "depth": 0.45,
+    "anim": {
+     "type": "sway",
+     "a": 1.4,
+     "t": 6
+    },
+    "src": "assets/scenes/jp_sakura_road/trees_near.png"
+   }
+  ]
+ },
  "lavilledieu": {
   "flat": "assets/scenes/lavilledieu/flat.png",
   "vignette": [

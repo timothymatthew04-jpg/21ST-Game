@@ -104,6 +104,13 @@ merchants' stalls and townhouses under their paper lanterns and banners, a stage
 players, an archery butt, the walled samurai quarter and its cherry trees in pink and white, to
 Hara Kei's great gate. It is drawn by `tools/paint/scenes-japan.js`.
 
+Chapter 3's arrival cutscene has three paintings of its own (tools/paint/scenes-arrival.js):
+`jp_sakura_road`, the road in under an avenue of cherry trees, pink and white, with lit stone
+lanterns and a torii, Mount Yōtei at the end of it; `jp_reveal`, Hara Kei's castle town on its hill,
+walls winding round it in terraces of houses and blossom up to the keep, Yōtei behind it, towering
+sunset clouds framing it all and a lake holding the fire of the sky; and `jp_gate`, the village gate
+at dusk in the fog, its lanterns lit, crows on the roof, two guards still as posts.
+
 Hara Kei's village looks the same wherever it is seen: the walk, the estate outside (`hara_kei_estate`,
 `estate_day`, `estate_unrest`), the views through the tea room's and his room's screens
 (`estate_tearoom`, `estate_room`) and the house in the rain (`yuki_house`) all show Mount Yōtei over
