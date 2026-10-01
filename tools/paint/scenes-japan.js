@@ -307,3 +307,42 @@ function jpLights(c, r, x, y, w, n, o = {}) {
 function jpCrow(c, x, y, dir = 1) {
   rect(c, x - 1, y - 2, 3, 2, '#0e0a10'); px(c, x + dir * 2, y - 3, '#0e0a10'); px(c, x - dir * 2, y - 1, '#0e0a10'); px(c, x, y, '#0e0a10');
 }
+
+/** The view over Hara Kei's village, the same as the walk shows it, inside the box (x0, y0, w, h):
+ *  Mount Yōtei over the castle hill, the keep and a pagoda, the town's lights, cherry and white
+ *  blossom, mist. mood: 'dusk' (the wine-red evening), 'day', 'unrest' (fires, smoke) or 'rain'.
+ *  o.moon = [x, y, r] puts the moon (dusk) or the sun (day) there. */
+const JP_VIEW = {
+  dusk: { sky: [[0, '#120c20'], [0.3, '#2a1834'], [0.55, '#4e2238'], [0.78, '#80343a'], [1, '#c06440']], fuji: { rock: '#2e2030', rockMid: '#43283a', rockLit: '#5a3040', snow: '#b48c9a', snowLit: '#eab4a8', snowShade: '#6a5a7c', forest: '#1e1422', haze: 'rgba(140,84,100,0.85)' }, hill: '#2e2232', hill2: '#3a2c3a', roof: '#1e1824', wall: '#4e404c', lit: true, haze: 'rgba(140,84,100,', castle: { stone: '#6e6270', stoneLit: '#8e8290', stoneDark: '#4e4452', wall: '#d6c8cc', wallLit: '#ecdcdc', wallShade: '#a4949e', board: '#241c28', window: '#3a2e3a', lit: '#ffb860', roof: '#2a2434', roofLit: '#5a4e62', gold: '#e0a848' } },
+  day: { sky: [[0, '#6f98d0'], [0.6, '#b8d0e6'], [1, '#f4e2c0']], fuji: { rock: '#4a5a78', rockMid: '#5a6a88', rockLit: '#7a88a4', snow: '#d4dcea', snowLit: '#ffffff', snowShade: '#a8b4cc', forest: '#3a5a4a', haze: 'rgba(200,214,230,0.8)' }, hill: '#4a6a4e', hill2: '#5a7a5a', roof: '#3a4458', wall: '#e8e0d0', lit: false, haze: 'rgba(210,220,232,', castle: { stone: '#8a8674', stoneLit: '#b0aa94', stoneDark: '#66624e', wall: '#f4f0e8', wallLit: '#ffffff', wallShade: '#c8c0b0', board: '#2e2c34', window: '#4a4658', lit: '#4a4658', roof: '#3a4458', roofLit: '#8a9ab8', gold: '#e0b850' } },
+  unrest: { sky: [[0, '#1a1426'], [0.5, '#4a2438'], [0.85, '#a8402e'], [1, '#d86a3a']], fuji: { rock: '#2a1a22', rockMid: '#3a2028', rockLit: '#4a2a2e', snow: '#8a6064', snowLit: '#d08868', snowShade: '#4a3448', forest: '#1a1018', haze: 'rgba(120,50,40,0.85)' }, hill: '#24141c', hill2: '#2e1a22', roof: '#160e14', wall: '#3e2a2e', lit: true, haze: 'rgba(120,50,40,', castle: { stone: '#4a3a3a', stoneLit: '#6a4a44', stoneDark: '#2e2228', wall: '#a48080', wallLit: '#c09088', wallShade: '#7a5a5a', board: '#1a1014', window: '#2a1a1e', lit: '#ff9040', roof: '#1e141c', roofLit: '#4a2e34', gold: '#a87040' } },
+  rain: { sky: [[0, '#3a4450'], [0.6, '#5a6a70'], [1, '#6a7a70']], fuji: { rock: '#4a5258', rockMid: '#525c64', rockLit: '#5c666c', snow: '#9aa4aa', snowLit: '#b4bcc0', snowShade: '#848e96', forest: '#3a4a44', haze: 'rgba(100,114,118,0.9)' }, hill: '#3e4c4c', hill2: '#465454', roof: '#26323a', wall: '#5e686a', lit: true, haze: 'rgba(100,114,118,', castle: { stone: '#5e6466', stoneLit: '#6e7476', stoneDark: '#4a5052', wall: '#a8acac', wallLit: '#b8bcbc', wallShade: '#8a9090', board: '#2a3034', window: '#3a4246', lit: '#e8b070', roof: '#2e3a40', roofLit: '#5a6670', gold: '#9a8a60' } },
+};
+function jpVillageView(c, r, x0, y0, w, h, mood = 'dusk', o = {}) {
+  const M = JP_VIEW[mood];
+  c.save(); c.beginPath(); c.rect(x0, y0, w, h); c.clip();
+  vgrad(c, x0, y0, w, h, M.sky);
+  if (mood === 'dusk' || mood === 'unrest') { glow(c, x0 + w * 0.45, y0 + h * 0.95, w * 0.7, mood === 'dusk' ? 'rgba(255,120,60,0.3)' : 'rgba(255,90,40,0.45)'); stars(c, r, Math.round(w / 30), x0, y0, w, h * 0.3, '#e8d8e8'); }
+  if (o.moon && mood !== 'day' && mood !== 'rain') { const [mx, my, mr] = o.moon; circle(c, mx, my, mr, mood === 'dusk' ? '#ecd4cc' : '#f0c0a0'); circle(c, mx + mr * 0.15, my - mr * 0.1, mr * 0.85, mood === 'dusk' ? '#f4e2da' : '#f8d0b0'); glow(c, mx, my, mr * 5, 'rgba(240,170,150,0.3)'); }
+  if (o.moon && mood === 'day') sun(c, o.moon[0], o.moon[1], o.moon[2], '#fffbe8', 'rgba(255,240,200,0.5)');
+  const fy = y0 + h * 0.8;
+  jpYotei(c, r, x0 + w * (o.fujiX || 0.38), fy, w * (o.fujiW || 0.95), h * (o.fujiH || 0.6), M.fuji);
+  // the castle hill and the keep, a pagoda, the town climbing it with its lights
+  const hillTop = (x) => fy - h * 0.12 - Math.max(0, 1 - Math.abs((x - (x0 + w * 0.74)) / (w * 0.32))) * h * 0.14;
+  c.fillStyle = M.hill; c.beginPath(); c.moveTo(x0, y0 + h); for (let x = x0; x <= x0 + w; x += 2) c.lineTo(x, hillTop(x)); c.lineTo(x0 + w, y0 + h); c.closePath(); c.fill();
+  const cs = h / 360;
+  jpCastle(c, r, x0 + w * 0.74, hillTop(x0 + w * 0.74) + 2, cs * 1.4, M.castle);
+  pagoda(c, x0 + w * 0.14, hillTop(x0 + w * 0.14) + 4, cs * 7, M.roof, M.hill2);
+  for (let i = 0; i < Math.round(w / 9); i++) {
+    const x = x0 + r.r(0, w), yb = hillTop(x) + r.r(4, h * 0.2), ww = r.r(5, 10) * cs * 3;
+    rect(c, x, yb - ww * 0.45, ww, ww * 0.45, M.wall);
+    poly(c, [[x - ww * 0.2, yb - ww * 0.42], [x + ww * 1.2, yb - ww * 0.42], [x + ww * 0.92, yb - ww * 0.8], [x + ww * 0.08, yb - ww * 0.8]], M.roof);
+    if (M.lit && r() < 0.75) { rect(c, x + 1, yb - ww * 0.35, Math.max(1, ww * 0.3), 1, r.pick(['#ffb050', '#ff9a3a', '#ffc870'])); if (r() < 0.4) glow(c, x + 2, yb - ww * 0.3, 6, 'rgba(255,140,60,0.4)'); }
+    if (r() < 0.35) crown(c, r, x + ww + 2, yb - ww * 0.6, r.r(3, 6), r.r(2.5, 4.5), r() < 0.6 ? (mood === 'unrest' ? ['#3a1a24', '#6a3040', '#9a5068', '#c87a8a'] : JP.sakura) : JP.blossomWhite, { x: -0.6, y: -0.8 }, 10);
+  }
+  if (mood === 'unrest') for (const fx of [0.3, 0.62, 0.86]) { const x = x0 + w * fx, y = hillTop(x) + h * 0.06; glow(c, x, y, h * 0.12, 'rgba(255,110,40,0.6)'); for (let i = 0; i < 16; i++) { const t = i / 16; ellipse(c, x + t * t * 30, y - t * h * 0.5, 2 + t * 10, 2 + t * 8, t < 0.15 ? '#6a2a20' : '#2a1418'); } }
+  c.save(); c.globalCompositeOperation = 'source-atop';
+  vgrad(c, x0, fy - h * 0.25, w, h * 0.45, [[0, M.haze + '0)'], [1, M.haze + (mood === 'rain' ? '0.8)' : '0.55)')]]);
+  c.restore();
+  c.restore();
+}

@@ -224,12 +224,12 @@ function estateScene(c, L, mood) {
   const r = rng(141);
   const night = mood === 'night', day = mood === 'day', unrest = mood === 'unrest';
   const P = {
-    night: { sky: [[0, '#081030'], [0.5, '#12256a'], [1, '#1e3a8a']], wood: '#4a2e22', woodLit: '#8a5a3a', plaster: '#d8cdb8', plasterShade: '#8c8aa0', roof: '#2c3a5a', roofLit: '#6a82b0', ground: [[0, '#2a3a36'], [1, '#101a1a']], rockC: { dark: '#1c2232', mid: '#343c54', lit: '#7a88b0' }, maple: ['#5a2018', '#a8401e', '#e07a2e', '#ffb050'], water: [[0, '#1a3060'], [1, '#0a1430']] },
-    day: { sky: [[0, '#6f98d0'], [0.6, '#b8d0e6'], [1, '#f4e2c0']], wood: '#5a3a28', woodLit: '#b07a4a', plaster: '#f2e8d4', plasterShade: '#c8bca4', roof: '#3a4458', roofLit: '#8a9ab8', ground: [[0, '#7a8a4a'], [1, '#34401e']], rockC: { dark: '#5a5448', mid: '#8a8474', lit: '#d8d0bc' }, maple: ['#8a2e1e', '#c8502a', '#f09a44', '#ffd07a'], water: [[0, '#8ab4d8'], [1, '#3a6a9a']] },
-    unrest: { sky: [[0, '#1a1426'], [0.5, '#4a2438'], [0.85, '#a8402e'], [1, '#d86a3a']], wood: '#3a2420', woodLit: '#8a4a2e', plaster: '#c8a898', plasterShade: '#7a5a5a', roof: '#2a2434', roofLit: '#8a5a5a', ground: [[0, '#3a2a26'], [1, '#140c0c']], rockC: { dark: '#231a1e', mid: '#3e2c30', lit: '#a0685a' }, maple: ['#4a1812', '#8a2e1a', '#c8502a', '#f08a40'], water: [[0, '#4a2a38'], [1, '#140c18']] },
+    night: { sky: [[0, '#120c20'], [0.3, '#2a1834'], [0.55, '#4e2238'], [0.8, '#80343a'], [1, '#b45a3c']], wood: '#3a2426', woodLit: '#7a4a3a', plaster: '#d4c0b8', plasterShade: '#8a6e7a', roof: '#2a2232', roofLit: '#6a4e62', ground: [[0, '#2e2428'], [1, '#120c10']], rockC: { dark: '#1e1620', mid: '#3a2c36', lit: '#8a6a70' }, maple: JP.sakura, maple2: JP.blossomWhite, water: [[0, '#5a2a3a'], [1, '#160c16']] },
+    day: { sky: [[0, '#6f98d0'], [0.6, '#b8d0e6'], [1, '#f4e2c0']], wood: '#5a3a28', woodLit: '#b07a4a', plaster: '#f2e8d4', plasterShade: '#c8bca4', roof: '#3a4458', roofLit: '#8a9ab8', ground: [[0, '#7a8a4a'], [1, '#34401e']], rockC: { dark: '#5a5448', mid: '#8a8474', lit: '#d8d0bc' }, maple: JP.sakura, maple2: JP.blossomWhite, water: [[0, '#8ab4d8'], [1, '#3a6a9a']] },
+    unrest: { sky: [[0, '#1a1426'], [0.5, '#4a2438'], [0.85, '#a8402e'], [1, '#d86a3a']], wood: '#3a2420', woodLit: '#8a4a2e', plaster: '#c8a898', plasterShade: '#7a5a5a', roof: '#2a2434', roofLit: '#8a5a5a', ground: [[0, '#3a2a26'], [1, '#140c0c']], rockC: { dark: '#231a1e', mid: '#3e2c30', lit: '#a0685a' }, maple: ['#3a1a24', '#6a3040', '#9a5068', '#c87a8a'], maple2: ['#3a3038', '#6a5a62', '#9a8a90', '#c8b8bc'], water: [[0, '#4a2a38'], [1, '#140c18']] },
   }[mood];
   vgrad(c, 0, 0, W, 190, P.sky);
-  if (night) { stars(c, r, 120, 0, 0, W, 110); moon(c, 209, 43, 26, { seed: 2, lit: '#f2f6ff', mare: '#b6c4e4' }); }
+  if (night) { stars(c, r, 50, 0, 0, W, 70, '#e8d8e8'); glow(c, 240, 180, 240, 'rgba(255,120,60,0.3)'); circle(c, 420, 30, 9, '#ecd4cc'); circle(c, 421, 29, 8, '#f4e2da'); glow(c, 420, 30, 46, 'rgba(240,170,150,0.32)'); }
   if (day) sun(c, 90, 36, 10, '#fffbe8', 'rgba(255,240,200,0.5)');
   if (unrest) { glow(c, 380, 170, 140, 'rgba(255,90,40,0.45)'); moon(c, 90, 40, 9, { seed: 8, lit: '#f0c8a8', mare: '#c89880', halo: 'rgba(255,140,90,0.3)' }); }
   if (!night) {
@@ -239,10 +239,16 @@ function estateScene(c, L, mood) {
       else { cloudBand(cc, rr, 0, 30, 280, 16, { body: '#2e1e2c', rim: '#c8603a', shadow: '#1e1420', hi: '#ff9a5a' }); cloudBand(cc, rr, 220, 70, 280, 12, { body: '#3e2432', rim: '#e0763e', shadow: '#2a1a26', hi: '#ffb070' }); }
     });
   }
-  // dark pines and hills behind, and (in the troubles) smoke from fires on the ridge
+  // the village's skyline over the wall: Mount Yotei, the castle on its hill, the town's lights
+  // (and, in the troubles, smoke from fires on the ridge)
   const far = L('far', { depth: 0.12 });
-  hill(far, r, -40, 520, 150, 30, night ? '#0e1a36' : day ? '#7a8cb0' : '#2a1a26');
-  for (const x of [120, 150, 300, 330, 360]) { const hh = r.r(40, 60); poly(far, [[x, 150 - hh], [x + 10, 150], [x - 10, 150]], night ? '#0c1830' : day ? '#4a6a5a' : '#1e141c'); }
+  const view = JP_VIEW[night ? 'dusk' : mood];
+  jpYotei(far, r, 150, 152, 400, 118, view.fuji);
+  hill(far, r, -40, 520, 150, 30, view.hill);
+  jpCastle(far, r, 420, 128, 0.55, view.castle);
+  pagoda(far, 40, 140, 2.2, view.roof, view.hill2);
+  if (!day) jpLights(far, r, 340, 132, 140, 14, {});
+  for (const x of [120, 150, 300, 330, 360]) { const hh = r.r(40, 60); poly(far, [[x, 150 - hh], [x + 10, 150], [x - 10, 150]], night ? '#1e1424' : day ? '#4a6a5a' : '#1e141c'); }
   if (unrest) for (const x of [60, 380, 440]) { glow(far, x, 148, 30, 'rgba(255,120,40,0.6)'); }
   // dark pines standing behind the halls
   const pines = L('pines', { depth: 0.3, anim: sway(0.5, 9) });
@@ -296,19 +302,19 @@ function estateScene(c, L, mood) {
   for (const [x, w] of [[90, 120], [270, 170]]) for (let y = 228; y < H; y += 2) { rf.globalAlpha = 0.55 * (1 - (y - 228) / 50); rect(rf, x + Math.sin(y) * 2, y, w, 1, day ? '#c8b89a' : '#3a3444'); }
   if (!day) for (const x of [138, 282, 368, 355]) for (let y = 230; y < 262; y += 3) { rf.globalAlpha = 0.8 * (1 - (y - 230) / 34); rect(rf, x - 3 + Math.sin(y * 0.8) * 2, y, 6, 1, '#ffc870'); }
   rf.restore();
-  // a small cherry in blossom, and autumn maples framing the court
+  // a small cherry in blossom, and cherry trees, pink and white, framing the court
   const ch = L('cherry', { depth: 0.35, anim: sway(1.4, 6) });
   trunk(ch, 262, 204, 30, 4, 2, '#3a2420');
   for (let k = 0; k < 5; k++) branch(ch, 262, 186, 262 + r.r(-22, 22), 170 + r.r(-10, 6), 1.5, '#3a2420');
   for (let k = 0; k < 90; k++) px(ch, 262 + r.r(-24, 24), 172 + r.r(-12, 10), r.pick(['#f4b0c8', '#ffd0e0', '#e890b0']));
-  // autumn maples at the edges of the court
+  // cherry trees at the edges of the court, one pink, one white
   for (const [i, [x, yb, hh, side]] of [[20, 200, 120, -1], [470, 206, 116, 1]].entries()) {
     const m = L(`maple${i}`, { depth: 0.45, anim: sway(0.8, r.r(6, 8), { ox: side < 0 ? 0.2 : 0.8 }) });
     trunk(m, x, yb + 30, hh * 0.6, 10, 5, P.wood);
-    crown(m, r, x - side * 16, yb - hh * 0.62, hh * 0.42, hh * 0.3, P.maple, { x: side * -0.7, y: -0.6 }, 50);
+    crown(m, r, x - side * 16, yb - hh * 0.62, hh * 0.42, hh * 0.3, i ? P.maple2 : P.maple, { x: side * -0.7, y: -0.6 }, 50);
   }
   tufts(L('grass', { depth: 0.55, anim: sway(4, 3.8) }), r, 0, 246, W, 24, 60, night ? ['#0e1a1a', '#1a2a28', '#2a3e3a'] : day ? ['#2a3a18', '#3e5226', '#5a6a2e'] : ['#1a1010', '#2a1c18', '#3a2a22']);
-  return { colors: 64, vignette: night ? [0.45, '0,4,24'] : day ? [0.3, '30,20,10'] : [0.5, '20,4,4'] };
+  return { colors: 72, vignette: night ? [0.45, '16,4,14'] : day ? [0.3, '30,20,10'] : [0.5, '20,4,4'] };
 }
 SCENES.hara_kei_estate = (c, L) => estateScene(c, L, 'night');
 SCENES.estate_day = (c, L) => estateScene(c, L, 'day');

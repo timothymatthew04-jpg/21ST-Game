@@ -133,12 +133,12 @@ bgfx smuggler_boat aurora=0.02,0.42,1 aurora=0.527,0.2,0.8,1 glow=0.1375,0.133,0
 bgfx china_dock glow=0.3125,0.526,0.09,#ffc080 flame=0.252,0.593,0.03,#ff7050 flame=0.877,0.593,0.03,#ff7050 glints=0,0.56,1,0.25,26 birds=3,0.08,0.3
 bgfx japan_coast glow=0.133,0.141,0.03,#cfe0ff glow=0.85,0.55,0.25,#ffb080 glints=0.3,0.56,0.7,0.2,26 flame=0.373,0.633,0.02 birds=4,0.1,0.35 mist=0.42,0.12,0.3,#ffd0d0 stars=0,0,1,0.25,14
 bgfx japan_path rays=0.5,0.37,1.2,0.6,#fff0b0 motes=0.3,0.2,0.4,0.6,40,#fff0c0 fireflies=0,0.65,0.35,0.3,8 fireflies=0.65,0.65,0.35,0.3,8 foliage=0.6 glow=0.5125,0.14,0.07,#e8f0ff flame=0.25,0.687,0.02,#ffd28a flame=0.754,0.687,0.02,#ffd28a flame=0.329,0.678,0.012,#ffd28a
-bgfx hara_kei_estate glow=0.435,0.159,0.1,#cfe0ff flame=0.2875,0.696,0.03 flame=0.429,0.673,0.025 flame=0.5875,0.696,0.03 flame=0.767,0.696,0.03 flame=0.9375,0.781,0.045 glow=0.74,0.66,0.06,#ffcf7a
-bgfx hara_kei_estate mist=0.6,0.2,0.5 mist=0.8,0.12,0.35 glints=0.1,0.8,0.8,0.18,22 leaves=0.8 petals=0.4 stars=0.05,0.02,0.9,0.3,14 fireflies=0.05,0.6,0.9,0.2,8
-bgfx estate_day glints=0.1,0.8,0.8,0.18,22 leaves=1 petals=0.3 birds=3,0.05,0.3 motes=0.2,0.4,0.6,0.4,20,#fff6d8
-bgfx estate_unrest flame=0.2875,0.696,0.03 flame=0.429,0.673,0.025 flame=0.5875,0.696,0.03 flame=0.767,0.696,0.03 flame=0.9375,0.781,0.045 smoke=0.125,0.548,1.2,#2e2020 smoke=0.79,0.548,1.3,#2e2020 smoke=0.917,0.548,1,#2e2020 ash=0.6 leaves=0.6
-bgfx estate_tearoom petals=1.2 glow=0.6875,0.163,0.07,#cfe0ff steam=0.4917,0.785,0.9 steam=0.65,0.711,0.8 glints=0.31,0.66,0.38,0.05,10 flame=0.748,0.459,0.02,#ffd28a
-bgfx estate_room glow=0.2167,0.244,0.035,#cfe0ff glints=0.17,0.56,0.12,0.13,10 fireflies=0.27,0.15,0.15,0.5,8 fireflies=0.696,0.16,0.2,0.5,10 motes=0.25,0.74,0.46,0.13,20
+bgfx hara_kei_estate glow=0.875,0.111,0.06,#ffd0c0 flame=0.2875,0.696,0.03 flame=0.429,0.673,0.025 flame=0.5875,0.696,0.03 flame=0.767,0.696,0.03 flame=0.9375,0.781,0.045 glow=0.74,0.66,0.06,#ffcf7a
+bgfx hara_kei_estate mist=0.6,0.2,0.5,#c08890 mist=0.8,0.12,0.35,#b07a84 glints=0.1,0.8,0.8,0.18,22 petals=1 stars=0.05,0.02,0.9,0.3,14 fireflies=0.05,0.6,0.9,0.2,8
+bgfx estate_day glints=0.1,0.8,0.8,0.18,22 petals=1 birds=3,0.05,0.3 motes=0.2,0.4,0.6,0.4,20,#fff6d8
+bgfx estate_unrest flame=0.2875,0.696,0.03 flame=0.429,0.673,0.025 flame=0.5875,0.696,0.03 flame=0.767,0.696,0.03 flame=0.9375,0.781,0.045 smoke=0.125,0.548,1.2,#2e2020 smoke=0.79,0.548,1.3,#2e2020 smoke=0.917,0.548,1,#2e2020 ash=0.6 petals=0.3
+bgfx estate_tearoom petals=1.2 glow=0.733,0.111,0.05,#ffd0c0 steam=0.4917,0.785,0.9 steam=0.65,0.711,0.8 glints=0.31,0.66,0.38,0.05,10 flame=0.748,0.459,0.02,#ffd28a
+bgfx estate_room glow=0.408,0.193,0.03,#ffd0c0 glints=0.17,0.56,0.12,0.13,10 fireflies=0.27,0.15,0.15,0.5,8 fireflies=0.696,0.16,0.2,0.5,10 motes=0.25,0.74,0.46,0.13,20
 bgfx aviary flutter=0.365,0.25,0.33,0.38,18 leaves=0.8 rays=0.19,0.15,0.8,0.8,#fff2c4 motes=0.3,0.3,0.4,0.5,25,#fff0c8
 bgfx burned_village smoke=0.167,0.65,1.3,#2e2020 smoke=0.7,0.64,1,#2e2020 smoke=0.906,0.67,1.2,#2e2020 smoke=0.41,0.62,0.7,#3a2a28 embers=0.167,0.7,1 embers=0.906,0.726,1 embers=0.406,0.63,0.6 ash=1 flame=0.167,0.71,0.08,#ff7a30 flame=0.7,0.69,0.07,#ff7a30 flame=0.906,0.75,0.08,#ff7a30
 bgfx army_camp flame=0.4625,0.87,0.06,#ff9a40 embers=0.4625,0.86,0.8 smoke=0.4625,0.84,0.9,#9a8a8a birds=4,0.06,0.3 motes=0.1,0.5,0.8,0.4,24,#fff0c8
@@ -165,7 +165,7 @@ bgfx road_rain splashes=0.7,0.3,34 lightning=0.08,0.42
 bgfx china_dock ripples=0,0.6,1,0.2,0.7,#ffc8a0 walkers=0.86,0.05,0.95,5,2,1,0.04
 bgfx japan_coast ripples=0.48,0.76,0.48,0.2,0.6,#f0d0e0 walkers=0.71,0.52,0.95,3,1,1,0.02
 bgfx japan_path grass=0.9,0.1,0.8,0,0.34,0.66,#78a848
-bgfx hara_kei_estate ripples=0.1,0.83,0.82,0.14,0.7,#c8d8ff
+bgfx hara_kei_estate ripples=0.1,0.83,0.82,0.14,0.7,#e8b0a0
 bgfx estate_day ripples=0.12,0.83,0.76,0.14,0.9,#e8f4ff walkers=0.79,0.26,0.74,2,1,1,0.02
 bgfx smuggler_boat ripples=0,0.52,1,0.25,0.6,#c8d8ff
 bgfx op_mountain grass=0.86,0.1,0.8,0.2,#f0dca0 birds=4,0.3,0.45

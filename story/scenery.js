@@ -1204,9 +1204,9 @@ window.VN_SCENERY = {
    {
     "id": "far",
     "x": 0,
-    "y": 97,
+    "y": 48,
     "w": 480,
-    "h": 54,
+    "h": 104,
     "depth": 0.12,
     "anim": null,
     "src": "assets/scenes/estate_day/far.png"
@@ -1214,9 +1214,9 @@ window.VN_SCENERY = {
    {
     "id": "pines",
     "x": 39,
-    "y": 95,
+    "y": 96,
     "w": 441,
-    "h": 103,
+    "h": 102,
     "depth": 0.3,
     "anim": {
      "type": "sway",
@@ -1251,10 +1251,10 @@ window.VN_SCENERY = {
    },
    {
     "id": "cherry",
-    "x": 240,
-    "y": 161,
-    "w": 46,
-    "h": 43,
+    "x": 238,
+    "y": 160,
+    "w": 48,
+    "h": 44,
     "depth": 0.35,
     "anim": {
      "type": "sway",
@@ -1266,38 +1266,38 @@ window.VN_SCENERY = {
    {
     "id": "maple0",
     "x": 0,
-    "y": 85,
-    "w": 89,
-    "h": 145,
+    "y": 82,
+    "w": 93,
+    "h": 148,
     "depth": 0.45,
     "anim": {
      "type": "sway",
      "a": 0.8,
-     "t": 6.66216463316232,
+     "t": 6.2625159081071615,
      "ox": 0.2
     },
     "src": "assets/scenes/estate_day/maple0.png"
    },
    {
     "id": "maple1",
-    "x": 402,
-    "y": 100,
-    "w": 78,
-    "h": 136,
+    "x": 400,
+    "y": 95,
+    "w": 80,
+    "h": 141,
     "depth": 0.45,
     "anim": {
      "type": "sway",
      "a": 0.8,
-     "t": 7.348606009501964,
+     "t": 7.27151183784008,
      "ox": 0.8
     },
     "src": "assets/scenes/estate_day/maple1.png"
    },
    {
     "id": "grass",
-    "x": 11,
-    "y": 244,
-    "w": 466,
+    "x": 0,
+    "y": 245,
+    "w": 473,
     "h": 25,
     "depth": 0.55,
     "anim": {
@@ -1328,10 +1328,10 @@ window.VN_SCENERY = {
    },
    {
     "id": "bamboo",
-    "x": 143,
+    "x": 244,
     "y": 0,
-    "w": 332,
-    "h": 196,
+    "w": 233,
+    "h": 197,
     "depth": 0.25,
     "anim": {
      "type": "sway",
@@ -1356,7 +1356,7 @@ window.VN_SCENERY = {
   "flat": "assets/scenes/estate_tearoom/flat.png",
   "vignette": [
    0.5,
-   "0,6,30"
+   "16,4,14"
   ],
   "layers": [
    {
@@ -1372,9 +1372,9 @@ window.VN_SCENERY = {
    {
     "id": "blossoms",
     "x": 0,
-    "y": 2,
-    "w": 251,
-    "h": 129,
+    "y": 4,
+    "w": 266,
+    "h": 127,
     "depth": 0.3,
     "anim": {
      "type": "sway",
@@ -1387,9 +1387,9 @@ window.VN_SCENERY = {
    },
    {
     "id": "blossoms2",
-    "x": 356,
+    "x": 351,
     "y": 73,
-    "w": 72,
+    "w": 68,
     "h": 97,
     "depth": 0.3,
     "anim": {
@@ -1444,9 +1444,9 @@ window.VN_SCENERY = {
    {
     "id": "far",
     "x": 0,
-    "y": 97,
+    "y": 48,
     "w": 480,
-    "h": 56,
+    "h": 105,
     "depth": 0.12,
     "anim": null,
     "src": "assets/scenes/estate_unrest/far.png"
@@ -1491,9 +1491,9 @@ window.VN_SCENERY = {
    },
    {
     "id": "cherry",
-    "x": 240,
+    "x": 239,
     "y": 161,
-    "w": 46,
+    "w": 47,
     "h": 43,
     "depth": 0.35,
     "anim": {
@@ -1506,38 +1506,38 @@ window.VN_SCENERY = {
    {
     "id": "maple0",
     "x": 0,
-    "y": 85,
-    "w": 89,
-    "h": 145,
+    "y": 82,
+    "w": 97,
+    "h": 148,
     "depth": 0.45,
     "anim": {
      "type": "sway",
      "a": 0.8,
-     "t": 6.66216463316232,
+     "t": 6.407224701251835,
      "ox": 0.2
     },
     "src": "assets/scenes/estate_unrest/maple0.png"
    },
    {
     "id": "maple1",
-    "x": 402,
-    "y": 100,
-    "w": 78,
-    "h": 136,
+    "x": 400,
+    "y": 96,
+    "w": 80,
+    "h": 140,
     "depth": 0.45,
     "anim": {
      "type": "sway",
      "a": 0.8,
-     "t": 7.348606009501964,
+     "t": 7.091498642694205,
      "ox": 0.8
     },
     "src": "assets/scenes/estate_unrest/maple1.png"
    },
    {
     "id": "grass",
-    "x": 11,
-    "y": 244,
-    "w": 466,
+    "x": 0,
+    "y": 245,
+    "w": 479,
     "h": 25,
     "depth": 0.55,
     "anim": {
@@ -1769,7 +1769,7 @@ window.VN_SCENERY = {
   "flat": "assets/scenes/hara_kei_estate/flat.png",
   "vignette": [
    0.45,
-   "0,4,24"
+   "16,4,14"
   ],
   "layers": [
    {
@@ -1785,9 +1785,9 @@ window.VN_SCENERY = {
    {
     "id": "far",
     "x": 0,
-    "y": 95,
+    "y": 48,
     "w": 480,
-    "h": 56,
+    "h": 104,
     "depth": 0.12,
     "anim": null,
     "src": "assets/scenes/hara_kei_estate/far.png"
@@ -1834,7 +1834,7 @@ window.VN_SCENERY = {
     "id": "cherry",
     "x": 238,
     "y": 160,
-    "w": 49,
+    "w": 48,
     "h": 44,
     "depth": 0.35,
     "anim": {
@@ -1847,39 +1847,39 @@ window.VN_SCENERY = {
    {
     "id": "maple0",
     "x": 0,
-    "y": 83,
-    "w": 91,
-    "h": 147,
+    "y": 84,
+    "w": 93,
+    "h": 146,
     "depth": 0.45,
     "anim": {
      "type": "sway",
      "a": 0.8,
-     "t": 6.070714563596994,
+     "t": 6.3098581321537495,
      "ox": 0.2
     },
     "src": "assets/scenes/hara_kei_estate/maple0.png"
    },
    {
     "id": "maple1",
-    "x": 399,
-    "y": 92,
-    "w": 81,
-    "h": 144,
+    "x": 400,
+    "y": 91,
+    "w": 80,
+    "h": 145,
     "depth": 0.45,
     "anim": {
      "type": "sway",
      "a": 0.8,
-     "t": 7.752712255809456,
+     "t": 7.796579853631556,
      "ox": 0.8
     },
     "src": "assets/scenes/hara_kei_estate/maple1.png"
    },
    {
     "id": "grass",
-    "x": 8,
-    "y": 244,
-    "w": 469,
-    "h": 26,
+    "x": 4,
+    "y": 245,
+    "w": 475,
+    "h": 25,
     "depth": 0.55,
     "anim": {
      "type": "sway",
@@ -4164,10 +4164,10 @@ window.VN_SCENERY = {
    },
    {
     "id": "maple",
-    "x": 125,
-    "y": 77,
-    "w": 100,
-    "h": 113,
+    "x": 131,
+    "y": 80,
+    "w": 91,
+    "h": 110,
     "depth": 0.2,
     "anim": {
      "type": "sway",

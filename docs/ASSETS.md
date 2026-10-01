@@ -104,6 +104,13 @@ merchants' stalls and townhouses under their paper lanterns and banners, a stage
 players, an archery butt, the walled samurai quarter and its cherry trees in pink and white, to
 Hara Kei's great gate. It is drawn by `tools/paint/scenes-japan.js`.
 
+Hara Kei's village looks the same wherever it is seen: the walk, the estate outside (`hara_kei_estate`,
+`estate_day`, `estate_unrest`), the views through the tea room's and his room's screens
+(`estate_tearoom`, `estate_room`) and the house in the rain (`yuki_house`) all show Mount Yōtei over
+the castle hill, the keep and a pagoda, the town's lights and pink and white blossom, painted by one
+helper (`jpVillageView` in tools/paint/scenes-japan.js) in the evening's wine-red dusk, by day, in
+the troubles or in the rain.
+
 The smuggler's boat (`smuggler_boat`), the crossing to Japan, is a clear, cold night at sea with
 the northern lights as its sky: the aurora itself is an effect (`aurora`), rippling above the deck
 and mirrored faintly in the swell, over a painted sky that glows green at the horizon.

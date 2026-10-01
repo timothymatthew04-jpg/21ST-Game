@@ -151,15 +151,15 @@ SCENES.cemetery_two = (c, L) => cemeteryScene(c, L, 'dusk', { two: true });
 // ---------------------------------------------------------------- a house in the hills of Japan, in the rain
 SCENES.yuki_house = (c, L) => {
   const r = rng(321);
-  // outside the open screens: a garden drowning in rain
-  vgrad(c, 0, 0, W, 200, [[0, '#3a4450'], [0.6, '#5a6a70'], [1, '#6a7a70']]);
-  hill(c, r, 60, 470, 120, 30, '#4a5a5e');
+  // outside the open screens: the same village drowning in rain, Mount Yotei and the castle grey in it,
+  // a garden of pines and a white cherry in blossom, beaten by the rain
+  jpVillageView(c, r, 96, 0, 290, 200, 'rain', { fujiX: 0.4, fujiH: 0.55 });
   for (let i = 0; i < 26; i++) crown(c, r, 100 + r() * 300, 150 + r() * 40, r.r(10, 18), r.r(6, 10), ['#2e4234', '#3e5440', '#5a6e52'], { x: 0, y: -1 }, 10);
   rect(c, 110, 176, 280, 24, '#3a4a44');
   for (let i = 0; i < 20; i++) rect(c, 120 + r() * 260, 182 + r() * 14, r.r(4, 12), 1, '#8a9aa0');
   const maple = L('maple', { depth: 0.2, anim: sway(1, 6) });
   trunk(maple, 170, 190, 60, 7, 4, '#3a2a24', '#2a1e1a');
-  crown(maple, r, 176, 110, 46, 30, ['#6a2a24', '#9a3a2a', '#c85a3a'], { x: -0.5, y: -0.7 }, 40);
+  crown(maple, r, 176, 110, 46, 30, ['#6a6470', '#9a96a0', '#c8c4cc', '#e8e6ea'], { x: -0.5, y: -0.7 }, 40);
   // the room: dark wood, paper screens pushed open, a futon on the tatami
   const rm = L('room', { depth: 0.5 });
   rect(rm, 0, 0, W, H, '#5a3a24');

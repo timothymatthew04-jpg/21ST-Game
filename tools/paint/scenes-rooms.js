@@ -497,21 +497,14 @@ SCENES.blanche_salon = (c, L) => {
 // ---------------------------------------------------------------- Hara Kei's house: the moonlit room where tea is served
 SCENES.estate_tearoom = (c, L) => {
   const r = rng(161);
-  // the view: night garden, roofs and a pagoda, the moon
-  vgrad(c, 0, 0, W, 200, [[0, '#0a1a44'], [0.55, '#1e3a80'], [1, '#3a5aa0']]);
-  stars(c, r, 60, 0, 0, W, 90);
-  moon(c, 330, 44, 22, { seed: 5, lit: '#eef4ff', mare: '#b4c2e2' });
-  hill(c, r, 60, 440, 132, 26, '#2a4480');
-  for (const [x, yb, w, hh, rh] of [[96, 162, 70, 18, 16], [180, 150, 50, 14, 12], [300, 150, 60, 16, 14], [352, 164, 44, 14, 12]]) {
-    jpHouse(c, r, x, yb, w, hh, { roof: '#18264e', roofLight: '#5a78b8', plaster: '#3a5088', wood: '#101a38', roofH: rh, windows: [[w * 0.4, 4, 6, 6, x === 300]] });
-  }
-  rect(c, 236, 70, 8, 84, '#142042');
-  for (let k = 0; k < 5; k++) { const y = 76 + k * 16, w = 30 - k * 4; poly(c, [[240 - w / 2 - 4, y], [240 + w / 2 + 4, y], [240 + w / 2, y - 5], [240 - w / 2, y - 5]], '#101a3a'); line(c, 240 - w / 2 - 4, y, 240 + w / 2 + 4, y, '#4a64a8', 1); }
-  vgrad(c, 0, 160, W, 40, [[0, '#1a2a5a'], [1, '#101a3a']]);
-  for (let i = 0; i < 30; i++) crown(c, r, 80 + r() * 320, 170 + r() * 20, r.r(6, 12), r.r(4, 8), ['#0e1a3a', '#1a2e60', '#3a5a9a'], { x: 0.3, y: -1 }, 8);
-  c.fillStyle = '#6a8ad0'; c.beginPath(); c.moveTo(150, 190); c.bezierCurveTo(220, 180, 250, 186, 330, 178); c.lineTo(330, 182); c.bezierCurveTo(250, 190, 220, 186, 150, 194); c.fill();
-  for (let i = 0; i < 20; i++) px(c, 160 + r() * 170, 180 + r() * 10, '#e8f0ff');
-  rect(c, 356, 118, 6, 12, '#ffd88a'); rect(c, 355, 116, 8, 2, '#1a2440'); rect(c, 358, 130, 2, 20, '#1a2440'); glow(c, 359, 124, 14, 'rgba(255,200,120,0.6)');
+  // the view: the village at dusk as the walk shows it, Mount Yotei over the castle hill, the town's
+  // lights, blossom, mist; the garden's pond below catching the red of the sky
+  jpVillageView(c, r, 60, 0, 360, 196, 'dusk', { moon: [352, 30, 8] });
+  vgrad(c, 60, 168, 360, 30, [[0, 'rgba(46,34,50,0)'], [1, '#241a26']]);
+  for (let i = 0; i < 26; i++) crown(c, r, 80 + r() * 320, 174 + r() * 18, r.r(6, 12), r.r(4, 8), r() < 0.5 ? ['#3a1a2a', '#6a3048', '#a8587a', '#d88aa8'] : ['#3a3240', '#6a6070', '#a8a0b0', '#d8d0dc'], { x: 0.3, y: -1 }, 8);
+  c.fillStyle = '#c86a5a'; c.beginPath(); c.moveTo(150, 190); c.bezierCurveTo(220, 180, 250, 186, 330, 178); c.lineTo(330, 182); c.bezierCurveTo(250, 190, 220, 186, 150, 194); c.fill();
+  for (let i = 0; i < 20; i++) px(c, 160 + r() * 170, 180 + r() * 10, '#f4d0c0');
+  rect(c, 356, 150, 6, 10, '#ffd88a'); rect(c, 355, 148, 8, 2, '#2a1a24'); rect(c, 358, 160, 2, 16, '#2a1a24'); glow(c, 359, 155, 14, 'rgba(255,200,120,0.6)');
   // the cherry trees outside, swaying and dropping petals
   const bl = L('blossoms', { depth: 0.3, anim: sway(1, 6, { ox: 0, oy: 0 }) });
   branch(bl, -10, 30, 150, 60, 7, '#1a1426'); branch(bl, 60, 44, 200, 10, 4, '#1a1426'); branch(bl, 120, 55, 240, 90, 3, '#1a1426'); branch(bl, 30, 38, 90, 130, 3, '#1a1426');
@@ -520,7 +513,7 @@ SCENES.estate_tearoom = (c, L) => {
   const bl2 = L('blossoms2', { depth: 0.3, anim: sway(1.6, 5) });
   trunk(bl2, 390, 170, 70, 5, 3, '#1a1426');
   for (let k = 0; k < 5; k++) branch(bl2, 390, 120, 390 + r.r(-30, 30), 90 + r.r(-20, 10), 2, '#1a1426');
-  for (let i = 0; i < 16; i++) crown(bl2, r, 390 + r.r(-30, 30), 96 + r.r(-22, 20), r.r(6, 11), r.r(5, 8), pink, { x: -0.4, y: -0.8 }, 8);
+  for (let i = 0; i < 16; i++) crown(bl2, r, 390 + r.r(-30, 30), 96 + r.r(-22, 20), r.r(6, 11), r.r(5, 8), JP.blossomWhite, { x: -0.4, y: -0.8 }, 8);
   // the room around the window, dark wood and paper screens
   const rm = L('room', { depth: 0.5 });
   rect(rm, 0, 0, W, H, '#10182e');
@@ -546,26 +539,24 @@ SCENES.estate_tearoom = (c, L) => {
   line(rm, 392, 237, 440, 266, '#6a7aa8', 1);
   for (let k = 0; k < 7; k++) { line(rm, 360 + k * 3, 258 - k * 3, 392 + k * 3, 240 - k * 3, '#5a6a98', 1); line(rm, 412 + k * 4, 242 + k * 1.5, 452 + k * 3, 242 + k * 3, '#5a6a98', 1); }
   for (let i = 0; i < 14; i++) { const x = r() * W, y = 206 + r() * 60; ellipse(rm, x, y, 2.5, 1.5, r.pick(['#f4b0cc', '#e890b8'])); }
-  return { colors: 64, vignette: [0.5, '0,6,30'] };
+  // the room takes the colour of the evening outside
+  rm.save(); rm.globalCompositeOperation = 'source-atop'; rect(rm, 0, 0, W, H, 'rgba(110,44,40,0.4)'); rm.restore();
+  return { colors: 72, vignette: [0.5, '16,4,14'] };
 };
 
 // ---------------------------------------------------------------- Hara Kei's house: the empty tatami room, the lake and the bamboo
 SCENES.estate_room = (c, L) => {
   const r = rng(171);
-  // the view through the open screens: a moonlit lake on the left, bamboo in the mist
-  vgrad(c, 0, 0, W, 200, [[0, '#0c1c48'], [1, '#2a4a8a']]);
-  stars(c, r, 30, 80, 20, 60, 60);
-  moon(c, 104, 66, 11, { seed: 3 });
-  hill(c, r, 70, 150, 150, 16, '#1a2c5a');
-  vgrad(c, 80, 150, 60, 36, [[0, '#2a4a8a'], [1, '#12234e']]);
-  for (let i = 0; i < 14; i++) rect(c, 96 + r.r(-6, 6), 152 + i * 2.2, r.r(3, 8), 1, '#dce8ff');
-  vgrad(c, 130, 0, 350, 200, [[0, '#9ab86a'], [0.6, '#c8d890'], [1, '#6a8a4a']]);
-  for (let i = 0; i < 40; i++) { const x = 130 + r() * 350; rect(c, x, 0, r.r(2, 4), 200, r.pick(['#b0c878', '#c8d890', '#a0b868'])); }
-  for (let i = 0; i < 30; i++) crown(c, r, 140 + r() * 330, 150 + r() * 40, r.r(10, 18), r.r(6, 10), ['#4a6a2e', '#6a8a3e', '#9ab85a'], { x: 0, y: -1 }, 10);
+  // the view through the open screens: the village at dusk on the left (Mount Yotei over the castle
+  // hill, the lights), the bamboo grove in the red evening light on the right
+  jpVillageView(c, r, 70, 30, 160, 170, 'dusk', { moon: [196, 52, 5], fujiX: 0.42, fujiW: 1.1 });
+  vgrad(c, 200, 0, 280, 200, [[0, '#3a2234'], [0.6, '#6a3a3a'], [1, '#3a2a2a']]);
+  for (let i = 0; i < 40; i++) { const x = 200 + r() * 280; rect(c, x, 0, r.r(2, 4), 200, r.pick(['#5a4a3a', '#6a5a40', '#4a3e34'])); }
+  for (let i = 0; i < 30; i++) crown(c, r, 210 + r() * 260, 150 + r() * 40, r.r(10, 18), r.r(6, 10), ['#2a2428', '#3e3a30', '#6a6040'], { x: 0, y: -1 }, 10);
   const bb = L('bamboo', { depth: 0.25, anim: sway(1.3, 5.5) });
   for (let i = 0; i < 18; i++) {
-    const x = 132 + r() * 340, w = r.r(3, 5);
-    rect(bb, x, 0, w, 196, '#3e6a2a'); rect(bb, x + w - 1, 0, 1, 196, '#8ab050');
+    const x = 236 + r() * 236, w = r.r(3, 5);
+    rect(bb, x, 0, w, 196, '#2e3a22'); rect(bb, x + w - 1, 0, 1, 196, '#c87a4a');
     for (let y = r() * 30; y < 196; y += r.r(22, 30)) rect(bb, x - 1, y, w + 2, 1, '#2a4a1e');
     for (let k = 0; k < 4; k++) { const y = r() * 150; line(bb, x, y, x + r.r(-16, 16), y + r.r(4, 10), '#4a7a2e', 1); }
   }
