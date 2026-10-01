@@ -1,7 +1,7 @@
 # Coraline main menu (animated painting)
 
 The main menu as a seamless 12-second loop for Canva: `export/coraline-main-menu.mp4` (1920×1080,
-30 fps, with sound) and `export/coraline-main-menu.gif` (1280×720, 15 fps, no sound).
+30 fps, 7 MB, with sound) and `export/coraline-main-menu.gif` (1280×720, 12 fps, 29 MB, no sound).
 
 It animates the reference painting itself, so its art style and its "Coraline" title stay exactly
 as they are. Nothing is redrawn: the painting is masked into sky, tree, house, windows, title,

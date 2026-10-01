@@ -108,8 +108,9 @@ if (args.stills) {
     console.log('wrote', args.mp4);
   }
   if (args.gif) {
-    // 1280 wide at 15 fps, one palette for the whole loop, gentle dithering for the dark sky
-    const vf = 'fps=15,scale=1280:-1:flags=lanczos,split[a][b];[a]palettegen=max_colors=256:stats_mode=full[p];[b][p]paletteuse=dither=sierra2_4a';
+    // 1280 wide at 12 fps; grain is smoothed first and only changed areas are stored, which keeps
+    // the file near 30 MB instead of 75
+    const vf = 'fps=12,scale=1280:-1:flags=lanczos,hqdn3d=4:4:8:8,split[a][b];[a]palettegen=max_colors=200:stats_mode=diff[p];[b][p]paletteuse=dither=bayer:bayer_scale=3:diff_mode=rectangle';
     run([...input, '-vf', vf, '-loop', '0', args.gif]);
     console.log('wrote', args.gif);
   }
