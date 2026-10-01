@@ -926,7 +926,7 @@
       // footsteps (hooves on horseback)
       if (this.moving) {
         this.stepAcc += dt * (this.running ? 3.6 : 2.4);
-        if (this.stepAcc > 1) { this.stepAcc = 0; this.audio.fx(riding ? 'hoof' : 'step', { volume: this.running ? 0.35 : 0.25 }); }
+        if (this.stepAcc > 1) { this.stepAcc = 0; this.audio.fx(riding ? (this.def.wet ? 'hoof_wet' : 'hoof') : this.def.ground ? `step_${this.def.ground}` : 'step', { volume: this.running ? 0.35 : 0.25 }); }
       }
       // the camera leads a little in the direction of travel
       const lead = this.facing * (this.chase ? 120 : this.moving ? 70 : 40);

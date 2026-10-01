@@ -19,6 +19,12 @@
  *  soldier, drummer, baldabiou, villager, merchant, guard, servant, boy, patrol.
  *  set: { variable: value } changes a story variable when the thing is used.
  *
+ *  A walk can bring its own music and sounds, played as it starts; the scene's come back after:
+ *    music:    { name, volume }  a track (camp, village, japan_dread, storm_ride, war_dread, ...)
+ *    ambience: { name, volume }  a bed of sound (barracks, town, dusk_village, tempest, battle, ...)
+ *    ground:   what Hervé walks on, for his footsteps: gravel, stone, wood, earth, mud, rubble, grass
+ *    wet:      true for hooves splashing through the wet
+ *
  *  Some walks have action too:
  *    cover:    [{ x0, x1, kind }]  places to crouch behind (↓): wall, rubble, sandbags, cart
  *    patrols:  [{ x0, x1, speed, reach, start, dir }]  soldiers with lanterns; if their light finds
@@ -106,6 +112,7 @@ window.VN_WALKS = {
   // ---------------------------------------------------------------- Chapter 1: the army camp at dawn
   camp: {
     title: 'The Army Camp', region: 'The south of France · 1861',
+    music: { name: 'camp', volume: 0.8 }, ambience: { name: 'barracks', volume: 0.9 }, ground: 'gravel',
     hero: 'soldier', start: 60, weather: 'motes', accent: '255,200,190',
     water: ['rgba(200,140,170,0.5)', 'rgba(50,34,64,0.9)'],
     hint: 'Walk to the edge of camp →',
@@ -176,6 +183,7 @@ window.VN_WALKS = {
   // ---------------------------------------------------------------- home: Lavilledieu, on a sunny day
   lavilledieu: {
     title: 'Lavilledieu', region: 'Home · The south of France', hero: 'traveller', start: 40, weather: 'autumn', weatherCount: 40, accent: '255,210,140', bright: true,
+    music: { name: 'village', volume: 0.85 }, ambience: { name: 'town', volume: 0.9 }, ground: 'stone',
     water: ['rgba(120,184,230,0.34)', 'rgba(52,108,160,0.72)'],
     hint: 'Walk home to Hélène →',
     // the river's trade and its life: nothing here stops Hervé, it is only there to be seen
@@ -246,6 +254,7 @@ window.VN_WALKS = {
   // ---------------------------------------------------------------- Chapter 2: riding east across Russia
   steppe: {
     title: 'The Steppe', region: 'Across Europe and Russia',
+    music: { name: 'storm_ride', volume: 0.75 }, ambience: { name: 'tempest', volume: 1 }, wet: true,
     hero: 'traveller', ride: true, start: 40, weather: 'motes', accent: '255,200,140',
     water: ['rgba(150,90,110,0.5)', 'rgba(30,18,40,0.9)'],
     hint: 'Ride east, to the edge of the continent →',
@@ -264,6 +273,7 @@ window.VN_WALKS = {
   // ---------------------------------------------------------------- Chapter 3: into Hara Kei's village, at night
   village: {
     title: 'Hara Kei\'s Village', region: 'The hills of Japan',
+    music: { name: 'japan_dread', volume: 1 }, ambience: { name: 'dusk_village', volume: 1 }, ground: 'earth',
     hero: 'traveller', start: 40, weather: 'sakura', weatherCount: 60, accent: '255,196,210',
     water: ['rgba(90,80,110,0.55)', 'rgba(14,10,26,0.92)'],
     hint: 'Follow the lanterns to Hara Kei\'s house →',
@@ -309,6 +319,7 @@ window.VN_WALKS = {
   // ---------------------------------------------------------------- Chapter 7: the aviary, by day
   aviary: {
     title: 'The Aviary', region: 'Behind Hara Kei\'s house',
+    ground: 'wood',
     hero: 'traveller', start: 60, weather: 'petals', weatherCount: 50, accent: '255,210,220',
     water: ['rgba(120,150,200,0.5)', 'rgba(30,40,70,0.88)'],
     hint: 'Walk through the aviary to her room →',
@@ -324,6 +335,7 @@ window.VN_WALKS = {
   // ---------------------------------------------------------------- Chapter 12: the burned village
   ruins: {
     title: 'The Burned Village', region: 'The hills of Japan',
+    ground: 'rubble',
     hero: 'traveller', start: 40, weather: 'ash', weatherCount: 90, accent: '255,140,90',
     water: ['rgba(120,50,30,0.5)', 'rgba(20,6,4,0.92)'],
     hint: 'Search the ruins → · hold ↓ behind cover when a lantern comes',
@@ -363,6 +375,7 @@ window.VN_WALKS = {
   // ---------------------------------------------------------------- Chapter 12: the road from the coast, through the war
   crossing: {
     title: 'The Road from the Coast', region: 'Japan at war',
+    music: { name: 'war_dread', volume: 0.85 }, ambience: { name: 'battle', volume: 0.8 }, ground: 'rubble',
     hero: 'traveller', start: 30, weather: 'embers', weatherCount: 60, accent: '255,140,90',
     water: ['rgba(120,40,30,0.5)', 'rgba(20,6,6,0.92)'],
     hint: 'Get through to the hills → · when a shell whistles, crouch (↓) behind cover',
@@ -395,6 +408,7 @@ window.VN_WALKS = {
   // ---------------------------------------------------------------- Ending: to Hélène's grave
   cemetery: {
     title: 'The Cemetery', region: 'Lavilledieu',
+    ground: 'grass',
     hero: 'mourner', start: 30, weather: 'petals', weatherCount: 40, accent: '255,200,200',
     water: ['rgba(140,90,120,0.5)', 'rgba(30,16,34,0.9)'],
     hint: 'Walk to Hélène\'s grave →',

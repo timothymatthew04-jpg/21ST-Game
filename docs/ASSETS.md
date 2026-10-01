@@ -195,12 +195,18 @@ To use a recording instead, save it under the same name and it takes over: music
 | Music | Mood / where |
 | --- | --- |
 | `title` | Title screen (a recording). Plays on the menu only and stops when a game starts |
-| `town_theme` | The town, the mill, Baldabiou: a waltz for guitar and music box |
+| `camp` | Chapter 1 and the army camp walk: a serious march, snare and bass drum, low strings, brass, a fife |
+| `village` | Lavilledieu and the mill: a cosy musette waltz, accordion over guitar and brushes, a music box |
+| `town_theme` | An older town waltz for guitar and music box |
 | `helene_theme` | Scenes with Hélène: piano over strings |
 | `journey` | The long journeys: a steady pulse, a flute looking ahead |
 | `japan` | Japan: koto and bamboo flute over a drone, a far temple bell |
 | `her_theme` | The woman, the cup, the note, the letter: high and weightless |
-| `war` | Chapter 10: drums, war horns and a crying flute |
+| `war` | Drums, war horns and a crying flute |
+| `war_dread` | Chapter 11 and the road from the coast: no tune, only dread (a grinding drone, shaking strings, drums out of time, a heartbeat, scraped metal) |
+| `japan_dread` | Hara Kei's village at dusk: shakuhachi breath, one koto string, a bell out of tune, long silences |
+| `storm_ride` | The ride across the steppe in the storm: a gallop in six on strings and timpani, a horn |
+| `aurora` | The smuggler's boat under the northern lights: glass harmonica, a high music box, a far choir |
 | `sorrow` | The empty mill, the grey ending |
 | `letter` | Final Chapter: the truth, from minor into major |
 | `home` | The endings: music box and piano |
@@ -214,5 +220,7 @@ To use a recording instead, save it under the same name and it takes over: music
 | `farewell` | Chapter 15: the sickroom, swelling slowly |
 | `revelation` | Final Chapter: the truth arriving |
 
+Each walk can bring its own music and ambience (`music`, `ambience` in story/walks.js), and
+Hervé's footsteps sound different on gravel, stone, wood, earth, mud, rubble and grass (`ground`).
 Each place's ambience is set by the `bgsound` lines at the top of the story script; the full list
 of ambiences and sounds is in docs/SCRIPTING.md.

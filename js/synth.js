@@ -396,6 +396,87 @@
       this.noise(dest, t, d * 0.7, { type: 'bandpass', f: 8500, q: 1.5, gain: vel * 0.5, attack: swell ? d * 0.66 : 0.002 });
     }
 
+    /** Accordion: reeds in pairs, one tuned a hair sharp of the other, so the chord beats like a musette. */
+    accordion(dest, midis, t, dur, vel = 0.06, { attack = 0.05 } = {}) {
+      const ctx = this.ctx;
+      const lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 2300; lp.Q.value = 0.4;
+      const body = ctx.createBiquadFilter(); body.type = 'peaking'; body.frequency.value = 1100; body.Q.value = 0.9; body.gain.value = 5;
+      const g = ctx.createGain();
+      g.gain.setValueAtTime(0, t);
+      g.gain.linearRampToValueAtTime(vel, t + attack);
+      g.gain.setValueAtTime(vel * 0.9, t + Math.max(attack + 0.01, dur - 0.06));
+      g.gain.linearRampToValueAtTime(0, t + dur + 0.05);
+      lp.connect(body).connect(g).connect(dest);
+      for (const m of midis) for (const [det, type, amt] of [[0, 'square', 0.35], [13, 'sawtooth', 0.5], [-1200, 'triangle', 0.25]]) {
+        const o = ctx.createOscillator();
+        o.type = type; o.frequency.value = mtof(m); o.detune.value = det;
+        const og = ctx.createGain(); og.gain.value = amt / midis.length;
+        o.connect(og).connect(lp);
+        o.start(t); o.stop(t + dur + 0.1);
+      }
+    }
+
+    /** Strings in tremolo: bows shaking fast on a chord, swelling out of nothing (the sound of dread). */
+    tremolo(dest, midis, t, dur, vel = 0.05, { rate = 13, bright = 0.5, swell = true } = {}) {
+      const ctx = this.ctx;
+      const lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 700 + 2600 * bright; lp.Q.value = 0.6;
+      const trem = ctx.createGain(); trem.gain.value = 0.55;
+      const lfo = ctx.createOscillator(), lg = ctx.createGain();
+      lfo.frequency.value = rate; lg.gain.value = 0.45;
+      lfo.connect(lg).connect(trem.gain);
+      const g = ctx.createGain();
+      g.gain.setValueAtTime(0, t);
+      g.gain.linearRampToValueAtTime(vel, t + (swell ? dur * 0.65 : 0.12));
+      g.gain.linearRampToValueAtTime(swell ? 0 : vel * 0.8, t + dur);
+      if (!swell) g.gain.linearRampToValueAtTime(0, t + dur + 0.25);
+      lp.connect(trem).connect(g).connect(dest);
+      for (const m of midis) for (const det of [-9, 8]) {
+        const o = ctx.createOscillator();
+        o.type = 'sawtooth'; o.frequency.value = mtof(m); o.detune.value = det;
+        const og = ctx.createGain(); og.gain.value = 1 / (midis.length * 2);
+        o.connect(og).connect(lp);
+        o.start(t); o.stop(t + dur + 0.3);
+      }
+      lfo.start(t); lfo.stop(t + dur + 0.3);
+    }
+
+    /** Glass harmonica: a pure tone that blooms slowly, with a faint ring above it. */
+    glass(dest, midi, t, dur, vel = 0.05) {
+      const ctx = this.ctx, f = mtof(midi);
+      const g = ctx.createGain();
+      g.gain.setValueAtTime(0, t);
+      g.gain.linearRampToValueAtTime(vel, t + Math.min(0.6, dur * 0.3));
+      g.gain.setValueAtTime(vel, t + dur * 0.6);
+      g.gain.linearRampToValueAtTime(0, t + dur + 1.2);
+      g.connect(dest);
+      for (const [k, a] of [[1, 1], [2.003, 0.18], [3.01, 0.06]]) {
+        const o = ctx.createOscillator(), og = ctx.createGain();
+        o.frequency.value = f * k; og.gain.value = a;
+        o.connect(og).connect(g); o.start(t); o.stop(t + dur + 1.3);
+      }
+    }
+
+    /** Shakuhachi: the bamboo flute, all breath: a rush of air, then the note scooping up into tune,
+     *  wavering, and falling away at the end. */
+    shaku(dest, midi, t, dur, vel = 0.13) {
+      this.noise(dest, t, 0.4, { type: 'bandpass', f: mtof(midi) * 1.4, q: 1.1, gain: vel * 1.1, attack: 0.06 });
+      this.flute(dest, midi, t + 0.08, dur, vel, { scoop: 2.4, vib: 0.02 });
+      this.noise(dest, t + 0.08, dur, { type: 'bandpass', f: mtof(midi), q: 2.5, gain: vel * 0.5, attack: dur * 0.3 });
+      this.flute(dest, midi - 1, t + 0.08 + dur * 0.92, Math.min(0.6, dur * 0.3), vel * 0.4, { scoop: 0, vib: 0.03 });
+    }
+
+    /** A bow drawn across metal: a thin, wavering, ringing scrape. */
+    scrape(dest, t, dur = 2.5, vel = 0.04, f = 2400) {
+      const n = this.noise(dest, t, dur, { type: 'bandpass', f, q: 22, gain: vel, attack: dur * 0.45 });
+      n.flt.frequency.setValueAtTime(f, t);
+      n.flt.frequency.linearRampToValueAtTime(f * 0.86, t + dur);
+    }
+
+    /** Brushes on a snare: a soft swish. */
+    brush(dest, t, vel = 0.04, dur = 0.16) {
+      this.noise(dest, t, dur, { type: 'bandpass', f: 4200, q: 0.6, gain: vel, attack: dur * 0.35 });
+    }
+
     // ---------------------------------------------------------------- music
     /** Start a named track; returns a handle with stop(fade) and gain(v). */
     track(name, volume) {
@@ -1005,6 +1086,141 @@
         if (f.part === 'C' && f.first) S.cymbal(a.out, t, 3, 0.1);
       },
     },
+    // The army: a march, upright and serious. The bass drum and the snare's cadence (a roll into every
+    // fourth bar), low strings driving on, brass holding the chords and calling at the top of each
+    // phrase; a fife takes the tune in the second part; timpani and a cymbal close the phrases.
+    camp: {
+      bpm: 108, beats: 4, seed: 83, reverb: 0.3, level: 1.4,
+      bar(a, bar, t) {
+        const S = a.synth, b = a.beat;
+        const f = form(bar, [['intro', 2], ['A', 8], ['B', 8], ['A', 8], ['C', 4]]);
+        const prog = [[50, 3], [46, 4], [53, 4], [48, 4], [50, 3], [55, 3], [45, 4], [45, 4]];
+        const [root, third] = prog[bar % 8];
+        S.taiko(a.out, t, 0.3, 0.72); S.taiko(a.out, t + 2 * b, 0.22, 0.72);
+        const roll = bar % 4 === 3;
+        const pat = roll ? [0, 0.5, 1, 1.5, 2, 2.25, 2.5, 2.75, 3, 3.125, 3.25, 3.375, 3.5, 3.625, 3.75, 3.875] : [0, 0.75, 1, 1.5, 2, 2.75, 3, 3.5];
+        pat.forEach((k) => S.snare(a.out, t + k * b, roll && k >= 3 ? 0.03 + (k - 3) * 0.06 : k % 1 === 0 ? 0.07 : 0.038));
+        if (f.part === 'intro') return;
+        for (let i = 0; i < 8; i++) S.bowed(a.out, root - 24 + (i === 6 ? 7 : 0), t + i * b / 2, b * 0.4, i % 2 ? 0.05 : 0.075, { vib: 0, bright: 0.22, attack: 0.02 });
+        S.brass(a.out, [root - 12, root - 12 + third, root - 5], t, a.barDur * 0.92, 0.032, { bright: 0.35, attack: 0.35 });
+        if (f.part === 'A' && f.i % 4 === 0) { S.brass(a.out, [root, root + 7], t + b * 2, b * 0.45, 0.06, { bright: 0.85 }); S.brass(a.out, [root, root + 7], t + b * 2.5, b * 1.4, 0.06, { bright: 0.85 }); }
+        if (f.part === 'B') {
+          const m = phraseMotif(a, 'fife', bar, 4, 4);
+          const rh = bar % 2 ? [[0, 1], [1, 1], [2, 1.5], [3.5, 0.5]] : [[0, 1.5], [1.5, 0.5], [2, 1], [3, 1]];
+          m.forEach((d, i) => S.flute(a.out, deg(74, 'minor', d), t + rh[i][0] * b, rh[i][1] * b * 0.92, 0.11, { scoop: 0.15, vib: 0.005 }));
+        }
+        if (f.part === 'C') {
+          S.timpani(a.out, 38, t, 0.42); S.timpani(a.out, 45, t + 2 * b, 0.32);
+          S.brass(a.out, [root, root + third, root + 7], t, a.barDur, 0.05, { bright: 0.6, attack: 0.2 });
+          if (f.last) S.cymbal(a.out, t + 3 * b, 2, 0.07);
+        }
+        if (f.first && f.part !== 'C') S.cymbal(a.out, t, 2.4, 0.05);
+      },
+    },
+    // Lavilledieu: a musette waltz, cosy as a kitchen. The bass and the guitar's oom-pah-pah, brushes,
+    // the accordion singing the tune; in the middle the piano takes it in the minor while the accordion
+    // holds the chords; now and then the music box alone.
+    village: {
+      bpm: 116, beats: 3, seed: 91, reverb: 0.32, level: 1.15,
+      bar(a, bar, t) {
+        const S = a.synth, b = a.beat;
+        const f = form(bar, [['A', 16], ['B', 8], ['A', 8], ['box', 4]]);
+        const progA = [[53, 4], [53, 4], [60, 4], [60, 4], [58, 4], [53, 4], [60, 4], [53, 4]];
+        const progB = [[50, 3], [50, 3], [58, 4], [58, 4], [55, 3], [60, 4], [53, 4], [60, 4]];
+        const [root, third] = (f.part === 'B' ? progB : progA)[bar % 8];
+        if (f.part === 'box') {
+          S.pad(a.out, [root - 12, root - 12 + third, root - 5], t, a.barDur, 0.02, { cutoff: 700, type: 'triangle' });
+          phraseMotif(a, 'box', bar, 3, 4).forEach((d, i) => S.musicBox(a.out, deg(77, 'major', d), t + i * b, 0.11));
+          return;
+        }
+        S.pluck(a.out, root - 24 + (bar % 2 ? 7 : 0), t, 0.42, { bright: 0.3, dur: 1.2 });
+        for (const k of [1, 2]) { for (const n of [root - 5, root, root + third]) S.pluck(a.out, n, t + k * b, 0.13, { bright: 0.5, dur: 0.7 }); S.brush(a.out, t + k * b, 0.03); }
+        if (f.part === 'B') {
+          S.accordion(a.out, [root, root + third, root + 7], t, a.barDur * 0.95, 0.03);
+          const m = phraseMotif(a, 'pno', bar, 3, 4);
+          m.forEach((d, i) => S.piano(a.out, deg(74, 'minor', d), t + i * b, 0.2, 2));
+        } else {
+          const m = phraseMotif(a, 'acc', bar, 3, 4);
+          const rh = bar % 4 === 3 ? [[0, 2.8]] : bar % 2 ? [[0, 1.5], [1.5, 0.5], [2, 1]] : [[0, 1], [1, 1], [2, 1]];
+          rh.forEach(([k, d], i) => S.accordion(a.out, [deg(65, 'major', m[i] + (f.cycle % 2 && bar % 8 > 4 ? 2 : 0))], t + k * b, d * b * 0.95, 0.07));
+          if (bar % 8 === 6) S.musicBox(a.out, deg(84, 'major', 4), t + 2 * b, 0.07);
+        }
+      },
+    },
+    // War, heard from inside it: no tune to hold on to. A drone in the deep with a semitone grinding
+    // against it, strings shaking in clusters that swell and break off, drums that land where they
+    // should not, a heartbeat, metal scraped, a choir's held breath, a low horn like a warning; and,
+    // every so often, a silence that is worse.
+    war_dread: {
+      bpm: 66, beats: 4, seed: 97, reverb: 0.6, level: 1.5,
+      bar(a, bar, t) {
+        const S = a.synth, b = a.beat, R = a.rng;
+        const f = form(bar, [['A', 8], ['B', 8], ['C', 6], ['void', 2]]);
+        if (f.part === 'void') { if (f.i === 0) S.scrape(a.out, t, a.barDur * 1.8, 0.035, 3100); return; }
+        S.pad(a.out, [26, 27], t, a.barDur, 0.09, { cutoff: 170, attack: 1.4 });
+        if (bar % 2 === 0) S.tremolo(a.out, f.part === 'A' ? [62, 63] : [61, 62, 68], t, a.barDur * 2, f.part === 'C' ? 0.05 : 0.035, { rate: 14, bright: 0.6 });
+        const n = f.part === 'A' ? 2 : f.part === 'B' ? 4 : 6;
+        for (let i = 0; i < n; i++) S.taiko(a.out, t + R.r(0, 3.8) * b, R.r(0.25, 0.55), R.r(0.55, 0.85));
+        if (f.part !== 'A') for (let k = 0; k < 4; k++) { S.taiko(a.out, t + k * b, 0.16, 0.5); S.taiko(a.out, t + k * b + 0.24, 0.1, 0.46); }
+        if (bar % 4 === 2) S.scrape(a.out, t + b, b * 3, 0.03, R.pick([1800, 2600, 3400]));
+        if (bar % 8 === 5) S.choir(a.out, [55, 56, 61], t, a.barDur * 1.5, 0.05, { vowel: 'o', attack: 1.2 });
+        if (f.part === 'C') { S.brass(a.out, [38, 44], t, b * 2.5, 0.08, { bright: 0.45, attack: 0.15 }); if (f.i % 2 === 1) S.timpani(a.out, 33, t + 3 * b, 0.6); }
+        if (bar % 4 === 0) S.bowed(a.out, R.pick([74, 75, 80]), t + R.r(0, 2) * b, b * 2, 0.04, { vib: 0.025, bright: 0.85, glide: 2 });
+      },
+    },
+    // Hara Kei's village at dusk, and something wrong with it: a drone felt more than heard, the
+    // shakuhachi breathing long bent notes, one koto string plucked and left to die (sometimes answered
+    // a semitone off), a temple bell out of tune with itself, a far drum, and long silences.
+    japan_dread: {
+      bpm: 52, beats: 4, seed: 103, reverb: 0.75, level: 1.1,
+      bar(a, bar, t) {
+        const S = a.synth, b = a.beat, R = a.rng;
+        const f = form(bar, [['A', 8], ['B', 8], ['hush', 4]]);
+        S.pad(a.out, [26, 33], t, a.barDur, 0.06, { cutoff: 240, attack: 2.5, type: 'triangle' });
+        if (f.part === 'hush') { if (f.i === 1) S.bell(a.out, 37, t, 0.12, 8); if (f.i === 2) S.bell(a.out, 38, t + 0.03, 0.08, 8); return; }
+        if (bar % 4 === 0) {
+          const m = phraseMotif(a, 'sh', bar, 2, 3);
+          S.shaku(a.out, deg(62, 'in', m[0]), t + 0.3, b * 2.2, 0.13);
+          S.shaku(a.out, deg(62, 'in', m[1]), t + b * 2.8, b * 1.2, 0.1);
+        }
+        if (bar % 4 === 2) S.shaku(a.out, deg(62, 'in', R.pick([1, 4, 6])), t + b, b * 2.6, 0.11);
+        for (const k of [0, 2.5]) if (R() < 0.6) { const nn = deg(50, 'in', R.pick([0, 1, 2, 3, 4, 5])); S.pluck(a.out, nn, t + k * b, 0.28, { bright: 0.75, bend: R() < 0.4 ? -1 : 0, dur: 3 }); if (R() < 0.25) S.pluck(a.out, nn + 1, t + k * b + 0.4, 0.14, { bright: 0.75 }); }
+        if (f.part === 'B') { S.choir(a.out, [57, 58], t, a.barDur, 0.025, { vowel: 'u', attack: 2.4 }); if (f.i % 2 === 0) S.taiko(a.out, t + 3 * b, 0.2, 0.6); }
+        if (bar % 8 === 3) S.scrape(a.out, t, a.barDur, 0.018, 2900);
+        if (bar % 8 === 7) S.bell(a.out, 38, t + b, 0.14, 7);
+      },
+    },
+    // Riding through the storm: a gallop in six (da-da-DUM, da-da-DUM) on the low strings and the
+    // timpani, dark chords; a horn calls over it in the middle, then the violins in tremolo take it up;
+    // a roll of thunder on the drums at the end of each turn.
+    storm_ride: {
+      bpm: 210, beats: 6, seed: 109, reverb: 0.4, level: 0.8,
+      bar(a, bar, t) {
+        const S = a.synth, b = a.beat;
+        const f = form(bar, [['A', 8], ['B', 8], ['A2', 8], ['brk', 2]]);
+        const root = [40, 40, 36, 38, 40, 40, 43, 42][bar % 8] + (f.part === 'B' ? 5 : 0);
+        [0, 2, 3, 5].forEach((k) => S.bowed(a.out, root - 12, t + k * b, b * 0.85, k === 0 || k === 3 ? 0.09 : 0.05, { vib: 0, bright: 0.3, attack: 0.015 }));
+        S.timpani(a.out, root, t, 0.28); S.timpani(a.out, root, t + 3 * b, 0.2);
+        if (f.part === 'brk') { S.roll(a.out, root, t, a.barDur, 0.05, 0.32); return; }
+        S.pad(a.out, [root + 12, root + 15, root + 19], t, a.barDur, 0.03, { cutoff: 700, attack: 0.6 });
+        if (f.part === 'B') { const m = phraseMotif(a, 'hn', bar, 2, 4); S.brass(a.out, [deg(root + 12, 'minor', m[0])], t, b * 3, 0.07, { bright: 0.6 }); S.brass(a.out, [deg(root + 12, 'minor', m[1])], t + 3 * b, b * 3, 0.06, { bright: 0.6 }); }
+        if (f.part === 'A2') { S.tremolo(a.out, [root + 24, root + 27], t, a.barDur, 0.03, { rate: 12, bright: 0.5, swell: false }); phraseMotif(a, 'vl', bar, 3, 4).forEach((d, i) => S.bowed(a.out, deg(root + 24, 'minor', d), t + i * 2 * b, b * 1.9, 0.05, { vib: 0.008, bright: 0.6 })); }
+        if (f.first) S.cymbal(a.out, t, 2.5, 0.06);
+      },
+    },
+    // Under the northern lights at sea: glass harmonica chords blooming and fading, a music box high
+    // above like stars, a choir far off; slow, and very still.
+    aurora: {
+      bpm: 50, beats: 4, seed: 113, reverb: 0.85, level: 1.2,
+      bar(a, bar, t) {
+        const S = a.synth, b = a.beat, R = a.rng;
+        const root = [57, 55, 52, 53][Math.floor(bar / 2) % 4];
+        S.pad(a.out, [root - 12, root - 5], t, a.barDur, 0.03, { cutoff: 500, attack: 3, type: 'triangle' });
+        if (bar % 2 === 0) [0, 4, 7, 11].forEach((iv, i) => S.glass(a.out, root + 12 + iv, t + i * 0.35, a.barDur * 2 - i * 0.35, 0.03));
+        phraseMotif(a, 'gl', bar, 3, 7).forEach((d, i) => { if (R() < 0.7) S.musicBox(a.out, deg(root + 24, 'lydian', d), t + (i * 1.3 + R.r(0, 0.2)) * b, 0.07); });
+        if (bar % 4 === 3) S.choir(a.out, [root + 12, root + 19], t, a.barDur, 0.02, { vowel: 'u', attack: 2.5 });
+      },
+    },
   };
 
   // ---------------------------------------------------------------- ambiences
@@ -1029,6 +1245,19 @@
   };
   const drop = (S, dest, t, gain = 0.05) => S.noise(dest, t, 0.03 + Math.random() * 0.03, { type: 'bandpass', f: 1500 + Math.random() * 3000, q: 4, gain, attack: 0.001 });
   const crackle = (S, dest, t) => S.noise(dest, t, 0.02 + Math.random() * 0.05, { type: 'highpass', f: 1200 + Math.random() * 2000, gain: 0.04 + Math.random() * 0.12, attack: 0.001 });
+
+  /** A crow: two or three harsh caws. */
+  const crow = (S, dest, t) => {
+    const ctx = S.ctx, n = 2 + Math.floor(Math.random() * 2), f0 = 520 + Math.random() * 160;
+    for (let i = 0; i < n; i++) {
+      const o = ctx.createOscillator(), bp = ctx.createBiquadFilter(), g = ctx.createGain(), tt = t + i * (0.32 + Math.random() * 0.1);
+      o.type = 'sawtooth'; o.frequency.setValueAtTime(f0, tt); o.frequency.exponentialRampToValueAtTime(f0 * 0.72, tt + 0.22);
+      bp.type = 'bandpass'; bp.frequency.value = 1300; bp.Q.value = 2.2;
+      g.gain.setValueAtTime(0, tt); g.gain.linearRampToValueAtTime(0.05, tt + 0.02); g.gain.exponentialRampToValueAtTime(0.0001, tt + 0.26);
+      o.connect(bp).connect(g).connect(dest); o.start(tt); o.stop(tt + 0.3);
+      S.noise(dest, tt, 0.2, { type: 'bandpass', f: 1800, q: 2, gain: 0.02, attack: 0.01 });
+    }
+  };
 
   // ---- the sounds of war
   const boom = (S, dest, t, size = 1) => {
@@ -1185,6 +1414,42 @@
       a.every(6, 16, (t) => boom(a.synth, a.out, t, 0.35));
       a.every(10, 25, (t) => volley(a.synth, a.out, t, 5 + Math.floor(Math.random() * 6), 0.07, 1.4));
       a.every(25, 50, (t) => horn(a.synth, a.out, t, 0.025, true));
+    },
+    // The army camp by day: the drums practising, orders shouted across the square, a bugle far off,
+    // horses, the wind in the flags, and birds over it all
+    barracks(a) {
+      a.bed({ type: 'bandpass', f: 520, q: 0.9, gain: 0.05, lfo: 0.07, depth: 0.7, fLfo: 0.05, fDepth: 150 });
+      a.bed({ type: 'highpass', f: 2600, gain: 0.006, lfo: 0.4, depth: 0.8 });
+      a.every(5, 12, (t) => drumline(a.synth, a.out, t, 0.03));
+      a.every(6, 14, (t) => shouts(a.synth, a.out, t, 1 + Math.floor(Math.random() * 2), 0.035));
+      a.every(28, 55, (t) => horn(a.synth, a.out, t, 0.022, true));
+      a.every(9, 22, (t) => { for (let i = 0; i < 4; i++) a.synth.noise(a.out, t + i * 0.32 + (i % 2) * 0.08, 0.06, { type: 'bandpass', f: 520, q: 2, gain: 0.08, attack: 0.002 }); });
+      a.every(2, 7, (t) => chirp(a.synth, a.out, t, [2600, 3400][Math.floor(Math.random() * 2)]));
+    },
+    // A river town in autumn: the water, birds, leaves stirring in the wind, the church bell now and then
+    town(a) {
+      AMBIENCES.stream(a);
+      a.bed({ type: 'bandpass', f: 1300, q: 0.7, gain: 0.014, lfo: 0.12, depth: 0.9 });
+      a.every(35, 70, (t) => { for (let i = 0; i < 3; i++) a.synth.bell(a.out, 55, t + i * 1.7, 0.05, 4); });
+      a.every(12, 30, (t) => { for (let i = 0; i < 3; i++) a.synth.noise(a.out, t + i * 0.25, 0.08, { type: 'lowpass', f: 600, gain: 0.03, attack: 0.004 }); });
+    },
+    // Hara Kei's village at dusk: wind in the eaves, a wind chime, crows, a temple bell far away, a drum
+    // somewhere that stops when you listen for it
+    dusk_village(a) {
+      a.bed({ type: 'bandpass', f: 420, q: 1.2, gain: 0.07, lfo: 0.05, depth: 0.8, fLfo: 0.04, fDepth: 200 });
+      a.bed({ type: 'highpass', f: 3800, gain: 0.003, lfo: 0.05 });
+      a.every(5, 13, (t) => { for (let i = 0; i < 4; i++) a.synth.bell(a.out, [86, 89, 91, 93, 96][Math.floor(Math.random() * 5)], t + i * (0.15 + Math.random() * 0.2), 0.018, 2); });
+      a.every(9, 20, (t) => crow(a.synth, a.out, t));
+      a.every(30, 55, (t) => a.synth.bell(a.out, 37, t, 0.08, 8));
+      a.every(14, 28, (t) => { for (let i = 0; i < 3; i++) a.synth.taiko(a.out, t + i * 0.7, 0.05, 0.7); });
+    },
+    // A storm on the steppe: rain hammering down, gusts that roar up and die away, thunder rolling
+    tempest(a) {
+      AMBIENCES.rain(a);
+      a.bed({ type: 'highpass', f: 900, gain: 0.07, lfo: 0.2, depth: 0.3 });
+      a.bed({ type: 'bandpass', f: 380, q: 0.9, gain: 0.12, lfo: 0.13, depth: 0.95, fLfo: 0.09, fDepth: 260 });
+      a.every(3, 8, (t) => { const n = a.synth.noise(a.out, t, 2.5 + Math.random() * 2, { type: 'bandpass', f: 300, q: 0.8, gain: 0.22, attack: 1.1 }); n.flt.frequency.setValueAtTime(300, t); n.flt.frequency.linearRampToValueAtTime(950, t + 1.4); });
+      a.every(7, 16, (t) => SOUNDS.thunder(a.synth, a.out, t));
     },
     ruins(a) {
       AMBIENCES.wind(a);
@@ -1370,6 +1635,17 @@
       for (let k = 0, n = 4 + Math.floor(Math.random() * 4); k < n; k++) S.syllable({ pitch, muffle: 900, breath: 0.3 }, 'aoeiu'[Math.floor(Math.random() * 5)], 0.05, 1 + Math.random() * 0.15, Math.random() < 0.5, o, t + k * 0.14);
     },
     // the everyday
+    // footsteps on different ground: gravel crunching, a hard heel on stone, boards, soft earth, mud,
+    // broken rubble, grass; and hooves splashing through the wet
+    step_gravel: (S, o, t) => { S.noise(o, t, 0.09, { type: 'bandpass', f: 2600, q: 0.7, gain: 0.22, attack: 0.004 }); for (let i = 0; i < 4; i++) S.noise(o, t + 0.01 + Math.random() * 0.06, 0.02, { type: 'highpass', f: 3500, gain: 0.08, attack: 0.001 }); S.noise(o, t, 0.06, { type: 'lowpass', f: 380, gain: 0.3, attack: 0.003 }); },
+    step_stone: (S, o, t) => { S.noise(o, t, 0.035, { type: 'bandpass', f: 2200, q: 2.5, gain: 0.3, attack: 0.001 }); S.noise(o, t, 0.07, { type: 'lowpass', f: 450, gain: 0.35, attack: 0.002 }); },
+    step_wood: (S, o, t) => { S.noise(o, t, 0.09, { type: 'bandpass', f: 340, q: 3.5, gain: 0.7, attack: 0.002 }); S.noise(o, t, 0.04, { type: 'bandpass', f: 1100, q: 3, gain: 0.15, attack: 0.001 }); },
+    step_earth: (S, o, t) => { S.noise(o, t, 0.09, { type: 'lowpass', f: 320, gain: 0.45, attack: 0.004 }); S.noise(o, t, 0.05, { type: 'bandpass', f: 1500, q: 0.8, gain: 0.04, attack: 0.004 }); },
+    step_mud: (S, o, t) => { S.noise(o, t, 0.12, { type: 'lowpass', f: 300, gain: 0.4, attack: 0.006 }); const n = S.noise(o, t + 0.03, 0.12, { type: 'bandpass', f: 900, q: 3, gain: 0.12, attack: 0.02 }); n.flt.frequency.setValueAtTime(900, t + 0.03); n.flt.frequency.linearRampToValueAtTime(1600, t + 0.15); },
+    step_rubble: (S, o, t) => { SOUNDS.step_gravel(S, o, t); if (Math.random() < 0.4) S.noise(o, t + 0.05, 0.05, { type: 'bandpass', f: 700, q: 4, gain: 0.25, attack: 0.001 }); },
+    step_grass: (S, o, t) => { S.noise(o, t, 0.1, { type: 'highpass', f: 2800, gain: 0.05, attack: 0.02 }); S.noise(o, t, 0.06, { type: 'lowpass', f: 300, gain: 0.25, attack: 0.004 }); },
+    hoof_wet: (S, o, t) => { SOUNDS.hoof(S, o, t); for (const k of [0, 0.09]) S.noise(o, t + k + 0.01, 0.18, { type: 'bandpass', f: 1400, q: 0.9, gain: 0.1, attack: 0.008 }); },
+    crow: (S, o, t) => crow(S, o, t),
     step: (S, o, t) => S.noise(o, t, 0.07, { type: 'lowpass', f: 420 + Math.random() * 120, gain: 0.45, attack: 0.003 }),
     hoof: (S, o, t) => { S.noise(o, t, 0.06, { type: 'bandpass', f: 520, q: 2, gain: 0.5, attack: 0.002 }); S.noise(o, t + 0.09, 0.05, { type: 'bandpass', f: 460, q: 2, gain: 0.35, attack: 0.002 }); },
     footsteps: (S, o, t) => { for (let i = 0; i < 4; i++) S.noise(o, t + i * 0.42 + Math.random() * 0.04, 0.09, { type: 'lowpass', f: 380, gain: 0.5, attack: 0.004 }); },

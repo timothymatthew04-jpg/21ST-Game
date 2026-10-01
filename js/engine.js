@@ -1006,7 +1006,13 @@
         this.ui.textbox.hideBox();
         this.ui.textbox.hideCentered();
         this.stage.setSpeaker(null);
+        // a walk can bring its own music and sounds (the camp's march, the village at dusk); when it
+        // is over, the scene's own come back
+        const own = def && (def.music || def.ambience);
+        if (def && def.music) this.audio.music.play(def.music.name, def.music.fade || 2, def.music.volume == null ? 1 : def.music.volume);
+        if (def && def.ambience) this.audio.ambience.play(def.ambience.name, 2, def.ambience.volume == null ? 1 : def.ambience.volume);
         const res = await this.guard(VN.playWalk({ ui: this.ui, engine: this, audio: this.audio, settings: this.settings, story: this.story }, ins.area));
+        if (own) this.audio.sync(this.state);
         if (ins.into) this.setVar(ins.into, res.how);
       }
       this.state.pc++;

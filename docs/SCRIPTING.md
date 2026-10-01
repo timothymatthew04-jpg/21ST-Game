@@ -533,17 +533,20 @@ bgsound japan_coast waves         # at the top: the sound of a place, started wh
 Files are found by name, see the asset folders below. When there is no file, the game plays its own
 music and sounds, composed in code (js/synth.js):
 
-* **Music**: `town_theme`, `helene_theme`, `journey`, `japan`, `her_theme`, `war`, `letter`, `home`,
-  `sorrow`; intense: `battle`, `tension`, `pursuit`, `storm`; emotional: `lament`, `farewell`,
+* **Music**: `camp` (a march), `village` (a musette waltz), `town_theme`, `helene_theme`, `journey`,
+  `japan`, `japan_dread`, `her_theme`, `aurora`, `war`, `war_dread`, `letter`, `home`, `sorrow`, `storm_ride`; intense: `battle`, `tension`, `pursuit`, `storm`; emotional: `lament`, `farewell`,
   `reverie`, `departure`, `revelation`.
 * **Ambience**: `waves`, `wind`, `birds`, `rain`, `storm`, `fire`, `crickets`, `night`, `temple`,
   `forest`, `camp`, `mill`, `clock`, `room`, `city`, `harbour`, `boat`, `stream`, `ruins`, `unrest`,
-  `aviary`, `battle` (the war all around), `battle_far` (the war heard from the hills).
+  `aviary`, `battle` (the war all around), `battle_far` (the war heard from the hills), `barracks`
+  (the camp by day), `town` (the river town), `dusk_village` (wind chimes, crows, a far bell),
+  `tempest` (driving rain and gusts).
 * **Sounds**: `bell`, `temple_bell`, `chime`, `heartbeat`, `heartbeat_fast`, `thunder`, `cannon`,
   `page`, `paper`, `knock`, `cup`, `gong`, `wind_gust`, `breath`, `ink`, `whoosh`, `stamp`,
   `sparkle`, `candle_out`; war: `musket`, `volley`, `explosion`, `shell`, `horn`, `drumroll`,
   `shouts`, `sword`; drama: `sting` (an orchestral hit), `swell`, `dread`; everyday: `footsteps`,
-  `running`, `gallop`, `door`, `creak`, `pour`, `rustle`, `shatter`, `splash`; walking: `step`, `hoof`;
+  `running`, `gallop`, `door`, `creak`, `pour`, `rustle`, `shatter`, `splash`, `crow`; walking: `step`,
+  `step_gravel`, `step_stone`, `step_wood`, `step_earth`, `step_mud`, `step_rubble`, `step_grass`, `hoof`, `hoof_wet`;
   the characters' themes (for `intro ... sound`): `theme_herve`, `theme_helene`, `theme_balbadiou`,
   `theme_harakei`, `theme_woman`, `theme_blanche`.
 

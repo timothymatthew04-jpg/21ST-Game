@@ -339,7 +339,7 @@ label chapter1
   scene army_camp with fade
   # in the army, Hervé wears the uniform (until he goes home)
   outfit herve army
-  play music war fadein 3 volume 0.45
+  play music camp fadein 3 volume 0.8
   play sound horn volume 0.4
   cutscene camp
   introduce herve
@@ -447,7 +447,7 @@ label wedding
   # home, out of the uniform
   outfit herve
   scene lavilledieu with fade
-  play music town_theme fadein 3
+  play music village fadein 3
   "So I went home. Not to Japan — home, to Lavilledieu, with my discharge papers in one pocket of my coat and Baldabiou's purse in the other."
   gain francs 200
   "Money for the road, he had said. For the smugglers, and for whatever else the road would ask. Every franc that comes back is the town's."
@@ -577,6 +577,7 @@ label chapter2
   walk steppe
   "Weeks of steppe. Lake Baikal, which the people there call the sea. Rivers I crossed on rafts, and villages that had never seen a Frenchman and saw no reason to start."
   scene smuggler_boat with dissolve
+  play music aurora fadein 3
   "At the edge of the continent, a man who asked no questions and wanted a great deal of money put me on a smuggler's boat."
   "On the last night he came to me with his hand out. The price, it seemed, had gone up."
   menu
@@ -816,7 +817,7 @@ label chapter5
     inner "When I read it back, it read like a ledger. Safer that way."
   endif
   scene silk_mill with fade
-  play music town_theme fadein 2
+  play music village fadein 2
   lose item egg_box
   if eggs_result == "win"
     "In spring, the eggs hatched. They were healthy. Every one of them."
@@ -1331,12 +1332,12 @@ label chapter10
 # ============================================================================
 label chapter11
   chapter "Chapter 11" "War" seal 戦
-  play music battle fadein 1
+  play music war_dread fadein 1
   play ambience battle
   cutscene war
   effect ringing
   scene balbadiou_office with fade
-  play music war fadein 3 volume 0.8
+  play music war_dread fadein 3 volume 0.55
   show balbadiou worried
   "The next year, war had changed everything. Japan was no longer the safe destination it had once been."
   "Baldabiou spoke to me in his office, with the door closed."
@@ -1415,7 +1416,7 @@ label lost_without_goodbye
 # ============================================================================
 label chapter12
   chapter "Chapter 12" "The Abandoned Village" seal 灰
-  play music battle fadein 1 volume 0.6
+  play music war_dread fadein 1 volume 0.8
   walk crossing
   if wounded
     effect ringing
