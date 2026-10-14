@@ -3,10 +3,11 @@
 
     python3 tools/audio.py export/ang-tanglaw.wav
 
-A fuse fizzes and rises as the spark climbs the torch; the flame catches with a soft whoomp and a
-low boom, then crackles quietly on. A warm D chord swells under the light and opens from sus2 to
-major as the name lands; the letters of TANGLAW ring in as a rising run, air sweeps with the sheen,
-and a bell sounds as the phoenix's eye catches the light. Everything is synthesised here.
+A hit launches the comet, which roars and rises up the torch into a boom as the flame erupts; the
+phoenix's eye opens with a metallic shing. Taiko drums drive the pull-back, a blade swishes TANGLAW
+open, ANG lands on three toms, and a riser and a drum roll pile into the lockup: a sub drop, a
+crash and a brassy D chord that holds, with the fire roaring under it, until a last hit ends it.
+Everything is synthesised here.
 
 Needs numpy and scipy.
 """
@@ -16,8 +17,8 @@ import wave
 import numpy as np
 from scipy.signal import butter, fftconvolve, sosfilt
 
-from render import (ANG_START, DURATION, GLINT_LEN, GLINT_START, IGNITE, SPARK_ON, SWEEP_LEN,
-                    SWEEP_START, TANGLAW_START)
+from render import (ANG_START, BUTTON, DURATION, EYE_FLARE, IGNITE, LAUNCH, LOCK, SLASH, SLASH_LEN,
+                    SWEEP_LEN, SWEEP_START, TWINKLE, ang_landing)
 
 SR = 48000
 N = int(DURATION * SR)
@@ -33,19 +34,20 @@ def noise(n=N):
     return rng.standard_normal(n)
 
 
-def curve(points):
-    """Piecewise-linear envelope through (time, level) points."""
-    ts, vs = zip(*points)
-    return np.interp(T, ts, vs)
+def since(t0):
+    return np.clip(T - t0, 0, None)
+
+
+def gate(t0):
+    return (T >= t0).astype(float)
 
 
 def bank(x, cutoffs, path, kind='lowpass'):
     """A filter that moves: crossfade copies of x filtered at fixed cutoffs, following path (Hz)."""
-    copies = [filt(x, kind, f) for f in cutoffs]
     pos = np.interp(np.log(np.clip(path, cutoffs[0], cutoffs[-1])), np.log(cutoffs), np.arange(len(cutoffs)))
     out = np.zeros_like(x)
-    for i, c in enumerate(copies):
-        out += c * np.clip(1 - np.abs(pos - i), 0, 1)
+    for i, f in enumerate(cutoffs):
+        out += filt(x, kind, f) * np.clip(1 - np.abs(pos - i), 0, 1)
     return out
 
 
@@ -64,127 +66,186 @@ def crackles(t0, t1, rate, band, level, decay=(0.002, 0.009)):
         t += rng.exponential(1 / max(r, 1e-3))
         if t >= t1:
             break
-        n = int(SR * 0.04)
-        i = int(t * SR)
+        n, i = int(SR * 0.04), int(t * SR)
         if i + n >= N:
             break
-        tau = rng.uniform(*decay)
-        pop = noise(n) * np.exp(-np.arange(n) / SR / tau) * rng.uniform(0.3, 1.0) ** 2
-        out[:, i:i + n] += pan(pop, rng.uniform(-0.6, 0.6))
+        pop = noise(n) * np.exp(-np.arange(n) / SR / rng.uniform(*decay)) * rng.uniform(0.3, 1.0) ** 2
+        out[:, i:i + n] += pan(pop, rng.uniform(-0.7, 0.7))
     return filt(out, 'bandpass', band) * level
 
 
-def tone(freq, partials, decays, amps, start, attack=0.003):
+def tone(freq, partials, decays, amps, start, attack=0.002):
     """A struck tone: partials (ratios) each decaying at its own rate."""
-    t = np.clip(T - start, 0, None)
-    on = T >= start
+    t = since(start)
     out = np.zeros(N)
     for r, d, a in zip(partials, decays, amps):
         out += a * np.sin(2 * np.pi * freq * r * t) * np.exp(-t / d)
-    return out * on * np.clip(t / attack, 0, 1)
+    return out * gate(start) * np.clip(t / attack, 0, 1)
 
 
-def reverb(x, seconds=2.6, decay=0.5, predelay=0.018):
+def drum(t0, size=1.0, pitch=1.0):
+    """A taiko-like hit: a pitch-dropping body, the skin, and a stick click."""
+    t = since(t0)
+    f = (55 + 95 * np.exp(-t / 0.03)) * pitch
+    body = np.sin(2 * np.pi * np.cumsum(f) / SR) * np.exp(-t / (0.32 * size)) * np.clip(t / 0.002, 0, 1)
+    skin = filt(noise(), 'bandpass', (180 * pitch, 1800)) * np.exp(-t / 0.045)
+    click = filt(noise(), 'highpass', 2500) * np.exp(-t / 0.004)
+    return (np.tanh(body * 1.5) * 0.9 + skin * 0.35 + click * 0.15) * gate(t0) * size
+
+
+def boom(t0, length=1.0, f0=62, f1=30):
+    """A sub drop."""
+    t = since(t0)
+    f = f1 + (f0 - f1) * np.exp(-t / 0.2)
+    x = np.sin(2 * np.pi * np.cumsum(f) / SR) * np.exp(-t / length) * np.clip(t / 0.004, 0, 1) * gate(t0)
+    return np.tanh(x * 1.8) / np.tanh(1.8)
+
+
+def whoomp(t0, length=0.45):
+    """A rush of air, bright at first then dark."""
+    t = since(t0)
+    x = bank(noise(), [250, 500, 1000, 2000, 4000, 8000], 280 + 8500 * np.exp(-t / 0.18))
+    return x * np.exp(-t / length) * np.clip(t / 0.01, 0, 1) * gate(t0)
+
+
+def shing(t0, base=2200.0, length=1.0):
+    """A metallic ring with a bright transient."""
+    ring = tone(base, [1, 2.32, 4.25, 6.63], [length, length * 0.55, length * 0.3, length * 0.15], [1, 0.5, 0.25, 0.1], t0)
+    t = since(t0)
+    zing = filt(noise(), 'highpass', 5000) * np.exp(-t / 0.05) * gate(t0)
+    return ring * 0.6 + zing * 0.4
+
+
+def saw(freq):
+    phase = np.cumsum(np.broadcast_to(freq, (N,))) / SR
+    return 2 * (phase % 1.0) - 1
+
+
+def braam(t0, notes, length=4.0, bright=1.0):
+    """A brassy chord: detuned saws through a filter that opens on the hit and slowly closes."""
+    t = since(t0)
+    x = np.zeros(N)
+    for f, a in notes:
+        for det in (-0.006, 0.0, 0.007):
+            x += saw(f * (1 + det)) * a / 3
+    path = 700 + 3800 * bright * np.exp(-t / 0.35) + 500 * np.exp(-t / 2.5)
+    x = bank(x, [250, 500, 1000, 2000, 4000], path)
+    env = np.clip(t / 0.02, 0, 1) * (0.55 + 0.45 * np.exp(-t / 0.6)) * np.exp(-t / length)
+    return np.tanh(x * env * gate(t0) * 1.4)
+
+
+def riser(t0, t1, f0=400, f1=9000):
+    """Noise and a gliding tone climbing into t1, cut there."""
+    u = np.clip((T - t0) / (t1 - t0), 0, 1) * (T < t1)
+    air = bank(noise(), [400, 800, 1600, 3200, 6400, 9000], f0 * (f1 / f0) ** u) * u ** 2.5
+    pitch = 146.83 * 2 ** (u ** 1.5)
+    tonal = filt(saw(pitch), 'lowpass', 2500) * u ** 3
+    cut = np.clip((t1 - T) / 0.008, 0, 1)
+    return (air * 0.8 + tonal * 0.25) * cut
+
+
+def reverb(x, seconds=2.4, decay=0.45, predelay=0.015):
     n = int(seconds * SR)
     tt = np.arange(n) / SR
     ir = rng.standard_normal((2, n)) * np.exp(-tt / decay)
-    ir = filt(filt(ir, 'lowpass', 5500), 'highpass', 150)
+    ir = filt(filt(ir, 'lowpass', 6000), 'highpass', 150)
     ir = np.concatenate([np.zeros((2, int(predelay * SR))), ir], axis=1)
     ir /= np.sqrt((ir ** 2).sum(axis=1, keepdims=True))
     return np.stack([fftconvolve(x[c], ir[c])[:N] for c in range(2)])
 
 
+D2, A2, D3, A3, D4, FS4, A4 = 73.42, 110.0, 146.83, 220.0, 293.66, 369.99, 440.0
+
+
 def main(path):
     dry = np.zeros((2, N))
     wet = np.zeros((2, N))
-    after = np.clip(T - IGNITE, 0, None)
-    hit = T >= IGNITE
 
-    # --- the spark climbing: a fizzing fuse and an airy rise that cuts at the impact
-    climb = np.clip((T - SPARK_ON) / (IGNITE - SPARK_ON), 0, 1) * (T < IGNITE)
-    fuse = crackles(SPARK_ON, IGNITE, lambda t: 70 + 160 * (t - SPARK_ON), (2500, 9000), 0.16, (0.0008, 0.003))
-    dry += fuse * np.clip((T - SPARK_ON) / 0.15, 0, 1)
-    air = bank(noise(), [300, 600, 1200, 2400, 4800], 350 * 12 ** climb, 'lowpass')
-    cut = np.clip((IGNITE - T) / 0.012, 0, 1)
-    rise = air * climb ** 2.2 * 0.22 * cut
-    dry += pan(rise, 0)
-    wet += pan(rise, 0) * 0.5
-    swell = np.sin(2 * np.pi * np.cumsum(38 + 18 * climb) / SR) * climb ** 3 * 0.12 * cut
-    dry += pan(swell, 0)
+    def add(sig, level, p=0.0, send=0.3):
+        s = pan(sig, p) if sig.ndim == 1 else sig
+        dry[:] += s * level
+        wet[:] += s * level * send
 
-    # --- ignition: a click, a low boom falling in pitch, and a whoomp of air
-    click = noise() * np.exp(-after / 0.0025) * hit
-    dry += pan(filt(click, 'bandpass', (200, 4000)) * 0.35, 0)
-    boom_f = 34 + 38 * np.exp(-after / 0.18)
-    boom = np.sin(2 * np.pi * np.cumsum(boom_f) / SR) * np.exp(-after / 0.75) * hit
-    boom *= np.clip(after / 0.004, 0, 1)
-    boom = np.tanh(boom * 1.6) / np.tanh(1.6)
-    dry += pan(boom * 0.62, 0)
-    wet += pan(boom * 0.12, 0)
-    whoomp_path = 300 + 6500 * np.exp(-after / 0.22)
-    whoomp = bank(noise(), [250, 500, 1000, 2000, 4000, 7000], whoomp_path, 'lowpass')
-    whoomp *= np.exp(-after / 0.42) * np.clip(after / 0.012, 0, 1) * hit
-    dry += np.stack([whoomp, np.roll(whoomp, 240)]) * 0.5
-    wet += pan(whoomp * 0.3, 0)
-    dry += crackles(IGNITE, IGNITE + 0.9, lambda t: 260 * np.exp(-(t - IGNITE) / 0.25) + 5, (2000, 10000), 0.3)
+    # --- a sucked-in breath, then the launch
+    u = np.clip(T / LAUNCH, 0, 1) * (T < LAUNCH)
+    add(bank(noise(), [500, 1000, 2000, 4000], 500 * 8 ** u) * u ** 3 * np.clip((LAUNCH - T) / 0.006, 0, 1), 0.35)
+    add(drum(LAUNCH, 0.8), 0.55, 0, 0.25)
+    add(boom(LAUNCH, 0.3, 80, 45), 0.35)
 
-    # --- the fire burns on: a low rumble and the odd crackle
-    bed_env = np.clip(after / 0.6, 0, 1) * hit * np.clip((DURATION - T) / 1.0, 0, 1)
-    rumble = filt(np.cumsum(noise()), 'bandpass', (60, 420))
-    rumble *= 0.07 / np.abs(rumble).max() * (0.8 + 0.2 * np.sin(2 * np.pi * 0.43 * T)) * bed_env
-    dry += np.stack([rumble, np.roll(rumble, 480)])
-    dry += crackles(IGNITE + 0.6, DURATION, 9, (900, 6500), 0.12, (0.003, 0.012)) * bed_env
+    # --- the comet roars up the torch, fizzing, into the impact
+    climb = np.clip((T - LAUNCH) / (IGNITE - LAUNCH), 0, 1) * (T < IGNITE)
+    cut = np.clip((IGNITE - T) / 0.008, 0, 1)
+    roar = bank(noise(), [300, 600, 1200, 2400, 4800, 8000], 400 * 18 ** climb) * (0.45 + 0.55 * climb ** 1.3) * (T >= LAUNCH)
+    add(roar * cut, 0.6, 0, 0.2)
+    add(crackles(LAUNCH, IGNITE, lambda t: 150 + 400 * (t - LAUNCH), (2500, 10000), 0.3, (0.0008, 0.003)), 1.0)
+    add(filt(saw(D2 * 2 ** (climb * 1.0)), 'lowpass', 900) * climb ** 2 * cut, 0.2)
 
-    # --- a warm chord: D sus2, opening to D major as the name lands
-    notes = {146.83: 1.0, 220.0: 0.8, 293.66: 0.7, 440.0: 0.45, 587.33: 0.18}
-    third = np.clip((T - (TANGLAW_START + 0.25)) / 0.7, 0, 1)
-    pad = np.zeros(N)
-    for f, a in list(notes.items()) + [(329.63, 'sus'), (369.99, 'maj')]:
-        level = 0.55 * (1 - third) if a == 'sus' else 0.55 * third if a == 'maj' else a
-        for det in (-0.004, 0.0, 0.0045):
-            ph = 2 * np.pi * f * (1 + det) * T + rng.uniform(0, 6.3)
-            wave_ = sum(np.sin(ph * k) * np.exp(-k / 2.6) / k for k in range(1, 9))
-            pad += wave_ * level / 3
-    pad_env = curve([(0, 0), (IGNITE + 0.05, 0), (IGNITE + 1.8, 0.75), (ANG_START + 0.8, 1.0),
-                     (DURATION - 1.4, 0.95), (DURATION, 0)]) ** 1.6
-    pad = filt(pad, "lowpass", 2200) * pad_env * 0.095
-    shimmer = 0.5 + 0.5 * np.sin(2 * np.pi * 0.18 * T)
-    dry += np.stack([pad * (0.9 + 0.1 * shimmer), pad * (1.0 - 0.1 * shimmer)])
-    wet += np.stack([pad, pad]) * 0.8
+    # --- the flame erupts
+    add(boom(IGNITE, 0.9, 64, 31), 0.9)
+    add(drum(IGNITE, 1.3, 0.85), 0.6, 0, 0.35)
+    w = whoomp(IGNITE, 0.5)
+    add(np.stack([w, np.roll(w, 260)]), 0.55, 0, 0.35)
+    add(crackles(IGNITE, IGNITE + 1.0, lambda t: 300 * np.exp(-(t - IGNITE) / 0.3) + 10, (1800, 11000), 0.38), 1.0)
 
-    # --- ANG drifts in on a breath of air, from the left
-    breath = filt(noise(), 'bandpass', (900, 5000))
-    breath_env = np.exp(-((T - (ANG_START + 0.35)) / 0.32) ** 2)
-    sig = breath * breath_env * 0.07
-    dry += pan(sig, -0.45)
-    wet += pan(sig, -0.45) * 0.6
+    # --- the fire roars on to the end
+    t = since(IGNITE)
+    bed = filt(np.cumsum(noise()), 'bandpass', (60, 600))
+    bed = bed / np.abs(bed).max() * (0.85 + 0.15 * np.sin(2 * np.pi * 0.5 * T))
+    hiss = filt(noise(), 'bandpass', (900, 4500)) * 0.12
+    swell = np.clip(t / 0.25, 0, 1) * gate(IGNITE) * (0.75 + 0.35 * np.exp(-t / 0.8))
+    add(np.stack([bed + hiss, np.roll(bed, 480) + np.roll(hiss, 240)]) * swell, 0.16, 0, 0.1)
+    add(crackles(IGNITE + 0.8, DURATION, 16, (800, 7000), 0.17, (0.003, 0.012)), 1.0)
 
-    # --- TANGLAW: each letter rings in as it lands, rising left to right
-    run = [587.33, 659.25, 739.99, 880.0, 987.77, 1174.66, 1318.51]
-    for j, f in enumerate(run):
-        land = TANGLAW_START + 0.06 * j + 0.2
-        note = tone(f, [1, 2.0, 3.98], [0.32, 0.12, 0.05], [1, 0.22, 0.07], land) * 0.085
-        p = -0.55 + 1.1 * j / 6
-        dry += pan(note, p)
-        wet += pan(note, p) * 0.9
+    # --- the phoenix opens its eye
+    add(shing(EYE_FLARE, 2200, 1.1), 0.26, 0.35, 0.8)
 
-    # --- the sheen: air sweeping left to right, and a bell for the phoenix's eye
-    sweep_u = np.clip((T - SWEEP_START) / SWEEP_LEN, 0, 1)
-    sheen = filt(noise(), 'bandpass', (4500, 12000)) * np.sin(np.pi * sweep_u) ** 2 * 0.05
-    dry += pan(sheen, -0.7 + 1.4 * sweep_u)
-    wet += pan(sheen, 0) * 0.5
-    ting_at = GLINT_START + GLINT_LEN / 2 - 0.05
-    ting = tone(1760.0, [1, 2.76, 5.40, 8.93], [1.6, 0.8, 0.35, 0.18], [1, 0.38, 0.14, 0.05], ting_at) * 0.09
-    ting += tone(880.0, [1, 2.0], [1.9, 0.6], [1, 0.2], ting_at) * 0.045
-    dry += pan(ting, 0.35)
-    wet += pan(ting, 0.35) * 1.1
+    # --- drums drive the pull back, the blade cuts TANGLAW open, ANG lands
+    for t0, s, pch in ((1.55, 0.8, 1.0), (1.95, 0.85, 1.0), (2.25, 0.6, 1.15), (2.42, 0.7, 1.1)):
+        add(drum(t0, s, pch), 0.5, 0, 0.35)
+    add(drum(SLASH, 1.1, 0.95), 0.55, 0, 0.35)
+    add(boom(SLASH, 0.5, 70, 38), 0.45)
+    blade = np.clip((T - SLASH) / SLASH_LEN, 0, 1)
+    swish = bank(noise(), [1500, 3000, 6000, 10000], 1500 * 6 ** blade, 'highpass')
+    swish *= np.sin(np.pi * np.clip((T - SLASH + 0.05) / (SLASH_LEN + 0.15), 0, 1)) ** 2
+    add(pan(swish, -0.8 + 1.6 * blade), 0.32, 0, 0.4)
+    add(shing(SLASH + 0.02, 1500, 0.8), 0.18, -0.3, 0.7)
+    for j in range(3):
+        add(drum(ang_landing(j), 0.55, 1.5 + 0.12 * j), 0.45, -0.5 + 0.12 * j, 0.3)
 
-    mix = dry + reverb(wet) * 0.55
-    mix = filt(mix, 'highpass', 28)
-    mix *= np.clip((DURATION - T) / 0.6, 0, 1) ** 2
-    mix = np.tanh(mix * 1.2) / 1.2
+    # --- the sheen, a riser and a roll piling into the lockup
+    sheen = filt(noise(), 'bandpass', (5000, 12000)) * np.sin(np.pi * np.clip((T - SWEEP_START) / SWEEP_LEN, 0, 1)) ** 2
+    add(pan(sheen, -0.7 + 1.4 * np.clip((T - SWEEP_START) / SWEEP_LEN, 0, 1)), 0.06, 0, 0.5)
+    add(riser(ANG_START + 0.3, LOCK), 0.45, 0, 0.3)
+    for t0, s in ((3.45, 0.45), (3.65, 0.5), (3.80, 0.55), (3.90, 0.6), (3.97, 0.65), (4.02, 0.7), (4.06, 0.75)):
+        add(drum(t0, s, 1.25), 0.6, 0, 0.3)
+
+    # --- the lockup: everything lands, and the chord holds to the end
+    add(boom(LOCK, 1.5, 58, 27), 1.0)
+    add(drum(LOCK, 1.5, 0.8), 0.7, 0, 0.4)
+    chord = [(D2, 1.0), (A2, 0.8), (D3, 0.75), (A3, 0.45), (D4, 0.4), (FS4, 0.3), (A4, 0.2)]
+    b = braam(LOCK, chord, 4.5)
+    add(np.stack([b, np.roll(b, 300)]), 0.42, 0, 0.35)
+    crash = filt(noise(2 * N).reshape(2, N), 'highpass', 4000) * np.exp(-since(LOCK) / 1.3) * gate(LOCK)
+    add(crash, 0.16, 0, 0.5)
+    w = whoomp(LOCK, 0.6)
+    add(np.stack([w, np.roll(w, 200)]), 0.4, 0, 0.3)
+    add(shing(LOCK, 2600, 1.5), 0.24, 0.35, 0.9)
+    add(shing(TWINKLE, 3100, 0.7), 0.08, 0.35, 0.9)
+
+    # --- one last hit to end on
+    add(boom(BUTTON, 0.7, 60, 30), 0.85)
+    add(drum(BUTTON, 1.3, 0.85), 0.65, 0, 0.35)
+    b = braam(BUTTON, chord, 2.0, 1.2)
+    add(np.stack([b, np.roll(b, 300)]), 0.36, 0, 0.3)
+    add(shing(BUTTON, 2600, 1.0), 0.2, 0.35, 0.8)
+    crash = filt(noise(2 * N).reshape(2, N), 'highpass', 4500) * np.exp(-since(BUTTON) / 0.8) * gate(BUTTON)
+    add(crash, 0.12, 0, 0.5)
+
+    mix = dry + reverb(wet) * 0.6
+    mix = filt(mix, 'highpass', 25)
+    mix = np.tanh(mix * 1.6) / 1.6            # glue it together, and loud
+    mix *= np.clip((DURATION - T) / 0.06, 0, 1)
     mix *= 10 ** (-1 / 20) / np.abs(mix).max()
-
     pcm = (np.clip(mix.T, -1, 1) * 32767).astype('<i2')
     with wave.open(path, 'wb') as w:
         w.setnchannels(2)
