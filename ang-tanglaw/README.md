@@ -5,7 +5,7 @@ means a light that shows the way, so the logo is forged by its own fire.
 
 | File | What it is |
 | --- | --- |
-| `export/ang-tanglaw.mp4` | The reveal with sound (1920×1080, 60 fps, 9 s) |
+| `export/ang-tanglaw.mp4` | The reveal with sound (1920×1080, 60 fps, 9 s, 3.7 MB) |
 | `export/ang-tanglaw-silent.mp4` | The same picture without sound, for laying your own music under it |
 | `export/ang-tanglaw.wav` | The sound on its own (48 kHz stereo) |
 
@@ -21,13 +21,17 @@ means a light that shows the way, so the logo is forged by its own fire.
 | 1.05 to 2.65 s | The camera pulls back hard to the whole burning torch | Taiko drums |
 | 2.6 s | A blade of fire cuts across, and **TANGLAW** opens out of the cut in white-hot letters that cool to cream | A blade swish and a hit |
 | 2.95 s | **ANG** slams down above it, letter by letter, throwing sparks | Three toms |
-| 3.35 s | A sheen crosses the logo while the camera leans in | A riser and a drum roll |
+| 3.35 s | A sheen glides across the logo while the camera leans in | A riser and a drum roll |
 | 4.1 s | **The lockup:** the logo slams into place, the flame flares, the eye blazes, the letters flash | A sub drop, a crash and a brassy D chord |
 | 4.1 to 8.5 s | The logo holds, burning hard: live flames lick up off the feathers, embers rise, the flame spits sparks, the eye glints | The chord holds over the roaring fire |
-| 8.55 s | One last flare and eye flash to end on | A final hit |
+| 8.55 s | One last, smaller flare and eye flash; the picture settles before the last frame | A short final hit, a step below the lockup, that rings out |
 
 The logo itself is never redrawn: the lettering, colours and layout are your design, and the live
 fire is kept a hair away from the phoenix's outline so its silhouette always reads.
+
+Every hit rises over a few frames rather than jumping in one, fast camera moves carry motion blur,
+and the shake is a short thump that settles. The sound is mixed to -12 LUFS with a -1 dB true peak,
+so it doesn't clip once uploaded, and its bass holds up on mono speakers.
 
 ## Using it
 
