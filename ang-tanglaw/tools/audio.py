@@ -267,7 +267,7 @@ def main(path):
     mix = filt(mix, 'highpass', 30, 4)
     mix = np.tanh(mix)                          # gentle glue; the hits keep their punch
     mix *= np.cos(0.5 * np.pi * np.clip((T - (DURATION - 0.25)) / 0.25, 0, 1)) ** 2
-    mix *= 10 ** (-1 / 20) / np.abs(resample_poly(mix, 4, 1, axis=-1)).max()   # -1 dB true peak: no clipping in AAC
+    mix *= 10 ** (-2 / 20) / np.abs(resample_poly(mix, 4, 1, axis=-1)).max()   # -2 dB true peak: room for AAC to overshoot
     pcm = (np.clip(mix.T, -1, 1) * 32767).astype('<i2')
     with wave.open(path, 'wb') as w:
         w.setnchannels(2)

@@ -30,7 +30,7 @@ The logo itself is never redrawn: the lettering, colours and layout are your des
 fire is kept a hair away from the phoenix's outline so its silhouette always reads.
 
 Every hit rises over a few frames rather than jumping in one, fast camera moves carry motion blur,
-and the shake is a short thump that settles. The sound is mixed to -12 LUFS with a -1 dB true peak,
+and the shake is a short thump that settles. The sound is mixed to about -13 LUFS with a -2 dB true peak,
 so it doesn't clip once uploaded, and its bass holds up on mono speakers.
 
 ## Using it

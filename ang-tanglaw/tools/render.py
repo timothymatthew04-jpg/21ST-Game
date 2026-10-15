@@ -370,7 +370,7 @@ def cam_follow(logo, t):
         return logo.layout(comet_pos(logo, max(t - CAM_LAG, LAUNCH)))
     p0 = logo.layout(comet_pos(logo, IGNITE - CAM_LAG))
     v0 = (p0 - logo.layout(comet_pos(logo, IGNITE - CAM_LAG - 1e-3))) / 1e-3
-    ign, k, tau = logo.layout(logo.ignite), t - IGNITE, 0.06
+    ign, k, tau = logo.layout(logo.ignite), t - IGNITE, 0.08
     return ign + ((p0 - ign) + (v0 + (p0 - ign) / tau) * k) * np.exp(-k / tau)
 
 
@@ -441,7 +441,7 @@ def draw_body(logo, canvas, glow, t, cam):
             light = light + fade * (1.8 * np.exp(-(d / 170) ** 2) + 0.3 * np.exp(-(d / 520) ** 2))
     if t >= IGNITE:
         d = cam.zk * np.hypot(bx - logo.ignite[0], by - logo.ignite[1])
-        flash = 1.2 * after(t, IGNITE, 0.3) * smooth(0, 0.04, t - IGNITE) * np.exp(-(d / 420) ** 2)
+        flash = 1.2 * after(t, IGNITE, 0.3) * smooth(0, 0.08, t - IGNITE) * np.exp(-(d / 420) ** 2)
         light = np.maximum(light, lit_by_front(t, d)) + flash
         heat = heat + 0.9 * hit(t, IGNITE, 0.4, 0.035)
     heat = heat + 0.9 * hit(t, LOCK, 0.3) + 0.45 * hit(t, BUTTON, 0.2)
@@ -672,7 +672,7 @@ def background(logo, t, cam):
     bg = DARK + (lit - DARK) * np.asarray(lit_amt, np.float32)[..., None]
     if t >= IGNITE:
         k = t - IGNITE
-        bg += WARM * (1.0 * np.exp(-k / 0.25) * smooth(0, 0.06, k) * np.exp(-(d_i / 420) ** 2))[..., None]
+        bg += WARM * (1.0 * np.exp(-k / 0.25) * smooth(0, 0.09, k) * np.exp(-(d_i / 420) ** 2))[..., None]
     for t0, s, tau in ((LOCK, 0.32, 0.22), (BUTTON, 0.16, 0.16)):
         if t >= t0:
             bg += WARM * (s * hit(t, t0, tau) * np.exp(-(d_f / 450) ** 2))[..., None]
@@ -824,8 +824,8 @@ def shutter_warp(logo, layer, t, cam):
     inv = cv2.invertAffineTransform(cam.canvas_matrix())
     q = pts @ inv[:, :2].T + inv[:, 2]
     travel = np.hypot(*((q @ m1[:, :2].T + m1[:, 2]) - (q @ m0[:, :2].T + m0[:, 2])).T).max()
-    n = int(min(10, np.ceil(travel / 4)))
-    if n <= 1:
+    n = int(min(16, np.ceil(travel / 2) + 1))      # samples no more than 2 px apart
+    if travel < 2:
         return cv2.warpAffine(layer, cam.canvas_matrix(), (W, H), flags=cv2.INTER_LINEAR,
                               borderMode=cv2.BORDER_CONSTANT, borderValue=0)
     acc = 0
@@ -848,7 +848,7 @@ def bloom(glow_half):
 def glow_gain(t):
     if t < LAUNCH:
         return 0.0
-    g = 1.0 + 1.4 * hit(t, IGNITE, 0.25)
+    g = 1.0 + 1.4 * hit(t, IGNITE, 0.25, 0.09)
     g += 1.0 * hit(t, LOCK, 0.22) + 0.45 * hit(t, BUTTON, 0.15)
     return g * (1 + 0.07 * np.sin(2 * np.pi * 0.55 * t) + 0.04 * np.sin(2 * np.pi * 1.37 * t + 1.3))
 
