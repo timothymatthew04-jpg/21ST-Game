@@ -36,7 +36,7 @@ EYE_FLARE = 1.30                   # the phoenix opens a blazing eye
 PULL_START, PULL_LEN = 1.05, 1.6   # the camera pulls back to the whole torch
 SLASH, SLASH_LEN = 2.60, 0.30      # a blade of fire cuts TANGLAW open
 ANG_START, ANG_FALL = 2.95, 0.26   # ANG slams down, letter by letter
-SWEEP_START, SWEEP_LEN = 3.35, 0.6
+SWEEP_START, SWEEP_LEN = 3.35, 0.7
 LOCK = 4.10                        # everything lands: the flame flares, the eye blazes
 TWINKLE = 6.45                     # the eye glints again while the logo holds
 BUTTON = 8.55                      # one last flare to end on
@@ -72,11 +72,6 @@ def out_cubic(u):
     return 1 - (1 - clamp01(u)) ** 3
 
 
-def out_expo(u):
-    u = clamp01(u)
-    return 1 - 2 ** (-10 * u) if u < 1 else 1.0
-
-
 def in_cubic(u):
     return clamp01(u) ** 3
 
@@ -106,7 +101,7 @@ def bezier(x1, y1, x2, y2):
 
 
 comet_ease = bezier(0.55, 0.0, 0.85, 0.75)   # launches, then still accelerating when it hits
-pull_ease = bezier(0.6, 0.0, 0.2, 1.0)       # a hard pull that settles with authority
+pull_ease = bezier(0.5, 0.0, 0.2, 1.0)       # a hard pull that settles with authority
 
 
 def after(t, t0, tau):
@@ -338,7 +333,8 @@ def deposit(buf, xs, ys, cols, ws):
 
 # ---------------------------------------------------------------- the camera
 
-SHAKES = [(LAUNCH, 4, 0.16), (IGNITE, 13, 0.3), (SLASH + SLASH_LEN * 0.5, 5, 0.18), (LOCK, 11, 0.28), (BUTTON, 6, 0.22)]
+SHAKES = [(LAUNCH, 3, 0.10), (IGNITE, 12, 0.13), (SLASH + SLASH_LEN * 0.5, 4, 0.10), (LOCK, 10, 0.13), (BUTTON, 4, 0.10)]
+CAM_LAG = 0.07
 
 
 class Cam:
@@ -361,9 +357,18 @@ class Cam:
         return np.float32(np.hstack([self.A * scale, ((self.A @ c0 + self.b) * scale - 0.5)[:, None]]))
 
 
+def cam_follow(logo, t):
+    """The point the camera chases: the comet CAM_LAG s ago; after the impact it settles onto the cup, critically damped."""
+    if t <= IGNITE:
+        return logo.layout(comet_pos(logo, max(t - CAM_LAG, LAUNCH)))
+    p0 = logo.layout(comet_pos(logo, IGNITE - CAM_LAG))
+    v0 = (p0 - logo.layout(comet_pos(logo, IGNITE - CAM_LAG - 1e-3))) / 1e-3
+    ign, k, tau = logo.layout(logo.ignite), t - IGNITE, 0.06
+    return ign + ((p0 - ign) + (v0 + (p0 - ign) / tau) * k) * np.exp(-k / tau)
+
+
 def camera(logo, t):
-    ign = logo.layout(logo.ignite)
-    follow = logo.layout(comet_pos(logo, max(t - 0.07, LAUNCH))) if t < IGNITE + 0.1 else ign
+    follow = cam_follow(logo, t)
     close = follow - (0, 140)
     if t <= IGNITE:
         z = 2.75 - 0.45 * in_out_sine(t / IGNITE)
@@ -378,12 +383,12 @@ def camera(logo, t):
     if 3.3 <= t < LOCK:
         zoom *= 1 + 0.04 * in_cubic((t - 3.3) / (LOCK - 3.3))
     elif t >= LOCK:
-        zoom *= 1 + 0.04 * (1 - out_expo((t - LOCK) / 0.3))
+        zoom *= 1 + 0.04 * (1 - out_cubic((t - LOCK) / 0.35))
     shake = np.zeros(2)
     for t0, amp, tau in SHAKES:
         if t >= t0:
             k = t - t0
-            shake += amp * np.exp(-k / tau) * np.array([np.sin(2 * np.pi * 21 * k), np.sin(2 * np.pi * 16 * k + 0.4)])
+            shake += amp * np.exp(-k / tau) * np.array([0.45 * np.sin(2 * np.pi * 7 * k + 0.5), np.sin(2 * np.pi * 9 * k)])
     return Cam(logo, zoom, rot, centre, shake)
 
 
@@ -566,7 +571,9 @@ def draw_slash(logo, canvas, glow, t):
     core = np.exp(-((yy - y_s) / 2.0) ** 2)
     haze = np.exp(-((yy - y_s) / 13) ** 2)
     light = (core * along)[..., None] * HOT * 1.7 + (haze * along)[..., None] * WARM * 0.4
-    r2 = (xx[None, :] - head) ** 2 + (yy - y_s) ** 2
+    seg = max(head - head_x(t - 0.5 / FPS), 0.0)           # smear the head over its half-frame travel
+    ddx = np.where(xx[None, :] > head, xx[None, :] - head, np.minimum(xx[None, :] - (head - seg), 0))
+    r2 = ddx ** 2 + (yy - y_s) ** 2
     light += (np.exp(-r2 / (2 * 9 ** 2)) * 1.4)[..., None] * HOT + (np.exp(-r2 / (2 * 38 ** 2)) * 0.45)[..., None] * WARM
     light *= fade
     sl = (slice(y0 - logo.cy0, y1 - logo.cy0), slice(x0 - logo.cx0, x1 - logo.cx0))
@@ -583,7 +590,7 @@ def draw_sweep(logo, canvas, glow, t):
     s = (xx + logo.cx0) * n[0] + (yy + logo.cy0) * n[1]
     lo, hi = 330 * n[0] + 150 * n[1] - 200, 1450 * n[0] + 1340 * n[1] + 200
     pos = lo + (hi - lo) * in_out_sine(u)
-    band = 0.32 * np.exp(-((s - pos) / 95) ** 2) + 0.3 * np.exp(-((s - pos) / 16) ** 2)
+    band = 0.30 * np.exp(-((s - pos) / 100) ** 2) + 0.14 * np.exp(-((s - pos) / 40) ** 2)   # wide enough to glide, not strobe
     add = (band * canvas[1])[..., None] * np.float32(np.sin(np.pi * u) ** 0.5)
     canvas[0][...] += add
     glow += add * 0.8
@@ -607,7 +614,7 @@ def aura_gain(t):
     if t < IGNITE:
         return 0.0
     g = smooth(IGNITE, IGNITE + 0.06, t) * (1.12 + 0.75 * after(t, IGNITE, 0.35))
-    g += 0.55 * after(t, LOCK, 0.4) * smooth(LOCK, LOCK + 0.04, t) + 0.4 * after(t, BUTTON, 0.35) * smooth(BUTTON, BUTTON + 0.04, t)
+    g += 0.55 * after(t, LOCK, 0.4) * smooth(LOCK, LOCK + 0.04, t) + 0.4 * after(t, BUTTON, 0.25) * smooth(BUTTON, BUTTON + 0.04, t)
     return g * (1 + 0.06 * np.sin(2 * np.pi * 0.7 * t) + 0.04 * np.sin(2 * np.pi * 1.9 * t + 1))
 
 
@@ -782,7 +789,7 @@ def rays(logo, glow_half, t, cam):
         return 0.0
     k = t - IGNITE
     gain = (1.0 * np.exp(-k / 0.5) * smooth(0, 0.05, k) + 0.2 * smooth(0.3, 1.2, k)
-            + 0.6 * after(t, LOCK, 0.4) + 0.35 * after(t, BUTTON, 0.35))
+            + 0.6 * after(t, LOCK, 0.4) + 0.35 * after(t, BUTTON, 0.25))
     cx, cy = cam.src(logo.flame_center) / 4
     q = cv2.resize(glow_half, (W // 4, H // 4), interpolation=cv2.INTER_AREA)
     near = np.exp(-(np.hypot(logo.qx / 4 - cx, logo.qy / 4 - cy) / (110 * cam.zoom)) ** 2)
@@ -796,6 +803,25 @@ def rays(logo, glow_half, t, cam):
         acc += w * cv2.warpAffine(q, m, (W // 4, H // 4), flags=cv2.INTER_LINEAR | cv2.WARP_INVERSE_MAP)
         total += w
     return cv2.resize(acc / total, (W, H), interpolation=cv2.INTER_LINEAR) * gain
+
+
+def shutter_warp(logo, layer, t, cam):
+    """Warp the picture layer over a half-frame shutter centred on t, so fast camera moves blur instead of strobing."""
+    m0 = camera(logo, t - 0.25 / FPS).canvas_matrix()
+    m1 = camera(logo, t + 0.25 / FPS).canvas_matrix()
+    pts = np.float32([[0, 0], [W, 0], [0, H], [W, H], [W / 2, H / 2]])
+    inv = cv2.invertAffineTransform(cam.canvas_matrix())
+    q = pts @ inv[:, :2].T + inv[:, 2]
+    travel = np.hypot(*((q @ m1[:, :2].T + m1[:, 2]) - (q @ m0[:, :2].T + m0[:, 2])).T).max()
+    n = int(min(10, np.ceil(travel / 4)))
+    if n <= 1:
+        return cv2.warpAffine(layer, cam.canvas_matrix(), (W, H), flags=cv2.INTER_LINEAR,
+                              borderMode=cv2.BORDER_CONSTANT, borderValue=0)
+    acc = 0
+    for s in np.linspace(0, 1, n):
+        acc = acc + cv2.warpAffine(layer, np.float32(m0 + (m1 - m0) * s), (W, H), flags=cv2.INTER_LINEAR,
+                                   borderMode=cv2.BORDER_CONSTANT, borderValue=0)
+    return acc / n
 
 
 def bloom(glow_half):
@@ -812,23 +838,23 @@ def glow_gain(t):
     if t < LAUNCH:
         return 0.0
     g = 1.0 + 1.4 * after(t, IGNITE, 0.25) * smooth(IGNITE, IGNITE + 0.04, t)
-    g += 1.0 * after(t, LOCK, 0.22) * smooth(LOCK, LOCK + 0.035, t) + 0.6 * after(t, BUTTON, 0.22) * smooth(BUTTON, BUTTON + 0.035, t)
+    g += 1.0 * after(t, LOCK, 0.22) * smooth(LOCK, LOCK + 0.035, t) + 0.6 * after(t, BUTTON, 0.15) * smooth(BUTTON, BUTTON + 0.035, t)
     return g * (1 + 0.07 * np.sin(2 * np.pi * 0.55 * t) + 0.04 * np.sin(2 * np.pi * 1.37 * t + 1.3))
 
 
 def ripple(logo, img, t, cam):
     """Shockwaves of heat that bend the picture as they pass."""
     dx = dy = None
-    for t0, centre, s in ((IGNITE, logo.ignite, 1.0), (LOCK, logo.torch_center, 0.9), (BUTTON, logo.torch_center, 0.5)):
+    for t0, centre, s in ((IGNITE, logo.ignite, 1.0), (LOCK, logo.torch_center, 0.9), (BUTTON, logo.torch_center, 0.35)):
         u = (t - t0) / 0.85
         if not 0 <= u < 1:
             continue
         c = cam.src(centre)
         ddx, ddy = logo.qx - c[0], logo.qy - c[1]
         d = np.hypot(ddx, ddy) + 1e-3
-        r = 30 + 1700 * out_cubic(u)
-        z = (d - r) / (28 + 70 * u)
-        disp = 11 * s * (1 - u) ** 2 * z * np.exp(-z * z) * 2.33
+        r = 30 + 1300 * (1 - (1 - u) ** 2)
+        z = (d - r) / (90 + 60 * u)
+        disp = 10 * s * smooth(0, 0.15, u) * (1 - u) ** 2 * z * np.exp(-z * z) * 2.33
         dx = (0 if dx is None else dx) + disp * ddx / d
         dy = (0 if dy is None else dy) + disp * ddy / d
     if dx is None:
@@ -861,8 +887,7 @@ def render(t, seed=0):
     layer = np.dstack([canvas[0], canvas[1]])
     if cam.zk < 0.999:
         layer = cv2.GaussianBlur(layer, (0, 0), 0.5)
-    layer = cv2.warpAffine(layer, cam.canvas_matrix(), (W, H), flags=cv2.INTER_LINEAR,
-                           borderMode=cv2.BORDER_CONSTANT, borderValue=0)
+    layer = shutter_warp(logo, layer, t, cam)
     img = background(logo, t, cam)
     gh = cv2.warpAffine(glow, cam.canvas_matrix(0.5), (W // 2, H // 2), flags=cv2.INTER_LINEAR,
                         borderMode=cv2.BORDER_CONSTANT, borderValue=0)

@@ -15,7 +15,7 @@ import sys
 import wave
 
 import numpy as np
-from scipy.signal import butter, fftconvolve, sosfilt
+from scipy.signal import butter, fftconvolve, resample_poly, sosfilt
 
 from render import (ANG_START, BUTTON, DURATION, EYE_FLARE, IGNITE, LAUNCH, LOCK, SLASH, SLASH_LEN,
                     SWEEP_LEN, SWEEP_START, TWINKLE, ang_landing)
@@ -117,8 +117,29 @@ def shing(t0, base=2200.0, length=1.0):
 
 
 def saw(freq):
-    phase = np.cumsum(np.broadcast_to(freq, (N,))) / SR
-    return 2 * (phase % 1.0) - 1
+    """A band-limited (PolyBLEP) sawtooth, so the chord stays clean instead of gritty with aliases."""
+    f = np.broadcast_to(np.asarray(freq, float), (N,))
+    dt = f / SR
+    phase = (np.cumsum(f) / SR) % 1.0
+    y = 2 * phase - 1
+    a = phase < dt
+    t = phase[a] / dt[a]
+    y[a] -= t + t - t * t - 1
+    b = phase > 1 - dt
+    t = (phase[b] - 1) / dt[b]
+    y[b] -= t * t + t + t + 1
+    return y
+
+
+def delay(x, n):
+    """x shifted n samples later, padded with silence (rolling it would wrap the end round to the start)."""
+    return np.concatenate([np.zeros(n), x[:-n]])
+
+
+def wide(x, n=300, split=200):
+    """Stereo width from a short delay on the right, above `split` Hz only, so the bass stays solid in mono."""
+    lo = filt(x, 'lowpass', split)
+    return np.stack([x, lo + delay(x - lo, n)])
 
 
 def braam(t0, notes, length=4.0, bright=1.0):
@@ -131,7 +152,7 @@ def braam(t0, notes, length=4.0, bright=1.0):
     path = 700 + 3800 * bright * np.exp(-t / 0.35) + 500 * np.exp(-t / 2.5)
     x = bank(x, [250, 500, 1000, 2000, 4000], path)
     env = np.clip(t / 0.02, 0, 1) * (0.55 + 0.45 * np.exp(-t / 0.6)) * np.exp(-t / length)
-    return np.tanh(x * env * gate(t0) * 1.4)
+    return np.tanh(x * env * gate(t0) * 0.9) * 1.4
 
 
 def riser(t0, t1, f0=400, f1=9000):
@@ -181,10 +202,10 @@ def main(path):
     add(filt(saw(D2 * 2 ** (climb * 1.0)), 'lowpass', 900) * climb ** 2 * cut, 0.2)
 
     # --- the flame erupts
-    add(boom(IGNITE, 0.9, 64, 31), 0.9)
+    add(boom(IGNITE, 0.7, 66, 38), 0.9)
     add(drum(IGNITE, 1.3, 0.85), 0.6, 0, 0.35)
     w = whoomp(IGNITE, 0.5)
-    add(np.stack([w, np.roll(w, 260)]), 0.55, 0, 0.35)
+    add(np.stack([w, delay(w, 260)]), 0.55, 0, 0.35)
     add(crackles(IGNITE, IGNITE + 1.0, lambda t: 300 * np.exp(-(t - IGNITE) / 0.3) + 10, (1800, 11000), 0.38), 1.0)
 
     # --- the fire roars on to the end
@@ -192,9 +213,10 @@ def main(path):
     bed = filt(np.cumsum(noise()), 'bandpass', (60, 600))
     bed = bed / np.abs(bed).max() * (0.85 + 0.15 * np.sin(2 * np.pi * 0.5 * T))
     hiss = filt(noise(), 'bandpass', (900, 4500)) * 0.12
-    swell = np.clip(t / 0.25, 0, 1) * gate(IGNITE) * (0.75 + 0.35 * np.exp(-t / 0.8))
-    add(np.stack([bed + hiss, np.roll(bed, 480) + np.roll(hiss, 240)]) * swell, 0.16, 0, 0.1)
-    add(crackles(IGNITE + 0.8, DURATION, 16, (800, 7000), 0.17, (0.003, 0.012)), 1.0)
+    release = np.where(T < BUTTON, 1.0, np.exp(-(T - BUTTON) / 0.12))   # the fire hands over to the last hit
+    swell = np.clip(t / 0.25, 0, 1) * gate(IGNITE) * (0.75 + 0.35 * np.exp(-t / 0.8)) * release
+    add(np.stack([bed + hiss, delay(bed, 480) + delay(hiss, 240)]) * swell, 0.16, 0, 0.1)
+    add(crackles(IGNITE + 0.8, DURATION, 16, (800, 7000), 0.17, (0.003, 0.012)) * release, 1.0)
 
     # --- the phoenix opens its eye
     add(shing(EYE_FLARE, 2200, 1.1), 0.26, 0.35, 0.8)
@@ -220,32 +242,32 @@ def main(path):
         add(drum(t0, s, 1.25), 0.6, 0, 0.3)
 
     # --- the lockup: everything lands, and the chord holds to the end
-    add(boom(LOCK, 1.5, 58, 27), 1.0)
+    add(boom(LOCK, 0.9, 60, 36), 1.0)               # punch where speakers can play it, not a 27 Hz rumble
     add(drum(LOCK, 1.5, 0.8), 0.7, 0, 0.4)
     chord = [(D2, 1.0), (A2, 0.8), (D3, 0.75), (A3, 0.45), (D4, 0.4), (FS4, 0.3), (A4, 0.2)]
-    b = braam(LOCK, chord, 4.5)
-    add(np.stack([b, np.roll(b, 300)]), 0.42, 0, 0.35)
-    crash = filt(noise(2 * N).reshape(2, N), 'highpass', 4000) * np.exp(-since(LOCK) / 1.3) * gate(LOCK)
-    add(crash, 0.16, 0, 0.5)
+    b = braam(LOCK, chord, 6.0) * np.where(T < BUTTON, 1.0, np.exp(-(T - BUTTON) / 0.06))
+    add(wide(b), 0.42, 0, 0.35)
+    crash = filt(filt(noise(2 * N).reshape(2, N), 'highpass', 3500), 'lowpass', 13000) * np.exp(-since(LOCK) / 0.8) * gate(LOCK)
+    add(crash, 0.13, 0, 0.5)
     w = whoomp(LOCK, 0.6)
-    add(np.stack([w, np.roll(w, 200)]), 0.4, 0, 0.3)
+    add(np.stack([w, delay(w, 200)]), 0.4, 0, 0.3)
     add(shing(LOCK, 2600, 1.5), 0.24, 0.35, 0.9)
     add(shing(TWINKLE, 3100, 0.7), 0.08, 0.35, 0.9)
 
-    # --- one last hit to end on
-    add(boom(BUTTON, 0.7, 60, 30), 0.85)
-    add(drum(BUTTON, 1.3, 0.85), 0.65, 0, 0.35)
-    b = braam(BUTTON, chord, 2.0, 1.2)
-    add(np.stack([b, np.roll(b, 300)]), 0.36, 0, 0.3)
-    add(shing(BUTTON, 2600, 1.0), 0.2, 0.35, 0.8)
-    crash = filt(noise(2 * N).reshape(2, N), 'highpass', 4500) * np.exp(-since(BUTTON) / 0.8) * gate(BUTTON)
-    add(crash, 0.12, 0, 0.5)
+    # --- one last, shorter hit to end on: a full step below the lockup, and it rings out
+    add(boom(BUTTON, 0.45, 60, 40), 0.8)
+    add(drum(BUTTON, 1.15, 0.85), 0.7, 0, 0.35)
+    b = braam(BUTTON, chord, 0.4, 1.0)
+    add(wide(b), 0.45, 0, 0.3)
+    add(shing(BUTTON, 2600, 0.7), 0.16, 0.35, 0.8)
+    crash = filt(filt(noise(2 * N).reshape(2, N), 'highpass', 3500), 'lowpass', 13000) * np.exp(-since(BUTTON) / 0.45) * gate(BUTTON)
+    add(crash, 0.10, 0, 0.5)
 
     mix = dry + reverb(wet) * 0.6
-    mix = filt(mix, 'highpass', 25)
-    mix = np.tanh(mix * 1.6) / 1.6            # glue it together, and loud
-    mix *= np.clip((DURATION - T) / 0.06, 0, 1)
-    mix *= 10 ** (-1 / 20) / np.abs(mix).max()
+    mix = filt(mix, 'highpass', 30, 4)
+    mix = np.tanh(mix)                          # gentle glue; the hits keep their punch
+    mix *= np.cos(0.5 * np.pi * np.clip((T - (DURATION - 0.25)) / 0.25, 0, 1)) ** 2
+    mix *= 10 ** (-1 / 20) / np.abs(resample_poly(mix, 4, 1, axis=-1)).max()   # -1 dB true peak: no clipping in AAC
     pcm = (np.clip(mix.T, -1, 1) * 32767).astype('<i2')
     with wave.open(path, 'wb') as w:
         w.setnchannels(2)
