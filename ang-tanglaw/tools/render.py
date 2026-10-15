@@ -109,6 +109,11 @@ def after(t, t0, tau):
     return float(np.exp(-(t - t0) / tau)) if t >= t0 else 0.0
 
 
+def hit(t, t0, tau, rise=0.06):
+    """A decay that starts at t0 after a few frames' rise, so a hit never jumps to full strength in one frame."""
+    return after(t, t0, tau) * float(smooth(t0, t0 + rise, t))
+
+
 # ---------------------------------------------------------------- assets and geometry
 
 def load_layer(name):
@@ -257,7 +262,7 @@ def make_particles(logo):
     groups.append(g)
     # the eruption
     groups.append(sparks(rng, 190, IGNITE + rng.uniform(0, 0.08, 190), ign + rng.uniform(-30, 30, (190, 2)) * (1, 0.2),
-                         (-np.pi * 0.95, -np.pi * 0.05), (300, 1500), (1.8, 3.2), -90, (0.4, 1.4), (0.7, 1.6)))
+                         (-np.pi * 0.95, -np.pi * 0.05), (300, 1500), (1.8, 3.2), -90, (0.4, 1.4), (1.0, 2.2)))
     # the blade throws sparks back and down as it cuts
     te = np.sort(rng.uniform(SLASH, SLASH + SLASH_LEN * 0.85, 100))
     org = np.array([lay((head_x(s), logo.slash_y)) for s in te])
@@ -299,15 +304,17 @@ def make_particles(logo):
     return groups, embers, puffs
 
 
-def spark_points(g, t, samples=8):
+def spark_points(g, t, samples=16):
     """Positions (layout px) along each live spark's streak this frame, with colour and weight."""
     tau = t - g['t0']
     live = (tau >= 0) & (tau < g['life'])
     if not live.any():
         return None
     tau = tau[live]
-    span = np.linspace(0, 0.5 / FPS, samples)                     # half-frame shutter
-    ts = np.maximum(tau[:, None] - span[None, :], 0)
+    span = np.linspace(0, 0.9 / FPS, samples)                     # a near full-frame streak, so sparks glide
+    ts = tau[:, None] - span[None, :]
+    born = (ts >= 0).astype(np.float32)                           # no light from before the spark existed
+    ts = np.maximum(ts, 0)
     k = g['drag'][live][:, None]
     e = (1 - np.exp(-k * ts)) / k
     x = g['p0'][live, 0][:, None] + g['v'][live, 0][:, None] * e
@@ -316,7 +323,7 @@ def spark_points(g, t, samples=8):
     col = HOT + (EMBER - HOT) * np.minimum(f * 2.5, 1) + (DEEP - EMBER) * np.clip(f * 2 - 1, 0, 1)
     gain = g['gain'][live][:, None] * (1 - f) ** 1.4 * (0.8 + 0.2 * np.sin(g['flick'][live][:, None] * tau[:, None]
                                                                           + g['phase'][live][:, None]))
-    return (x.ravel(), y.ravel(), np.repeat(col, samples, 0), np.repeat(gain, samples, 1).ravel() / samples)
+    return (x.ravel(), y.ravel(), np.repeat(col, samples, 0), (np.repeat(gain, samples, 1) * born).ravel() / samples)
 
 
 def deposit(buf, xs, ys, cols, ws):
@@ -416,7 +423,7 @@ def lit_by_front(t, d):
     if t < IGNITE:
         return np.zeros_like(d) if isinstance(d, np.ndarray) else 0.0
     r = 3000 * out_cubic((t - IGNITE) / 1.3)
-    return 1 - smooth(r - 500, r + 500, d)
+    return (1 - smooth(r - 500, r + 500, d)) * smooth(IGNITE, IGNITE + 0.05, t)
 
 
 def draw_body(logo, canvas, glow, t, cam):
@@ -436,13 +443,13 @@ def draw_body(logo, canvas, glow, t, cam):
         d = cam.zk * np.hypot(bx - logo.ignite[0], by - logo.ignite[1])
         flash = 1.2 * after(t, IGNITE, 0.3) * smooth(0, 0.04, t - IGNITE) * np.exp(-(d / 420) ** 2)
         light = np.maximum(light, lit_by_front(t, d)) + flash
-        heat = heat + 0.9 * after(t, IGNITE, 0.4)
-    heat = heat + 0.9 * after(t, LOCK, 0.3) + 0.6 * after(t, BUTTON, 0.28)
+        heat = heat + 0.9 * hit(t, IGNITE, 0.4, 0.035)
+    heat = heat + 0.9 * hit(t, LOCK, 0.3) + 0.45 * hit(t, BUTTON, 0.2)
     rgb = logo.body_rgb * light[..., None]
     edge = (logo.outline * heat)[..., None] * EMBER
     rgb = rgb + edge
     if t >= IGNITE:
-        catch = 0.14 + 0.9 * after(t, IGNITE, 0.45) + 0.5 * after(t, LOCK, 0.3)
+        catch = 0.14 + 0.9 * hit(t, IGNITE, 0.45, 0.035) + 0.5 * hit(t, LOCK, 0.3)
         rgb = rgb + logo.rim_edge[..., None] * HOT * catch
     a = logo.body_a
     placed = paste(logo, canvas, rgb * a[..., None], a, logo.body_box[0], logo.body_box[1])
@@ -455,7 +462,7 @@ def eye_level(t):
     """How brightly the phoenix's eye shines: it opens on EYE_FLARE and keeps glowing."""
     g = smooth(EYE_FLARE - 0.08, EYE_FLARE + 0.1, t) * (1 + 0.2 * np.sin(2 * np.pi * 0.9 * t))
     for t0, s in ((EYE_FLARE, 3.0), (LOCK, 3.5), (TWINKLE, 1.2), (BUTTON, 2.5)):
-        g += s * after(t, t0, 0.25)
+        g += s * hit(t, t0, 0.25)
     return g
 
 
@@ -503,7 +510,7 @@ def molten(logo, h):
 
 
 def draw_letters(logo, canvas, glow, t, cam):
-    flash = 0.7 * after(t, LOCK, 0.16) * smooth(LOCK, LOCK + 0.035, t) + 0.45 * after(t, BUTTON, 0.16) * smooth(BUTTON, BUTTON + 0.035, t)
+    flash = 0.7 * hit(t, LOCK, 0.16) + 0.3 * hit(t, BUTTON, 0.16)
     for l in logo.letters:
         x0, y0 = l['box'][:2]
         a = l['a']
@@ -515,7 +522,10 @@ def draw_letters(logo, canvas, glow, t, cam):
             if sy < 0.02:
                 continue
             heat = np.exp(-(t - l['open']) / 0.42)
-            pivot, dy, vy = logo.slash_y, 0.0, 0.0
+            pivot, dy = logo.slash_y, 0.0
+            reach = max(pivot - y0, l['box'][3] - pivot)              # how far its edges travel as it opens
+            vy = abs(sy - out_back(v - 1 / (0.26 * FPS), 1.8)) * reach / max(sy, 0.3)
+            a = a * smooth(0, 0.12, v)
         else:                                    # falls and slams down
             j = l['index']
             u = (t - ANG_START - 0.06 * j) / ANG_FALL
@@ -557,10 +567,11 @@ def draw_letters(logo, canvas, glow, t, cam):
 
 def draw_slash(logo, canvas, glow, t):
     """The blade of fire: a white-hot line with a long burning tail."""
-    if not SLASH <= t < SLASH + SLASH_LEN + 0.4:
+    if not SLASH - 1 / FPS < t < SLASH + SLASH_LEN + 0.6:
         return
     head = head_x(t)
     fade = 1.0 if t < SLASH + SLASH_LEN else float(np.exp(-(t - SLASH - SLASH_LEN) / 0.1))
+    fade *= float(smooth(SLASH - 1 / FPS, SLASH + 0.025, t))
     y_s = logo.slash_y
     y0, y1 = int(y_s - 90), int(y_s + 90)
     x0, x1 = int(SLASH_X[0] - 40), int(min(head + 120, logo.cx1))
@@ -614,7 +625,7 @@ def aura_gain(t):
     if t < IGNITE:
         return 0.0
     g = smooth(IGNITE, IGNITE + 0.06, t) * (1.12 + 0.75 * after(t, IGNITE, 0.35))
-    g += 0.55 * after(t, LOCK, 0.4) * smooth(LOCK, LOCK + 0.04, t) + 0.4 * after(t, BUTTON, 0.25) * smooth(BUTTON, BUTTON + 0.04, t)
+    g += 0.55 * hit(t, LOCK, 0.4, 0.07) + 0.3 * hit(t, BUTTON, 0.25, 0.07)
     return g * (1 + 0.06 * np.sin(2 * np.pi * 0.7 * t) + 0.04 * np.sin(2 * np.pi * 1.9 * t + 1))
 
 
@@ -639,13 +650,13 @@ def aura(logo, t, cam):
         return cv2.remap(logo.noise, np.mod(x, 256).astype(np.float32), np.mod(y, 256).astype(np.float32),
                          cv2.INTER_LINEAR, borderMode=cv2.BORDER_WRAP)
     # tall, narrow tongues racing upwards
-    warp = tex(sx / 9 + 40, (sy + 140 * t) / 12)
+    warp = tex(sx / 9 + 40, (sy + 90 * t) / 12)
     wx = sx + 30 * (warp - 0.5)
-    n1 = tex(wx / 4.2, (sy + 340 * t) / 9.0)
-    n2 = tex(wx / 2.2 + 90, (sy + 540 * t) / 4.5 + 17)
+    n1 = tex(wx / 4.2, (sy + 220 * t) / 9.0)
+    n2 = tex(wx / 2.2 + 90, (sy + 350 * t) / 4.5 + 17)
     d = U * (0.3 + 0.95 * n1) * (0.6 + 0.6 * n2) * g
-    alpha = smooth(0.40, 0.47, d) * 0.92 * (1 - K * smooth(IGNITE + 0.3, IGNITE + 0.7, t))
-    mid, core = smooth(0.62, 0.68, d), smooth(0.86, 0.92, d)
+    alpha = smooth(0.36, 0.50, d) * 0.92 * (1 - K * smooth(IGNITE + 0.3, IGNITE + 0.7, t))
+    mid, core = smooth(0.58, 0.70, d), smooth(0.82, 0.95, d)
     col = FIRE[0] + (FIRE[1] - FIRE[0]) * mid[..., None] + (FIRE[2] - FIRE[1]) * core[..., None]
     return col * alpha[..., None], alpha
 
@@ -661,22 +672,22 @@ def background(logo, t, cam):
     bg = DARK + (lit - DARK) * np.asarray(lit_amt, np.float32)[..., None]
     if t >= IGNITE:
         k = t - IGNITE
-        bg += WARM * (1.0 * np.exp(-k / 0.25) * smooth(0, 0.04, k) * np.exp(-(d_i / 420) ** 2))[..., None]
-    for t0, s in ((LOCK, 0.45), (BUTTON, 0.3)):
+        bg += WARM * (1.0 * np.exp(-k / 0.25) * smooth(0, 0.06, k) * np.exp(-(d_i / 420) ** 2))[..., None]
+    for t0, s, tau in ((LOCK, 0.32, 0.22), (BUTTON, 0.16, 0.16)):
         if t >= t0:
-            bg += WARM * (s * after(t, t0, 0.22) * smooth(t0, t0 + 0.035, t) * np.exp(-(d_f / 700) ** 2))[..., None]
+            bg += WARM * (s * hit(t, t0, tau) * np.exp(-(d_f / 450) ** 2))[..., None]
     if LAUNCH <= t < IGNITE + 0.05:
         cp = cam.src(comet_pos(logo, min(t, IGNITE)))
         d_s = np.hypot(qx - cp[0], qy - cp[1])
-        fade = smooth(LAUNCH, LAUNCH + 0.05, t)
+        fade = smooth(LAUNCH, LAUNCH + 0.05, t) * (1 - smooth(IGNITE, IGNITE + 0.05, t))
         bg += WARM * (fade * (0.16 * np.exp(-(d_s / 90) ** 2) + 0.05 * np.exp(-(d_s / 320) ** 2)))[..., None]
     return cv2.resize(bg, (W, H), interpolation=cv2.INTER_CUBIC)
 
 
 def draw_comet(logo, img, fire_h, t, cam):
-    if not LAUNCH <= t <= IGNITE + 0.02:
+    if not LAUNCH <= t <= IGNITE + 0.06:
         return
-    fade = smooth(LAUNCH, LAUNCH + 0.05, t)
+    fade = smooth(LAUNCH, LAUNCH + 0.05, t) * (1 - smooth(IGNITE, IGNITE + 0.06, t))
     n = 120
     for k in range(n - 1, -1, -1):                     # a burning tail, drawn into the half-size fire layer
         age = k / (n - 1) * 0.16
@@ -721,20 +732,20 @@ def draw_sparks(logo, img, t, cam):
     if live.any():
         tl = tau[live]
         f = tl / embers['life'][live]
-        x = embers['p0'][live, 0] + embers['sway'][live] * (np.sin(2 * np.pi * embers['freq'][live] * tl + embers['phase'][live])
-                                                          - np.sin(embers['phase'][live]))
-        y = embers['p0'][live, 1] + embers['vy'][live] * tl
         gain = embers['gain'][live] * smooth(0, 0.15, f) * (1 - smooth(0.45, 1, f)) * (0.75 + 0.25 * np.sin(embers['flick'][live] * tl))
-        xs.append(x)
-        ys.append(y)
-        cols.append(np.repeat(EMBER[None], len(x), 0))
-        ws.append(gain * 0.7)
+        for back in np.linspace(0, 1 / FPS, 4):                  # a one-frame streak each
+            tb = np.maximum(tl - back, 0)
+            xs.append(embers['p0'][live, 0] + embers['sway'][live] * (np.sin(2 * np.pi * embers['freq'][live] * tb + embers['phase'][live])
+                                                                     - np.sin(embers['phase'][live])))
+            ys.append(embers['p0'][live, 1] + embers['vy'][live] * tb)
+            cols.append(np.repeat(EMBER[None], len(tl), 0))
+            ws.append(gain * 0.7 / 4)
     if not xs:
         return
     pts = cam.lay(np.stack([np.concatenate(xs), np.concatenate(ys)], 1))
     buf = np.zeros((H, W, 3), np.float32)
     deposit(buf, pts[:, 0], pts[:, 1], np.concatenate(cols).astype(np.float32), np.concatenate(ws) * 9)
-    img += cv2.GaussianBlur(buf, (0, 0), 0.9)
+    img += cv2.GaussianBlur(buf, (0, 0), 1.05)
     half = cv2.resize(buf, (W // 2, H // 2), interpolation=cv2.INTER_AREA) * 4
     img += cv2.resize(cv2.GaussianBlur(half, (0, 0), 3), (W, H), interpolation=cv2.INTER_LINEAR) * 0.3
 
@@ -789,7 +800,7 @@ def rays(logo, glow_half, t, cam):
         return 0.0
     k = t - IGNITE
     gain = (1.0 * np.exp(-k / 0.5) * smooth(0, 0.05, k) + 0.2 * smooth(0.3, 1.2, k)
-            + 0.6 * after(t, LOCK, 0.4) + 0.35 * after(t, BUTTON, 0.25))
+            + 0.6 * hit(t, LOCK, 0.4) + 0.25 * hit(t, BUTTON, 0.25))
     cx, cy = cam.src(logo.flame_center) / 4
     q = cv2.resize(glow_half, (W // 4, H // 4), interpolation=cv2.INTER_AREA)
     near = np.exp(-(np.hypot(logo.qx / 4 - cx, logo.qy / 4 - cy) / (110 * cam.zoom)) ** 2)
@@ -837,15 +848,15 @@ def bloom(glow_half):
 def glow_gain(t):
     if t < LAUNCH:
         return 0.0
-    g = 1.0 + 1.4 * after(t, IGNITE, 0.25) * smooth(IGNITE, IGNITE + 0.04, t)
-    g += 1.0 * after(t, LOCK, 0.22) * smooth(LOCK, LOCK + 0.035, t) + 0.6 * after(t, BUTTON, 0.15) * smooth(BUTTON, BUTTON + 0.035, t)
+    g = 1.0 + 1.4 * hit(t, IGNITE, 0.25)
+    g += 1.0 * hit(t, LOCK, 0.22) + 0.45 * hit(t, BUTTON, 0.15)
     return g * (1 + 0.07 * np.sin(2 * np.pi * 0.55 * t) + 0.04 * np.sin(2 * np.pi * 1.37 * t + 1.3))
 
 
 def ripple(logo, img, t, cam):
     """Shockwaves of heat that bend the picture as they pass."""
     dx = dy = None
-    for t0, centre, s in ((IGNITE, logo.ignite, 1.0), (LOCK, logo.torch_center, 0.9), (BUTTON, logo.torch_center, 0.35)):
+    for t0, centre, s in ((IGNITE, logo.ignite, 1.0), (LOCK, logo.torch_center, 0.9), (BUTTON, logo.torch_center, 0.25)):
         u = (t - t0) / 0.85
         if not 0 <= u < 1:
             continue
@@ -885,8 +896,9 @@ def render(t, seed=0):
     draw_sweep(logo, canvas, glow, t)
 
     layer = np.dstack([canvas[0], canvas[1]])
-    if cam.zk < 0.999:
-        layer = cv2.GaussianBlur(layer, (0, 0), 0.5)
+    pre = 0.5 * float(clamp01((1.05 - cam.zk) / 0.2))
+    if pre > 0.05:
+        layer = cv2.GaussianBlur(layer, (0, 0), pre)
     layer = shutter_warp(logo, layer, t, cam)
     img = background(logo, t, cam)
     gh = cv2.warpAffine(glow, cam.canvas_matrix(0.5), (W // 2, H // 2), flags=cv2.INTER_LINEAR,
@@ -908,7 +920,7 @@ def render(t, seed=0):
     gain = glow_gain(t)
     if gain > 0:
         # after the eruption the glow lights the air around the logo but leaves its colours alone
-        keep = 0.9 * smooth(IGNITE + 0.15, IGNITE + 0.6, t) * (1 - 0.55 * after(t, LOCK, 0.25))
+        keep = 0.9 * smooth(IGNITE + 0.15, IGNITE + 0.6, t) * (1 - 0.55 * hit(t, LOCK, 0.25))
         spill = 1 - keep * layer[..., 3:4]
         img += bloom(gh) * gain * spill
         img += rays(logo, gh, t, cam) * spill
@@ -919,7 +931,7 @@ def render(t, seed=0):
     img = ripple(logo, img, t, cam)
 
     rng = np.random.default_rng(1000 + seed)
-    img += rng.standard_normal((H, W), np.float32)[..., None] * 0.006     # a fine dither against banding
+    img += rng.standard_normal((H, W), np.float32)[..., None] * 0.004     # a fine dither against banding
     # roll the brightest light off softly instead of clipping it flat
     img = np.where(img > 0.97, 0.97 + 0.03 * np.tanh((img - 0.97) / 0.03), img)
     return (np.clip(img, 0, 1) * 255 + 0.5).astype(np.uint8)
